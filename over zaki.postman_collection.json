@@ -1,0 +1,617 @@
+{
+	"info": {
+		"_postman_id": "532e23f8-225b-4ebe-af81-a1f28f463b49",
+		"name": "over zaki",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20803640",
+		"_collection_link": "https://lively-meadow-828867.postman.co/workspace/My-Workspace~21a32255-28fe-4ea1-86ec-2fd25e9b775a/collection/20803640-532e23f8-225b-4ebe-af81-a1f28f463b49?action=share&source=collection_link&creator=20803640"
+	},
+	"item": [
+		{
+			"name": "builder",
+			"item": [
+				{
+					"name": "create builder",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "appName[en]",
+									"value": "english-name-new",
+									"type": "text"
+								},
+								{
+									"key": "appName[ar]",
+									"value": "اسم عربي",
+									"type": "text"
+								},
+								{
+									"key": "appDescription[en]",
+									"value": "description in engllish-new",
+									"type": "text"
+								},
+								{
+									"key": "appDescription[ar]",
+									"value": "الوصف بالعربي",
+									"type": "text"
+								},
+								{
+									"key": "supportEmail",
+									"value": "support@example.com",
+									"type": "text"
+								},
+								{
+									"key": "appLanguage[0]",
+									"value": "en",
+									"type": "text"
+								},
+								{
+									"key": "appLanguage[1]",
+									"value": "ar",
+									"type": "text"
+								},
+								{
+									"key": "primaryColor",
+									"value": "#0f0",
+									"type": "text"
+								},
+								{
+									"key": "BusinessType",
+									"value": "6496b96f0e96aceae170b6b5",
+									"description": "business type id",
+									"type": "text"
+								},
+								{
+									"key": "owner",
+									"value": "6496b96f0e96aceae170b6b5",
+									"description": "owner id",
+									"type": "text"
+								},
+								{
+									"key": "appLogo",
+									"type": "file",
+									"src": "/C:/Users/engal/OneDrive/Pictures/Screenshots/Screenshot 2023-07-14 174642.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:4001/builder",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4001",
+							"path": [
+								"builder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit design",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "appLogo",
+									"type": "file",
+									"src": "/C:/Users/engal/OneDrive/Desktop/logo.png",
+									"disabled": true
+								},
+								{
+									"key": "websiteConfigurationFiles",
+									"type": "file",
+									"src": "/C:/Users/engal/OneDrive/Desktop/New WinRAR ZIP archive.zip"
+								},
+								{
+									"key": "applicationConfigurationFiles",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:4001/builder/edit-design/:builderId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4001",
+							"path": [
+								"builder",
+								"edit-design",
+								":builderId"
+							],
+							"variable": [
+								{
+									"key": "builderId",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "toggle activate website",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/builder/activate-website/{ownerId}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"builder",
+								"activate-website",
+								"{ownerId}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "toggle activate application",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/builder/activate-application/{ownerId}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"builder",
+								"activate-application",
+								"{ownerId}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get builder by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4001/builder/65224bac6c7aa0dfac276f74",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4001",
+							"path": [
+								"builder",
+								"65224bac6c7aa0dfac276f74"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "integration",
+			"item": [
+				{
+					"name": "create integration",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/engal/OneDrive/Desktop/Screenshot 2023-08-19 194734.png"
+								},
+								{
+									"key": "name[ar]",
+									"value": "arabic name",
+									"type": "text"
+								},
+								{
+									"key": "name[en]",
+									"value": "english name",
+									"type": "text"
+								},
+								{
+									"key": "description[ar]",
+									"value": "arabic description",
+									"type": "text"
+								},
+								{
+									"key": "description[en]",
+									"value": "english description",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "200",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/integration",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"integration"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update integration",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/engal/OneDrive/Desktop/Screenshot 2023-08-19 194734.png"
+								},
+								{
+									"key": "name[ar]",
+									"value": "arabic name edit",
+									"type": "text"
+								},
+								{
+									"key": "name[en]",
+									"value": "english name edit",
+									"type": "text"
+								},
+								{
+									"key": "description[ar]",
+									"value": "arabic description edit",
+									"type": "text"
+								},
+								{
+									"key": "description[en]",
+									"value": "english description edit",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "200",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/integration/:id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"integration",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete integrations",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{host}}/integration/:id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"integration",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get integrations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/integration",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"integration"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "subscription_integration",
+			"item": [
+				{
+					"name": "create subscription",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "integrationId",
+									"value": "id",
+									"type": "text"
+								},
+								{
+									"key": "userId",
+									"value": "id",
+									"type": "text"
+								},
+								{
+									"key": "authentication",
+									"value": "\"{clientId:123456,clientSecret:123456}\"",
+									"description": "json as string",
+									"type": "text"
+								},
+								{
+									"key": "isActive",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/integration/subscription",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"integration",
+								"subscription"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update subscription",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/engal/OneDrive/Desktop/Screenshot 2023-08-19 194734.png"
+								},
+								{
+									"key": "name[ar]",
+									"value": "arabic name edit",
+									"type": "text"
+								},
+								{
+									"key": "name[en]",
+									"value": "english name edit",
+									"type": "text"
+								},
+								{
+									"key": "description[ar]",
+									"value": "arabic description edit",
+									"type": "text"
+								},
+								{
+									"key": "description[en]",
+									"value": "english description edit",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "200",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/integration/subscription/:id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"integration",
+								"subscription",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete subscription",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{host}}/integration/subscription/:id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"integration",
+								"subscription",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get subscription",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/integration/subscription/:id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"integration",
+								"subscription",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "rigster & login",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ii1LeWZHZ04wNTYtRWdTYjBLVmhGTCJ9.eyJpc3MiOiJodHRwczovL2Rldi1nZmpiMHZsd2t3b21oNmRhLmF1LmF1dGgwLmNvbS8iLCJzdWIiOiJKelRWOUtTdmIxSkZ0bUY1Zmw1THJWbHUxMjg2d0czekBjbGllbnRzIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo0MDAyIiwiaWF0IjoxNjk2MzE1ODU4LCJleHAiOjE2OTY0MDIyNTgsImF6cCI6Ikp6VFY5S1N2YjFKRnRtRjVmbDVMclZsdTEyODZ3RzN6IiwiZ3R5IjoiY2xpZW50LWNyZWRlbnRpYWxzIn0.RkNbec57IOFCL7YHFYBYUsXctVffN-fIr9P9xKiYIp_y1tVtK4BYmDFGNMKwrJzCxe4fm_GvXjM6dfjEcRooTKRPfGlPo0rwJsVJ33uTPeJOpxt3l-gVvSKldkhzlF_UtSIGTeXDpmlJGT8gOXuPdtLQ9PCwFGJhMiBh9Cd0--paHahhouyRJWfsN2KkO7RvoKJ7d5HAJJsfSyZomzDVkRG-Rc-1Itn_qnLqWIrpk5dGmbuAiLq28_dwF7zwJFFW2GR5SMJS1oM-b5nSeMOa9c-NJcuGkaTDvrCXczc7epPLunDLOuKzu7Ciepg8YMtizQdFGkCeKws7xI-b3mizTg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-TENANT-ID",
+								"value": "overzaki",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host}}/auth/login",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/auth/logout",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "seed",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4001/seed",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4001",
+					"path": [
+						"seed"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

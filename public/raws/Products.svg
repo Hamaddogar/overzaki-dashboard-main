@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="37.5" height="10.5" viewBox="0 0 37.5 10.5">
+  <g id="productsR" transform="translate(0.5)">
+    <path id="Vector" d="M3,0A3,3,0,0,0,0,3V7.5a3,3,0,0,0,3,3H7.5a3,3,0,0,0,3-3V3a3,3,0,0,0-3-3ZM16.5,0a3,3,0,0,0-3,3V7.5a3,3,0,0,0,3,3H21a3,3,0,0,0,3-3V3a3,3,0,0,0-3-3Z" transform="translate(-0.5)" fill="#b2b3c5"/>
+    <path id="Vector-2" data-name="Vector" d="M29.5.5a3,3,0,0,0-3,3V8a3,3,0,0,0,3,3H34a3,3,0,0,0,3-3V3.5a3,3,0,0,0-3-3Z" transform="translate(0 -0.5)" fill="#b2b3c5"/>
+  </g>
+</svg>

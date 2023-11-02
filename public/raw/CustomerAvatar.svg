@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">
+  <g id="CustomerAvatar" transform="translate(-250 -78)">
+    <path id="face-grin-stars-solid_1_" data-name="face-grin-stars-solid (1)" d="M0,25A25,25,0,1,1,25,50,25,25,0,0,1,0,25Z" transform="translate(250 78)" fill="#ebecf0"/>
+    <path id="user-group-solid_4_" data-name="user-group-solid (4)" d="M4.5,6a6,6,0,1,1,6,6,6,6,0,0,1-6-6ZM0,22.608A8.356,8.356,0,0,1,8.358,14.25h4.284A8.356,8.356,0,0,1,21,22.608,1.392,1.392,0,0,1,19.608,24H1.392A1.392,1.392,0,0,1,0,22.608Z" transform="translate(265 91)" fill="#b6b7c8"/>
+  </g>
+</svg>

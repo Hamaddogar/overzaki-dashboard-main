@@ -1,0 +1,34 @@
+<svg id="KNETLogo" xmlns="http://www.w3.org/2000/svg" width="30.452" height="22" viewBox="0 0 30.452 22">
+  <g id="Group_4471" data-name="Group 4471" transform="translate(0 0)">
+    <g id="Group_4464" data-name="Group 4464">
+      <path id="Rectangle_3872" data-name="Rectangle 3872" d="M0,0H30.452a0,0,0,0,1,0,0V4.718a1,1,0,0,1-1,1H1a1,1,0,0,1-1-1V0A0,0,0,0,1,0,0Z" transform="translate(0 16.282)" fill="#0872b9"/>
+      <path id="Rectangle_3873" data-name="Rectangle 3873" d="M1,0H29.452a1,1,0,0,1,1,1V5.718a0,0,0,0,1,0,0H0a0,0,0,0,1,0,0V1A1,1,0,0,1,1,0Z" fill="#0872b9"/>
+    </g>
+    <rect id="Rectangle_3874" data-name="Rectangle 3874" width="30.452" height="9.633" transform="translate(0 6.215)" fill="#0872b9"/>
+    <g id="Group_4465" data-name="Group 4465" transform="translate(0.621 1.305)">
+      <path id="Path_12158" data-name="Path 12158" d="M39.824,3.584H37.276l.186.311h2.548l.87.559s.186.186.062.311l-.994.746H35.1l-.373-.5V6.38H28.7V3.708h4.412V5.075H30.564v.5h3.107V3.77H35.35l.994.994H39.2v-.5H36.344L34.977,2.9h4.412Z" transform="translate(-11.796 -2.9)" fill="#fff"/>
+      <rect id="Rectangle_3875" data-name="Rectangle 3875" width="0.621" height="0.559" transform="translate(23.74 2.983)" fill="#fff"/>
+      <rect id="Rectangle_3876" data-name="Rectangle 3876" width="0.621" height="0.559" transform="translate(25.232 2.983)" fill="#fff"/>
+      <rect id="Rectangle_3877" data-name="Rectangle 3877" width="0.87" height="0.808" transform="translate(3.045 0.311)" fill="#fff"/>
+      <rect id="Rectangle_3878" data-name="Rectangle 3878" width="0.87" height="0.808" transform="translate(4.164 0.311)" fill="#fff"/>
+      <rect id="Rectangle_3879" data-name="Rectangle 3879" width="0.87" height="0.808" transform="translate(11.311 0.311)" fill="#fff"/>
+      <rect id="Rectangle_3880" data-name="Rectangle 3880" width="2.237" height="0.808" transform="translate(13.237 1.616)" fill="#fff"/>
+      <path id="Path_12159" data-name="Path 12159" d="M12.376,4.205h1.554v1.8H2.37L1.5,4.889,2.992,2.9H4.172L3.3,4.889h7.644V4.267H12v.621h.373Z" transform="translate(-1.5 -2.9)" fill="#fff"/>
+    </g>
+    <g id="Group_4467" data-name="Group 4467" transform="translate(3.48 16.531)">
+      <g id="Group_4466" data-name="Group 4466">
+        <path id="Path_12160" data-name="Path 12160" d="M9.394,32.356H8.4V30.678a1.749,1.749,0,0,0-.062-.684.858.858,0,0,0-.186-.249.466.466,0,0,0-.311-.062.9.9,0,0,0-.435.124.413.413,0,0,0-.249.311,1.785,1.785,0,0,0-.124.746v1.492H6.1V29.062h.87v.5A1.531,1.531,0,0,1,8.151,29a1.815,1.815,0,0,1,.559.124.956.956,0,0,1,.373.249l.186.373a1.379,1.379,0,0,1,.062.559v2.051Z" transform="translate(-6.1 -28.006)" fill="#fff"/>
+        <path id="Path_12161" data-name="Path 12161" d="M24.362,31.3l.932.124a1.463,1.463,0,0,1-1.554.994,1.573,1.573,0,0,1-1.367-.559A1.735,1.735,0,0,1,22,30.74a1.78,1.78,0,0,1,.5-1.305A1.547,1.547,0,0,1,23.678,29a1.634,1.634,0,0,1,1.243.5,2.042,2.042,0,0,1,.435,1.492H22.994a.8.8,0,0,0,.249.621.76.76,0,0,0,.559.186.883.883,0,0,0,.373-.124A1.012,1.012,0,0,0,24.362,31.3Zm.062-.87a.76.76,0,0,0-.186-.559.756.756,0,0,0-.994,0,.76.76,0,0,0-.186.559Z" transform="translate(-12.119 -28.006)" fill="#fff"/>
+        <path id="Path_12162" data-name="Path 12162" d="M42.551,28.456v.684h-.621v1.8c0,.062.062.062.062.124.062,0,.124.062.186.062a1.093,1.093,0,0,0,.373-.062l.062.684a3.12,3.12,0,0,1-.746.124.922.922,0,0,1-.435-.062,1.358,1.358,0,0,1-.311-.186A.475.475,0,0,1,41,31.315c0-.124-.062-.311-.062-.621V29.264H40.5v-.684h.435V27.9l.932-.5v1.181h.684Z" transform="translate(-19.121 -27.4)" fill="#fff"/>
+      </g>
+    </g>
+    <g id="Group_4470" data-name="Group 4470" transform="translate(4.102 6.96)">
+      <g id="Group_4469" data-name="Group 4469">
+        <g id="Group_4468" data-name="Group 4468">
+          <rect id="Rectangle_3881" data-name="Rectangle 3881" width="7.209" height="7.706" fill="#fbed1f"/>
+        </g>
+        <path id="Path_12163" data-name="Path 12163" d="M18.3,15.456,23.645,12.1h9.509l-5.22,3.356,5.655,4.164H23.4l-4.972-3.853Z" transform="translate(-11.339 -12.038)" fill="#fbed1f"/>
+      </g>
+    </g>
+  </g>
+</svg>

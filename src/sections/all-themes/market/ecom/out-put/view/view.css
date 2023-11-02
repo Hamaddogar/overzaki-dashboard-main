@@ -1,0 +1,97 @@
+/* Almarai-Regular */
+@font-face {
+    font-family: 'Almarai';
+    src: url('/fonts/Almarai-Regular.ttf') format('truetype');
+    font-weight: 1 999;
+    font-style: normal;
+}
+
+/* AvenirNextLTPro-Regular */
+@font-face {
+    font-family: 'AvenirNextLTPro';
+    src: url('/fonts/AvenirNextLTPro-Regular.otf') format('opentype');
+    font-weight: 1 999;
+    font-style: normal;
+}
+
+/* Cairo-VariableFont */
+@font-face {
+    font-family: 'Cairo';
+    src: url('/fonts/Cairo-VariableFont_slnt,wght.ttf') format('truetype');
+    font-weight: 1 999;
+    /* Define weight axis values */
+    font-style: normal;
+}
+
+/* Montserrat-VariableFont */
+@font-face {
+    font-family: 'Montserrat';
+    src: url('/fonts/Montserrat-VariableFont_wght.ttf') format('truetype-variations');
+    font-weight: 1 999;
+    /* Define weight axis values */
+    font-style: normal;
+}
+
+/* Poppins-Regular */
+@font-face {
+    font-family: 'Poppins';
+    src: url('/fonts/Poppins-Regular.ttf') format('truetype');
+    font-weight: 1 999;
+    font-style: normal;
+}
+
+/* Times New Roman */
+@font-face {
+    font-family: 'Times New Roman';
+    src: url('/fonts/times-new-roman.ttf') format('truetype');
+    font-weight: 1 999;
+    font-style: normal;
+}
+
+/* Algerian Regular */
+@font-face {
+    font-family: 'Algerian';
+    src: url('/fonts/Algerian-Regular.ttf') format('truetype');
+    font-weight: 1 999;
+    font-style: normal;
+}
+
+
+
+
+/* use case */
+
+.Cairo {
+    font-family: 'Cairo', sans-serif !important;
+}
+
+.Avernir {
+    font-family: 'AvenirNextLTPro', sans-serif !important;
+}
+
+.Almarai {
+    font-family: 'Almarai', sans-serif !important;
+}
+
+.TimesNewRoman {
+    font-family: 'Times New Roman', sans-serif !important;
+}
+
+.Poppins {
+    font-family: 'Poppins', sans-serif !important;
+}
+
+.Montserrat {
+    font-family: 'Montserrat', sans-serif !important;
+}
+
+.Algerian {
+    font-family: 'Algerian', sans-serif !important;
+}
+
+
+/* cursor config */
+.cursor-config {
+    cursor: url(https://cdn.custom-cursor.com/db/cursor/32/Purple_Dot_Cursor.png), default !important;
+    cursor: -webkit-image-set(url('https://cdn.custom-cursor.com/db/cursor/32/Purple_Dot_Cursor.png') 1x, url('https://cdn.custom-cursor.com/db/cursor/32/Purple_Dot_Cursor.png') 2x), auto;
+}

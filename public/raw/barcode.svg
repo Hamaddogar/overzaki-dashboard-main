@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="22" viewBox="0 0 30 22">
+  <g id="barcode" transform="translate(-1 -5)">
+    <g id="Group_8369" data-name="Group 8369">
+      <path id="Path_35167" data-name="Path 35167" d="M2,10V6H6" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <path id="Path_35168" data-name="Path 35168" d="M30,10V6H26" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <path id="Path_35169" data-name="Path 35169" d="M2,22v4H6" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <path id="Path_35170" data-name="Path 35170" d="M30,22v4H26" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <line id="Line_1245" data-name="Line 1245" y2="6" transform="translate(6 9)" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <line id="Line_1246" data-name="Line 1246" y2="6" transform="translate(11 9)" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <line id="Line_1247" data-name="Line 1247" y2="6" transform="translate(26 9)" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <line id="Line_1248" data-name="Line 1248" y2="6" transform="translate(21 9)" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <line id="Line_1249" data-name="Line 1249" y2="6" transform="translate(16 9)" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <line id="Line_1250" data-name="Line 1250" x2="28" transform="translate(2 18)" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <line id="Line_1251" data-name="Line 1251" y2="2" transform="translate(6 21)" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <line id="Line_1252" data-name="Line 1252" y2="1" transform="translate(11 21)" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <line id="Line_1253" data-name="Line 1253" y2="2" transform="translate(26 21)" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <line id="Line_1254" data-name="Line 1254" y2="1" transform="translate(21 21)" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <line id="Line_1255" data-name="Line 1255" y2="1" transform="translate(16 21)" fill="none" stroke="#8688a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+    </g>
+  </g>
+</svg>

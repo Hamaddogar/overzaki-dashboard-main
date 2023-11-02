@@ -1,0 +1,45 @@
+.actions {
+    position: fixed;
+    bottom: -100%;
+    /* Start hidden off-screen */
+    left: 0;
+    width: 100%;
+    max-height: 65vh;
+    /* Maximum 50% of the viewport height */
+    overflow-y: auto;
+    box-shadow: 0px 6px 40px rgba(0, 0, 0, 0.1);
+    /* Add scroll when content exceeds max height */
+    background-color: white;
+    transition: bottom 0.3s ease-in-out;
+    /* Transition for sliding effect */
+
+    /* Customize scrollbar */
+    scrollbar-width: thin;
+    /* Firefox */
+    scrollbar-color: darkgray lightgray;
+    /* Firefox */
+}
+
+.actions.show {
+    bottom: 0;
+    /* Slide up to the bottom of the screen */
+}
+
+.actions.hide {
+    bottom: -100%;
+    /* Slide down to hide off-screen */
+}
+
+/* Customize scrollbar for WebKit (Chrome, Safari) */
+.actions::-webkit-scrollbar {
+    width: 8px;
+}
+
+.actions::-webkit-scrollbar-track {
+    background-color: lightgray;
+}
+
+.actions::-webkit-scrollbar-thumb {
+    background-color: darkgray;
+    border-radius: 4px;
+}

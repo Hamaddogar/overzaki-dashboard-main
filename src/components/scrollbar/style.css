@@ -1,0 +1,31 @@
+.vertical-drag-scroll-container,
+.horizontal-drag-scroll-container {
+    /* overflow: hidden; */
+    position: relative;
+    /* background-color: red; */
+}
+
+.vertical-drag-scroll-container::-webkit-scrollbar,
+.horizontal-drag-scroll-container::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    background: transparent;
+}
+
+.non-selectable {
+    user-select: none;
+    pointer-events: none;
+}
+.active-selectable {
+    user-select: none;
+    pointer-events: auto;
+}
+
+.active-selectable img {
+    user-select: none;
+    pointer-events: none;
+}
+
+.pointer-events-allow{
+    pointer-events: auto;
+}

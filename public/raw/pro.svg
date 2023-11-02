@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="44" height="50" viewBox="0 0 44 50">
+  <g id="pro" transform="translate(2 2)">
+    <path id="Path_35127" data-name="Path 35127" d="M50.994,153.91l-3.627-9.428a.75.75,0,0,0-1.4,0l-3.627,9.428a.75.75,0,0,1-.431.431l-9.428,3.627a.75.75,0,0,0,0,1.4l9.428,3.627a.75.75,0,0,1,.431.431l3.627,9.428a.75.75,0,0,0,1.4,0l3.627-9.428a.75.75,0,0,1,.431-.431l9.428-3.627a.75.75,0,0,0,0-1.4l-9.428-3.627A.75.75,0,0,1,50.994,153.91Z" transform="translate(-30.668 -127.334)" fill="#1bfcb6" stroke="#1bfcb6" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+    <path id="Path_35128" data-name="Path 35128" d="M23.667,20.333,22,16l-1.667,4.333L16,22l4.333,1.667L22,28l1.667-4.333L28,22Z" transform="translate(-16 -16)" fill="#1bfcb6" stroke="#1bfcb6" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+    <path id="Path_35129" data-name="Path 35129" d="M314.222,53.778,312,48l-2.223,5.778L304,56l5.778,2.223L312,64l2.222-5.778L320,56Z" transform="translate(-280 -45.333)" fill="#1bfcb6" stroke="#1bfcb6" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+  </g>
+</svg>

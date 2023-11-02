@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="79.955" height="16.76" viewBox="0 0 79.955 16.76">
+  <g id="visa_mastercard" data-name="visa mastercard" transform="translate(-255.045 -457)">
+    <g id="_x32_06-mastercard_x2C__Credit_card" transform="translate(255.045 457)">
+      <g id="Group_8288" data-name="Group 8288" transform="translate(0 0)">
+        <g id="Group_8285" data-name="Group 8285" transform="translate(14.996 0)">
+          <path id="Path_35077" data-name="Path 35077" d="M262.616,161A8.38,8.38,0,1,1,256,174.523a8.38,8.38,0,0,0,0-10.287A8.362,8.362,0,0,1,262.616,161Z" transform="translate(-256 -161)" fill="#f79f1a"/>
+        </g>
+        <g id="Group_8286" data-name="Group 8286" transform="translate(13.232 3.236)">
+          <path id="Path_35078" data-name="Path 35078" d="M237.764,197.69a8.38,8.38,0,0,1,0,10.287,8.38,8.38,0,0,1,0-10.287Z" transform="translate(-236 -197.69)" fill="#ff5f01"/>
+        </g>
+        <g id="Group_8287" data-name="Group 8287" transform="translate(0 0)">
+          <path id="Path_35079" data-name="Path 35079" d="M94.38,161A8.363,8.363,0,0,1,101,164.236a8.38,8.38,0,0,0,0,10.287A8.38,8.38,0,1,1,94.38,161Z" transform="translate(-86 -161)" fill="#ea001b"/>
+        </g>
+      </g>
+      <path id="Path_35080" data-name="Path 35080" d="M254.3,253.9v.324h.057V253.9h.134v-.056h-.324v.056Z" transform="translate(-239.33 -245.654)"/>
+      <path id="Path_35092" data-name="Path 35092" d="M254.027,253.844h-.1l-.113.247-.113-.247h-.1v.38h.056v-.289l.113.247h.077l.1-.247v.289h.077Z" transform="translate(-238.819 -245.654)"/>
+    </g>
+    <g id="_x33_63-visa_x2C__Credit_card" transform="translate(297.904 459)">
+      <g id="Group_8295" data-name="Group 8295" transform="translate(0 0)">
+        <g id="Group_8294" data-name="Group 8294" transform="translate(0 0)">
+          <path id="Union_32" data-name="Union 32" d="M21.3,12a9.3,9.3,0,0,1-3.357-.612l.419-2.613.4.188a5.952,5.952,0,0,0,2.815.627c.858,0,1.79-.366,1.8-1.137,0-.5-.39-.882-1.547-1.45C20.7,6.445,19.178,5.514,19.2,3.847,19.213,1.588,21.3,0,24.27,0a7.491,7.491,0,0,1,2.7.5l-.413,2.52-.27-.132a5.083,5.083,0,0,0-2.238-.437c-1.181,0-1.714.5-1.723,1,0,.548.645.9,1.693,1.436,1.726.826,2.537,1.843,2.52,3.158C26.508,10.447,24.469,12,21.334,12Zm13-.158s-.261-1.333-.354-1.743H30.1c-.114.308-.624,1.743-.624,1.743H26.312L30.776,1.187A1.479,1.479,0,0,1,32.344.226h2.329L37.1,11.842ZM30.964,7.723h2.5c-.12-.589-.688-3.366-.688-3.366l-.217-1c-.146.431-.407,1.14-.387,1.11C32.168,4.468,31.213,7.061,30.964,7.723ZM13.072,11.842,14.956.226h3L16.072,11.842Zm-7.236-.009L3.152,1.726A11.861,11.861,0,0,0,0,.46L.056.226H4.9a1.254,1.254,0,0,1,1.362.97L7.3,6.536l.325,1.617L10.564.226H13.74L9.018,11.833Z" fill="#0353a5"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

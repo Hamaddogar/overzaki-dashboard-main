@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="340" height="110" viewBox="0 0 340 110">
+  <defs>
+    <filter id="Rectangle_4862" x="0" y="0" width="340" height="110" filterUnits="userSpaceOnUse">
+      <feOffset dy="6" input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feFlood flood-opacity="0.122"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="nav2" transform="translate(-716 -1871)">
+    <g transform="matrix(1, 0, 0, 1, 716, 1871)" filter="url(#Rectangle_4862)">
+      <rect id="Rectangle_4862-2" data-name="Rectangle 4862" width="280" height="50" rx="12" transform="translate(30 24)" fill="#fff"/>
+    </g>
+    <g id="shopping-cart" transform="translate(984 1910.615)">
+      <circle id="Ellipse_649" data-name="Ellipse 649" cx="1" cy="1" r="1" transform="translate(7 19)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <circle id="Ellipse_650" data-name="Ellipse 650" cx="1" cy="1" r="1" transform="translate(18 19)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <path id="Path_17690" data-name="Path 17690" d="M1,1H5L7.68,14.39a2,2,0,0,0,2,1.61H19.4a2,2,0,0,0,2-1.61L23,6H6" transform="translate(-1 -1)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+    </g>
+    <g id="menu" transform="translate(762 1914.792)">
+      <line id="Line_901" data-name="Line 901" x2="18" transform="translate(0 6)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <line id="Line_902" data-name="Line 902" x2="18" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <line id="Line_903" data-name="Line 903" x2="18" transform="translate(0 12)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+    </g>
+    <g id="Group_8272" data-name="Group 8272" transform="translate(790 1910)">
+      <text id="Logo" transform="translate(0 17)" fill="#121212" font-size="16" font-family="AvenirArabic-Black, Avenir Arabic" font-weight="800"><tspan x="0" y="0">Logo</tspan></text>
+    </g>
+    <g id="search_1_" data-name="search (1)" transform="translate(946.839 1911.762)">
+      <circle id="Ellipse_651" data-name="Ellipse 651" cx="8" cy="8" r="8" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <line id="Line_904" data-name="Line 904" x1="4.35" y1="4.35" transform="translate(13.65 13.65)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+    </g>
+    <g id="Ellipse_680" data-name="Ellipse 680" transform="translate(1000 1905.818)" fill="#0d6efd" stroke="#fff" stroke-width="2">
+      <circle cx="8" cy="8" r="8" stroke="none"/>
+      <circle cx="8" cy="8" r="9" fill="none"/>
+    </g>
+    <text id="_2" data-name="2" transform="translate(1005 1917.667)" fill="#fff" font-size="10" font-family="Poppins-SemiBold, Poppins" font-weight="600"><tspan x="0" y="0">2</tspan></text>
+  </g>
+</svg>
