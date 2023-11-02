@@ -234,7 +234,8 @@ export const paths = {
     design: {
       root: `${ROOTS.DASHBOARD}/design`,
       themes: (theme_type: string) => `${ROOTS.DASHBOARD}/design/${theme_type}`,
-      theme: (theme_type: string, theme_name: string) => `${ROOTS.DASHBOARD}/design/${theme_type}/${theme_name}`,
+      theme: (theme_type: string, theme_name: string, theme_url: string) =>
+        `${ROOTS.DASHBOARD}/design/${theme_type}/${theme_name}?url=${theme_url}`,
       market: {
         root: `${ROOTS.DASHBOARD}/design/market`,
         preview: `${ROOTS.DASHBOARD}/design/market/preview`,

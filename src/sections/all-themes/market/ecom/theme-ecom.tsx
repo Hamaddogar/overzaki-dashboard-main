@@ -47,6 +47,7 @@ import ProductPageProductCardDealer from './out-put/product-page-product-card-se
 import UserViewDealer from './out-put/user-view-selection';
 import Actions from './Actions';
 import SaveSettings from '../../utils/save-settings';
+import { useSearchParams } from 'next/navigation';
 
 
 const dataPages = [
@@ -138,6 +139,10 @@ export default function EcomDesignMain() {
     userFacebook: true,
     userTwitter: true,
   });
+
+  const searchParams = useSearchParams();
+  const url = searchParams.get('url')?.toString() || "";
+
 
   const handleThemeConfig = (key: string, newValue: string) => {
     setThemeConfig(pv => ({ ...pv, [key]: newValue }));
@@ -298,7 +303,8 @@ export default function EcomDesignMain() {
 
               {/* View and Dsiplay Section */}
               <Box sx={{ pb: '20px' }}>
-                <OutPutView deviceView={deviceView} page={linker(controlls.page)} />
+                {/* <OutPutView deviceView={deviceView} page={linker(controlls.page)} /> */}
+                <OutPutView deviceView={deviceView} page={url} />
               </Box>
 
             </Box>
@@ -1080,7 +1086,8 @@ export default function EcomDesignMain() {
             <Grid xs={12} sx={{ pb: 8 }}>
               {/* View and Dsiplay Section */}
               <Box sx={{ pb: '20px' }}>
-                <OutPutView deviceView={deviceView} page={linker(controlls.page)} />
+                {/* <OutPutView deviceView={deviceView} page={linker(controlls.page)} /> */}
+                <OutPutView deviceView={deviceView} page={url} />
               </Box>
             </Grid>
 

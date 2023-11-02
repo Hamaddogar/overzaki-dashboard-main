@@ -13,6 +13,7 @@ import Linker from 'src/sections/overview/subscription-plan-checkout/link';
 import { paths } from 'src/routes/paths';
 // images
 import ECom from 'src/assets/themes-images/theme-ecom.png';
+import ECom2 from 'src/assets/themes-images/them-ecom-2.png';
 import Cafe from 'src/assets/themes-images/theme-cafe.png';
 import Image from 'next/image';
 
@@ -42,9 +43,10 @@ const responsive = {
 };
 export default function ThemesViewRoot({ theme_type }: PersonalProps) {
   const data = [
-    { name: 'ecom', image: ECom, type: 'market' },
-    { name: 'cafe', image: Cafe, type: 'market' },
-    { name: 'cafe', image: Cafe, type: 'home' },
+    { name: 'ecom', image: ECom, type: 'market', url: "https://ecom-zaki.vercel.app" },
+    { name: 'ecomv2', image: ECom2, type: 'market', url: "https://e-com-v2-bice.vercel.app" },
+    { name: 'cafe', image: Cafe, type: 'market', url: "https://resturant-ui-mu.vercel.app" },
+    { name: 'cafe', image: Cafe, type: 'home', url: "https://resturant-ui-mu.vercel.app" },
   ];
 
 
@@ -66,13 +68,15 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
             showDots={false}
             responsive={responsive}
             infinite
-            autoPlay
+          // autoPlay
           >
             {(data.filter(item => item.type === theme_type)).map((theme, indx) => (
               <Box key={indx} className="rainbow" sx={{ textAlign: 'center', marginRight: '10px' }}>
-                <Linker path={paths.dashboard.design.theme(theme_type, theme.name)} sx={{ textAlign: 'center' }}>
-                  <Image src={theme.image} alt={theme.name} layout='intrinsic' width={220} height={300} />
-                  <Box className='theme-title'>{theme.name} </Box>
+                <Image src={theme.image} alt={theme.name} layout='intrinsic' width={220} height={300} />
+                {/* <Box className='theme-title'>{theme.name} </Box> */}
+                <Box className='theme-title' my={2} >Apply Theme</Box>
+                <Linker path={paths.dashboard.design.theme(theme_type, theme.name, theme.url)} sx={{ textAlign: 'center' }}>
+                  <Box className='theme-subtitle' my={2}>Edit Theme</Box>
                 </Linker>
               </Box>
             ))}
