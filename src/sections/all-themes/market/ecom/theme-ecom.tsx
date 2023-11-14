@@ -21,7 +21,6 @@ import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar/scrollbar';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { BottomActions } from 'src/components/bottom-actions';
-import { useSearchParams } from 'next/navigation';
 import OutPutView from './out-put/view/out-put-view';
 import Buttons from './out-put/Buttons-Design-selection';
 import HeaderSection from './out-put/header-section';
