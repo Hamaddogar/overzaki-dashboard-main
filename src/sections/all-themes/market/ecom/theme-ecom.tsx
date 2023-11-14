@@ -3,6 +3,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import './out-put/view/view.css';
 // @mui
 import Box from '@mui/material/Box';
@@ -47,7 +48,6 @@ import ProductPageProductCardDealer from './out-put/product-page-product-card-se
 import UserViewDealer from './out-put/user-view-selection';
 import Actions from './Actions';
 import SaveSettings from '../../utils/save-settings';
-import { useSearchParams } from 'next/navigation';
 
 
 const dataPages = [

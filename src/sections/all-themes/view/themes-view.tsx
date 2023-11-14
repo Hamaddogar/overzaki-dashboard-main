@@ -15,6 +15,8 @@ import { paths } from 'src/routes/paths';
 import ECom from 'src/assets/themes-images/theme-ecom.png';
 import ECom2 from 'src/assets/themes-images/them-ecom-2.png';
 import Cafe from 'src/assets/themes-images/theme-cafe.png';
+import rest1 from 'src/assets/themes-images/burgerBoutique.png';
+import rest2 from 'src/assets/themes-images/fatayeralaaltayer.png';
 import Image from 'next/image';
 
 // ----------------------------------------------------------------------
@@ -47,6 +49,8 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
     { name: 'ecomv2', image: ECom2, type: 'market', url: "https://e-com-v2-bice.vercel.app" },
     { name: 'cafe', image: Cafe, type: 'market', url: "https://resturant-ui-mu.vercel.app" },
     { name: 'cafe', image: Cafe, type: 'home', url: "https://resturant-ui-mu.vercel.app" },
+    { name: 'burgerboutique', image: rest1, type: 'restaurant', url: "https://burgerboutique.vercel.app" },
+    { name: 'fatayer', image: rest2, type: 'restaurant', url: "https://fatayeralaaltayer.vercel.app" },
   ];
 
 
