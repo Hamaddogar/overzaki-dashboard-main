@@ -16,7 +16,7 @@ const data = [
     icon: '/assets/images/design/Market.png',
     title: "Market",
   }, {
-    icon: '/assets/images/design/Restaurant.png',
+    icon: '/assets/images/design/restaurant.png',
     title: "Restaurant",
   }, {
     icon: '/assets/images/design/Groceries.png',
