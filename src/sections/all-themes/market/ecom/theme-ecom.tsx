@@ -21,6 +21,7 @@ import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar/scrollbar';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { BottomActions } from 'src/components/bottom-actions';
+import { useSearchParams } from 'next/navigation';
 import OutPutView from './out-put/view/out-put-view';
 import Buttons from './out-put/Buttons-Design-selection';
 import HeaderSection from './out-put/header-section';
@@ -55,11 +56,6 @@ const dataPages = [
   { title: "Products Page", link: 'https://ecom-zaki.vercel.app/products' },
   { title: "Sign Up Page", link: 'https://ecom-zaki.vercel.app/signUp' },
 ]
-const linker = (name: string) => {
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  const [page] = dataPages.filter(page => page.title === name);
-  return page.link;
-}
 // ----------------------------------------------------------------------
 
 interface ControllsState {
