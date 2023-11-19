@@ -76,6 +76,7 @@ const reducer = (state: AuthStateType, action: ActionsType) => {
 // ----------------------------------------------------------------------
 
 const STORAGE_KEY = 'accessToken';
+const REFRESH_KEY = 'refreshToken';
 
 type Props = {
   children: React.ReactNode;
@@ -86,19 +87,23 @@ export function AuthProvider({ children }: Props) {
 
   const initialize = useCallback(async () => {
     try {
-      const accessToken = sessionStorage.getItem(STORAGE_KEY);
+      const refreshTokenP = sessionStorage.getItem(REFRESH_KEY);
 
-      if (accessToken && isValidToken(accessToken)) {
+      if (refreshTokenP && isValidToken(refreshTokenP)) {
+        setSession(refreshTokenP);
+
+        const response = await axios.get(endpoints.auth.refresh);
+
+        const { accessToken, refreshToken } = response.data.data;
+
+
         setSession(accessToken);
-
-        const response = await axios.get(endpoints.auth.me);
-
-        const { user } = response.data;
+        sessionStorage.setItem(REFRESH_KEY, refreshToken);
 
         dispatch({
           type: Types.INITIAL,
           payload: {
-            user,
+            user: response.data.data,
           },
         });
       } else {
@@ -127,20 +132,25 @@ export function AuthProvider({ children }: Props) {
   // LOGIN
   const login = useCallback(async (email: string, password: string) => {
     const data = {
+      deviceName: "Device Name",
+      deviceToken: "Device Token",
       email,
       password,
     };
 
     const response = await axios.post(endpoints.auth.login, data);
 
-    const { accessToken, user } = response.data;
+    const { accessToken, refreshToken } = response.data.data;
+    console.log(accessToken);
+    console.log(response.data.data);
 
+    sessionStorage.setItem(REFRESH_KEY, refreshToken);
     setSession(accessToken);
 
     dispatch({
       type: Types.LOGIN,
       payload: {
-        user,
+        user: response.data.data,
       },
     });
   }, []);
@@ -149,22 +159,30 @@ export function AuthProvider({ children }: Props) {
   const register = useCallback(
     async (email: string, password: string, firstName: string, lastName: string) => {
       const data = {
-        email,
-        password,
+        deviceName: "unique device name",
+        deviceToken: "firebase token",
         firstName,
         lastName,
+        country: "PK",
+        phoneNumber: "+963999999991",
+        email,
+        password,
+        preferedLanguage: ["en", "ar"],
+        birthday: "19999-5-01",
+        gender: "MALE"
       };
 
       const response = await axios.post(endpoints.auth.register, data);
 
-      const { accessToken, user } = response.data;
+      const { accessToken, refreshToken } = response.data.data;
 
       sessionStorage.setItem(STORAGE_KEY, accessToken);
+      sessionStorage.setItem(REFRESH_KEY, refreshToken);
 
       dispatch({
         type: Types.REGISTER,
         payload: {
-          user,
+          user: response.data.data,
         },
       });
     },
@@ -173,7 +191,9 @@ export function AuthProvider({ children }: Props) {
 
   // LOGOUT
   const logout = useCallback(async () => {
+    await axios.get(endpoints.auth.loutout);
     setSession(null);
+    sessionStorage.removeItem(REFRESH_KEY)
     dispatch({
       type: Types.LOGOUT,
     });

@@ -19,7 +19,7 @@ import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 import { useSearchParams, useRouter } from 'src/routes/hooks';
 // config
-import { PATH_AFTER_LOGIN } from 'src/config-global';
+import { PATH_AFTER_LOGIN, PATH_AFTER_REGISTER } from 'src/config-global';
 // auth
 import { useAuthContext } from 'src/auth/hooks';
 // components
@@ -70,7 +70,8 @@ export default function JwtRegisterView() {
     try {
       await register?.(data.email, data.password, data.firstName, data.lastName);
 
-      router.push(returnTo || PATH_AFTER_LOGIN);
+      // router.push(returnTo || PATH_AFTER_LOGIN);
+      router.push(returnTo || PATH_AFTER_REGISTER);
     } catch (error) {
       console.error(error);
       reset();

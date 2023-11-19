@@ -17,7 +17,7 @@ import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 import { useSearchParams, useRouter } from 'src/routes/hooks';
 // config
-import { PATH_AFTER_LOGIN } from 'src/config-global';
+import { PATH_AFTER_LOGIN, PATH_AFTER_REGISTER } from 'src/config-global';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // auth
@@ -47,8 +47,10 @@ export default function JwtLoginView() {
   });
 
   const defaultValues = {
-    email: 'demo@minimals.cc',
-    password: 'demo1234',
+    // email: 'demo@minimals.cc',
+    // password: 'demo1234',
+    email: 'rehman@livegolftv.com',
+    password: '12345678',
   };
 
   const methods = useForm({
@@ -64,9 +66,11 @@ export default function JwtLoginView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await login?.(data.email, data.password);
+      // await login?.(data.email, data.password);
+      // router.push(returnTo || PATH_AFTER_LOGIN);
+      router.push(PATH_AFTER_REGISTER);
 
-      router.push(returnTo || PATH_AFTER_LOGIN);
+
     } catch (error) {
       console.error(error);
       reset();
