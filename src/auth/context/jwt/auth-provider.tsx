@@ -20,6 +20,8 @@ enum Types {
   INITIAL = 'INITIAL',
   LOGIN = 'LOGIN',
   REGISTER = 'REGISTER',
+  SENDOTP = 'SENDOTP',
+  VERIFYOTP = 'VERIFYOTP',
   LOGOUT = 'LOGOUT',
 }
 
@@ -31,6 +33,12 @@ type Payload = {
     user: AuthUserType;
   };
   [Types.REGISTER]: {
+    user: AuthUserType;
+  };
+  [Types.SENDOTP]: {
+    user: AuthUserType;
+  };
+  [Types.VERIFYOTP]: {
     user: AuthUserType;
   };
   [Types.LOGOUT]: undefined;
@@ -176,7 +184,7 @@ export function AuthProvider({ children }: Props) {
 
       const { accessToken, refreshToken } = response.data.data;
 
-      sessionStorage.setItem(STORAGE_KEY, accessToken);
+      setSession(accessToken);
       sessionStorage.setItem(REFRESH_KEY, refreshToken);
 
       dispatch({
@@ -185,6 +193,29 @@ export function AuthProvider({ children }: Props) {
           user: response.data.data,
         },
       });
+    },
+    []
+  );
+  // SENDOTP
+  const sendOtp = useCallback(
+    async (email: string) => {
+      const data = {
+        email
+      };
+      const response = await axios.post(endpoints.auth.sendotp, data);
+      return { ...response.data };
+    },
+    []
+  );
+  // VERIFYOTP
+  const verifyOtp = useCallback(
+    async (email: string, otp: number) => {
+      const data = {
+        email,
+        otp
+      };
+      const response = await axios.post(endpoints.auth.verifyotp, data);
+      return { ...response.data };
     },
     []
   );
@@ -216,8 +247,10 @@ export function AuthProvider({ children }: Props) {
       login,
       register,
       logout,
+      sendOtp,
+      verifyOtp
     }),
-    [login, logout, register, state.user, status]
+    [login, logout, register, sendOtp, verifyOtp, state.user, status]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

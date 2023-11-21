@@ -16,19 +16,18 @@ import { EmailInboxIcon } from 'src/assets/icons';
 import Iconify from 'src/components/iconify';
 import { RouterLink } from 'src/routes/components';
 import FormProvider, { RHFCode, RHFTextField } from 'src/components/hook-form';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-
+import { useAuthContext } from 'src/auth/hooks';
+import { useRouter } from 'src/routes/hooks';
+import { PATH_AFTER_LOGIN } from 'src/config-global';
+import { useState } from 'react';
+import Alert from '@mui/material/Alert';
 // ----------------------------------------------------------------------
 
 export default function JwtVerifyView() {
+  const [errorMsg, setErrorMsg] = useState('');
 
   const router = useRouter();
-
-  useEffect(() => {
-    console.log(router);
-  }, [router]);
-
+  const { register, verifyOtp } = useAuthContext();
 
 
   const VerifySchema = Yup.object().shape({
@@ -36,9 +35,13 @@ export default function JwtVerifyView() {
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
   });
 
+
+  const registerUserDetails: any = sessionStorage.getItem('register_user_data');
+  const { email, password, firstName, lastName }: any = registerUserDetails ? JSON.parse(registerUserDetails) : {};
+
   const defaultValues = {
     code: '',
-    email: '',
+    email: email || '',
   };
 
   const methods = useForm({
@@ -54,8 +57,30 @@ export default function JwtVerifyView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      console.info('DATA', data);
+      // await new Promise((resolve) => setTimeout(resolve, 500));
+      const result: any = await verifyOtp?.(data.email, Number(data.code));
+      if (result) {
+        const { success } = result;
+        // eslint-disable-next-line no-empty
+        if (success) {
+
+          try {
+
+            const registerRes: any = await register?.(email, password, firstName, lastName);
+            if (registerRes && registerRes.success) {
+              sessionStorage.removeItem('register_user_data');
+              router.push(PATH_AFTER_LOGIN);
+            }
+
+          } catch (error) {
+            console.error(error);
+            setErrorMsg(typeof error === 'string' ? error : error.message);
+          }
+
+
+        }
+      }
+      // console.info('DATA', data);
     } catch (error) {
       console.error(error);
     }
@@ -63,10 +88,12 @@ export default function JwtVerifyView() {
 
   const renderForm = (
     <Stack spacing={3} alignItems="center">
+      {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
       <RHFTextField
         name="email"
         label="Email"
         placeholder="example@gmail.com"
+        disabled
         InputLabelProps={{ shrink: true }}
       />
 
@@ -96,7 +123,7 @@ export default function JwtVerifyView() {
 
       <Link
         component={RouterLink}
-        href={paths.authDemo.classic.login}
+        href={paths.auth.jwt.register}
         color="inherit"
         variant="subtitle2"
         sx={{
@@ -105,7 +132,7 @@ export default function JwtVerifyView() {
         }}
       >
         <Iconify icon="eva:arrow-ios-back-fill" width={16} />
-        Return to sign in
+        Return to sign up
       </Link>
     </Stack>
   );

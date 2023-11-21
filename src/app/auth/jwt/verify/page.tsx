@@ -7,6 +7,6 @@ export const metadata = {
   title: 'Jwt: Verify',
 };
 
-export default function LoginPage() {
+export default function VerifyPage() {
   return <JwtVerifyView />;
 }

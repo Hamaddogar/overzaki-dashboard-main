@@ -31,6 +31,8 @@ type CanRemove = {
     firstName: string,
     lastName: string
   ) => Promise<void>;
+  sendOtp?: (email: string) => Promise<void>;
+  verifyOtp?: (email: string, otp: number) => Promise<void>;
   //
   loginWithGoogle?: () => Promise<void>;
   loginWithGithub?: () => Promise<void>;
@@ -53,6 +55,8 @@ export type JWTContextType = CanRemove & {
   unauthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
+  sendOtp: (email: string) => Promise<void>;
+  verifyOtp: (email: string, otp: number) => Promise<void>;
   logout: () => Promise<void>;
 };
 

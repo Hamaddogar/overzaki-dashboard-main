@@ -29,7 +29,7 @@ import FormProvider, { RHFTextField } from 'src/components/hook-form';
 // ----------------------------------------------------------------------
 
 export default function JwtRegisterView() {
-  const { register } = useAuthContext();
+  const { register, sendOtp } = useAuthContext();
 
   const router = useRouter();
 
@@ -68,10 +68,25 @@ export default function JwtRegisterView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await register?.(data.email, data.password, data.firstName, data.lastName);
+      // need to change this
+      // await register?.(data.email, data.password, data.firstName, data.lastName);
+
+      const result: any = await sendOtp?.(data.email);
+      if (result) {
+        const { success } = result;
+        // eslint-disable-next-line no-empty
+        if (success) {
+          sessionStorage.setItem('register_user_data', JSON.stringify({ email: data.email, password: data.password, firstName: data.firstName, lastName: data.lastName }))
+          router.push(PATH_AFTER_REGISTER);
+        }
+      }
+
+
+
+
+
 
       // router.push(returnTo || PATH_AFTER_LOGIN);
-      router.push(returnTo || PATH_AFTER_REGISTER);
     } catch (error) {
       console.error(error);
       reset();

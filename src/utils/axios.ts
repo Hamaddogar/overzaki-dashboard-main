@@ -51,7 +51,9 @@ export const endpoints = {
     me: '/api/auth/me',
     refresh: '/api/auth/refresh',
     login: '/api/auth/login',
-    register: '/api/auth/register',
+    register: '/api/auth/signup',
+    sendotp: '/api/code/verify_account_otp',
+    verifyotp: '/api/code/verify_account',
     loutout: '/api/auth/logout',
   },
   mail: {
