@@ -23,9 +23,13 @@ export default function PostEditPage({ params }: Props) {
 }
 
 export async function generateStaticParams() {
-  const res = await axios.get(endpoints.post.list);
+  // const res = await axios.get(endpoints.post.list);
 
-  return res.data.posts.map((post: { title: string }) => ({
-    title: paramCase(post.title),
-  }));
+  // return res.data.posts.map((post: { title: string }) => ({
+  //   title: paramCase(post.title),
+  // }));
+  const res = [{
+    title: "title"
+  }]
+  return res;
 }

@@ -17,7 +17,7 @@ import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 import { useSearchParams, useRouter } from 'src/routes/hooks';
 // config
-import { PATH_AFTER_LOGIN, PATH_AFTER_REGISTER } from 'src/config-global';
+import { PATH_AFTER_LOGIN } from 'src/config-global';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // auth
@@ -49,7 +49,7 @@ export default function JwtLoginView() {
   const defaultValues = {
     // email: 'demo@minimals.cc',
     // password: 'demo1234',
-    email: 'rehman@livegolftv.com',
+    email: 'contactus@friendsack.com',
     password: '12345678',
   };
 
@@ -110,7 +110,7 @@ export default function JwtLoginView() {
         }}
       />
 
-      <Link variant="body2" color="inherit" underline="always" sx={{ alignSelf: 'flex-end' }}>
+      <Link component={RouterLink} href={paths.auth.jwt.forgotPassword} variant="body2" color="inherit" underline="always" sx={{ alignSelf: 'flex-end' }}>
         Forgot password?
       </Link>
 
@@ -132,7 +132,7 @@ export default function JwtLoginView() {
       {renderHead}
 
       <Alert severity="info" sx={{ mb: 3 }}>
-        Use email : <strong>demo@minimals.cc</strong> / password :<strong> demo1234</strong>
+        Use email : <strong>contactus@friendsack.com</strong> / password :<strong> 12345678</strong>
       </Alert>
 
       {renderForm}

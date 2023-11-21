@@ -57,7 +57,9 @@ export type JWTContextType = CanRemove & {
   register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   sendOtp: (email: string) => Promise<void>;
   verifyOtp: (email: string, otp: number) => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
+  newPassword?: (email: string, code: string, password: string) => Promise<void>;
 };
 
 export type FirebaseContextType = CanRemove & {

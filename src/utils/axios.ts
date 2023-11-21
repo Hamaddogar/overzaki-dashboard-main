@@ -54,6 +54,8 @@ export const endpoints = {
     register: '/api/auth/signup',
     sendotp: '/api/code/verify_account_otp',
     verifyotp: '/api/code/verify_account',
+    forgotPassword: '/api/code/forgot_password_otp',
+    forgotPasswordVerity: '/api/auth/forgot_password',
     loutout: '/api/auth/logout',
   },
   mail: {

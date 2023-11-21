@@ -22,6 +22,8 @@ enum Types {
   REGISTER = 'REGISTER',
   SENDOTP = 'SENDOTP',
   VERIFYOTP = 'VERIFYOTP',
+  FORGOTPASSWORD = 'FORGOTPASSWORD',
+  NEWPASSWORD = 'NEWPASSWORD',
   LOGOUT = 'LOGOUT',
 }
 
@@ -39,6 +41,12 @@ type Payload = {
     user: AuthUserType;
   };
   [Types.VERIFYOTP]: {
+    user: AuthUserType;
+  };
+  [Types.FORGOTPASSWORD]: {
+    user: AuthUserType;
+  };
+  [Types.NEWPASSWORD]: {
     user: AuthUserType;
   };
   [Types.LOGOUT]: undefined;
@@ -219,6 +227,30 @@ export function AuthProvider({ children }: Props) {
     },
     []
   );
+  // forgotPassword
+  const forgotPassword = useCallback(
+    async (email: string) => {
+      const data = {
+        email
+      };
+      const response = await axios.post(endpoints.auth.forgotPassword, data);
+      return { ...response.data };
+    },
+    []
+  );
+  // newPassword
+  const newPassword = useCallback(
+    async (email: string, code: string, password: string) => {
+      const data = {
+        email,
+        otp: Number(code),
+        newPassword: password
+      };
+      const response = await axios.put(endpoints.auth.forgotPasswordVerity, data);
+      return { ...response.data };
+    },
+    []
+  );
 
   // LOGOUT
   const logout = useCallback(async () => {
@@ -248,9 +280,12 @@ export function AuthProvider({ children }: Props) {
       register,
       logout,
       sendOtp,
-      verifyOtp
+      verifyOtp,
+      forgotPassword,
+      newPassword
+
     }),
-    [login, logout, register, sendOtp, verifyOtp, state.user, status]
+    [login, logout, register, sendOtp, verifyOtp, forgotPassword, newPassword, state.user, status]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;
