@@ -4,7 +4,7 @@
 import { AuthGuard } from 'src/auth/guard';
 // components
 import DashboardLayout from 'src/layouts/dashboard';
-
+import ReduxProvider from "../../redux/reduxProvider";
 // ----------------------------------------------------------------------
 
 type Props = {
@@ -13,8 +13,10 @@ type Props = {
 
 export default function Layout({ children }: Props) {
   return (
-    <AuthGuard>
-      <DashboardLayout>{children}</DashboardLayout>
-    </AuthGuard>
+    <ReduxProvider>
+      <AuthGuard>
+        <DashboardLayout>{children}</DashboardLayout>
+      </AuthGuard>
+    </ReduxProvider>
   );
 }
