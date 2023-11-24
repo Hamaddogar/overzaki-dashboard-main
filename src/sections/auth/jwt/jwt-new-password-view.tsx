@@ -24,6 +24,7 @@ import Alert from '@mui/material/Alert';
 import { useState } from 'react';
 import { useRouter } from 'src/routes/hooks';
 import { useAuthContext } from 'src/auth/hooks';
+import { PATH_AFTER_LOGIN } from 'src/config-global';
 
 
 // ----------------------------------------------------------------------
@@ -77,7 +78,8 @@ export default function JwtNewPasswordView() {
         // eslint-disable-next-line no-empty
         if (success) {
           sessionStorage.removeItem('forgot_password_email');
-          router.push(paths.auth.jwt.login);
+          // router.push(paths.auth.jwt.login);
+          router.push(PATH_AFTER_LOGIN);
         }
       }
     } catch (error) {

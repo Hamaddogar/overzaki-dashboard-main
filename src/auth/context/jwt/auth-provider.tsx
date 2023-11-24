@@ -244,12 +244,17 @@ export function AuthProvider({ children }: Props) {
       const data = {
         email,
         otp: Number(code),
-        newPassword: password
+        newPassword: password,
+        deviceName: "anyDeviceKey"
       };
       const response = await axios.put(endpoints.auth.forgotPasswordVerity, data);
+      const { success } = response.data;
+      if (success) {
+        initialize();
+      }
       return { ...response.data };
     },
-    []
+    [initialize]
   );
 
   // LOGOUT

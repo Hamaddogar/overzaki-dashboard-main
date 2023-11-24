@@ -91,10 +91,14 @@ export default function CategoriesView() {
 
   const handleCreateCategory = () => {
     const FormValues: any = new FormData();
-    Object.keys(categoriesData).forEach((key) => {
-      const value = categoriesData[key];
-      FormValues.append(`${key}`, value);
+    console.log(categoriesData);
+    Object.keys(categoriesData.name).forEach((key) => {
+      const value = categoriesData.name[key];
+      FormValues.append(`name[${key}]`, value);
     });
+    if (typeof categoriesData.image !== "string") {
+      FormValues.append('image', categoriesData.image);
+    }
 
     dispatch(createCategory(FormValues)).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
@@ -447,13 +451,11 @@ export default function CategoriesView() {
           <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Category Name (English)
           </Typography>
-          {/* <TextField fullWidth variant='filled' defaultValue='Electronic Devices' onChange={handleCategoryData} name='name[en]' /> */}
           <TextField fullWidth variant='filled' value={categoriesData?.name?.en || ""} onChange={handleCategoryData} name="name.en" />
 
           <Typography mt='20px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Category Name (Arabic)
           </Typography>
-          {/* <TextField fullWidth variant='filled' defaultValue='الأجهزة الإلكترونية' onChange={handleCategoryData} name='name_ar' /> */}
           <TextField fullWidth variant='filled' value={categoriesData?.name?.ar || ""} onChange={handleCategoryData} name="name.ar" />
 
           <Typography mt='20px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
@@ -469,7 +471,6 @@ export default function CategoriesView() {
                 </Box>
                 <Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    {/* <Box onClick={() => setCategoriesData({ ...categoriesData, image: null })} sx={{ backgroundColor: 'rgb(134, 136, 163,.09)', padding: '10px 11px 7px 11px', borderRadius: '36px', cursor: "pointer" }}> */}
                     <Box onClick={removeImage} sx={{ backgroundColor: 'rgb(134, 136, 163,.09)', padding: '10px 11px 7px 11px', borderRadius: '36px', cursor: "pointer" }}>
                       <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
                     </Box>
