@@ -50,6 +50,17 @@ export const fetchOneCategory = createAsyncThunk(
     return response.data;
   }
 );
+export const fetchOneSubCategory = createAsyncThunk(
+  'category/fetchOneSubcat',
+  async (subCategoryId: number) => {
+    const response = await getRequest(
+      `${endpoints.subCategory._list}/${subCategoryId}`,
+      defaultConfig
+    );
+
+    return response.data;
+  }
+);
 
 export const createCategory = createAsyncThunk('category/create', async (data: ICategoryForm) => {
   defaultConfig.headers['Content-Type'] = 'multipart/form-data';
@@ -57,6 +68,16 @@ export const createCategory = createAsyncThunk('category/create', async (data: I
 
   return response.data;
 });
+
+export const createSubCategory = createAsyncThunk(
+  'category/createSubCat',
+  async (data: ICategoryForm) => {
+    defaultConfig.headers['Content-Type'] = 'multipart/form-data';
+    const response = await postRequest(endpoints.subCategory.create, data, defaultConfig);
+
+    return response.data;
+  }
+);
 
 export const editCategory = createAsyncThunk(
   'category/edit',
@@ -73,12 +94,38 @@ export const editCategory = createAsyncThunk(
     return response.data;
   }
 );
+export const editSubCategory = createAsyncThunk(
+  'category/editSubcat',
+  async (payload: { subcategoryId: number; data: ICategoryForm }) => {
+    defaultConfig.headers['Content-Type'] = 'multipart/form-data';
+
+    const { subcategoryId, data } = payload;
+    const response = await putRequest(
+      `${endpoints.subCategory._list}/${subcategoryId}`,
+      data,
+      defaultConfig
+    );
+
+    return response.data;
+  }
+);
 
 export const deleteCategory = createAsyncThunk('category/delete', async (categoryId: number) => {
   const response = await deleteRequest(`${endpoints.category._list}/${categoryId}`, defaultConfig);
 
   return response.data;
 });
+export const deleteSubCategory = createAsyncThunk(
+  'category/deleteSubcat',
+  async (subCategoryId: number) => {
+    const response = await deleteRequest(
+      `${endpoints.subCategory._list}/${subCategoryId}`,
+      defaultConfig
+    );
+
+    return response.data;
+  }
+);
 
 const categorySlice = createSlice({
   name: 'category',
@@ -132,6 +179,28 @@ const categorySlice = createSlice({
         state.error = action.error.message !== undefined ? action.error.message : null;
       })
 
+      .addCase(fetchOneSubCategory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchOneSubCategory.fulfilled, (state, action) => {
+        const subCategoryObj: any = {
+          ...action.payload,
+          category: action.payload.category.id,
+          name: {
+            en: action.payload.name,
+            ar: '',
+          },
+        };
+        state.loading = false;
+        // state.subCategory = action.payload;
+        state.subCategory = subCategoryObj;
+      })
+      .addCase(fetchOneSubCategory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message !== undefined ? action.error.message : null;
+      })
+
       .addCase(createCategory.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -157,6 +226,17 @@ const categorySlice = createSlice({
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
       })
+      .addCase(editSubCategory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(editSubCategory.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(editSubCategory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message !== undefined ? action.error.message : null;
+      })
 
       .addCase(deleteCategory.pending, (state) => {
         state.loading = true;
@@ -166,6 +246,18 @@ const categorySlice = createSlice({
         state.loading = false;
       })
       .addCase(deleteCategory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message !== undefined ? action.error.message : null;
+      })
+      .addCase(deleteSubCategory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteSubCategory.fulfilled, (state) => {
+        state.loading = false;
+      })
+
+      .addCase(deleteSubCategory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
       })
@@ -181,6 +273,18 @@ const categorySlice = createSlice({
       })
       .addCase(fetchSubCategorysList.rejected, (state, action) => {
         state.status = 'failed';
+        state.loading = false;
+        state.error = action.error.message !== undefined ? action.error.message : null;
+      })
+      .addCase(createSubCategory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createSubCategory.fulfilled, (state, action: any) => {
+        state.loading = false;
+        // state.subCatList.unshift(action.payload);
+      })
+      .addCase(createSubCategory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
       });
