@@ -27,6 +27,18 @@ export const fetchCategorysList = createAsyncThunk(
   }
 );
 
+export const fetchSubCategorysList = createAsyncThunk(
+  'category/fetchSubCatList',
+  async (params: IRequest, { rejectWithValue }) => {
+    try {
+      const response = await getRequest(`${endpoints.subCategory.list}`, defaultConfig);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 export const fetchOneCategory = createAsyncThunk(
   'category/fetchOne',
   async (categoryId: number) => {
@@ -73,14 +85,19 @@ const categorySlice = createSlice({
   initialState: {
     list: [] as any,
     category: null as any,
+    subCatList: [] as any,
+    subCategory: null as any,
     loading: false,
     error: null as string | null,
     status: 'idle',
   },
   reducers: {
     setCategory: (state, action: PayloadAction<any>) => {
-      console.log('action', action);
       state.category = action.payload;
+    },
+    setSubCategory: (state, action: PayloadAction<any>) => {
+      console.log('action', action);
+      state.subCategory = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -151,8 +168,23 @@ const categorySlice = createSlice({
       .addCase(deleteCategory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
+      })
+      .addCase(fetchSubCategorysList.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.status = 'loading';
+      })
+      .addCase(fetchSubCategorysList.fulfilled, (state, action: any) => {
+        state.status = 'succeeded';
+        state.loading = false;
+        state.subCatList = action.payload.data.data;
+      })
+      .addCase(fetchSubCategorysList.rejected, (state, action) => {
+        state.status = 'failed';
+        state.loading = false;
+        state.error = action.error.message !== undefined ? action.error.message : null;
       });
   },
 });
-export const { setCategory } = categorySlice.actions;
+export const { setCategory, setSubCategory } = categorySlice.actions;
 export default categorySlice.reducer;

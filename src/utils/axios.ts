@@ -127,6 +127,11 @@ export const endpoints = {
     list: '/categories/all',
     search: '/category/search',
   },
+  subCategory: {
+    create: '/sub-categories',
+    _list: '/sub-categories',
+    list: '/sub-categories/all',
+  },
   voucher: {
     list: '/vouchers',
     search: '/voucher/search',
