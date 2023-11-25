@@ -252,7 +252,7 @@ export default function CategoriesView() {
     setCategoriesData((prevData: any) => ({
       ...prevData,
       name: {
-        ...prevData.name,
+        ...prevData?.name,
         [language]: value,
       },
     }));
