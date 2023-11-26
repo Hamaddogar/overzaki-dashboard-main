@@ -20,12 +20,12 @@ export const fetchCustomersList = createAsyncThunk(
   async (params: IRequest, { rejectWithValue }) => {
     try {
       const response = await getRequestWithParams(
-        'https://staging-api.overzaki.io/customers',
+        `${endpoints.customer.list}?pageSize=10&pageNumber=1`,
         params,
         defaultConfig
       );
 
-      return response;
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
@@ -45,6 +45,7 @@ export const fetchOneCustomer = createAsyncThunk(
 );
 
 export const createCustomer = createAsyncThunk('customers/create', async (data: ICustomerForm) => {
+  defaultConfig.headers['Content-Type'] = 'multipart/form-data';
   const response = await postRequest(endpoints.customer.list, data, defaultConfig);
 
   return response.data;

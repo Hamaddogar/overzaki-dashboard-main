@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 // @mui
 import Divider from '@mui/material/Divider';
 import { alpha } from '@mui/material/styles';
@@ -10,16 +10,18 @@ import Tab from '@mui/material/Tab';
 import InputAdornment from '@mui/material/InputAdornment';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import { Box, Grid, Stack, Chip, Typography, Paper } from '@mui/material';
+import { Box, Grid, Stack, Chip, Typography, Paper, Select, MenuItem } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import TextField from '@mui/material/TextField';
+import { useSnackbar } from 'notistack';
 // _mock
 import { _orders, allCustomers } from 'src/_mock';
 // utils
 import { fTimestamp } from 'src/utils/format-time';
 // components
+import { UploadAvatar } from 'src/components/upload';
 import { BottomActions } from 'src/components/bottom-actions';
 import { useSettingsContext } from 'src/components/settings';
 import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
@@ -27,12 +29,20 @@ import { useTable, getComparator } from 'src/components/table';
 // types
 import { IOrderItem, IOrderTableFilters, IOrderTableFilterValue } from 'src/types/order';
 //
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from 'src/redux/store/store';
+
 import Label from 'src/components/label/label';
 import Iconify from 'src/components/iconify/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomersTableToolbar from '../customers-toolbar';
 import CustomersTableFiltersResult from '../customers-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
+import CountrySelect from './CountryField';
+import { createCustomer, fetchCustomersList } from '../../../redux/store/thunks/customers';
+
+
+
 
 // ----------------------------------------------------------------------
 
@@ -55,6 +65,13 @@ const defaultFilters: IOrderTableFilters = {
 // ----------------------------------------------------------------------
 
 export default function OrdersListView() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { enqueueSnackbar } = useSnackbar();
+
+  const loadStatus = useSelector((state: any) => state.customers.status);
+
+  const { list, loading, error, customer } = useSelector((state: any) => state.customers);
+
 
   const table = useTable({ defaultOrderBy: 'orderNumber' });
 
@@ -62,11 +79,87 @@ export default function OrdersListView() {
 
   const [value, setValue] = useState('All');
 
-  const [data, setData] = useState(allCustomers)
+  const [data, setData] = useState(list)
 
   const [tableData] = useState(_orders);
 
   const [filters, setFilters] = useState(defaultFilters);
+
+  const [customerData, setCustomerData] = useState<any>(null);
+
+
+
+  useEffect(() => {
+    if (loadStatus === 'idle') {
+      dispatch(fetchCustomersList(error)).then((response: any) => {
+        console.log(list);
+        // setData(list)
+      });
+    }
+  }, [loadStatus, dispatch, error, list]);
+
+  useEffect(() => {
+    setData(list || [])
+  }, [list])
+
+
+
+  // ----------------------------------------------------------------------------------------------------
+
+
+  const handleCustomerData = (e: any) => {
+    setCustomerData((prevData: any) => ({
+      ...prevData,
+      [e.target.name]: e.target.value
+    }));
+  }
+  const handleDropAvatar = useCallback((acceptedFiles: File[]) => {
+    const newFile = acceptedFiles[0];
+    if (newFile) {
+      setCustomerData({ ...customerData, avatar: newFile });
+    }
+  }, [customerData]);
+
+
+
+  const createCustomerFun = () => {
+    if (customerData) {
+      const FormValues: any = new FormData();
+      Object?.keys(customerData).forEach((key) => {
+        if (key === "avatar" && typeof customerData.avatar !== "string") {
+          FormValues.append('avatar', customerData.avatar);
+        } else if (key === "location") {
+          FormValues.append(`${key}[0]`, customerData[key]);
+        } else {
+          FormValues.append(key, customerData[key]);
+        }
+      });
+      FormValues.append('deviceToken', "only for android and ios app.");
+
+      dispatch(createCustomer(FormValues)).then((response: any) => {
+        console.log(response);
+
+        if (response.meta.requestStatus === 'fulfilled') {
+          setCustomerData(null);
+          dispatch(fetchCustomersList(error));
+          enqueueSnackbar('Successfully Created!', { variant: 'success' });
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    }
+  }
+
+
+
+
+
+
+
+
+
+  // ----------------------------------------------------------------------------------------------------
+
 
   const dateError =
     filters.startDate && filters.endDate
@@ -79,7 +172,6 @@ export default function OrdersListView() {
     filters,
     dateError,
   });
-
 
   const canReset =
     !!filters.name || filters.status !== 'all' || (!!filters.startDate && !!filters.endDate);
@@ -103,9 +195,9 @@ export default function OrdersListView() {
   const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
     if (newValue === 'All') {
-      setData(allCustomers);
+      setData(list);
     } else {
-      const newData = allCustomers.filter(order => order.status === newValue)
+      const newData = list.filter((item: any) => item?.type === newValue)
       setData(newData);
     }
   };
@@ -186,9 +278,9 @@ export default function OrdersListView() {
                     boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
                   }}
                 >
-                  {STATUS_OPTIONS.map((tab) => (
+                  {STATUS_OPTIONS.map((tab, i) => (
                     <Tab
-                      key={tab.value}
+                      key={i}
                       iconPosition="end"
                       value={tab.value}
                       label={tab.label}
@@ -205,15 +297,15 @@ export default function OrdersListView() {
                             'default'
                           }
                         >
-                          {tab.value === 'All' && allCustomers.length}
+                          {tab.value === 'All' && list.length}
                           {tab.value === 'New' &&
-                            allCustomers.filter((order) => order.status === 'New').length}
+                            list.length > 0 && list.filter((item: any) => item.type === 'New').length}
                           {tab.value === 'Loyal' &&
-                            allCustomers.filter((order) => order.status === 'Loyal').length}
+                            list.length > 0 && list.filter((item: any) => item.type === 'Loyal').length}
                           {tab.value === 'Not Active' &&
-                            allCustomers.filter((order) => order.status === 'Not Active').length}
+                            list.length > 0 && list.filter((item: any) => item.type === 'Not Active').length}
                           {tab.value === 'Super' &&
-                            allCustomers.filter((order) => order.status === 'Super').length}
+                            list.length > 0 && list.filter((item: any) => item.type === 'Super').length}
                         </Label>
                       }
                     />
@@ -223,7 +315,7 @@ export default function OrdersListView() {
 
               <TabPanel value={value} sx={{ px: 0, }}>
                 <Grid container spacing={2}>
-                  {data.map((order, indx) =>
+                  {data.map((itemObj: any, indx: any) =>
                     <Grid key={indx} item xs={12}>
                       <Paper elevation={4} onClick={toggleDrawerCommon('details')} sx={{ cursor: 'pointer', border: '2px solid #FFFFFF', '&:hover': { borderColor: '#1BFCB6' } }} >
                         <Grid container item alignItems='center' justifyContent='space-between' rowGap={3} sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '80px' }}>
@@ -236,26 +328,42 @@ export default function OrdersListView() {
                                 gap: '8px'
                               }}
                             >
-                              <Box component='img' src={order.flag} alt=" " width='22px' />
+                              <Box component='img' src={itemObj?.avatar} alt=" " width='22px' />
                               <Box display='flex' gap='0px' flexDirection='column' >
-                                <Typography component='p' variant="subtitle2" sx={{ fontSize: '.9rem', fontWeight: 900 }} > {order.name} </Typography>
-                                <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }}> {order.phone} </Typography>
+                                <Typography component='p' variant="subtitle2" sx={{ fontSize: '.9rem', fontWeight: 900 }} > {itemObj.firstName} </Typography>
+                                <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }}> {itemObj.phoneNumber} </Typography>
                               </Box>
                             </Box>
                           </Grid>
 
                           <Grid item xs={6} md='auto'>
                             <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >Orders</Typography>
-                            <Typography component='p' variant="subtitle2" sx={{ fontSize: '.9rem', fontWeight: 900 }} >{order.orders} Orders</Typography>
+                            <Typography component='p' variant="subtitle2" sx={{ fontSize: '.9rem', fontWeight: 900 }} >{itemObj.countOrders} Orders</Typography>
                           </Grid>
 
                           <Grid item xs={6} md='auto' >
                             <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }}> Total </Typography>
-                            <Typography component='p' variant="subtitle2" sx={{ fontSize: '.9rem', fontWeight: 900 }}> {order.total} KWD </Typography>
+                            <Typography component='p' variant="subtitle2" sx={{ fontSize: '.9rem', fontWeight: 900 }}> {itemObj.totalCostOrder} KWD </Typography>
                           </Grid>
 
                           <Grid item xs={6} md='auto'>
-                            <Chip label={order.status} size='small' sx={{ backgroundColor: order.color, color: '#0F1349' }} />
+                            <Chip label={itemObj.type} size='small' color={(itemObj.type === 'New' && 'info') ||
+                              (itemObj.type === 'Loyal' && 'secondary') ||
+                              (itemObj.type === 'Not Active' && 'error') ||
+                              (itemObj.type === 'Super' && 'warning') ||
+                              'default'}
+                            />
+                          </Grid>
+
+                          <Grid item xs='auto' textAlign='right'>
+                            <Iconify icon="carbon:delete" sx={{ height: "60px" }} onClick={() => {
+                              // setRemoveData({ type: 'category', id: category._id });
+                              // confirm.onTrue();
+                            }} /> &nbsp; &nbsp; &nbsp;
+                            <Iconify icon="bx:edit"
+                              sx={{ height: "60px" }}
+                            // onClick={toggleDrawerCommon('cat', category._id)}
+                            />
                           </Grid>
 
                         </Grid>
@@ -376,6 +484,7 @@ export default function OrdersListView() {
                 <Button
                   fullWidth
                   variant="soft"
+                  onClick={createCustomerFun}
                   color="success"
                   size="large"
                   sx={{ borderRadius: '30px' }}
@@ -386,56 +495,91 @@ export default function OrdersListView() {
             >
               <Divider flexItem />
               <Box width='100%'>
+                <UploadAvatar
+                  file={customerData?.avatar ? Object.assign(customerData?.avatar, {
+                    preview: URL.createObjectURL(customerData?.avatar),
+                  }) : null}
+                  onDrop={handleDropAvatar}
+                />
 
                 <Typography pb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-                  Full Name
+                  First Name
                 </Typography>
-                <TextField fullWidth variant='filled' defaultValue='Ahmed Omar' name='NAME' />
+                <TextField fullWidth variant='filled' onChange={handleCustomerData} value={customerData?.firstName || ""} name='firstName' />
+
+                <Typography mt='20px' pb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+                  Last Name
+                </Typography>
+                <TextField fullWidth variant='filled' onChange={handleCustomerData} value={customerData?.lastName || ""} name='lastName' />
 
                 <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
                   Mobile Number
                 </Typography>
 
-                <TextField fullWidth variant='filled' defaultValue='965128743291' name='PHONE'
-                  sx={{
-                    '& .MuiInputAdornment-root': {
-                      marginTop: '0px !important',
-                      // paddingLeft: '10px'
-                    },
-                    '& input': {
-                      paddingLeft: '2px !important'
-                    }
-                  }}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">
-                      <Stack direction='row' alignItems='center' spacing="8px">
-                        <Iconify icon="mingcute:down-fill" width={43} />
-                        <Box component='img' src='/raw/flagN.png' />
-                        <Divider orientation="vertical" variant='middle' flexItem />
-                      </Stack>
-                    </InputAdornment>,
-                  }}
+                <TextField fullWidth variant='filled' onChange={handleCustomerData} value={customerData?.phoneNumber || ""} name='phoneNumber'
+                // sx={{
+                //   '& .MuiInputAdornment-root': {
+                //     marginTop: '0px !important',
+                //     // paddingLeft: '10px'
+                //   },
+                //   '& input': {
+                //     paddingLeft: '2px !important'
+                //   }
+                // }}
+                // InputProps={{
+                //   startAdornment: <InputAdornment position="start">
+                //     <Stack direction='row' alignItems='center' spacing="8px">
+                //       <Iconify icon="mingcute:down-fill" width={43} />
+                //       <Box component='img' src='/raw/flagN.png' />
+                //       <Divider orientation="vertical" variant='middle' flexItem />
+                //     </Stack>
+                //   </InputAdornment>,
+                // }}
                 />
 
 
                 <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-                  Email Address (Optional)
+                  Email Address
                 </Typography>
-                <TextField fullWidth variant='filled' type='email' defaultValue='ahmed.omar@gmail.com' name='email' />
+                <TextField fullWidth variant='filled' type='email' onChange={handleCustomerData} value={customerData?.email || ""} name='email' />
 
 
                 <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-                  Delivery Address
+                  Country
                 </Typography>
+                <CountrySelect name="country" value={customerData?.country || ""} onChange={(event: any, value: any) => setCustomerData({ ...customerData, country: value?.code || "" })} />
 
-                <Box sx={{ borderRadius: '12px', padding: '24px', background: 'rgb(245, 245, 248)' }}>
+                <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+                  Gender
+                </Typography>
+                <Select
+                  fullWidth
+                  variant='filled'
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  name="gender"
+                  value={customerData?.gender || ""}
+                  onChange={handleCustomerData}
+                >
+                  <MenuItem value="MALE">Male</MenuItem>
+                  <MenuItem value="FEMALE">Female</MenuItem>
+                </Select>
+
+
+                <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+                  Address
+                </Typography>
+                <TextField fullWidth variant='filled' type='text' onChange={handleCustomerData} value={customerData?.location || ""} name='location' />
+
+
+
+                {/* <Box sx={{ borderRadius: '12px', padding: '24px', background: 'rgb(245, 245, 248)' }}>
                   <Stack direction='row' alignItems='center' spacing='10px'>
                     <Iconify icon="ion:location" width={45} style={{ color: '#8688A3' }} />
                     <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', fontWeight: 900 }} >
                       Ali Sabah Al-Salem - Block 5A - Street 8 House 4 - Floor 2
                     </Typography>
                   </Stack>
-
                   <Divider sx={{ my: '22px' }} />
                   <Stack direction='row' alignItems='center' spacing='10px'>
                     <Iconify icon="mingcute:add-fill" width={30} style={{ color: '#8688A3' }} />
@@ -443,8 +587,7 @@ export default function OrdersListView() {
                       Add Delivery Location
                     </Typography>
                   </Stack>
-
-                </Box>
+                </Box> */}
 
 
               </Box>
