@@ -41,7 +41,7 @@ export default function AppWidgetSummary({ title, percent, total, chart, sx, ...
         colorStops: [
           { offset: 0, color: colors[0] },
           { offset: 100, color: colors[1] },
-        ],
+        ] as any,
       },
     },
     chart: {

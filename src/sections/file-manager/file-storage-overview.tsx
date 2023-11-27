@@ -77,7 +77,7 @@ export default function FileStorageOverview({ data, total, chart, ...other }: Pr
         colorStops: [
           { offset: 0, color: colors[0] },
           { offset: 100, color: colors[1] },
-        ],
+        ] as any,
       },
     },
     ...options,

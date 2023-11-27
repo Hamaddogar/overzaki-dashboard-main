@@ -73,7 +73,7 @@ export default function useChart(options?: ApexOptions) {
         opacityFrom: 0.4,
         opacityTo: 0,
         stops: [0, 100],
-      },
+      } as any,
     },
 
     // Datalabels

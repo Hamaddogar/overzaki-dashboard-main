@@ -49,7 +49,7 @@ export default function BookingCheckInWidgets({ chart, ...other }: Props) {
         colorStops: [
           { offset: 0, color: colors[0][0] },
           { offset: 100, color: colors[0][1] },
-        ],
+        ] as any,
       },
     },
     chart: {
@@ -90,7 +90,7 @@ export default function BookingCheckInWidgets({ chart, ...other }: Props) {
         colorStops: [
           { offset: 0, color: colors[1][0] },
           { offset: 100, color: colors[1][1] },
-        ],
+        ] as any,
       },
     },
   };

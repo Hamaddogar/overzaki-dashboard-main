@@ -54,7 +54,7 @@ export default function BookingAvailable({ title, subheader, chart, ...other }: 
         colorStops: [
           { offset: 0, color: colors[0] },
           { offset: 100, color: colors[1] },
-        ],
+        ] as any,
       },
     },
     plotOptions: {
