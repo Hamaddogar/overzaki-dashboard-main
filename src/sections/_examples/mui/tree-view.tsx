@@ -2,7 +2,8 @@
 
 // @mui
 import TreeView from '@mui/lab/TreeView';
-import TreeItem, { TreeItemProps, treeItemClasses } from '@mui/lab/TreeItem';
+// import TreeItem, { TreeItemProps, treeItemClasses } from '@mui/lab/TreeItem';
+import TreeItem, { TreeItemProps } from '@mui/lab/TreeItem';
 import { alpha, styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
@@ -23,12 +24,14 @@ const StyledTreeView = styled(TreeView)({
 });
 
 const StyledTreeItem = styled((props: TreeItemProps) => <TreeItem {...props} />)(({ theme }) => ({
-  [`& .${treeItemClasses.iconContainer}`]: {
+  // [`& .${treeItemClasses.iconContainer}`]: {
+  [`& .iconContainer`]: {
     '& .close': {
       opacity: 0.3,
     },
   },
-  [`& .${treeItemClasses.group}`]: {
+  // [`& .${treeItemClasses.group}`]: {
+  [`& .group`]: {
     marginLeft: 15,
     paddingLeft: 18,
     borderLeft: `1px dashed ${alpha(theme.palette.text.primary, 0.4)}`,

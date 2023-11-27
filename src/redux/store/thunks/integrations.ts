@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { IIntegrationsRequest } from 'src/types/request/integrations';
+// import { IIntegrationsRequest } from 'src/types/request/integrations';
 import {
   getRequest,
   endpoints,
@@ -9,9 +9,7 @@ import {
   deleteRequest,
 } from 'src/utils/axios';
 
-
 export const fetchIntegrationsList = createAsyncThunk('integrations/fetchList', async () => {
-
   const response = await getRequest(`${endpoints.integrations.list}`, defaultConfig);
 
   return response;
@@ -20,13 +18,16 @@ export const fetchIntegrationsList = createAsyncThunk('integrations/fetchList', 
 export const fetchOneIntegrations = createAsyncThunk(
   'integrations/fetchOne',
   async (integrationsId: number) => {
-    const response = await getRequest(`${endpoints.integrations.list}/${integrationsId}`, defaultConfig);
+    const response = await getRequest(
+      `${endpoints.integrations.list}/${integrationsId}`,
+      defaultConfig
+    );
 
     return response.data;
   }
 );
 
-export const createIntegrations = createAsyncThunk('integrations/create', async (data: IIntegrationsRequest) => {
+export const createIntegrations = createAsyncThunk('integrations/create', async (data: any) => {
   const response = await postRequest(endpoints.integrations.list, data, defaultConfig);
 
   return response.data;
@@ -34,8 +35,8 @@ export const createIntegrations = createAsyncThunk('integrations/create', async 
 
 export const editIntegrations = createAsyncThunk(
   'integrations/edit',
-  async (payload : {integrationsId: number, data: IIntegrationsRequest}) => {
-    const { integrationsId, data} = payload
+  async (payload: { integrationsId: number; data: any }) => {
+    const { integrationsId, data } = payload;
     const response = await putRequest(
       `${endpoints.integrations.list}/${integrationsId}`,
       data,
@@ -46,11 +47,17 @@ export const editIntegrations = createAsyncThunk(
   }
 );
 
-export const deleteIntegrations = createAsyncThunk('integrations/delete', async (integrationsId: number) => {
-  const response = await deleteRequest(`${endpoints.integrations.list}/${integrationsId}`, defaultConfig);
+export const deleteIntegrations = createAsyncThunk(
+  'integrations/delete',
+  async (integrationsId: number) => {
+    const response = await deleteRequest(
+      `${endpoints.integrations.list}/${integrationsId}`,
+      defaultConfig
+    );
 
-  return response.data;
-});
+    return response.data;
+  }
+);
 
 const integrationsSlice = createSlice({
   name: 'integrations',
@@ -73,7 +80,6 @@ const integrationsSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchIntegrationsList.fulfilled, (state, action) => {
-
         state.loading = false;
         state.list = action.payload;
       })
@@ -129,7 +135,7 @@ const integrationsSlice = createSlice({
       .addCase(deleteIntegrations.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
+      });
   },
 });
 export const { setIntegrations } = integrationsSlice.actions;

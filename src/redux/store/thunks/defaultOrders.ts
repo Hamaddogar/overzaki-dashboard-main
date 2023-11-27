@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { IOrdersRequest } from 'src/types/request/orders';
+// import { IOrdersRequest } from 'src/types/request/orders';
 import {
   getRequest,
   endpoints,
@@ -9,24 +9,19 @@ import {
   deleteRequest,
 } from 'src/utils/axios';
 
-
 export const fetchOrderssList = createAsyncThunk('orders/fetchList', async () => {
-
   const response = await getRequest(`${endpoints.orders.list}`, defaultConfig);
 
   return response;
 });
 
-export const fetchOneOrders = createAsyncThunk(
-  'orders/fetchOne',
-  async (ordersId: number) => {
-    const response = await getRequest(`${endpoints.orders.list}/${ordersId}`, defaultConfig);
+export const fetchOneOrders = createAsyncThunk('orders/fetchOne', async (ordersId: number) => {
+  const response = await getRequest(`${endpoints.orders.list}/${ordersId}`, defaultConfig);
 
-    return response.data;
-  }
-);
+  return response.data;
+});
 
-export const createOrders = createAsyncThunk('orders/create', async (data: IOrdersRequest) => {
+export const createOrders = createAsyncThunk('orders/create', async (data: any) => {
   const response = await postRequest(endpoints.orders.list, data, defaultConfig);
 
   return response.data;
@@ -34,13 +29,9 @@ export const createOrders = createAsyncThunk('orders/create', async (data: IOrde
 
 export const editOrders = createAsyncThunk(
   'orders/edit',
-  async (payload : {ordersId: number, data: IOrdersRequest}) => {
-    const { ordersId, data} = payload
-    const response = await putRequest(
-      `${endpoints.orders.list}/${ordersId}`,
-      data,
-      defaultConfig
-    );
+  async (payload: { ordersId: number; data: any }) => {
+    const { ordersId, data } = payload;
+    const response = await putRequest(`${endpoints.orders.list}/${ordersId}`, data, defaultConfig);
 
     return response.data;
   }
@@ -73,7 +64,6 @@ const ordersSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchOrderssList.fulfilled, (state, action) => {
-
         state.loading = false;
         state.list = action.payload;
       })
@@ -129,7 +119,7 @@ const ordersSlice = createSlice({
       .addCase(deleteOrders.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
+      });
   },
 });
 export const { setOrders } = ordersSlice.actions;

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { IStaffMangmentRequest } from 'src/types/request/staffManagement';
+// import { IStaffMangmentRequest } from 'src/types/request/staffManagement';
 import {
   getRequest,
   endpoints,
@@ -8,7 +8,6 @@ import {
   putRequest,
   deleteRequest,
 } from 'src/utils/axios';
-
 
 export const fetchStaffManagementsList = createAsyncThunk('staffManagement/fetchList', async () => {
   const response = await getRequest(`${endpoints.staffManagement.list}`, defaultConfig);
@@ -19,22 +18,28 @@ export const fetchStaffManagementsList = createAsyncThunk('staffManagement/fetch
 export const fetchOneStaffManagement = createAsyncThunk(
   'staffManagement/fetchOne',
   async (staffManagementId: number) => {
-    const response = await getRequest(`${endpoints.staffManagement.list}/${staffManagementId}`, defaultConfig);
+    const response = await getRequest(
+      `${endpoints.staffManagement.list}/${staffManagementId}`,
+      defaultConfig
+    );
 
     return response.data;
   }
 );
 
-export const createStaffManagement = createAsyncThunk('staffManagement/create', async (data: IStaffMangmentRequest) => {
-  const response = await postRequest(endpoints.staffManagement.list, data, defaultConfig);
+export const createStaffManagement = createAsyncThunk(
+  'staffManagement/create',
+  async (data: any) => {
+    const response = await postRequest(endpoints.staffManagement.list, data, defaultConfig);
 
-  return response.data;
-});
+    return response.data;
+  }
+);
 
 export const editStaffManagement = createAsyncThunk(
   'staffManagement/edit',
-  async (payload : {staffManagementId: number, data: IStaffMangmentRequest}) => {
-    const { staffManagementId, data} = payload
+  async (payload: { staffManagementId: number; data: any }) => {
+    const { staffManagementId, data } = payload;
     const response = await putRequest(
       `${endpoints.staffManagement.list}/${staffManagementId}`,
       data,
@@ -45,11 +50,17 @@ export const editStaffManagement = createAsyncThunk(
   }
 );
 
-export const deleteStaffManagement = createAsyncThunk('staffManagement/delete', async (staffManagementId: number) => {
-  const response = await deleteRequest(`${endpoints.staffManagement.list}/${staffManagementId}`, defaultConfig);
+export const deleteStaffManagement = createAsyncThunk(
+  'staffManagement/delete',
+  async (staffManagementId: number) => {
+    const response = await deleteRequest(
+      `${endpoints.staffManagement.list}/${staffManagementId}`,
+      defaultConfig
+    );
 
-  return response.data;
-});
+    return response.data;
+  }
+);
 
 const staffManagementSlice = createSlice({
   name: 'staffManagement',
@@ -127,7 +138,7 @@ const staffManagementSlice = createSlice({
       .addCase(deleteStaffManagement.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
+      });
   },
 });
 export const { setStaffManagement } = staffManagementSlice.actions;

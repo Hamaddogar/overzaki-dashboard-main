@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { ITaxSettingsRequest } from 'src/types/request/taxSettings';
+// import { ITaxSettingsRequest } from 'src/types/request/taxSettings';
 import {
   getRequest,
   endpoints,
@@ -8,7 +8,6 @@ import {
   putRequest,
   deleteRequest,
 } from 'src/utils/axios';
-
 
 export const fetchTaxSettingssList = createAsyncThunk('taxSettingss/fetchList', async () => {
   const response = await getRequest(endpoints.taxSettings.list, defaultConfig);
@@ -19,13 +18,16 @@ export const fetchTaxSettingssList = createAsyncThunk('taxSettingss/fetchList', 
 export const fetchOneTaxSettings = createAsyncThunk(
   'taxSettingss/fetchOne',
   async (taxSettingsId: number) => {
-    const response = await getRequest(`${endpoints.taxSettings.list}/${taxSettingsId}`, defaultConfig);
+    const response = await getRequest(
+      `${endpoints.taxSettings.list}/${taxSettingsId}`,
+      defaultConfig
+    );
 
     return response.data;
   }
 );
 
-export const createTaxSettings = createAsyncThunk('taxSettingss/create', async (data: ITaxSettingsRequest) => {
+export const createTaxSettings = createAsyncThunk('taxSettingss/create', async (data: any) => {
   const response = await postRequest(endpoints.taxSettings.list, data, defaultConfig);
 
   return response.data;
@@ -33,8 +35,8 @@ export const createTaxSettings = createAsyncThunk('taxSettingss/create', async (
 
 export const editTaxSettings = createAsyncThunk(
   'taxSettingss/edit',
-  async (payload : {taxSettingsId: number, data: ITaxSettingsRequest}) => {
-    const { taxSettingsId, data} = payload
+  async (payload: { taxSettingsId: number; data: any }) => {
+    const { taxSettingsId, data } = payload;
     const response = await putRequest(
       `${endpoints.taxSettings.list}/${taxSettingsId}`,
       data,
@@ -45,11 +47,17 @@ export const editTaxSettings = createAsyncThunk(
   }
 );
 
-export const deleteTaxSettings = createAsyncThunk('taxSettingss/delete', async (taxSettingsId: number) => {
-  const response = await deleteRequest(`${endpoints.taxSettings.list}/${taxSettingsId}`, defaultConfig);
+export const deleteTaxSettings = createAsyncThunk(
+  'taxSettingss/delete',
+  async (taxSettingsId: number) => {
+    const response = await deleteRequest(
+      `${endpoints.taxSettings.list}/${taxSettingsId}`,
+      defaultConfig
+    );
 
-  return response.data;
-});
+    return response.data;
+  }
+);
 
 const taxSettingssSlice = createSlice({
   name: 'taxSettingss',
@@ -127,7 +135,7 @@ const taxSettingssSlice = createSlice({
       .addCase(deleteTaxSettings.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
+      });
   },
 });
 export const { setTaxSettings } = taxSettingssSlice.actions;

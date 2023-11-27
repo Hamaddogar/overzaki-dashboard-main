@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { INotificationsSettingsRequest } from 'src/types/request/notificationsSettings';
+// import { INotificationsSettingsRequest } from 'src/types/request/notificationsSettings';
 import {
   getRequest,
   endpoints,
@@ -9,32 +9,40 @@ import {
   deleteRequest,
 } from 'src/utils/axios';
 
-
-export const fetchNotificationsSettingssList = createAsyncThunk('notificationsSettings/fetchList', async () => {
-  const response = await getRequest(endpoints.notificationsSettings.list, defaultConfig);
-
-  return response.data;
-});
-
-export const fetchOneNotificationsSettings = createAsyncThunk(
-  'notificationsSettings/fetchOne',
-  async (notificationsSettingsId: number) => {
-    const response = await getRequest(`${endpoints.notificationsSettings.list}/${notificationsSettingsId}`, defaultConfig);
+export const fetchNotificationsSettingssList = createAsyncThunk(
+  'notificationsSettings/fetchList',
+  async () => {
+    const response = await getRequest(endpoints.notificationsSettings.list, defaultConfig);
 
     return response.data;
   }
 );
 
-export const createNotificationsSettings = createAsyncThunk('notificationsSettings/create', async (data: INotificationsSettingsRequest) => {
-  const response = await postRequest(endpoints.notificationsSettings.list, data, defaultConfig);
+export const fetchOneNotificationsSettings = createAsyncThunk(
+  'notificationsSettings/fetchOne',
+  async (notificationsSettingsId: number) => {
+    const response = await getRequest(
+      `${endpoints.notificationsSettings.list}/${notificationsSettingsId}`,
+      defaultConfig
+    );
 
-  return response.data;
-});
+    return response.data;
+  }
+);
+
+export const createNotificationsSettings = createAsyncThunk(
+  'notificationsSettings/create',
+  async (data: any) => {
+    const response = await postRequest(endpoints.notificationsSettings.list, data, defaultConfig);
+
+    return response.data;
+  }
+);
 
 export const editNotificationsSettings = createAsyncThunk(
   'notificationsSettings/edit',
-  async (payload : {notificationsSettingsId: number, data: INotificationsSettingsRequest}) => {
-    const { notificationsSettingsId, data} = payload
+  async (payload: { notificationsSettingsId: number; data: any }) => {
+    const { notificationsSettingsId, data } = payload;
     const response = await putRequest(
       `${endpoints.notificationsSettings.list}/${notificationsSettingsId}`,
       data,
@@ -45,11 +53,17 @@ export const editNotificationsSettings = createAsyncThunk(
   }
 );
 
-export const deleteNotificationsSettings = createAsyncThunk('notificationsSettings/delete', async (notificationsSettingsId: number) => {
-  const response = await deleteRequest(`${endpoints.notificationsSettings.list}/${notificationsSettingsId}`, defaultConfig);
+export const deleteNotificationsSettings = createAsyncThunk(
+  'notificationsSettings/delete',
+  async (notificationsSettingsId: number) => {
+    const response = await deleteRequest(
+      `${endpoints.notificationsSettings.list}/${notificationsSettingsId}`,
+      defaultConfig
+    );
 
-  return response.data;
-});
+    return response.data;
+  }
+);
 
 const notificationsSettingsSlice = createSlice({
   name: 'notificationsSettings',
@@ -127,7 +141,7 @@ const notificationsSettingsSlice = createSlice({
       .addCase(deleteNotificationsSettings.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
+      });
   },
 });
 export const { setNotificationsSettings } = notificationsSettingsSlice.actions;

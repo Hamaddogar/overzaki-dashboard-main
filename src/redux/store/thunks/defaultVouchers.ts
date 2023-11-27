@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { IVouchersRequest } from 'src/types/request/vouchers';
+// import { IVouchersRequest } from 'src/types/request/vouchers';
 import {
   getRequest,
   endpoints,
@@ -10,24 +10,19 @@ import {
   IRequest,
 } from 'src/utils/axios';
 
-
 export const fetchVouchersList = createAsyncThunk('voucher/fetchList', async () => {
-
   const response = await getRequest(`${endpoints.voucher.list}`, defaultConfig);
 
   return response;
 });
 
-export const fetchOneVoucher = createAsyncThunk(
-  'voucher/fetchOne',
-  async (voucherId: number) => {
-    const response = await getRequest(`${endpoints.voucher.list}/${voucherId}`, defaultConfig);
+export const fetchOneVoucher = createAsyncThunk('voucher/fetchOne', async (voucherId: number) => {
+  const response = await getRequest(`${endpoints.voucher.list}/${voucherId}`, defaultConfig);
 
-    return response.data;
-  }
-);
+  return response.data;
+});
 
-export const createVoucher = createAsyncThunk('voucher/create', async (data: IVouchersRequest) => {
+export const createVoucher = createAsyncThunk('voucher/create', async (data: any) => {
   const response = await postRequest(endpoints.voucher.list, data, defaultConfig);
 
   return response.data;
@@ -35,8 +30,8 @@ export const createVoucher = createAsyncThunk('voucher/create', async (data: IVo
 
 export const editVoucher = createAsyncThunk(
   'voucher/edit',
-  async (payload : {voucherId: number, data: IVouchersRequest}) => {
-    const { voucherId, data} = payload
+  async (payload: { voucherId: number; data: any }) => {
+    const { voucherId, data } = payload;
     const response = await putRequest(
       `${endpoints.voucher.list}/${voucherId}`,
       data,
@@ -74,7 +69,6 @@ const voucherSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchVouchersList.fulfilled, (state, action) => {
-
         state.loading = false;
         state.list = action.payload;
       })
@@ -130,7 +124,7 @@ const voucherSlice = createSlice({
       .addCase(deleteVoucher.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
+      });
   },
 });
 export const { setVoucher } = voucherSlice.actions;

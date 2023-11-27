@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { IInvoiceSettingsRequest } from 'src/types/request/invoiceSettings';
+// import { IInvoiceSettingsRequest } from 'src/types/request/invoiceSettings';
 import {
   getRequest,
   endpoints,
@@ -9,9 +9,7 @@ import {
   deleteRequest,
 } from 'src/utils/axios';
 
-
 export const fetchInvoiceSettingsList = createAsyncThunk('invoiceSettings/fetchList', async () => {
-
   const response = await getRequest(`${endpoints.invoiceSettings.list}`, defaultConfig);
 
   return response;
@@ -20,22 +18,28 @@ export const fetchInvoiceSettingsList = createAsyncThunk('invoiceSettings/fetchL
 export const fetchOneInvoiceSettings = createAsyncThunk(
   'invoiceSettings/fetchOne',
   async (invoiceSettingsId: number) => {
-    const response = await getRequest(`${endpoints.invoiceSettings.list}/${invoiceSettingsId}`, defaultConfig);
+    const response = await getRequest(
+      `${endpoints.invoiceSettings.list}/${invoiceSettingsId}`,
+      defaultConfig
+    );
 
     return response.data;
   }
 );
 
-export const createInvoiceSettings = createAsyncThunk('invoiceSettings/create', async (data: IInvoiceSettingsRequest) => {
-  const response = await postRequest(endpoints.invoiceSettings.list, data, defaultConfig);
+export const createInvoiceSettings = createAsyncThunk(
+  'invoiceSettings/create',
+  async (data: any) => {
+    const response = await postRequest(endpoints.invoiceSettings.list, data, defaultConfig);
 
-  return response.data;
-});
+    return response.data;
+  }
+);
 
 export const editInvoiceSettings = createAsyncThunk(
   'invoiceSettings/edit',
-  async (payload : {invoiceSettingsId: number, data: IInvoiceSettingsRequest}) => {
-    const { invoiceSettingsId, data} = payload
+  async (payload: { invoiceSettingsId: number; data: any }) => {
+    const { invoiceSettingsId, data } = payload;
     const response = await putRequest(
       `${endpoints.invoiceSettings.list}/${invoiceSettingsId}`,
       data,
@@ -46,11 +50,17 @@ export const editInvoiceSettings = createAsyncThunk(
   }
 );
 
-export const deleteInvoiceSettings = createAsyncThunk('invoiceSettings/delete', async (invoiceSettingsId: number) => {
-  const response = await deleteRequest(`${endpoints.invoiceSettings.list}/${invoiceSettingsId}`, defaultConfig);
+export const deleteInvoiceSettings = createAsyncThunk(
+  'invoiceSettings/delete',
+  async (invoiceSettingsId: number) => {
+    const response = await deleteRequest(
+      `${endpoints.invoiceSettings.list}/${invoiceSettingsId}`,
+      defaultConfig
+    );
 
-  return response.data;
-});
+    return response.data;
+  }
+);
 
 const invoiceSettingsSlice = createSlice({
   name: 'invoiceSettings',
@@ -73,7 +83,6 @@ const invoiceSettingsSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchInvoiceSettingsList.fulfilled, (state, action) => {
-
         state.loading = false;
         state.list = action.payload;
       })
@@ -129,7 +138,7 @@ const invoiceSettingsSlice = createSlice({
       .addCase(deleteInvoiceSettings.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
+      });
   },
 });
 export const { setInvoiceSettings } = invoiceSettingsSlice.actions;

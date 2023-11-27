@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { IAccountDetailsRequest } from 'src/types/request/accountDetails';
+// import { IAccountDetailsRequest } from 'src/types/request/accountDetails';
 import {
   getRequest,
   endpoints,
@@ -9,9 +9,7 @@ import {
   deleteRequest,
 } from 'src/utils/axios';
 
-
 export const fetchAccountDetailssList = createAsyncThunk('accountDetails/fetchList', async () => {
-
   const response = await getRequest(`${endpoints.accountDetails.list}`, defaultConfig);
 
   return response;
@@ -20,13 +18,16 @@ export const fetchAccountDetailssList = createAsyncThunk('accountDetails/fetchLi
 export const fetchOneAccountDetails = createAsyncThunk(
   'accountDetails/fetchOne',
   async (accountDetailsId: number) => {
-    const response = await getRequest(`${endpoints.accountDetails.list}/${accountDetailsId}`, defaultConfig);
+    const response = await getRequest(
+      `${endpoints.accountDetails.list}/${accountDetailsId}`,
+      defaultConfig
+    );
 
     return response.data;
   }
 );
 
-export const createAccountDetails = createAsyncThunk('accountDetails/create', async (data: IAccountDetailsRequest) => {
+export const createAccountDetails = createAsyncThunk('accountDetails/create', async (data: any) => {
   const response = await postRequest(endpoints.accountDetails.list, data, defaultConfig);
 
   return response.data;
@@ -34,8 +35,8 @@ export const createAccountDetails = createAsyncThunk('accountDetails/create', as
 
 export const editAccountDetails = createAsyncThunk(
   'accountDetails/edit',
-  async (payload : {accountDetailsId: number, data: IAccountDetailsRequest}) => {
-    const { accountDetailsId, data} = payload
+  async (payload: { accountDetailsId: number; data: any }) => {
+    const { accountDetailsId, data } = payload;
     const response = await putRequest(
       `${endpoints.accountDetails.list}/${accountDetailsId}`,
       data,
@@ -46,11 +47,17 @@ export const editAccountDetails = createAsyncThunk(
   }
 );
 
-export const deleteAccountDetails = createAsyncThunk('accountDetails/delete', async (accountDetailsId: number) => {
-  const response = await deleteRequest(`${endpoints.accountDetails.list}/${accountDetailsId}`, defaultConfig);
+export const deleteAccountDetails = createAsyncThunk(
+  'accountDetails/delete',
+  async (accountDetailsId: number) => {
+    const response = await deleteRequest(
+      `${endpoints.accountDetails.list}/${accountDetailsId}`,
+      defaultConfig
+    );
 
-  return response.data;
-});
+    return response.data;
+  }
+);
 
 const accountDetailsSlice = createSlice({
   name: 'accountDetails',
@@ -73,7 +80,6 @@ const accountDetailsSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchAccountDetailssList.fulfilled, (state, action) => {
-
         state.loading = false;
         state.list = action.payload;
       })
@@ -129,7 +135,7 @@ const accountDetailsSlice = createSlice({
       .addCase(deleteAccountDetails.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
+      });
   },
 });
 export const { setAccountDetails } = accountDetailsSlice.actions;

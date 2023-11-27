@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { ILocationRequest } from 'src/types/request/locations';
+// import { ILocationRequest } from 'src/types/request/locations';
 import {
   getRequest,
   endpoints,
@@ -9,9 +9,7 @@ import {
   deleteRequest,
 } from 'src/utils/axios';
 
-
 export const fetchLocationsList = createAsyncThunk('location/fetchList', async () => {
-
   const response = await getRequest(`${endpoints.location.list}`, defaultConfig);
 
   return response;
@@ -26,7 +24,7 @@ export const fetchOneLocation = createAsyncThunk(
   }
 );
 
-export const createLocation = createAsyncThunk('location/create', async (data: ILocationRequest) => {
+export const createLocation = createAsyncThunk('location/create', async (data: any) => {
   const response = await postRequest(endpoints.location.list, data, defaultConfig);
 
   return response.data;
@@ -34,8 +32,8 @@ export const createLocation = createAsyncThunk('location/create', async (data: I
 
 export const editLocation = createAsyncThunk(
   'location/edit',
-  async (payload : {locationId: number, data: ILocationRequest}) => {
-    const { locationId, data} = payload
+  async (payload: { locationId: number; data: any }) => {
+    const { locationId, data } = payload;
     const response = await putRequest(
       `${endpoints.location.list}/${locationId}`,
       data,
@@ -73,7 +71,6 @@ const locationSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchLocationsList.fulfilled, (state, action) => {
-
         state.loading = false;
         state.list = action.payload;
       })
@@ -129,7 +126,7 @@ const locationSlice = createSlice({
       .addCase(deleteLocation.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
+      });
   },
 });
 export const { setLocation } = locationSlice.actions;
