@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-shadow */
 
 'use client';
@@ -20,6 +21,7 @@ import { useSnackbar } from 'notistack';
 import { _orders, allCustomers } from 'src/_mock';
 // utils
 import { fTimestamp } from 'src/utils/format-time';
+import { useBoolean } from 'src/hooks/use-boolean';
 // components
 import { UploadAvatar } from 'src/components/upload';
 import { BottomActions } from 'src/components/bottom-actions';
@@ -39,7 +41,7 @@ import CustomersTableToolbar from '../customers-toolbar';
 import CustomersTableFiltersResult from '../customers-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
 import CountrySelect from './CountryField';
-import { createCustomer, fetchCustomersList } from '../../../redux/store/thunks/customers';
+import { createCustomer, deleteCustomer, editCustomer, fetchCustomersList, fetchOneCustomer, setCustomer } from '../../../redux/store/thunks/customers';
 
 
 
@@ -69,8 +71,11 @@ export default function OrdersListView() {
   const { enqueueSnackbar } = useSnackbar();
 
   const loadStatus = useSelector((state: any) => state.customers.status);
-
   const { list, loading, error, customer } = useSelector((state: any) => state.customers);
+
+  const [editId, setEditId] = useState(null);
+  const [removeData, setRemoveData] = useState<any>(null)
+  const confirm = useBoolean();
 
 
   const table = useTable({ defaultOrderBy: 'orderNumber' });
@@ -100,7 +105,33 @@ export default function OrdersListView() {
 
   useEffect(() => {
     setData(list || [])
-  }, [list])
+  }, [list]);
+
+  // reseting removeData value
+  useEffect(() => {
+    if (!confirm.value) {
+      setRemoveData(null)
+    }
+  }, [confirm])
+
+  // Edit customer
+  useEffect(() => {
+    if (customer) {
+      if (customer)
+        setCustomerData({
+          avatar: customer.avatar,
+          email: customer.email,
+          firstName: customer.firstName,
+          gender: customer.gender,
+          lastName: customer.lastName,
+          phoneNumber: customer.phoneNumber,
+          country: customer.country,
+          location: customer.location && customer.location.length > 0 ? customer.location[0] : null
+        })
+    } else {
+      setCustomerData(null)
+    }
+  }, [customer])
 
 
 
@@ -130,7 +161,7 @@ export default function OrdersListView() {
           FormValues.append('avatar', customerData.avatar);
         } else if (key === "location") {
           FormValues.append(`${key}[0]`, customerData[key]);
-        } else {
+        } else if (key !== "location" && key !== 'avatar') {
           FormValues.append(key, customerData[key]);
         }
       });
@@ -143,6 +174,42 @@ export default function OrdersListView() {
           setCustomerData(null);
           dispatch(fetchCustomersList(error));
           enqueueSnackbar('Successfully Created!', { variant: 'success' });
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    }
+  }
+
+  const editCustomerFun = () => {
+    const FormValues: any = new FormData();
+    Object?.keys(customerData).forEach((key) => {
+      if (key === 'avatar' && (typeof customerData[key] !== 'string' || !customerData[key].startsWith('https://'))) {
+        FormValues.append('avatar', customerData.avatar);
+      } else if (key === "location") {
+        FormValues.append(`${key}[0]`, customerData[key]);
+      } else if (key !== "location" && key !== 'avatar') {
+        FormValues.append(key, customerData[key]);
+      }
+    });
+    FormValues.append('deviceToken', "only for android and ios app. Edited");
+    dispatch(editCustomer({ customerId: editId, data: FormValues })).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        dispatch(fetchCustomersList(error));
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  }
+
+  const removeCustomerFun = () => {
+    if (removeData && removeData.type === "customer") {
+      dispatch(deleteCustomer(removeData.id)).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          dispatch(fetchCustomersList(error));
+          enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
+          confirm.onFalse();
         } else {
           enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
         }
@@ -207,8 +274,17 @@ export default function OrdersListView() {
   const [openCreateCustomer, setOpenCreateCustomer] = useState(false);
   const [openAnalytics, setOpenAnalytics] = useState(false);
 
-  const toggleDrawerCommon = (state: string) => (event: React.SyntheticEvent | React.MouseEvent) => {
-    if (state === "new") setOpenCreateCustomer(pv => !pv)
+  const toggleDrawerCommon = (state: string, id: any = null) => (event: React.SyntheticEvent | React.MouseEvent) => {
+    if (state === "createOrEdit") {
+      setOpenCreateCustomer(pv => !pv);
+      setEditId(id)
+      if (id) {
+        dispatch(fetchOneCustomer(id));
+      } else {
+        setCustomerData({});
+        dispatch(setCustomer(null));
+      }
+    }
     else if (state === "details") setOpenDetails(pv => !pv)
     else if (state === "analytics") setOpenAnalytics(pv => !pv)
   };
@@ -220,7 +296,7 @@ export default function OrdersListView() {
         (event as React.KeyboardEvent).key === 'Shift')
     ) { return; }
 
-    if (state === "new") setOpenCreateCustomer(false)
+    if (state === "createOrEdit") setOpenCreateCustomer(false)
     else if (state === "details") setOpenDetails(false)
     else if (state === "analytics") setOpenAnalytics(false)
   };
@@ -236,7 +312,7 @@ export default function OrdersListView() {
           <BottomActions>
             <Stack direction={{ xs: 'column', sm: 'row' }} alignItems='center' justifyContent={{ xs: 'flex-start', sm: 'flex-end' }} spacing={{ xs: '10px', sm: '20px' }} sx={{ width: '100%', }}>
               <Button startIcon={<Box component='img' src='/raw/orderreport.svg' />} fullWidth sx={{ borderRadius: '30px', color: '#8688A3', backgroundColor: '#F0F0F4' }} component='h5' variant='contained' onClick={toggleDrawerCommon('analytics')}> Analytics </Button>
-              <Button startIcon="+" fullWidth sx={{ borderRadius: '30px', color: '#0F1349' }} component='h5' variant='contained' color='primary' onClick={toggleDrawerCommon('new')} > Add Customer </Button>
+              <Button startIcon="+" fullWidth sx={{ borderRadius: '30px', color: '#0F1349' }} component='h5' variant='contained' color='primary' onClick={toggleDrawerCommon('createOrEdit')} > Add Customer </Button>
             </Stack>
           </BottomActions>
         </Grid>
@@ -317,7 +393,7 @@ export default function OrdersListView() {
                 <Grid container spacing={2}>
                   {data.map((itemObj: any, indx: any) =>
                     <Grid key={indx} item xs={12}>
-                      <Paper elevation={4} onClick={toggleDrawerCommon('details')} sx={{ cursor: 'pointer', border: '2px solid #FFFFFF', '&:hover': { borderColor: '#1BFCB6' } }} >
+                      <Paper elevation={4} sx={{ cursor: 'pointer', border: '2px solid #FFFFFF', '&:hover': { borderColor: '#1BFCB6' } }} >
                         <Grid container item alignItems='center' justifyContent='space-between' rowGap={3} sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '80px' }}>
 
                           <Grid item xs={6} md='auto' >
@@ -357,12 +433,12 @@ export default function OrdersListView() {
 
                           <Grid item xs='auto' textAlign='right'>
                             <Iconify icon="carbon:delete" sx={{ height: "60px" }} onClick={() => {
-                              // setRemoveData({ type: 'category', id: category._id });
-                              // confirm.onTrue();
+                              setRemoveData({ type: 'customer', id: itemObj._id });
+                              confirm.onTrue();
                             }} /> &nbsp; &nbsp; &nbsp;
                             <Iconify icon="bx:edit"
                               sx={{ height: "60px" }}
-                            // onClick={toggleDrawerCommon('cat', category._id)}
+                              onClick={toggleDrawerCommon('createOrEdit', itemObj._id)}
                             />
                           </Grid>
 
@@ -478,27 +554,36 @@ export default function OrdersListView() {
             {/* new customer */}
             <DetailsNavBar
               open={openCreateCustomer}
-              onClose={handleDrawerCloseCommon('new')}
-              title="Add New Customer"
+              onClose={handleDrawerCloseCommon('createOrEdit')}
+              title={editId ? "Edit Customer" : "Add New Customer"}
               actions={<Stack alignItems='center' justifyContent='center' spacing="10px">
                 <Button
                   fullWidth
                   variant="soft"
-                  onClick={createCustomerFun}
+                  onClick={editId ? editCustomerFun : createCustomerFun}
                   color="success"
                   size="large"
                   sx={{ borderRadius: '30px' }}
                 >
-                  Save
+                  {editId ? "Update" : "Save"}
                 </Button>
               </Stack>}
             >
               <Divider flexItem />
               <Box width='100%'>
                 <UploadAvatar
-                  file={customerData?.avatar ? Object.assign(customerData?.avatar, {
-                    preview: URL.createObjectURL(customerData?.avatar),
-                  }) : null}
+                  // file={customerData?.avatar ?
+                  //   (Object.assign(customerData?.avatar, {
+                  //     preview: URL.createObjectURL(customerData?.avatar),
+                  //   }))
+                  //   : null}
+                  file={customerData?.avatar && typeof customerData?.avatar === 'string' ?
+                    customerData.avatar :
+                    (customerData?.avatar ?
+                      (Object.assign(customerData.avatar, {
+                        preview: URL.createObjectURL(customerData.avatar),
+                      }))
+                      : null)}
                   onDrop={handleDropAvatar}
                 />
 
@@ -708,6 +793,30 @@ export default function OrdersListView() {
           </Box>
         </Grid>
       </Grid >
+      {/* remove Customer */}
+      <ConfirmDialog
+        open={confirm.value}
+        onClose={confirm.onFalse}
+        noCancel={false}
+        title="Delete"
+        content={
+          <>
+            Are you sure want to delete items?
+          </>
+        }
+        action={<Button
+          fullWidth
+          color="error"
+          variant='soft'
+          size="large"
+
+          onClick={removeCustomerFun}
+          sx={{ borderRadius: '30px' }}
+        >
+          Delete
+        </Button>}
+
+      />
     </Container >
   );
 }

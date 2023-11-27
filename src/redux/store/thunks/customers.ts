@@ -32,17 +32,11 @@ export const fetchCustomersList = createAsyncThunk(
   }
 );
 
-export const fetchOneCustomer = createAsyncThunk(
-  'customers/fetchOne',
-  async (customerId: number) => {
-    const response = await getRequest(
-      `https://fakestoreapi.com/products/${customerId}`,
-      defaultConfig
-    );
-    console.log('customerId....', customerId);
-    return response.data;
-  }
-);
+export const fetchOneCustomer = createAsyncThunk('customers/fetchOne', async (customerId: any) => {
+  const response = await getRequest(`${endpoints.customer.list}/${customerId}`, defaultConfig);
+  console.log('customerId....', customerId);
+  return response.data;
+});
 
 export const createCustomer = createAsyncThunk('customers/create', async (data: ICustomerForm) => {
   defaultConfig.headers['Content-Type'] = 'multipart/form-data';
@@ -53,7 +47,8 @@ export const createCustomer = createAsyncThunk('customers/create', async (data: 
 
 export const editCustomer = createAsyncThunk(
   'customers/edit',
-  async (payload: { customerId: number; data: ICustomerForm }) => {
+  async (payload: { customerId: any; data: ICustomerForm }) => {
+    defaultConfig.headers['Content-Type'] = 'multipart/form-data';
     const { customerId, data } = payload;
     const response = await putRequest(
       `${endpoints.customer.list}/${customerId}`,
@@ -75,7 +70,7 @@ const customersSlice = createSlice({
   name: 'customers',
   initialState: {
     list: [],
-    customer: null,
+    customer: null as any,
     loading: false,
     error: null as string | null,
     status: 'idle',
