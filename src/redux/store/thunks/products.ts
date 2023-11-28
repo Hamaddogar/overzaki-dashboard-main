@@ -41,7 +41,8 @@ export const createProduct = createAsyncThunk('products/create', async (data: an
 
 export const editProduct = createAsyncThunk(
   'products/edit',
-  async (payload: { productId: number; data: IProductsForm }) => {
+  async (payload: { productId: any; data: any }) => {
+    defaultConfig.headers['Content-Type'] = 'multipart/form-data';
     const { productId, data } = payload;
     const response = await putRequest(
       `${endpoints.product.list}/${productId}`,

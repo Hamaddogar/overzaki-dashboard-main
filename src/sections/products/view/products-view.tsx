@@ -29,7 +29,7 @@ import { useSnackbar } from 'notistack';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { UploadBox } from 'src/components/upload';
-import { createProduct, fetchOneProduct, fetchProductsList, setProduct } from 'src/redux/store/thunks/products';
+import { createProduct, deleteProduct, editProduct, fetchOneProduct, fetchProductsList, setProduct } from 'src/redux/store/thunks/products';
 // components
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
@@ -69,30 +69,54 @@ export default function OrdersListView() {
 
 
   const [productData, setProductData] = useState<any>({});
-  const [editProductId, setEditProductId] = useState(null);
-
+  const [editProductId, setEditProductId] = useState<any>(null);
+  const [removeData, setRemoveData] = useState<any>(null)
 
   const settings = useSettingsContext();
 
-  const [value, setValue] = useState('All');
+  const [value, setValue] = useState<any>('All');
 
   const confirm = useBoolean();
 
-  const [data, setData] = useState(list)
+  const [data, setData] = useState([]);
 
 
   useEffect(() => {
     if (loadStatus === 'idle') {
       dispatch(fetchProductsList(error)).then((response: any) => {
-        console.log("list", list);
-        // setData(list)
+        console.log("list", list);;
       });
     }
+    setValue('All');
+    setData(list || [])
   }, [loadStatus, dispatch, error, list]);
+
+  // reseting removeData value
+  useEffect(() => {
+    if (!confirm.value) {
+      setRemoveData(null)
+    }
+  }, [confirm])
 
   useEffect(() => {
     if (product) {
-      setProductData(product)
+      const newProduct = {
+        name: {
+          en: product.name,
+          ar: "",
+        },
+        categoryId: product.categoryId,
+        subCategory: product.subCategory,
+        price: product.price,
+        images: product.images,
+        description: {
+          en: product.description,
+          ar: "",
+        },
+        quantity: product.quantity,
+        publish_app: product.publish_app,
+      }
+      setProductData(newProduct)
     } else {
       setProductData(null)
     }
@@ -113,9 +137,10 @@ export default function OrdersListView() {
   useEffect(() => {
     setProductData((prevData: any) => ({
       ...prevData,
-      subCategory: null,
+      subCategory: product?.subCategory || null,
     }));
-  }, [productData?.categoryId]);
+
+  }, [productData?.categoryId, product]);
 
 
 
@@ -153,18 +178,21 @@ export default function OrdersListView() {
       setProductData((prevData: any) => (
         {
           ...prevData,
-          // images: prevData.images ? [...prevData.images, files[0]] : [files[0]]
-          images: files[0]
+          images: prevData.images ? [...prevData.images, files[0]] : [files[0]]
+          // images: files[0]
         }
       ));
     }
   }
   const handleRemoveImage = (index: any) => {
+    console.log(index);
+
     setProductData((current: any) => {
       const { images, ...rest } = current;
-      // const updatedImages = images.filter((_: any, i: any) => i !== index);
+      const updatedImages = images.filter((_: any, i: any) => i !== index);
       return {
         ...rest,
+        images: updatedImages
       };
     })
   }
@@ -182,24 +210,33 @@ export default function OrdersListView() {
       }
     });
   }
+  const editProductFun = () => {
 
+    const formData = convertStateToFormData(productData);
+    dispatch(editProduct({ productId: editProductId, data: formData })).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        setProductData(null);
+        dispatch(fetchProductsList(error));
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  const removeProductFun = () => {
+    if (removeData) {
+      dispatch(deleteProduct(removeData)).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          dispatch(fetchProductsList(error));
+          enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
+          confirm.onFalse();
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    }
+  }
 
 
 
@@ -215,10 +252,17 @@ export default function OrdersListView() {
           formData.append(`${key}[${nestedKey}]`, nestedValue);
         });
       } else if (Array.isArray(value)) {
-        // If the value is an array, assume it's a file input
-        value.forEach((file: any, index: any) => {
-          formData.append(`${key}[${index}]`, file);
-        });
+        if (key === 'images') {
+          const newImages = value.filter((file) => typeof file !== 'string');
+          newImages.forEach((file: any, index: any) => {
+            formData.append(`${key}`, file);
+          });
+        } else {
+          // If the value is an array, assume it's a file input
+          value.forEach((file: any, index: any) => {
+            formData.append(`${key}[${index}]`, file);
+          });
+        }
       } else {
         // For other types of values
         formData.append(key, value);
@@ -269,7 +313,7 @@ export default function OrdersListView() {
     if (state === "new") setOpenDetails(false)
   };
 
-  const imagesItrations = Array.from({ length: 1 }, (_, index) => index);
+  const imagesItrations = Array.from({ length: 3 }, (_, index) => index);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -318,9 +362,9 @@ export default function OrdersListView() {
                         variant={
                           ((value === 'All') && 'filled') || 'outlined'
                         }
-                        color='success'
+                        color='primary'
                       >
-                        {value === 'All' && list.length}
+                        {list.length}
                       </Label>
                     }
                   />
@@ -380,9 +424,10 @@ export default function OrdersListView() {
                               <Typography component='p' variant="subtitle2" sx={{ fontSize: '.8rem', fontWeight: 800 }} > {product.price} KWD </Typography>
                               &nbsp; &nbsp;
                               <Iconify icon="carbon:delete" onClick={() => {
+                                setRemoveData(product._id)
                                 confirm.onTrue();
                               }} style={{ cursor: 'pointer' }} /> &nbsp; &nbsp;
-                              <Iconify icon="bx:edit" onClick={toggleDrawerCommon('new')} style={{ cursor: 'pointer' }} />
+                              <Iconify icon="bx:edit" onClick={toggleDrawerCommon('new', product._id)} style={{ cursor: 'pointer' }} />
                             </Box>
                           </Grid>
 
@@ -392,149 +437,6 @@ export default function OrdersListView() {
                   )}
                 </Grid>
               </TabPanel>
-              {/* <TabPanel value='Watches' sx={{ px: 0, }}>
-                <Grid container spacing={2}>
-                  {data.map((product: any, indx: any) =>
-                    <Grid key={indx} item xs={12}>
-                      <Paper elevation={4}>
-                        <Grid container item alignItems='center' justifyContent='space-between' rowGap={3} sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}>
-
-                          <Grid item xs={12} md={6} >
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px'
-                              }}
-                            >
-                              <Box component='img' src={product.img} alt=" " width='60px' />
-                              <Box display='flex' gap='0px' flexDirection='column' >
-                                <Typography component='p' noWrap variant="subtitle2" sx={{ fontSize: '.9rem', fontWeight: 800, maxWidth: { xs: '100%', md: '188px' } }} > {product.name} </Typography>
-                                <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '100%', md: '188px' } }} >{product.mainCat}</Typography>
-                              </Box>
-                            </Box>
-                          </Grid>
-
-                          <Grid item xs={12} md={6} >
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                justifyContent: { xs: 'flex-start', md: 'flex-end' }
-                              }}
-                            >
-                              <Typography component='p' variant="subtitle2" sx={{ fontSize: '.8rem', fontWeight: 800 }} > {product.price} KWD </Typography>
-                              &nbsp; &nbsp;
-                              <Iconify icon="carbon:delete" onClick={() => {
-                                confirm.onTrue();
-                              }} style={{ cursor: 'pointer' }} /> &nbsp; &nbsp;
-                              <Iconify icon="bx:edit" onClick={toggleDrawerCommon('new')} style={{ cursor: 'pointer' }} />
-                            </Box>
-                          </Grid>
-
-                        </Grid>
-                      </Paper>
-                    </Grid>
-                  )}
-                </Grid>
-
-              </TabPanel>
-              <TabPanel value='Laptops' sx={{ px: 0, }}>
-                <Grid container spacing={2}>
-                  {data.map((product: any, indx: any) =>
-                    <Grid key={indx} item xs={12}>
-                      <Paper elevation={4}>
-                        <Grid container item alignItems='center' justifyContent='space-between' rowGap={3} sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}>
-
-                          <Grid item xs={12} md={6} >
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px'
-                              }}
-                            >
-                              <Box component='img' src={product.img} alt=" " width='60px' />
-                              <Box display='flex' gap='0px' flexDirection='column' >
-                                <Typography component='p' noWrap variant="subtitle2" sx={{ fontSize: '.9rem', fontWeight: 800, maxWidth: { xs: '100%', md: '188px' } }} > {product.name} </Typography>
-                                <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '100%', md: '188px' } }} >{product.mainCat}</Typography>
-                              </Box>
-                            </Box>
-                          </Grid>
-
-                          <Grid item xs={12} md={6} >
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                justifyContent: { xs: 'flex-start', md: 'flex-end' }
-                              }}
-                            >
-                              <Typography component='p' variant="subtitle2" sx={{ fontSize: '.8rem', fontWeight: 800 }} > {product.price} KWD </Typography>
-                              &nbsp; &nbsp;
-                              <Iconify icon="carbon:delete" onClick={() => {
-                                confirm.onTrue();
-                              }} style={{ cursor: 'pointer' }} /> &nbsp; &nbsp;
-                              <Iconify icon="bx:edit" onClick={toggleDrawerCommon('new')} style={{ cursor: 'pointer' }} />
-                            </Box>
-                          </Grid>
-
-                        </Grid>
-                      </Paper>
-                    </Grid>
-                  )}
-                </Grid>
-              </TabPanel>
-              <TabPanel value='Mobiles' sx={{ px: 0, }}>
-                <Grid container spacing={2}>
-                  {data.map((product: any, indx: any) =>
-                    <Grid key={indx} item xs={12}>
-                      <Paper elevation={4}>
-                        <Grid container item alignItems='center' justifyContent='space-between' rowGap={3} sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}>
-
-                          <Grid item xs={12} md={6} >
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px'
-                              }}
-                            >
-                              <Box component='img' src={product.img} alt=" " width='60px' />
-                              <Box display='flex' gap='0px' flexDirection='column' >
-                                <Typography component='p' noWrap variant="subtitle2" sx={{ fontSize: '.9rem', fontWeight: 800, maxWidth: { xs: '100%', md: '188px' } }} > {product.name} </Typography>
-                                <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '100%', md: '188px' } }} >{product.mainCat}</Typography>
-                              </Box>
-                            </Box>
-                          </Grid>
-
-                          <Grid item xs={12} md={6} >
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                justifyContent: { xs: 'flex-start', md: 'flex-end' }
-                              }}
-                            >
-                              <Typography component='p' variant="subtitle2" sx={{ fontSize: '.8rem', fontWeight: 800 }} > {product.price} KWD </Typography>
-                              &nbsp; &nbsp;
-                              <Iconify icon="carbon:delete" onClick={() => {
-                                confirm.onTrue();
-                              }} style={{ cursor: 'pointer' }} /> &nbsp; &nbsp;
-                              <Iconify icon="bx:edit" onClick={toggleDrawerCommon('new')} style={{ cursor: 'pointer' }} />
-                            </Box>
-                          </Grid>
-
-                        </Grid>
-                      </Paper>
-                    </Grid>
-                  )}
-                </Grid>
-
-              </TabPanel> */}
 
             </TabContext>
 
@@ -546,17 +448,17 @@ export default function OrdersListView() {
       <DetailsNavBar
         open={openDetails}
         onClose={handleDrawerCloseCommon('new')}
-        title="Add New Product"
+        title={editProductId ? "Edit Product" : "Add New Product"}
         actions={<Stack alignItems='center' justifyContent='center' spacing="10px">
           <Button
             fullWidth
             variant="soft"
             color="success"
             size="large"
-            onClick={createProductFun}
+            onClick={editProductId ? editProductFun : createProductFun}
             sx={{ borderRadius: '30px' }}
           >
-            Save
+            {editProductId ? "Update" : "Save"}
           </Button>
         </Stack>}
       >
@@ -585,8 +487,8 @@ export default function OrdersListView() {
             {imagesItrations.map((itration: any, ind: any) => {
               return (
                 <Box key={ind}>
-                  {/* {productData?.images?.length > 0 && productData?.images[itration] ? ( */}
-                  {productData?.images ? (
+                  {/* {productData?.images ? ( */}
+                  {productData?.images?.length > 0 && productData?.images[itration] ? (
                     <Box sx={{
                       width: '100px', height: '100px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
@@ -594,11 +496,11 @@ export default function OrdersListView() {
                       position: 'relative', overflow: "hidden"
                     }}>
                       <Box component='img'
-                        // src={typeof productData?.images[itration] === 'string' ? productData?.images[itration] : URL.createObjectURL(productData?.images[itration])}
-                        src={typeof productData?.images === 'string' ? productData?.images : URL.createObjectURL(productData?.images)}
+                        src={typeof productData?.images[itration] === 'string' ? productData?.images[itration] : URL.createObjectURL(productData?.images[itration])}
+                        // src={typeof productData?.images === 'string' ? productData?.images : URL.createObjectURL(productData?.images)}
                         alt=''
                         sx={{ maxHeight: "95px" }} />
-                      <Box onClick={() => handleRemoveImage(ind)} sx={{ backgroundColor: 'rgb(134, 136, 163,.09)', padding: '10px 11px 7px 11px', borderRadius: '36px', cursor: "pointer", position: 'absolute', top: 0, right: 0 }}>
+                      <Box onClick={() => handleRemoveImage(itration)} sx={{ backgroundColor: 'rgb(134, 136, 163,.09)', padding: '10px 11px 7px 11px', borderRadius: '36px', cursor: "pointer", position: 'absolute', top: 0, right: 0 }}>
                         <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
                       </Box>
                     </Box>
@@ -769,7 +671,7 @@ export default function OrdersListView() {
               Published
             </Typography>
             <Switch size="medium"
-              value={productData?.publish_app || false}
+              checked={productData?.publish_app || false}
               onChange={(e: any) => setProductData({ ...productData, publish_app: e.target.checked })}
             />
           </Stack>
@@ -833,7 +735,7 @@ export default function OrdersListView() {
           color="error"
           variant='soft'
           size="large"
-          onClick={() => confirm.onFalse()}
+          onClick={removeProductFun}
           sx={{ borderRadius: '30px' }}
         >
           Delete
