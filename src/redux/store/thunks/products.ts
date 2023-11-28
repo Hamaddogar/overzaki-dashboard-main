@@ -20,16 +20,14 @@ export const fetchProductsList = createAsyncThunk('products/fetchList', async ()
   return response.data;
 });
 
-export const fetchOneProduct = createAsyncThunk(
-  'products/fetchOne',
-  async (productId: number) => {
-    const response = await getRequest(`${endpoints.product.list}/${productId}`, defaultConfig);
+export const fetchOneProduct = createAsyncThunk('products/fetchOne', async (productId: number) => {
+  const response = await getRequest(`${endpoints.product.list}/${productId}`, defaultConfig);
 
-    return response.data;
-  }
-);
+  return response.data;
+});
 
 export const createProduct = createAsyncThunk('products/create', async (data: IProductsForm) => {
+  defaultConfig.headers['Content-Type'] = 'multipart/form-data';
   const response = await postRequest(endpoints.product.list, data, defaultConfig);
 
   return response.data;
@@ -37,8 +35,8 @@ export const createProduct = createAsyncThunk('products/create', async (data: IP
 
 export const editProduct = createAsyncThunk(
   'products/edit',
-  async (payload : {productId: number, data: IProductsForm}) => {
-    const { productId, data} = payload
+  async (payload: { productId: number; data: IProductsForm }) => {
+    const { productId, data } = payload;
     const response = await putRequest(
       `${endpoints.product.list}/${productId}`,
       data,
@@ -131,7 +129,7 @@ const productsSlice = createSlice({
       .addCase(deleteProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
+      });
   },
 });
 export const { setProduct } = productsSlice.actions;

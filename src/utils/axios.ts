@@ -100,7 +100,7 @@ export const endpoints = {
     search: '/post/search',
   },
   product: {
-    list: '/product/list',
+    list: '/products',
     details: '/product/details',
     search: '/product/search',
   },

@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 // @mui
 import Divider from '@mui/material/Divider';
 import { alpha } from '@mui/material/styles';
@@ -19,8 +19,12 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from 'src/redux/store/store';
+import { useSnackbar } from 'notistack';
 // _mock
-import { allProducts } from 'src/_mock';
+// import { allProducts } from 'src/_mock';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
@@ -31,8 +35,13 @@ import { BottomActions } from 'src/components/bottom-actions';
 //
 import Label from 'src/components/label/label';
 import Iconify from 'src/components/iconify/iconify';
+
+import { fetchCategorysList, fetchSubCategorysList } from 'src/redux/store/thunks/category';
+
 import DetailsNavBar from '../DetailsNavBar';
 import ProductTableToolbar from '../product-table-toolbar';
+
+
 
 // ----------------------------------------------------------------------
 
@@ -48,20 +57,92 @@ const STATUS_OPTIONS = [
 
 export default function OrdersListView() {
 
+  const dispatch = useDispatch<AppDispatch>();
+  const { enqueueSnackbar } = useSnackbar();
+  const categoryState = useSelector((state: any) => state.category);
+  const loadStatus = useSelector((state: any) => state.products.status);
+  const { list, loading, error, product } = useSelector((state: any) => state.products);
+
+
+  const [productData, setProductData] = useState<any>(null);
+
+
   const settings = useSettingsContext();
 
   const [value, setValue] = useState('All');
 
   const confirm = useBoolean();
 
-  const [data, setData] = useState(allProducts)
+  const [data, setData] = useState(list)
+
+
+  useEffect(() => {
+    if (loadStatus === 'idle') {
+      // dispatch(fetchCustomersList(error)).then((response: any) => {
+      //   console.log(list);
+      //   // setData(list)
+      // });
+    }
+  }, [loadStatus, dispatch, error, list]);
+
+
+
+  useEffect(() => {
+    if (categoryState.status === 'idle') {
+      dispatch(fetchCategorysList(categoryState.error)).then((response: any) => {
+        dispatch(fetchSubCategorysList(categoryState.error));
+      });
+    }
+  }, [categoryState, dispatch]);
+
+
+  useEffect(() => {
+    if (productData && productData.categoryId) {
+      setProductData({ ...productData, subCategory: null })
+    }
+  }, [productData])
+
+
+
+
+
+
+
+
+
+
+
+
+  const handleProductData = (e: any) => {
+    const { name, value } = e.target;
+    setProductData((prevData: any) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  }
+  const handleNestedProductData = (e: any) => {
+    const { name, value } = e.target;
+    const [parentKey, nestedKey] = name.split('.');
+
+    setProductData((prevData: any) => ({
+      ...prevData,
+      [parentKey]: {
+        ...prevData[parentKey],
+        [nestedKey]: value,
+      },
+    }));
+  }
+
+
+
+
 
   const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
     if (newValue === 'All') {
-      setData(allProducts);
+      setData(list);
     } else {
-      const newData = allProducts.filter(order => order.mainCat === newValue)
+      const newData = list.filter((order: any) => order?.category === newValue)
       setData(newData);
     }
   };
@@ -168,13 +249,13 @@ export default function OrdersListView() {
                             'default'
                           }
                         >
-                          {tab.value === 'All' && allProducts.length}
+                          {tab.value === 'All' && list.length}
                           {tab.value === 'Watches' &&
-                            allProducts.filter((order) => order.mainCat === 'Watches').length}
+                            list.filter((order: any) => order.category === 'Watches').length}
                           {tab.value === 'Laptops' &&
-                            allProducts.filter((order) => order.mainCat === 'Laptops').length}
+                            list.filter((order: any) => order.category === 'Laptops').length}
                           {tab.value === 'Mobiles' &&
-                            allProducts.filter((order) => order.mainCat === 'Mobiles').length}
+                            list.filter((order: any) => order.category === 'Mobiles').length}
                         </Label>
                       }
                     />
@@ -184,7 +265,7 @@ export default function OrdersListView() {
 
               <TabPanel value='All' sx={{ px: 0, }}>
                 <Grid container spacing={2}>
-                  {data.map((product, indx) =>
+                  {data.map((product: any, indx: any) =>
                     <Grid key={indx} item xs={12}>
                       <Paper elevation={4}>
                         <Grid container item alignItems='center' justifyContent='space-between' rowGap={3} sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}>
@@ -200,7 +281,7 @@ export default function OrdersListView() {
                               <Box component='img' src={product.img} alt=" " width='60px' />
                               <Box display='flex' gap='0px' flexDirection='column' >
                                 <Typography component='p' noWrap variant="subtitle2" sx={{ fontSize: '.9rem', fontWeight: 800, maxWidth: { xs: '100%', md: '188px' } }} > {product.name} </Typography>
-                                <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '100%', md: '188px' } }} >{product.mainCat}</Typography>
+                                <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '100%', md: '188px' } }} >{product.category}</Typography>
                               </Box>
                             </Box>
                           </Grid>
@@ -231,7 +312,7 @@ export default function OrdersListView() {
               </TabPanel>
               <TabPanel value='Watches' sx={{ px: 0, }}>
                 <Grid container spacing={2}>
-                  {data.map((product, indx) =>
+                  {data.map((product: any, indx: any) =>
                     <Grid key={indx} item xs={12}>
                       <Paper elevation={4}>
                         <Grid container item alignItems='center' justifyContent='space-between' rowGap={3} sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}>
@@ -279,7 +360,7 @@ export default function OrdersListView() {
               </TabPanel>
               <TabPanel value='Laptops' sx={{ px: 0, }}>
                 <Grid container spacing={2}>
-                  {data.map((product, indx) =>
+                  {data.map((product: any, indx: any) =>
                     <Grid key={indx} item xs={12}>
                       <Paper elevation={4}>
                         <Grid container item alignItems='center' justifyContent='space-between' rowGap={3} sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}>
@@ -326,7 +407,7 @@ export default function OrdersListView() {
               </TabPanel>
               <TabPanel value='Mobiles' sx={{ px: 0, }}>
                 <Grid container spacing={2}>
-                  {data.map((product, indx) =>
+                  {data.map((product: any, indx: any) =>
                     <Grid key={indx} item xs={12}>
                       <Paper elevation={4}>
                         <Grid container item alignItems='center' justifyContent='space-between' rowGap={3} sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}>
@@ -403,12 +484,12 @@ export default function OrdersListView() {
           <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Product Name (English)
           </Typography>
-          <TextField fullWidth variant='filled' defaultValue='iPhone 13 Pro Max' name='itemname' />
+          <TextField fullWidth variant='filled' defaultValue='iPhone 13 Pro Max' onChange={handleNestedProductData} value={productData?.name.en || ""} name='name.en' />
 
           <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Product Name (Arabic)
           </Typography>
-          <TextField fullWidth variant='filled' defaultValue="ايفون 13 برو ماكس" name='itemname' />
+          <TextField fullWidth variant='filled' defaultValue="ايفون 13 برو ماكس" onChange={handleNestedProductData} value={productData?.name.ar || ""} name='name.ar' />
 
           <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Upload Product Images
@@ -440,10 +521,9 @@ export default function OrdersListView() {
             </Box>
           </Box>
 
-          <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+          {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Upload Product Video
           </Typography>
-
           <Box mt='10px' sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
             <Box sx={{
               width: '100px', height: '100px',
@@ -452,7 +532,7 @@ export default function OrdersListView() {
             }}>
               <Iconify icon="octicon:video-16" style={{ color: '#8688A3' }} />
             </Box>
-          </Box>
+          </Box> */}
 
           <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Category
@@ -461,11 +541,13 @@ export default function OrdersListView() {
           <FormControl fullWidth>
             <Select
               variant='filled'
-              value={dropDown.category}
-              onChange={handleChangeDropDown('cat')}
+              value={productData?.category || ""}
+              onChange={handleProductData}
+              name='categoryId'
             >
-              <MenuItem value='Mobiles & Tablets'>Mobiles & Tablets</MenuItem>
-              <MenuItem value='Laptops & Computers'>Laptops & Computers</MenuItem>
+              {categoryState.list.map((cat: any, index: any) => (
+                <MenuItem key={index} value={cat._id}>{cat.name.en || cat.name}</MenuItem>
+              ))}
             </Select>
           </FormControl>
 
@@ -476,12 +558,15 @@ export default function OrdersListView() {
           <FormControl fullWidth>
             <Select
               variant='filled'
-              value={dropDown.subCategory}
-              onChange={handleChangeDropDown('subcat')}
+              // value={dropDown.subCategory}
+              // onChange={handleChangeDropDown('subcat')}
+              value={productData?.subCategory || ""}
+              onChange={handleProductData}
+              name='subCategory'
             >
-              <MenuItem value='Mobiles'>Mobiles</MenuItem>
-              <MenuItem value='Andriod'>Andriod</MenuItem>
-              <MenuItem value='Apple'>Apple</MenuItem>
+              {productData?.categoryId && categoryState.subCatList.filter((item: any) => item.category === productData.categoryId).map((item: any) => (
+                <MenuItem value={item._id}>{item.name}</MenuItem>
+              ))}
             </Select>
           </FormControl>
 
