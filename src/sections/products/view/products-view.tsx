@@ -1,3 +1,4 @@
+/* eslint-disable arrow-body-style */
 /* eslint-disable @typescript-eslint/no-shadow */
 
 'use client';
@@ -27,6 +28,8 @@ import { useSnackbar } from 'notistack';
 // import { allProducts } from 'src/_mock';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
+import { UploadBox } from 'src/components/upload';
+import { createProduct, fetchOneProduct, fetchProductsList, setProduct } from 'src/redux/store/thunks/products';
 // components
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
@@ -40,6 +43,7 @@ import { fetchCategorysList, fetchSubCategorysList } from 'src/redux/store/thunk
 
 import DetailsNavBar from '../DetailsNavBar';
 import ProductTableToolbar from '../product-table-toolbar';
+
 
 
 
@@ -64,7 +68,8 @@ export default function OrdersListView() {
   const { list, loading, error, product } = useSelector((state: any) => state.products);
 
 
-  const [productData, setProductData] = useState<any>(null);
+  const [productData, setProductData] = useState<any>({});
+  const [editProductId, setEditProductId] = useState(null);
 
 
   const settings = useSettingsContext();
@@ -78,18 +83,27 @@ export default function OrdersListView() {
 
   useEffect(() => {
     if (loadStatus === 'idle') {
-      // dispatch(fetchCustomersList(error)).then((response: any) => {
-      //   console.log(list);
-      //   // setData(list)
-      // });
+      dispatch(fetchProductsList(error)).then((response: any) => {
+        console.log("list", list);
+        // setData(list)
+      });
     }
   }, [loadStatus, dispatch, error, list]);
+
+  useEffect(() => {
+    if (product) {
+      setProductData(product)
+    } else {
+      setProductData(null)
+    }
+  }, [product])
 
 
 
   useEffect(() => {
     if (categoryState.status === 'idle') {
       dispatch(fetchCategorysList(categoryState.error)).then((response: any) => {
+        console.log("response", response);
         dispatch(fetchSubCategorysList(categoryState.error));
       });
     }
@@ -97,10 +111,11 @@ export default function OrdersListView() {
 
 
   useEffect(() => {
-    if (productData && productData.categoryId) {
-      setProductData({ ...productData, subCategory: null })
-    }
-  }, [productData])
+    setProductData((prevData: any) => ({
+      ...prevData,
+      subCategory: null,
+    }));
+  }, [productData?.categoryId]);
 
 
 
@@ -133,6 +148,88 @@ export default function OrdersListView() {
     }));
   }
 
+  const handleAddImage = (files: any) => {
+    if (files.length > 0) {
+      setProductData((prevData: any) => (
+        {
+          ...prevData,
+          // images: prevData.images ? [...prevData.images, files[0]] : [files[0]]
+          images: files[0]
+        }
+      ));
+    }
+  }
+  const handleRemoveImage = (index: any) => {
+    setProductData((current: any) => {
+      const { images, ...rest } = current;
+      // const updatedImages = images.filter((_: any, i: any) => i !== index);
+      return {
+        ...rest,
+      };
+    })
+  }
+
+
+  const createProductFun = () => {
+    const formData = convertStateToFormData(productData);
+    dispatch(createProduct(formData)).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        setProductData(null);
+        dispatch(fetchProductsList(error));
+        enqueueSnackbar('Successfully Created!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const convertStateToFormData = (state: any) => {
+    const formData = new FormData();
+
+    // Iterate over the properties of the state
+    Object.entries(state).forEach(([key, value]: any) => {
+      // this is only for the products and sending single image.
+      // && key !== 'images'  
+      if (typeof value === 'object' && !Array.isArray(value) && key !== 'images') {
+        Object.entries(value).forEach(([nestedKey, nestedValue]: any) => {
+          formData.append(`${key}[${nestedKey}]`, nestedValue);
+        });
+      } else if (Array.isArray(value)) {
+        // If the value is an array, assume it's a file input
+        value.forEach((file: any, index: any) => {
+          formData.append(`${key}[${index}]`, file);
+        });
+      } else {
+        // For other types of values
+        formData.append(key, value);
+      }
+    });
+
+    return formData;
+  };
+
+
+
 
 
 
@@ -142,45 +239,25 @@ export default function OrdersListView() {
     if (newValue === 'All') {
       setData(list);
     } else {
-      const newData = list.filter((order: any) => order?.category === newValue)
+      const newData = list.filter((order: any) => order?.categoryId === newValue)
       setData(newData);
     }
-  };
-
-  interface DropDownState {
-    category: any;
-    subCategory: any;
-    price: any;
-    color: any;
-    available: any;
-    qty: any;
-  }
-
-  const [dropDown, setDropDown] = useState<DropDownState>({
-    category: 'Mobiles & Tablets',
-    subCategory: 'Mobiles',
-    price: '165.000',
-    color: 'blue',
-    available: 'All Branches',
-    qty: 'Unlimited',
-  })
-
-  const handleChangeDropDown = (changeTo?: string | undefined | null) => (event: SelectChangeEvent) => {
-    if (changeTo === "cat") setDropDown(pv => ({ ...pv, category: event.target.value as string }))
-    else if (changeTo === "subcat") setDropDown(pv => ({ ...pv, subCategory: event.target.value as string }))
-    else if (changeTo === "price") setDropDown(pv => ({ ...pv, price: event.target.value as string }))
-    else if (changeTo === "color") setDropDown(pv => ({ ...pv, color: event.target.value as string }))
-    else if (changeTo === "available") setDropDown(pv => ({ ...pv, available: event.target.value as string }))
-    else if (changeTo === "qty") setDropDown(pv => ({ ...pv, qty: event.target.value as string }))
-
-    // setMySubCat(event.target.value as string);
   };
 
   const [openDetails, setOpenDetails] = useState(false);
 
   // common
-  const toggleDrawerCommon = (state: string) => (event: React.SyntheticEvent | React.MouseEvent) => {
-    if (state === "new") setOpenDetails(pv => !pv)
+  const toggleDrawerCommon = (state: string, id: any = null) => (event: React.SyntheticEvent | React.MouseEvent) => {
+    if (state === "new") {
+      setOpenDetails(pv => !pv)
+      setEditProductId(id);
+      if (id) {
+        dispatch(fetchOneProduct(id));
+      } else {
+        setProductData({});
+        dispatch(setProduct({}));
+      }
+    }
   };
 
   const handleDrawerCloseCommon = (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -192,6 +269,7 @@ export default function OrdersListView() {
     if (state === "new") setOpenDetails(false)
   };
 
+  const imagesItrations = Array.from({ length: 1 }, (_, index) => index);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -231,31 +309,35 @@ export default function OrdersListView() {
                     boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
                   }}
                 >
-                  {STATUS_OPTIONS.map((tab) => (
+                  <Tab
+                    iconPosition="end"
+                    value="All"
+                    label="All Products"
+                    icon={
+                      <Label
+                        variant={
+                          ((value === 'All') && 'filled') || 'outlined'
+                        }
+                        color='success'
+                      >
+                        {value === 'All' && list.length}
+                      </Label>
+                    }
+                  />
+                  {categoryState.list.map((categoryObj: any) => (
                     <Tab
-                      key={tab.value}
+                      key={categoryObj._id}
                       iconPosition="end"
-                      value={tab.value}
-                      label={tab.label}
+                      value={categoryObj._id}
+                      label={categoryObj.name}
                       icon={
                         <Label
                           variant={
-                            ((tab.value === 'All' || tab.value === value) && 'filled') || 'soft'
+                            ((categoryObj._id === value) && 'filled') || 'outlined'
                           }
-                          color={
-                            (tab.value === 'Mobiles' && 'primary') ||
-                            (tab.value === 'Laptops' && 'secondary') ||
-                            (tab.value === 'Watches' && 'warning') ||
-                            'default'
-                          }
+                          color='primary'
                         >
-                          {tab.value === 'All' && list.length}
-                          {tab.value === 'Watches' &&
-                            list.filter((order: any) => order.category === 'Watches').length}
-                          {tab.value === 'Laptops' &&
-                            list.filter((order: any) => order.category === 'Laptops').length}
-                          {tab.value === 'Mobiles' &&
-                            list.filter((order: any) => order.category === 'Mobiles').length}
+                          {list.filter((product: any) => product.categoryId === categoryObj._id).length}
                         </Label>
                       }
                     />
@@ -263,7 +345,7 @@ export default function OrdersListView() {
                 </TabList>
               </Box>
 
-              <TabPanel value='All' sx={{ px: 0, }}>
+              <TabPanel value={value} sx={{ px: 0, }}>
                 <Grid container spacing={2}>
                   {data.map((product: any, indx: any) =>
                     <Grid key={indx} item xs={12}>
@@ -278,7 +360,7 @@ export default function OrdersListView() {
                                 gap: '8px'
                               }}
                             >
-                              <Box component='img' src={product.img} alt=" " width='60px' />
+                              <Box component='img' src={product.images[0]} alt=" " width='60px' />
                               <Box display='flex' gap='0px' flexDirection='column' >
                                 <Typography component='p' noWrap variant="subtitle2" sx={{ fontSize: '.9rem', fontWeight: 800, maxWidth: { xs: '100%', md: '188px' } }} > {product.name} </Typography>
                                 <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '100%', md: '188px' } }} >{product.category}</Typography>
@@ -310,7 +392,7 @@ export default function OrdersListView() {
                   )}
                 </Grid>
               </TabPanel>
-              <TabPanel value='Watches' sx={{ px: 0, }}>
+              {/* <TabPanel value='Watches' sx={{ px: 0, }}>
                 <Grid container spacing={2}>
                   {data.map((product: any, indx: any) =>
                     <Grid key={indx} item xs={12}>
@@ -452,7 +534,7 @@ export default function OrdersListView() {
                   )}
                 </Grid>
 
-              </TabPanel>
+              </TabPanel> */}
 
             </TabContext>
 
@@ -471,6 +553,7 @@ export default function OrdersListView() {
             variant="soft"
             color="success"
             size="large"
+            onClick={createProductFun}
             sx={{ borderRadius: '30px' }}
           >
             Save
@@ -484,41 +567,67 @@ export default function OrdersListView() {
           <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Product Name (English)
           </Typography>
-          <TextField fullWidth variant='filled' defaultValue='iPhone 13 Pro Max' onChange={handleNestedProductData} value={productData?.name.en || ""} name='name.en' />
+          {/* defaultValue='iPhone 13 Pro Max' */}
+          <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.en || ""} name='name.en' />
 
           <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Product Name (Arabic)
           </Typography>
-          <TextField fullWidth variant='filled' defaultValue="ايفون 13 برو ماكس" onChange={handleNestedProductData} value={productData?.name.ar || ""} name='name.ar' />
+          {/* defaultValue="ايفون 13 برو ماكس" */}
+          <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.ar || ""} name='name.ar' />
 
           <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Upload Product Images
           </Typography>
 
+
           <Box mt='10px' sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-            <Box sx={{
-              width: '100px', height: '100px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-              flexDirection: 'column', border: '1px dashed rgb(134, 136, 163,.5)', borderRadius: '16px',
-              padding: '20px'
-            }}>
-              <Box component='img' src='/raw/s1.png' alt='' sx={{ width: '90%' }} />
-            </Box>
-            <Box sx={{
-              width: '100px', height: '100px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-              flexDirection: 'column', border: '1px dashed rgb(134, 136, 163,.5)', borderRadius: '16px',
-              padding: '20px'
-            }}>
-              <Box component='img' src='/raw/s1.png' alt='' sx={{ width: '90%' }} />
-            </Box>
-            <Box sx={{
-              width: '100px', height: '100px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-              flexDirection: 'column', border: '1px dashed rgb(134, 136, 163,.5)', borderRadius: '16px'
-            }}>
-              <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
-            </Box>
+            {imagesItrations.map((itration: any, ind: any) => {
+              return (
+                <Box key={ind}>
+                  {/* {productData?.images?.length > 0 && productData?.images[itration] ? ( */}
+                  {productData?.images ? (
+                    <Box sx={{
+                      width: '100px', height: '100px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                      flexDirection: 'column', border: '1px dashed rgb(134, 136, 163,.5)', borderRadius: '16px',
+                      position: 'relative', overflow: "hidden"
+                    }}>
+                      <Box component='img'
+                        // src={typeof productData?.images[itration] === 'string' ? productData?.images[itration] : URL.createObjectURL(productData?.images[itration])}
+                        src={typeof productData?.images === 'string' ? productData?.images : URL.createObjectURL(productData?.images)}
+                        alt=''
+                        sx={{ maxHeight: "95px" }} />
+                      <Box onClick={() => handleRemoveImage(ind)} sx={{ backgroundColor: 'rgb(134, 136, 163,.09)', padding: '10px 11px 7px 11px', borderRadius: '36px', cursor: "pointer", position: 'absolute', top: 0, right: 0 }}>
+                        <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
+                      </Box>
+                    </Box>
+                  ) : (
+                    <UploadBox
+                      sx={{ width: '100px!important', height: '100px!important', textAlign: 'center', padding: '20px' }}
+                      onDrop={handleAddImage}
+                      maxFiles={1}
+                      maxSize={5242880}
+                      accept={{
+                        'image/jpeg': [],
+                        'image/png': []
+                      }}
+                      placeholder={
+                        <Box sx={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                          flexDirection: 'column',
+                        }}>
+                          <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
+                          <span style={{ color: '#8688A3', fontSize: '.6rem' }}>Upload Image</span>
+                        </Box>
+                      }
+                    />
+                  )}
+                </Box>
+
+              )
+            })}
+
           </Box>
 
           {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
@@ -541,7 +650,7 @@ export default function OrdersListView() {
           <FormControl fullWidth>
             <Select
               variant='filled'
-              value={productData?.category || ""}
+              value={productData?.categoryId || ""}
               onChange={handleProductData}
               name='categoryId'
             >
@@ -558,14 +667,12 @@ export default function OrdersListView() {
           <FormControl fullWidth>
             <Select
               variant='filled'
-              // value={dropDown.subCategory}
-              // onChange={handleChangeDropDown('subcat')}
               value={productData?.subCategory || ""}
               onChange={handleProductData}
               name='subCategory'
             >
-              {productData?.categoryId && categoryState.subCatList.filter((item: any) => item.category === productData.categoryId).map((item: any) => (
-                <MenuItem value={item._id}>{item.name}</MenuItem>
+              {productData?.categoryId && categoryState.subCatList.filter((item: any) => item.category === productData.categoryId).map((item: any, ind: any) => (
+                <MenuItem key={ind} value={item._id}>{item.name}</MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -574,7 +681,9 @@ export default function OrdersListView() {
             Price
           </Typography>
 
-          <FormControl fullWidth>
+          <TextField fullWidth variant='filled' onChange={handleProductData} value={productData?.price || ""} name='price' />
+
+          {/* <FormControl fullWidth>
             <Select
               variant='filled'
               value={dropDown.price}
@@ -583,7 +692,7 @@ export default function OrdersListView() {
               <MenuItem value='165.000'>165.000</MenuItem>
               <MenuItem value='200.000'>200.000</MenuItem>
             </Select>
-          </FormControl>
+          </FormControl> */}
 
           <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
             Description (English)
@@ -595,7 +704,10 @@ export default function OrdersListView() {
             fullWidth
             rows={5}
             sx={{ fontWeight: 900, fontSize: '26px' }}
-            defaultValue="It is a long established fact that a read will be distracted by the readable content of a page."
+            // defaultValue="It is a long established fact that a read will be distracted by the readable content of a page."
+            value={productData?.description?.en || ""}
+            onChange={handleNestedProductData}
+            name='description.en'
           />
 
           <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
@@ -609,13 +721,15 @@ export default function OrdersListView() {
             rows={5}
             dir="rtl"
             sx={{ fontWeight: 900, fontSize: '26px' }}
-            defaultValue="هنالك العديد من الأنواع المتوفرة لنصوص لوريم إيبسوم، ولكن الغالبية تم تعديلها بشكل ما عبر إدخال بعض الكلمات العشوائية"
+            // defaultValue="هنالك العديد من الأنواع المتوفرة لنصوص لوريم إيبسوم، ولكن الغالبية تم تعديلها بشكل ما عبر إدخال بعض الكلمات العشوائية"
+            value={productData?.description?.ar || ""}
+            onChange={handleNestedProductData}
+            name='description.ar'
           />
 
-          <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+          {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Available
           </Typography>
-
           <FormControl fullWidth>
             <Select
               variant='filled'
@@ -625,13 +739,15 @@ export default function OrdersListView() {
               <MenuItem value='All Branches'>All Branches</MenuItem>
               <MenuItem value='Main Branch'>Main Branch</MenuItem>
             </Select>
-          </FormControl>
+          </FormControl> */}
 
           <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
             Quantity (in stock)
           </Typography>
+          <TextField type='number' fullWidth variant='filled' onChange={handleProductData} value={productData?.quantity || ""} name='quantity' />
 
-          <FormControl fullWidth>
+
+          {/* <FormControl fullWidth>
             <Select
               variant='filled'
               value={dropDown.qty}
@@ -640,7 +756,7 @@ export default function OrdersListView() {
               <MenuItem value='Unlimited'>Unlimited</MenuItem>
               <MenuItem value='200'>200</MenuItem>
             </Select>
-          </FormControl>
+          </FormControl> */}
 
           <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
             Product Status
@@ -652,26 +768,27 @@ export default function OrdersListView() {
             <Typography component='p' variant="subtitle2" sx={{ fontWeight: 900, fontSize: '.9rem' }} >
               Published
             </Typography>
-            <Switch size="medium" defaultChecked />
+            <Switch size="medium"
+              value={productData?.publish_app || false}
+              onChange={(e: any) => setProductData({ ...productData, publish_app: e.target.checked })}
+            />
           </Stack>
 
 
-          <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+          {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
             Barcode (Optional)
           </Typography>
-
           <TextField fullWidth variant='filled' defaultValue='481155444762' name='branchCode'
             InputProps={{
               endAdornment: <InputAdornment position="end">
                 <Box component='img' src='/raw/barcode.svg' alt='' sx={{}} />
               </InputAdornment>,
             }}
-          />
+          /> */}
 
-          <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+          {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Color (Optional)
           </Typography>
-
           <FormControl fullWidth>
             <Select
               variant='filled'
@@ -686,7 +803,6 @@ export default function OrdersListView() {
                   </Typography>
                 </Stack>
               </MenuItem>
-
               <MenuItem value='green'>
                 <Stack direction='row' spacing='20px' alignItems='center'>
                   <Box sx={{ width: '23px', height: '23px', borderRadius: '23px', background: 'green' }} />
@@ -697,7 +813,7 @@ export default function OrdersListView() {
               </MenuItem>
 
             </Select>
-          </FormControl>
+          </FormControl> */}
         </Box>
       </DetailsNavBar>
 

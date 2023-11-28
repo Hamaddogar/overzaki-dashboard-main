@@ -14,11 +14,17 @@ export interface IProductsForm extends IRequest {
   balance: number;
   // examples
 }
-export const fetchProductsList = createAsyncThunk('products/fetchList', async () => {
-  const response = await getRequest(endpoints.product.list, defaultConfig);
-
-  return response.data;
-});
+export const fetchProductsList = createAsyncThunk(
+  'products/fetchList',
+  async (params: IRequest, { rejectWithValue }) => {
+    try {
+      const response = await getRequest(endpoints.product.list, defaultConfig);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 
 export const fetchOneProduct = createAsyncThunk('products/fetchOne', async (productId: number) => {
   const response = await getRequest(`${endpoints.product.list}/${productId}`, defaultConfig);
@@ -26,7 +32,7 @@ export const fetchOneProduct = createAsyncThunk('products/fetchOne', async (prod
   return response.data;
 });
 
-export const createProduct = createAsyncThunk('products/create', async (data: IProductsForm) => {
+export const createProduct = createAsyncThunk('products/create', async (data: any) => {
   defaultConfig.headers['Content-Type'] = 'multipart/form-data';
   const response = await postRequest(endpoints.product.list, data, defaultConfig);
 
@@ -60,6 +66,7 @@ const productsSlice = createSlice({
     product: null,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setProduct: (state, action: PayloadAction<any>) => {
@@ -72,12 +79,15 @@ const productsSlice = createSlice({
       .addCase(fetchProductsList.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.status = 'loading';
       })
       .addCase(fetchProductsList.fulfilled, (state, action) => {
         state.loading = false;
-        state.list = action.payload;
+        state.list = action.payload.data.data;
+        state.status = 'succeeded';
       })
       .addCase(fetchProductsList.rejected, (state, action) => {
+        state.status = 'failed';
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
       })
