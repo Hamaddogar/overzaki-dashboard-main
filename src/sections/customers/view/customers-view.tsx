@@ -3,22 +3,28 @@
 
 'use client';
 
+import * as Yup from 'yup';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import LoadingButton from '@mui/lab/LoadingButton';
+
 import { useState, useCallback, useEffect } from 'react';
 // @mui
 import Divider from '@mui/material/Divider';
 import { alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
-import InputAdornment from '@mui/material/InputAdornment';
+// import InputAdornment from '@mui/material/InputAdornment';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import { Box, Grid, Stack, Chip, Typography, Paper, Select, MenuItem } from '@mui/material';
+import { Box, Grid, Stack, Chip, Typography, Paper, Select, MenuItem, Alert } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import TextField from '@mui/material/TextField';
 import { useSnackbar } from 'notistack';
 // _mock
-import { _orders, allCustomers } from 'src/_mock';
+import { _orders } from 'src/_mock';
 // utils
 import { fTimestamp } from 'src/utils/format-time';
 import { useBoolean } from 'src/hooks/use-boolean';
@@ -42,7 +48,6 @@ import CustomersTableFiltersResult from '../customers-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
 import CountrySelect from './CountryField';
 import { createCustomer, deleteCustomer, editCustomer, fetchCustomersList, fetchOneCustomer, setCustomer } from '../../../redux/store/thunks/customers';
-
 
 
 
@@ -71,7 +76,7 @@ export default function OrdersListView() {
   const { enqueueSnackbar } = useSnackbar();
 
   const loadStatus = useSelector((state: any) => state.customers.status);
-  const { list, loading, error, customer } = useSelector((state: any) => state.customers);
+  const { list, error, customer } = useSelector((state: any) => state.customers);
 
   const [editId, setEditId] = useState(null);
   const [removeData, setRemoveData] = useState<any>(null)
@@ -92,6 +97,39 @@ export default function OrdersListView() {
 
   const [customerData, setCustomerData] = useState<any>(null);
 
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const CategorySchema = Yup.object().shape({
+    firstName: Yup.string().required('Field is required'),
+    lastName: Yup.string().required('Field is required'),
+    phoneNumber: Yup.string().required('Field is required'),
+    email: Yup.string().required('Field is required').email('Email must be a valid email address'),
+    location: Yup.string().required('Field is required'),
+  });
+
+  const methods = useForm({
+    resolver: yupResolver(CategorySchema)
+  });
+
+  const {
+    reset,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = methods;
+
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      if (editId) {
+        await editCustomerFun();
+      } else {
+        await createCustomerFun();
+      }
+    } catch (error) {
+      console.error(error);
+      reset();
+      setErrorMsg(typeof error === 'string' ? error : error.message);
+    }
+  });
 
 
   useEffect(() => {
@@ -557,108 +595,111 @@ export default function OrdersListView() {
               onClose={handleDrawerCloseCommon('createOrEdit')}
               title={editId ? "Edit Customer" : "Add New Customer"}
               actions={<Stack alignItems='center' justifyContent='center' spacing="10px">
-                <Button
+                <LoadingButton
                   fullWidth
                   variant="soft"
-                  onClick={editId ? editCustomerFun : createCustomerFun}
                   color="success"
                   size="large"
                   sx={{ borderRadius: '30px' }}
+                  // loading={methods.formState.isSubmitting}
+                  loading={isSubmitting}
+                  onClick={() => methods.handleSubmit(onSubmit as any)()}
                 >
                   {editId ? "Update" : "Save"}
-                </Button>
+                </LoadingButton>
               </Stack>}
             >
-              <Divider flexItem />
-              <Box width='100%'>
-                <UploadAvatar
-                  // file={customerData?.avatar ?
-                  //   (Object.assign(customerData?.avatar, {
-                  //     preview: URL.createObjectURL(customerData?.avatar),
-                  //   }))
-                  //   : null}
-                  file={customerData?.avatar && typeof customerData?.avatar === 'string' ?
-                    customerData.avatar :
-                    (customerData?.avatar ?
-                      (Object.assign(customerData.avatar, {
-                        preview: URL.createObjectURL(customerData.avatar),
-                      }))
-                      : null)}
-                  onDrop={handleDropAvatar}
-                />
+              <FormProvider methods={methods} onSubmit={onSubmit}>
+                <Divider flexItem />
+                {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+                <Box width='100%'>
+                  <UploadAvatar
+                    file={customerData?.avatar && typeof customerData?.avatar === 'string' ?
+                      customerData.avatar :
+                      (customerData?.avatar ?
+                        (Object.assign(customerData.avatar, {
+                          preview: URL.createObjectURL(customerData.avatar),
+                        }))
+                        : null)}
+                    onDrop={handleDropAvatar}
+                  />
 
-                <Typography pb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-                  First Name
-                </Typography>
-                <TextField fullWidth variant='filled' onChange={handleCustomerData} value={customerData?.firstName || ""} name='firstName' />
+                  <Typography pb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+                    First Name
+                  </Typography>
+                  {/* <TextField fullWidth variant='filled' onChange={handleCustomerData} value={customerData?.firstName || ""} name='firstName' /> */}
+                  <RHFTextField fullWidth variant='filled' settingStateValue={handleCustomerData} value={customerData?.firstName || ""} name='firstName' />
+                  <Typography mt='20px' pb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+                    Last Name
+                  </Typography>
+                  {/* <TextField fullWidth variant='filled' onChange={handleCustomerData} value={customerData?.lastName || ""} name='lastName' /> */}
+                  <RHFTextField fullWidth variant='filled' settingStateValue={handleCustomerData} value={customerData?.lastName || ""} name='lastName' />
 
-                <Typography mt='20px' pb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-                  Last Name
-                </Typography>
-                <TextField fullWidth variant='filled' onChange={handleCustomerData} value={customerData?.lastName || ""} name='lastName' />
+                  <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+                    Mobile Number
+                  </Typography>
 
-                <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-                  Mobile Number
-                </Typography>
-
-                <TextField fullWidth variant='filled' onChange={handleCustomerData} value={customerData?.phoneNumber || ""} name='phoneNumber'
-                // sx={{
-                //   '& .MuiInputAdornment-root': {
-                //     marginTop: '0px !important',
-                //     // paddingLeft: '10px'
-                //   },
-                //   '& input': {
-                //     paddingLeft: '2px !important'
-                //   }
-                // }}
-                // InputProps={{
-                //   startAdornment: <InputAdornment position="start">
-                //     <Stack direction='row' alignItems='center' spacing="8px">
-                //       <Iconify icon="mingcute:down-fill" width={43} />
-                //       <Box component='img' src='/raw/flagN.png' />
-                //       <Divider orientation="vertical" variant='middle' flexItem />
-                //     </Stack>
-                //   </InputAdornment>,
-                // }}
-                />
-
-
-                <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-                  Email Address
-                </Typography>
-                <TextField fullWidth variant='filled' type='email' onChange={handleCustomerData} value={customerData?.email || ""} name='email' />
+                  {/* <TextField fullWidth variant='filled' onChange={handleCustomerData} value={customerData?.phoneNumber || ""} name='phoneNumber' */}
+                  <RHFTextField fullWidth variant='filled' settingStateValue={handleCustomerData} value={customerData?.phoneNumber || ""} name='phoneNumber'
+                  // sx={{
+                  //   '& .MuiInputAdornment-root': {
+                  //     marginTop: '0px !important',
+                  //     // paddingLeft: '10px'
+                  //   },
+                  //   '& input': {
+                  //     paddingLeft: '2px !important'
+                  //   }
+                  // }}
+                  // InputProps={{
+                  //   startAdornment: <InputAdornment position="start">
+                  //     <Stack direction='row' alignItems='center' spacing="8px">
+                  //       <Iconify icon="mingcute:down-fill" width={43} />
+                  //       <Box component='img' src='/raw/flagN.png' />
+                  //       <Divider orientation="vertical" variant='middle' flexItem />
+                  //     </Stack>
+                  //   </InputAdornment>,
+                  // }}
+                  />
 
 
-                <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-                  Country
-                </Typography>
-                <CountrySelect name="country" value={customerData?.country || ""} onChange={(event: any, value: any) => setCustomerData({ ...customerData, country: value?.code || "" })} />
-
-                <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-                  Gender
-                </Typography>
-                <Select
-                  fullWidth
-                  variant='filled'
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  name="gender"
-                  value={customerData?.gender || ""}
-                  onChange={handleCustomerData}
-                >
-                  <MenuItem value="MALE">Male</MenuItem>
-                  <MenuItem value="FEMALE">Female</MenuItem>
-                </Select>
+                  <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+                    Email Address
+                  </Typography>
+                  {/* <TextField fullWidth variant='filled' type='email' onChange={handleCustomerData} value={customerData?.email || ""} name='email' /> */}
+                  <RHFTextField fullWidth variant='filled' type='email' settingStateValue={handleCustomerData} value={customerData?.email || ""} name='email' />
 
 
-                <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-                  Address
-                </Typography>
-                <TextField fullWidth variant='filled' type='text' onChange={handleCustomerData} value={customerData?.location || ""} name='location' />
+                  <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+                    Country
+                  </Typography>
+                  <CountrySelect name="country" value={customerData?.country || ""} onChange={(event: any, value: any) => setCustomerData({ ...customerData, country: value?.code || "" })} />
+
+                  <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+                    Gender
+                  </Typography>
+                  <Select
+                    fullWidth
+                    variant='filled'
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    name="gender"
+                    value={customerData?.gender || ""}
+                    onChange={handleCustomerData}
+                  >
+                    <MenuItem value="MALE">Male</MenuItem>
+                    <MenuItem value="FEMALE">Female</MenuItem>
+                  </Select>
+
+
+                  <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+                    Address
+                  </Typography>
+                  {/* <TextField fullWidth variant='filled' type='text' onChange={handleCustomerData} value={customerData?.location || ""} name='location' /> */}
+                  <RHFTextField fullWidth variant='filled' type='text' settingStateValue={handleCustomerData} value={customerData?.location || ""} name='location' />
 
 
 
-                {/* <Box sx={{ borderRadius: '12px', padding: '24px', background: 'rgb(245, 245, 248)' }}>
+                  {/* <Box sx={{ borderRadius: '12px', padding: '24px', background: 'rgb(245, 245, 248)' }}>
                   <Stack direction='row' alignItems='center' spacing='10px'>
                     <Iconify icon="ion:location" width={45} style={{ color: '#8688A3' }} />
                     <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', fontWeight: 900 }} >
@@ -675,7 +716,21 @@ export default function OrdersListView() {
                 </Box> */}
 
 
-              </Box>
+                </Box>
+
+                {/* <LoadingButton
+                  fullWidth
+                  variant="soft"
+                  type="submit"
+                  color="success"
+                  size="large"
+                  sx={{ borderRadius: '30px' }}
+                  loading={isSubmitting}
+                >
+                  {editId ? "Update" : "Save"}
+                </LoadingButton> */}
+              </FormProvider>
+
             </DetailsNavBar>
 
             <ConfirmDialog

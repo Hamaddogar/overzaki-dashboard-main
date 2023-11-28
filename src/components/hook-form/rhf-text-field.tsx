@@ -6,9 +6,10 @@ import TextField, { TextFieldProps } from '@mui/material/TextField';
 
 type Props = TextFieldProps & {
   name: string;
+  settingStateValue?: any
 };
 
-export default function RHFTextField({ name, helperText, type, ...other }: Props) {
+export default function RHFTextField({ name, helperText, type, settingStateValue, ...other }: Props) {
   const { control } = useFormContext();
 
   return (
@@ -26,6 +27,9 @@ export default function RHFTextField({ name, helperText, type, ...other }: Props
               field.onChange(Number(event.target.value));
             } else {
               field.onChange(event.target.value);
+            }
+            if (settingStateValue) {
+              settingStateValue(event)
             }
           }}
           error={!!error}
