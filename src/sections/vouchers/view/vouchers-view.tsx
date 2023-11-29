@@ -2,7 +2,13 @@
 
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+
+import * as Yup from 'yup';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form';
+import LoadingButton from '@mui/lab/LoadingButton';
 // @mui
 import Divider from '@mui/material/Divider';
 import { alpha } from '@mui/material/styles';
@@ -11,7 +17,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import { Box, Grid, Stack, Typography, Switch, MenuItem } from '@mui/material';
+import { Box, Grid, Stack, Typography, Switch, MenuItem, Alert } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
@@ -31,6 +37,12 @@ import { useSnackbar } from 'src/components/snackbar';
 // types
 import { IOrderItem, IOrderTableFilters, IOrderTableFilterValue } from 'src/types/order';
 //
+import { fetchVouchersList } from 'src/redux/store/thunks/defaultVouchers';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from 'src/redux/store/store';
+import { useBoolean } from 'src/hooks/use-boolean';
+
+
 import Label from 'src/components/label/label';
 import Iconify from 'src/components/iconify/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
@@ -38,7 +50,19 @@ import VouchersToolbar from '../vouchers-toolbar';
 import VouchersFiltersResult from '../vouchers-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
 
+
+
 // ----------------------------------------------------------------------
+const activeTab = {
+  color: '#0F1349',
+  background: 'rgb(209, 255, 240)',
+  border: '2px solid #1AF9B3',
+}
+const nonActiveTab = {
+  color: '#8688A3',
+  background: 'rgb(245, 245, 248)',
+}
+
 
 const STATUS_OPTIONS = [
   { value: 'All', label: 'All' },
@@ -58,11 +82,21 @@ const stylesDisabled = { cursor: { xs: 'default', md: "pointer" }, background: '
 // ----------------------------------------------------------------------
 
 export default function OrdersListView() {
-
+  const dispatch = useDispatch<AppDispatch>();
   const { enqueueSnackbar } = useSnackbar();
 
-  const { copy } = useCopyToClipboard();
+  const loadStatus = useSelector((state: any) => state.vouchers.status);
+  const { list, error, voucher } = useSelector((state: any) => state.vouchers);
+  const [editId, setEditId] = useState(null);
+  const [removeData, setRemoveData] = useState<any>(null)
+  const confirm = useBoolean();
 
+  const [voucherData, setVoucherData] = useState<any>(null);
+  const [errorMsg, setErrorMsg] = useState('');
+
+
+  const [discountTypeToggle, setDiscountTypeToggle] = useState('FIXED');
+  const { copy } = useCopyToClipboard();
   const onCopy = (color: string) => {
     if (color) {
       enqueueSnackbar(`Copied! ${color}`);
@@ -76,12 +110,162 @@ export default function OrdersListView() {
 
   const [value, setValue] = useState('All');
 
-  const [data, setData] = useState(allVouchers)
+  // const [data, setData] = useState(allVouchers)
+  const [data, setData] = useState(list)
 
   const [tableData] = useState(_orders);
 
   const [filters, setFilters] = useState(defaultFilters);
 
+
+  // ----------------------------------------------------------------------------------
+
+  const VoucherSchema = Yup.object().shape({
+    name: Yup.object().shape({
+      en: Yup.string().required('English Name is required'),
+      ar: Yup.string().required('Arabic Name is required'),
+    }),
+    code: Yup.string().required('Field is required'),
+
+    discountAmount: discountTypeToggle === 'FIXED' ? Yup.number().required('Field is required') : Yup.number(),
+    discountPercentage: discountTypeToggle === 'PERCENTAGE' ? Yup.number().required('Field is required') : Yup.number(),
+    upTo: discountTypeToggle === 'PERCENTAGE' ? Yup.number().required('Field is required') : Yup.number(),
+
+    totalUses: Yup.number().required('Field is required'),
+    availabitiyStarts: Yup.string().required('Field is required'),
+    availabitiyEnds: Yup.string().required('Field is required'),
+  });
+
+  const methods = useForm({
+    resolver: yupResolver(VoucherSchema)
+  });
+
+  const {
+    reset,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = methods;
+
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      console.log("data", data);
+
+      // if (editId) {
+      //   await editCustomerFun();
+      // } else {
+      //   await createCustomerFun();
+      // }
+    } catch (error) {
+      console.error(error);
+      reset();
+      setErrorMsg(typeof error === 'string' ? error : error.message);
+    }
+  });
+
+  useEffect(() => {
+    if (loadStatus === 'idle') {
+      dispatch(fetchVouchersList(error)).then((response: any) => {
+        console.log(list);
+        // setData(list)
+      });
+    }
+  }, [loadStatus, dispatch, error, list]);
+
+  useEffect(() => {
+    setData(list || [])
+  }, [list]);
+
+  // reseting removeData value
+  useEffect(() => {
+    if (!confirm.value) {
+      setRemoveData(null)
+    }
+  }, [confirm])
+
+  // Edit customer
+  useEffect(() => {
+    if (voucher) {
+      if (voucher) {
+        console.log("voucher", voucher);
+        // const updatedData = {
+        //   avatar: customer.avatar,
+        //   email: customer.email,
+        //   firstName: customer.firstName,
+        //   gender: customer.gender,
+        //   lastName: customer.lastName,
+        //   phoneNumber: customer.phoneNumber,
+        //   country: customer.country,
+        //   location: customer.location && customer.location.length > 0 ? customer.location[0] : null
+        // };
+        // setVoucherData(updatedData);
+        // // Use setValue to update each field separately
+        // Object.entries(updatedData).forEach(([fieldName, value]: any) => {
+        //   methods.setValue(fieldName, value);
+        // });
+
+      }
+    } else {
+      setVoucherData(null)
+      reset();
+    }
+  }, [voucher, methods, reset])
+
+
+
+  const handleVoucherData = (e: any) => {
+    setVoucherData((prevData: any) => ({
+      ...prevData,
+      [e.target.name]: e.target.value
+    }));
+  }
+  const handleNestedVoucherData = (e: any) => {
+    const { name, value } = e.target;
+    const [parentKey, nestedKey] = name.split('.');
+
+    setVoucherData((prevData: any) => ({
+      ...prevData,
+      [parentKey]: prevData?.parentKey ? {
+        ...prevData[parentKey],
+        [nestedKey]: value,
+      } : {
+        [nestedKey]: value,
+      },
+    }));
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // ----------------------------------------------------------------------------------
   const dateError =
     filters.startDate && filters.endDate
       ? filters.startDate.getTime() > filters.endDate.getTime()
@@ -242,7 +426,7 @@ export default function OrdersListView() {
 
               <TabPanel value={value} sx={{ px: 0, pb: 0 }}>
                 <Grid container spacing={2}>
-                  {data.map((order, indx) =>
+                  {data.map((order: any, indx: any) =>
                     <Grid key={indx} item xs={12}>
                       {/* <Paper elevation={4} > */}
                       <Grid container item alignItems='center' justifyContent='space-between' rowGap={3} p={3} minHeight="80px" sx={order.status ? stylesActive : stylesDisabled}
@@ -489,162 +673,252 @@ export default function OrdersListView() {
             <DetailsNavBar
               open={openCreateVoucher}
               onClose={handleDrawerCloseCommon('new')}
-              title="Create New Order"
-              actions={<Button
-                fullWidth
-                variant="soft"
-                color="success"
-                size="large"
-                sx={{ borderRadius: '30px' }}
-              >
-                Save
-              </Button>}
+              title={editId ? "Edit Voucher" : "Add New Voucher"}
+              actions={<Stack alignItems='center' justifyContent='center' spacing="10px">
+                <LoadingButton
+                  fullWidth
+                  variant="soft"
+                  color="success"
+                  size="large"
+                  sx={{ borderRadius: '30px' }}
+                  loading={isSubmitting}
+                  onClick={() => methods.handleSubmit(onSubmit as any)()}
+                >
+                  {editId ? "Update" : "Save"}
+                </LoadingButton>
+              </Stack>}
             >
-              <Divider flexItem />
-              <Box width='100%'>
+              <FormProvider methods={methods} onSubmit={onSubmit}>
+                <Divider flexItem />
+                {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+                <Box width='100%'>
 
-                <Typography pb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
-                  Voucher Name (English)
-                </Typography>
-                <TextField fullWidth variant='filled' defaultValue='Happy Eid' name='NAME' />
+                  <Typography pb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+                    Voucher Name (English)
+                  </Typography>
+                  {/* <TextField fullWidth variant='filled' defaultValue='Happy Eid' name='NAME' /> */}
+                  <RHFTextField fullWidth variant='filled' settingStateValue={handleNestedVoucherData} value={voucherData?.name?.en || ""} name='name.en' />
 
-
-                <Typography mt='20px' pb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
-                  Voucher Name (Arabic)
-                </Typography>
-                <TextField fullWidth variant='filled' defaultValue='عيد سعيد' name='NAME' />
-
-
-
-                <Typography mt='20px' pb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
-                  Voucher Code
-                </Typography>
-                <TextField fullWidth variant='filled' defaultValue="H@PPYEID2023" name='Code' />
-
-                <Stack mt='20px' pb='5px' direction='row' alignItems='center' justifyContent="space-between">
-                  <Box>
-                    <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
-                      Voucher Status
-                    </Typography>
-                    <Typography component='p' variant="subtitle2" sx={{ fontWeight: 900, fontSize: '1rem' }} >
-                      Available
-                    </Typography>
-                  </Box>
-                  <Switch defaultChecked />
-                </Stack>
+                  <Typography mt='20px' pb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+                    Voucher Name (Arabic)
+                  </Typography>
+                  {/* <TextField fullWidth variant='filled' defaultValue='عيد سعيد' name='NAME' /> */}
+                  <RHFTextField fullWidth variant='filled' settingStateValue={handleNestedVoucherData} value={voucherData?.name?.ar || ""} name='name.ar' />
 
 
-                <Grid container mt='20px' columnSpacing="20px" pb='5px' alignItems='flex-end' rowGap='20px' justifyContent='space-between'>
-                  <Grid item xs={6}>
-                    <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
-                      Select Discount Type
-                    </Typography>
-                    <Box sx={{
-                      width: "100%",
-                      height: "56px",
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#0F1349',
-                      fontSize: '.9rem',
-                      background: 'rgb(209, 255, 240)',
-                      borderRadius: '16px',
-                      fontWeight: 800,
-                      border: '2px solid #1AF9B3',
-                    }}>
-                      Fixed Amount
+                  <Typography mt='20px' pb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+                    Voucher Code
+                  </Typography>
+                  {/* <TextField fullWidth variant='filled' defaultValue="H@PPYEID2023" name='Code' /> */}
+                  <RHFTextField fullWidth variant='filled' settingStateValue={handleVoucherData} value={voucherData?.code || ""} name='code' />
+
+                  <Stack mt='20px' pb='5px' direction='row' alignItems='center' justifyContent="space-between">
+                    <Box>
+                      <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+                        Voucher Status
+                      </Typography>
+                      <Typography component='p' variant="subtitle2" sx={{ fontWeight: 900, fontSize: '1rem' }} >
+                        Available
+                      </Typography>
                     </Box>
-                  </Grid>
+                    <Switch checked={voucherData?.status || false} onChange={handleVoucherData} name='status' />
+                  </Stack>
 
-                  <Grid item xs={6}>
-                    <Box sx={{
-                      width: "100%",
-                      height: "56px",
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#8688A3',
-                      fontSize: '.9rem',
-                      background: 'rgb(245, 245, 248)',
-                      borderRadius: '16px',
-                      fontWeight: 800
-                    }}>
-                      Percentage
-                    </Box>
-                  </Grid>
 
-                  <Grid item xs={6}>
-                    <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
-                      Discount Amount
-                    </Typography>
-                    <TextField fullWidth variant='filled' defaultValue='10' name='PHONE'
-                      sx={{
-                        '& .MuiInputAdornment-root': {
-                          marginTop: '0px !important',
-                        },
-                        '& input': {
-                          paddingRight: '0px !important'
-                        }
+                  <Grid container mt='20px' columnSpacing="20px" pb='5px' alignItems='flex-end' rowGap='20px' justifyContent='space-between'>
+                    <Grid item xs={6}>
+                      <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
+                        Select Discount Type
+                      </Typography>
+                      <Box sx={{
+                        width: "100%",
+                        height: "56px",
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '.9rem',
+                        borderRadius: '16px',
+                        fontWeight: 800,
+                        ...(discountTypeToggle === 'FIXED' ? activeTab : nonActiveTab)
                       }}
-                      InputProps={{
-                        endAdornment: <InputAdornment position="end">
-                          <Stack direction='row' alignItems='center' spacing="5px">
-                            <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.6rem' }} >
-                              KWD
-                            </Typography>
-                            <Iconify icon="mingcute:down-fill" width={20} />
-                          </Stack>
-                        </InputAdornment>,
-                      }} />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
-                      Total Uses
-                    </Typography>
-                    <TextField fullWidth variant='filled' defaultValue='500' name='PHONE' />
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
-                      Start Date
-                    </Typography>
-                    <TextField fullWidth variant='filled' defaultValue='2023-06-28' name='sd' />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
-                      End Date
-                    </Typography>
-                    <TextField fullWidth type='date' variant='filled' defaultValue='2023-10-07' name='ed' />
-                  </Grid>
-
-
-                  <Grid item xs={12}>
-                    <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
-                      Voucher Coverage
-                    </Typography>
-                    <FormControl fullWidth>
-                      <Select
-                        variant='filled'
-                        value={mySubCat}
-                        sx={{
-                          fontWeight: 900
-                        }}
-                        onChange={handleChangeMySubCat}
-                      // endAdornment={<div style={{ fontSize: '12px', marginRight: '20px', marginTop: '3px' }}>KWD</div>}
+                        onClick={() => setDiscountTypeToggle('FIXED')}
                       >
-                        <MenuItem value='All Products'>All Products</MenuItem>
-                        <MenuItem value='Laptops'>Laptops</MenuItem>
-                        <MenuItem value='Clothes'>Clothes</MenuItem>
-                      </Select>
-                    </FormControl>
+                        Fixed Amount
+                      </Box>
+
+                    </Grid>
+
+                    <Grid item xs={6}>
+                      <Box sx={{
+                        width: "100%",
+                        height: "56px",
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '.9rem',
+                        borderRadius: '16px',
+                        fontWeight: 800,
+                        ...(discountTypeToggle === 'PERCENTAGE' ? activeTab : nonActiveTab)
+                      }}
+                        onClick={() => setDiscountTypeToggle('PERCENTAGE')}
+                      >
+                        Percentage
+                      </Box>
+                    </Grid>
+
+                    {discountTypeToggle === 'FIXED' ? (
+                      <Grid item xs={6}>
+                        <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
+                          Discount Amount
+                        </Typography>
+                        {/* <TextField fullWidth variant='filled' defaultValue='10' name='PHONE'
+                          sx={{
+                            '& .MuiInputAdornment-root': {
+                              marginTop: '0px !important',
+                            },
+                            '& input': {
+                              paddingRight: '0px !important'
+                            }
+                          }}
+                          InputProps={{
+                            endAdornment: <InputAdornment position="end">
+                              <Stack direction='row' alignItems='center' spacing="5px">
+                                <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.6rem' }} >
+                                  KWD
+                                </Typography>
+                                <Iconify icon="mingcute:down-fill" width={20} />
+                              </Stack>
+                            </InputAdornment>,
+                          }} /> */}
+                        <RHFTextField fullWidth variant='filled' settingStateValue={handleVoucherData} value={voucherData?.discountAmount || ""} name='discountAmount'
+                          sx={{
+                            '& .MuiInputAdornment-root': {
+                              marginTop: '0px !important',
+                            },
+                            '& input': {
+                              paddingRight: '0px !important'
+                            }
+                          }}
+                          InputProps={{
+                            endAdornment: <InputAdornment position="end">
+                              <Stack direction='row' alignItems='center' spacing="5px">
+                                <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.6rem' }} >
+                                  KWD
+                                </Typography>
+                                <Iconify icon="mingcute:down-fill" width={20} />
+                              </Stack>
+                            </InputAdornment>,
+                          }} />
+                      </Grid>
+                    ) : (
+                      <>
+                        <Grid item xs={6}>
+                          <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
+                            Discount Percentage
+                          </Typography>
+                          {/* <TextField fullWidth variant='filled' defaultValue="20%" name='Percentage' /> */}
+                          <RHFTextField fullWidth variant='filled' settingStateValue={handleVoucherData} value={voucherData?.discountPercentage || ""} name='discountPercentage' />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
+                            Up to
+                          </Typography>
+                          {/* <TextField fullWidth variant='filled' defaultValue='10' name='PHONE'
+                            sx={{
+                              '& .MuiInputAdornment-root': {
+                                marginTop: '0px !important',
+                              },
+                              '& input': {
+                                paddingRight: '0px !important'
+                              }
+                            }}
+                            InputProps={{
+                              endAdornment: <InputAdornment position="end">
+                                <Stack direction='row' alignItems='center' spacing="5px">
+                                  <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.6rem' }} >
+                                    KWD
+                                  </Typography>
+                                  <Iconify icon="mingcute:down-fill" width={20} />
+                                </Stack>
+                              </InputAdornment>,
+                            }} /> */}
+                          <RHFTextField fullWidth variant='filled' settingStateValue={handleVoucherData} value={voucherData?.upTo || ""} name='upTo'
+                            sx={{
+                              '& .MuiInputAdornment-root': {
+                                marginTop: '0px !important',
+                              },
+                              '& input': {
+                                paddingRight: '0px !important'
+                              }
+                            }}
+                            InputProps={{
+                              endAdornment: <InputAdornment position="end">
+                                <Stack direction='row' alignItems='center' spacing="5px">
+                                  <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.6rem' }} >
+                                    KWD
+                                  </Typography>
+                                  <Iconify icon="mingcute:down-fill" width={20} />
+                                </Stack>
+                              </InputAdornment>,
+                            }} />
+                        </Grid>
+                      </>
+                    )}
+
+
+
+                    <Grid item xs={12}>
+                      <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
+                        Total Uses
+                      </Typography>
+                      {/* <TextField fullWidth variant='filled' defaultValue='500' name='PHONE' /> */}
+                      <RHFTextField fullWidth variant='filled' settingStateValue={handleVoucherData} value={voucherData?.totalUses || ""} name='totalUses' />
+                    </Grid>
+
+                    <Grid item xs={6}>
+                      <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
+                        Start Date
+                      </Typography>
+                      {/* <TextField fullWidth type='date' variant='filled' defaultValue='2023-06-28' name='sd' /> */}
+                      <RHFTextField fullWidth type='date' variant='filled' settingStateValue={handleVoucherData} value={voucherData?.availabitiyStarts || ""} name='availabitiyStarts' />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
+                        End Date
+                      </Typography>
+                      {/* <TextField fullWidth type='date' variant='filled' defaultValue='2023-10-07' name='ed' /> */}
+                      <RHFTextField fullWidth type='date' variant='filled' settingStateValue={handleVoucherData} value={voucherData?.availabitiyEnds || ""} name='availabitiyEnds' />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
+                        Voucher Coverage
+                      </Typography>
+                      <FormControl fullWidth>
+                        <Select
+                          variant='filled'
+                          sx={{
+                            fontWeight: 900
+                          }}
+                          // value={mySubCat}
+                          // onChange={handleChangeMySubCat}
+
+                          value={voucherData?.coverage}
+                          onChange={handleVoucherData}
+                          name='coverage'
+                        >
+                          <MenuItem value='AllProducts'>All Products</MenuItem>
+                          <MenuItem value='Laptops'>Laptops</MenuItem>
+                          <MenuItem value='Clothes'>Clothes</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+
+
                   </Grid>
 
 
-                </Grid>
-
-
-                {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+                  {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
                   Mobile Number
                 </Typography>
 
@@ -670,7 +944,7 @@ export default function OrdersListView() {
                 /> */}
 
 
-                {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+                  {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
                   Email Address (Optional)
                 </Typography>
                 <TextField fullWidth variant='filled' type='email' defaultValue='ahmed.omar@gmail.com' name='email' />
@@ -699,7 +973,10 @@ export default function OrdersListView() {
                 </Box> */}
 
 
-              </Box>
+                </Box>
+              </FormProvider>
+
+
             </DetailsNavBar>
 
 
@@ -731,7 +1008,7 @@ export default function OrdersListView() {
 
           </Box>
         </Grid>
-      </Grid>
+      </Grid >
     </Container >
   );
 }

@@ -10,13 +10,19 @@ import {
   IRequest,
 } from 'src/utils/axios';
 
-export const fetchVouchersList = createAsyncThunk('voucher/fetchList', async () => {
-  const response = await getRequest(`${endpoints.voucher.list}`, defaultConfig);
+export const fetchVouchersList = createAsyncThunk(
+  'voucher/fetchList',
+  async (params: IRequest, { rejectWithValue }) => {
+    try {
+      const response = await getRequest(`${endpoints.voucher.list}`, defaultConfig);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 
-  return response;
-});
-
-export const fetchOneVoucher = createAsyncThunk('voucher/fetchOne', async (voucherId: number) => {
+export const fetchOneVoucher = createAsyncThunk('voucher/fetchOne', async (voucherId: any) => {
   const response = await getRequest(`${endpoints.voucher.list}/${voucherId}`, defaultConfig);
 
   return response.data;
@@ -52,9 +58,10 @@ const voucherSlice = createSlice({
   name: 'voucher',
   initialState: {
     list: [],
-    voucher: null,
+    voucher: null as any,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setVoucher: (state, action: PayloadAction<any>) => {
@@ -67,13 +74,16 @@ const voucherSlice = createSlice({
       .addCase(fetchVouchersList.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.status = 'loading';
       })
       .addCase(fetchVouchersList.fulfilled, (state, action) => {
+        state.status = 'succeeded';
         state.loading = false;
-        state.list = action.payload;
+        state.list = action.payload.data;
       })
       .addCase(fetchVouchersList.rejected, (state, action) => {
-        state.loading = false;
+        state.status = 'failed';
+        state.loading = true;
         state.error = action.error.message !== undefined ? action.error.message : null;
       })
 
