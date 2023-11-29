@@ -4,6 +4,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
+
+import * as Yup from 'yup';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form';
+import LoadingButton from '@mui/lab/LoadingButton';
+
+
 // @mui
 import Divider from '@mui/material/Divider';
 import { alpha } from '@mui/material/styles';
@@ -11,15 +20,14 @@ import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Switch from '@mui/material/Switch';
-import { Box, Grid, Stack, Typography, Paper } from '@mui/material';
+import { Box, Grid, Stack, Typography, Paper, Alert } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
-import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Select from '@mui/material/Select';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
@@ -49,36 +57,79 @@ import ProductTableToolbar from '../product-table-toolbar';
 
 // ----------------------------------------------------------------------
 
-const STATUS_OPTIONS = [
-  { value: 'All', label: 'All Products' },
-  { value: 'Mobiles', label: 'Mobiles' },
-  { value: 'Laptops', label: 'Laptops' },
-  { value: 'Watches', label: 'Watches' },
-];
-
-
-// ----------------------------------------------------------------------
-
 export default function OrdersListView() {
 
   const dispatch = useDispatch<AppDispatch>();
   const { enqueueSnackbar } = useSnackbar();
   const categoryState = useSelector((state: any) => state.category);
   const loadStatus = useSelector((state: any) => state.products.status);
-  const { list, loading, error, product } = useSelector((state: any) => state.products);
+  const { list, error, product } = useSelector((state: any) => state.products);
 
 
-  const [productData, setProductData] = useState<any>({});
+  const [productData, setProductData] = useState<any>(null);
   const [editProductId, setEditProductId] = useState<any>(null);
   const [removeData, setRemoveData] = useState<any>(null)
 
   const settings = useSettingsContext();
 
   const [value, setValue] = useState<any>('All');
-
   const confirm = useBoolean();
-
   const [data, setData] = useState([]);
+
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const ProductSchema = Yup.object().shape({
+    name: Yup.object().shape({
+      en: Yup.string().required('English Name is required'),
+      ar: Yup.string().required('Arabic Name is required'),
+    }),
+
+    categoryId: Yup.string().required('Category is required'),
+    subCategory: Yup.string().required('Sub Category is required'),
+
+    price: Yup.number().required('Field is required'),
+    description: Yup.object().shape({
+      en: Yup.string().required('English Name is required'),
+      ar: Yup.string().required('Arabic Name is required'),
+    }),
+    quantity: Yup.number().required('Field is required'),
+  });
+
+  const methods = useForm({
+    resolver: yupResolver(ProductSchema)
+  });
+
+  const {
+    reset,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = methods;
+
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      console.log("data", data);
+      if (editProductId) {
+        await editProductFun();
+      } else {
+        await createProductFun();
+      }
+    } catch (error) {
+      console.error(error);
+      reset();
+      setErrorMsg(typeof error === 'string' ? error : error.message);
+    }
+  });
+
+
+
+
+
+
+
+
+
+
+
 
 
   useEffect(() => {
@@ -99,7 +150,7 @@ export default function OrdersListView() {
   }, [confirm])
 
   useEffect(() => {
-    if (product) {
+    if (product && Object.entries(product).length > 0) {
       const newProduct = {
         name: {
           en: product.name,
@@ -116,11 +167,23 @@ export default function OrdersListView() {
         quantity: product.quantity,
         publish_app: product.publish_app,
       }
-      setProductData(newProduct)
+      setProductData(newProduct);
+      // Use setValue to update each field separately
+      Object.entries(newProduct).forEach(([fieldName, nestedData]: any) => {
+        if (fieldName === 'name' || fieldName === 'description') {
+          Object.entries(nestedData).forEach(([nestedFieldName, value]: any) => {
+            const fullFieldName: string = `${fieldName}.${nestedFieldName}`;
+            methods.setValue(fullFieldName as "name.en" | "name.ar" | "description.en" | "description.ar", value);
+          });
+        } else {
+          methods.setValue(fieldName, nestedData);
+        }
+      });
     } else {
-      setProductData(null)
+      setProductData(null);
+      reset();
     }
-  }, [product])
+  }, [product, reset, methods])
 
 
 
@@ -211,7 +274,6 @@ export default function OrdersListView() {
     });
   }
   const editProductFun = () => {
-
     const formData = convertStateToFormData(productData);
     dispatch(editProduct({ productId: editProductId, data: formData })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
@@ -450,89 +512,95 @@ export default function OrdersListView() {
         onClose={handleDrawerCloseCommon('new')}
         title={editProductId ? "Edit Product" : "Add New Product"}
         actions={<Stack alignItems='center' justifyContent='center' spacing="10px">
-          <Button
+          <LoadingButton
             fullWidth
             variant="soft"
             color="success"
             size="large"
-            onClick={editProductId ? editProductFun : createProductFun}
+            // onClick={editProductId ? editProductFun : createProductFun}
+            loading={isSubmitting}
+            onClick={() => methods.handleSubmit(onSubmit as any)()}
             sx={{ borderRadius: '30px' }}
           >
             {editProductId ? "Update" : "Save"}
-          </Button>
+          </LoadingButton>
         </Stack>}
       >
 
-        <Divider flexItem />
+        <FormProvider methods={methods} onSubmit={onSubmit}>
+          <Divider flexItem />
+          {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+          <Box width='100%'>
+            <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Product Name (English)
+            </Typography>
+            {/* defaultValue='iPhone 13 Pro Max' */}
+            {/* <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.en || ""} name='name.en' /> */}
+            <RHFTextField fullWidth variant='filled' settingStateValue={handleNestedProductData} value={productData?.name?.en || ""} name='name.en' />
 
-        <Box width='100%'>
-          <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Product Name (English)
-          </Typography>
-          {/* defaultValue='iPhone 13 Pro Max' */}
-          <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.en || ""} name='name.en' />
-
-          <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Product Name (Arabic)
-          </Typography>
-          {/* defaultValue="ايفون 13 برو ماكس" */}
-          <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.ar || ""} name='name.ar' />
-
-          <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Upload Product Images
-          </Typography>
+            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Product Name (Arabic)
+            </Typography>
+            {/* defaultValue="ايفون 13 برو ماكس" */}
+            {/* <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.ar || ""} name='name.ar' /> */}
+            <RHFTextField fullWidth variant='filled' settingStateValue={handleNestedProductData} value={productData?.name?.ar || ""} name='name.ar' />
 
 
-          <Box mt='10px' sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-            {imagesItrations.map((itration: any, ind: any) => {
-              return (
-                <Box key={ind}>
-                  {/* {productData?.images ? ( */}
-                  {productData?.images?.length > 0 && productData?.images[itration] ? (
-                    <Box sx={{
-                      width: '100px', height: '100px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                      flexDirection: 'column', border: '1px dashed rgb(134, 136, 163,.5)', borderRadius: '16px',
-                      position: 'relative', overflow: "hidden"
-                    }}>
-                      <Box component='img'
-                        src={typeof productData?.images[itration] === 'string' ? productData?.images[itration] : URL.createObjectURL(productData?.images[itration])}
-                        // src={typeof productData?.images === 'string' ? productData?.images : URL.createObjectURL(productData?.images)}
-                        alt=''
-                        sx={{ maxHeight: "95px" }} />
-                      <Box onClick={() => handleRemoveImage(itration)} sx={{ backgroundColor: 'rgb(134, 136, 163,.09)', padding: '10px 11px 7px 11px', borderRadius: '36px', cursor: "pointer", position: 'absolute', top: 0, right: 0 }}>
-                        <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
-                      </Box>
-                    </Box>
-                  ) : (
-                    <UploadBox
-                      sx={{ width: '100px!important', height: '100px!important', textAlign: 'center', padding: '20px' }}
-                      onDrop={handleAddImage}
-                      maxFiles={1}
-                      maxSize={5242880}
-                      accept={{
-                        'image/jpeg': [],
-                        'image/png': []
-                      }}
-                      placeholder={
-                        <Box sx={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                          flexDirection: 'column',
-                        }}>
-                          <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
-                          <span style={{ color: '#8688A3', fontSize: '.6rem' }}>Upload Image</span>
+            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Upload Product Images
+            </Typography>
+
+
+            <Box mt='10px' sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+              {imagesItrations.map((itration: any, ind: any) => {
+                return (
+                  <Box key={ind}>
+                    {/* {productData?.images ? ( */}
+                    {productData?.images?.length > 0 && productData?.images[itration] ? (
+                      <Box sx={{
+                        width: '100px', height: '100px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                        flexDirection: 'column', border: '1px dashed rgb(134, 136, 163,.5)', borderRadius: '16px',
+                        position: 'relative', overflow: "hidden"
+                      }}>
+                        <Box component='img'
+                          src={typeof productData?.images[itration] === 'string' ? productData?.images[itration] : URL.createObjectURL(productData?.images[itration])}
+                          // src={typeof productData?.images === 'string' ? productData?.images : URL.createObjectURL(productData?.images)}
+                          alt=''
+                          sx={{ maxHeight: "95px" }} />
+                        <Box onClick={() => handleRemoveImage(itration)} sx={{ backgroundColor: 'rgb(134, 136, 163,.09)', padding: '10px 11px 7px 11px', borderRadius: '36px', cursor: "pointer", position: 'absolute', top: 0, right: 0 }}>
+                          <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
                         </Box>
-                      }
-                    />
-                  )}
-                </Box>
+                      </Box>
+                    ) : (
+                      <UploadBox
+                        sx={{ width: '100px!important', height: '100px!important', textAlign: 'center', padding: '20px' }}
+                        onDrop={handleAddImage}
+                        maxFiles={1}
+                        maxSize={5242880}
+                        accept={{
+                          'image/jpeg': [],
+                          'image/png': []
+                        }}
+                        placeholder={
+                          <Box sx={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                            flexDirection: 'column',
+                          }}>
+                            <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
+                            <span style={{ color: '#8688A3', fontSize: '.6rem' }}>Upload Image</span>
+                          </Box>
+                        }
+                      />
+                    )}
+                  </Box>
 
-              )
-            })}
+                )
+              })}
 
-          </Box>
+            </Box>
 
-          {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Upload Product Video
           </Typography>
           <Box mt='10px' sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
@@ -545,47 +613,73 @@ export default function OrdersListView() {
             </Box>
           </Box> */}
 
-          <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Category
-          </Typography>
+            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Category
+            </Typography>
 
-          <FormControl fullWidth>
-            <Select
+            {/* <FormControl fullWidth>
+              <Select
+                variant='filled'
+                value={productData?.categoryId || ""}
+                onChange={handleProductData}
+                name='categoryId'
+              >
+                {categoryState.list.map((cat: any, index: any) => (
+                  <MenuItem key={index} value={cat._id}>{cat.name.en || cat.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl> */}
+            <RHFSelect
+              fullWidth
               variant='filled'
-              value={productData?.categoryId || ""}
-              onChange={handleProductData}
               name='categoryId'
+              id="demo-simple-select2"
+              value={productData?.categoryId || null}
+              settingStateValue={handleProductData}
             >
               {categoryState.list.map((cat: any, index: any) => (
                 <MenuItem key={index} value={cat._id}>{cat.name.en || cat.name}</MenuItem>
               ))}
-            </Select>
-          </FormControl>
+            </RHFSelect>
 
-          <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Sub-Category
-          </Typography>
+            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Sub-Category
+            </Typography>
 
-          <FormControl fullWidth>
-            <Select
+            {/* <FormControl fullWidth>
+              <Select
+                variant='filled'
+                value={productData?.subCategory || ""}
+                onChange={handleProductData}
+                name='subCategory'
+              >
+                {productData?.categoryId && categoryState.subCatList.filter((item: any) => item.category === productData.categoryId).map((item: any, ind: any) => (
+                  <MenuItem key={ind} value={item._id}>{item.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl> */}
+            <RHFSelect
+              fullWidth
               variant='filled'
-              value={productData?.subCategory || ""}
-              onChange={handleProductData}
+              id="demo-simple-select"
               name='subCategory'
+              value={productData?.subCategory || null}
+              settingStateValue={handleProductData}
             >
               {productData?.categoryId && categoryState.subCatList.filter((item: any) => item.category === productData.categoryId).map((item: any, ind: any) => (
                 <MenuItem key={ind} value={item._id}>{item.name}</MenuItem>
               ))}
-            </Select>
-          </FormControl>
+            </RHFSelect>
 
-          <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Price
-          </Typography>
+            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Price
+            </Typography>
 
-          <TextField fullWidth variant='filled' onChange={handleProductData} value={productData?.price || ""} name='price' />
+            {/* <TextField fullWidth variant='filled' onChange={handleProductData} value={productData?.price || ""} name='price' /> */}
+            <RHFTextField fullWidth variant='filled' settingStateValue={handleProductData} value={productData?.price || ""} name='price' />
 
-          {/* <FormControl fullWidth>
+
+            {/* <FormControl fullWidth>
             <Select
               variant='filled'
               value={dropDown.price}
@@ -596,40 +690,60 @@ export default function OrdersListView() {
             </Select>
           </FormControl> */}
 
-          <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
-            Description (English)
-          </Typography>
+            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+              Description (English)
+            </Typography>
 
-          <TextField
-            variant='filled'
-            multiline
-            fullWidth
-            rows={5}
-            sx={{ fontWeight: 900, fontSize: '26px' }}
-            // defaultValue="It is a long established fact that a read will be distracted by the readable content of a page."
-            value={productData?.description?.en || ""}
-            onChange={handleNestedProductData}
-            name='description.en'
-          />
+            {/* <TextField
+              variant='filled'
+              multiline
+              fullWidth
+              rows={5}
+              sx={{ fontWeight: 900, fontSize: '26px' }}
+              value={productData?.description?.en || ""}
+              onChange={handleNestedProductData}
+              name='description.en'
+            /> */}
+            <RHFTextField
+              variant='filled'
+              multiline
+              fullWidth
+              rows={5}
+              sx={{ fontWeight: 900, fontSize: '26px' }}
+              value={productData?.description?.en || ""}
+              settingStateValue={handleNestedProductData}
+              name='description.en'
+            />
 
-          <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
-            Description (Arabic)
-          </Typography>
+            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+              Description (Arabic)
+            </Typography>
 
-          <TextField
-            variant='filled'
-            multiline
-            fullWidth
-            rows={5}
-            dir="rtl"
-            sx={{ fontWeight: 900, fontSize: '26px' }}
-            // defaultValue="هنالك العديد من الأنواع المتوفرة لنصوص لوريم إيبسوم، ولكن الغالبية تم تعديلها بشكل ما عبر إدخال بعض الكلمات العشوائية"
-            value={productData?.description?.ar || ""}
-            onChange={handleNestedProductData}
-            name='description.ar'
-          />
+            {/* <TextField
+              variant='filled'
+              multiline
+              fullWidth
+              rows={5}
+              dir="rtl"
+              sx={{ fontWeight: 900, fontSize: '26px' }}
+              // defaultValue="هنالك العديد من الأنواع المتوفرة لنصوص لوريم إيبسوم، ولكن الغالبية تم تعديلها بشكل ما عبر إدخال بعض الكلمات العشوائية"
+              value={productData?.description?.ar || ""}
+              onChange={handleNestedProductData}
+              name='description.ar'
+            /> */}
+            <RHFTextField
+              variant='filled'
+              multiline
+              fullWidth
+              rows={5}
+              dir="rtl"
+              sx={{ fontWeight: 900, fontSize: '26px' }}
+              value={productData?.description?.ar || ""}
+              settingStateValue={handleNestedProductData}
+              name='description.ar'
+            />
 
-          {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Available
           </Typography>
           <FormControl fullWidth>
@@ -643,13 +757,13 @@ export default function OrdersListView() {
             </Select>
           </FormControl> */}
 
-          <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
-            Quantity (in stock)
-          </Typography>
-          <TextField type='number' fullWidth variant='filled' onChange={handleProductData} value={productData?.quantity || ""} name='quantity' />
+            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+              Quantity (in stock)
+            </Typography>
+            {/* <TextField type='number' fullWidth variant='filled' onChange={handleProductData} value={productData?.quantity || ""} name='quantity' /> */}
+            <RHFTextField type='number' fullWidth variant='filled' settingStateValue={handleProductData} value={productData?.quantity || ""} name='quantity' />
 
-
-          {/* <FormControl fullWidth>
+            {/* <FormControl fullWidth>
             <Select
               variant='filled'
               value={dropDown.qty}
@@ -660,24 +774,24 @@ export default function OrdersListView() {
             </Select>
           </FormControl> */}
 
-          <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
-            Product Status
-          </Typography>
-
-          <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
-            borderRadius: '16px', padding: '7px 14px', backgroundColor: '#F5F6F8'
-          }} >
-            <Typography component='p' variant="subtitle2" sx={{ fontWeight: 900, fontSize: '.9rem' }} >
-              Published
+            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+              Product Status
             </Typography>
-            <Switch size="medium"
-              checked={productData?.publish_app || false}
-              onChange={(e: any) => setProductData({ ...productData, publish_app: e.target.checked })}
-            />
-          </Stack>
+
+            <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
+              borderRadius: '16px', padding: '7px 14px', backgroundColor: '#F5F6F8'
+            }} >
+              <Typography component='p' variant="subtitle2" sx={{ fontWeight: 900, fontSize: '.9rem' }} >
+                Published
+              </Typography>
+              <Switch size="medium"
+                checked={productData?.publish_app || false}
+                onChange={(e: any) => setProductData({ ...productData, publish_app: e.target.checked })}
+              />
+            </Stack>
 
 
-          {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+            {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
             Barcode (Optional)
           </Typography>
           <TextField fullWidth variant='filled' defaultValue='481155444762' name='branchCode'
@@ -688,7 +802,7 @@ export default function OrdersListView() {
             }}
           /> */}
 
-          {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Color (Optional)
           </Typography>
           <FormControl fullWidth>
@@ -716,7 +830,8 @@ export default function OrdersListView() {
 
             </Select>
           </FormControl> */}
-        </Box>
+          </Box>
+        </FormProvider>
       </DetailsNavBar>
 
 

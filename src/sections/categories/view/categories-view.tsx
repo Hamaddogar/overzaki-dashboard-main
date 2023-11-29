@@ -6,15 +6,22 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+
+import * as Yup from 'yup';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form';
+import LoadingButton from '@mui/lab/LoadingButton';
+
 // @mui
 import Divider from '@mui/material/Divider';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import { Box, Grid, Stack, Typography, Paper } from '@mui/material';
-import TextField from '@mui/material/TextField';
+import { Box, Grid, Stack, Typography, Paper, Alert } from '@mui/material';
+// import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+// import FormControl from '@mui/material/FormControl';
+import { SelectChangeEvent } from '@mui/material/Select';
 // components
 import { useSettingsContext } from 'src/components/settings';
 import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
@@ -23,13 +30,12 @@ import Iconify from 'src/components/iconify/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { BottomActions } from 'src/components/bottom-actions';
-import { Icon } from '@iconify/react';
 import { UploadBox } from 'src/components/upload';
 import { useSnackbar } from 'notistack';
 import { useDispatch, useSelector } from 'react-redux';
 // import { fetchCustomersList, fetchOneCustomer } from '../../../redux/store/thunks/customers';
 import { createCategory, createSubCategory, deleteCategory, deleteSubCategory, editCategory, editSubCategory, fetchCategorysList, fetchOneCategory, fetchOneSubCategory, fetchSubCategorysList, setCategory, setSubCategory } from '../../../redux/store/thunks/category';
-import type { RootState, AppDispatch } from "../../../redux/store/store";
+import type { AppDispatch } from "../../../redux/store/store";
 
 
 
@@ -50,19 +56,83 @@ export default function CategoriesView() {
 
   const [activeCategory, setActiveCategory] = useState('main');
 
-  const [mySubCat, setMySubCat] = React.useState('Electronic Devices');
-
   const [categoryDrawer, setCategoryDrawer] = useState(false);
 
   const [subCategoryDrawer, setSubCategoryDrawer] = useState(false);
 
   const loadStatus = useSelector((state: any) => state.category.status);
-  const { list, subCatList, loading, error, category, subCategory } = useSelector((state: any) => state.category);
+  const { list, subCatList, error, category, subCategory } = useSelector((state: any) => state.category);
 
   const [categoriesData, setCategoriesData] = useState<any>(null);
   const [subCategoriesData, setSubCategoriesData] = useState<any>(null);
 
+  const [errorMsg, setErrorMsg] = useState<any>('');
+
+
   const { enqueueSnackbar } = useSnackbar();
+
+
+
+
+  const CategorySchema = Yup.object().shape({
+    name: Yup.object().shape({
+      en: Yup.string().required('English Name is required'),
+      ar: Yup.string().required('Arabic Name is required'),
+    }),
+  });
+
+  // Sub Category
+  const SubCategorySchema = Yup.object().shape({
+    name: Yup.object().shape({
+      en: Yup.string().required('English Name is required'),
+      ar: Yup.string().required('Arabic Name is required'),
+    }),
+    category: Yup.string().required('Category is required'),
+  });
+
+
+  const methods = useForm({
+    resolver: yupResolver(CategorySchema)
+  });
+
+  const subCatMethods = useForm({
+    resolver: yupResolver(SubCategorySchema)
+  });
+
+  const {
+    reset,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = methods;
+
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      if (editCatId) {
+        await handleEditCategory();
+      } else {
+        await handleCreateCategory();
+      }
+    } catch (error) {
+      console.error(error);
+      reset();
+      setErrorMsg(typeof error === 'string' ? error : error.message);
+    }
+  });
+
+  const onSubmitSubCat = subCatMethods.handleSubmit(async (data) => {
+    try {
+      if (editSubCatId) {
+        await handleEditSubCategory();
+      } else {
+        await handleCreateSubCategory();
+      }
+    } catch (error) {
+      console.error(error);
+      subCatMethods.reset();
+      setErrorMsg(typeof error === 'string' ? error : error.message);
+    }
+  });
+
 
   useEffect(() => {
     if (loadStatus === 'idle') {
@@ -81,19 +151,41 @@ export default function CategoriesView() {
 
 
   useEffect(() => {
-    if (category) {
-      setCategoriesData(category)
+    if (category && Object.entries(category).length > 0) {
+      setCategoriesData(category);
+      if (category?.name) {
+        Object.entries(category).forEach(([fieldName, nestedData]: any) => {
+          if (fieldName === 'name') {
+            Object.entries(nestedData).forEach(([nestedFieldName, value]: any) => {
+              const fullFieldName: string = `${fieldName}.${nestedFieldName}`;
+              methods.setValue(fullFieldName as "name.en" | "name.ar", value);
+            });
+          }
+        });
+      }
     } else {
-      setCategoriesData(null)
+      setCategoriesData(null);
+      reset();
     }
-  }, [category])
+  }, [category, reset])
 
 
   useEffect(() => {
-    if (subCategory) {
-      setSubCategoriesData(subCategory)
+    if (subCategory && Object.entries(subCategory).length > 0) {
+      setSubCategoriesData(subCategory);
+      Object.entries(subCategory).forEach(([fieldName, nestedData]: any) => {
+        if (fieldName === 'name') {
+          Object.entries(nestedData).forEach(([nestedFieldName, value]: any) => {
+            const fullFieldName: string = `${fieldName}.${nestedFieldName}`;
+            subCatMethods.setValue(fullFieldName as "name.en" | "name.ar", value);
+          });
+        } else if (fieldName === 'category') {
+          subCatMethods.setValue(fieldName, nestedData);
+        }
+      });
     } else {
-      setSubCategoriesData(null)
+      setSubCategoriesData(null);
+      subCatMethods.reset();
     }
   }, [subCategory])
 
@@ -231,6 +323,7 @@ export default function CategoriesView() {
     }));
 
   }
+
   const handleSubCategoryImage = (files: any) => {
     if (files.length > 0) {
       setSubCategoriesData({ ...subCategoriesData, image: files[0] });
@@ -520,77 +613,81 @@ export default function CategoriesView() {
         onClose={handleDrawerCloseCommon('cat')}
         title={editCatId ? "Edit Category" : "Add New Category"}
         actions={<Stack alignItems='center' justifyContent='center' spacing="10px">
-          <Button
+          <LoadingButton
             fullWidth
             variant="soft"
             color="success"
             size="large"
             sx={{ borderRadius: '30px' }}
-            onClick={editCatId ? handleEditCategory : handleCreateCategory}
+            loading={isSubmitting}
+            onClick={() => methods.handleSubmit(onSubmit as any)()}
           >
             {editCatId ? "Update" : "Save"}
-          </Button>
+          </LoadingButton>
         </Stack>}>
-        <Divider flexItem />
-        <Box width='100%'>
-          <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Category Name (English)
-          </Typography>
-          <TextField fullWidth variant='filled' value={categoriesData?.name?.en || ""} onChange={handleCategoryData} name="name.en" />
+        <FormProvider methods={methods} onSubmit={onSubmit}>
+          <Divider flexItem />
+          {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+          <Box width='100%'>
+            <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Category Name (English)
+            </Typography>
+            <RHFTextField fullWidth variant='filled' value={categoriesData?.name?.en || ""} settingStateValue={handleCategoryData} name="name.en" />
 
-          <Typography mt='20px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Category Name (Arabic)
-          </Typography>
-          <TextField fullWidth variant='filled' value={categoriesData?.name?.ar || ""} onChange={handleCategoryData} name="name.ar" />
+            <Typography mt='20px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Category Name (Arabic)
+            </Typography>
+            <RHFTextField fullWidth variant='filled' value={categoriesData?.name?.ar || ""} settingStateValue={handleCategoryData} name="name.ar" />
 
-          <Typography mt='20px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Category Image
-          </Typography>
+            <Typography mt='20px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Category Image
+            </Typography>
 
-          <Stack direction='row' spacing='10px'>
+            <Stack direction='row' spacing='10px'>
 
-            {categoriesData?.image ? (
-              <Box width={"100%"} display={"flex"} >
-                <Box display={"flex"} m={1} justifyContent={"center"} alignItems={"center"} width={"80px"} height={"80px"}>
-                  <Box component='img' borderRadius={"5px"} src={typeof categoriesData.image === 'string' ? categoriesData.image : URL.createObjectURL(categoriesData.image)} alt='' />
-                </Box>
-                <Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Box onClick={removeImage} sx={{ backgroundColor: 'rgb(134, 136, 163,.09)', padding: '10px 11px 7px 11px', borderRadius: '36px', cursor: "pointer" }}>
-                      <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
-                    </Box>
-
+              {categoriesData?.image ? (
+                <Box width={"100%"} display={"flex"} >
+                  <Box display={"flex"} m={1} justifyContent={"center"} alignItems={"center"} width={"80px"} height={"80px"}>
+                    <Box component='img' borderRadius={"5px"} src={typeof categoriesData.image === 'string' ? categoriesData.image : URL.createObjectURL(categoriesData.image)} alt='' />
                   </Box>
-                  <Typography mt='0px' component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
-                    Maximum size is 5mb
-                  </Typography>
+                  <Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <Box onClick={removeImage} sx={{ backgroundColor: 'rgb(134, 136, 163,.09)', padding: '10px 11px 7px 11px', borderRadius: '36px', cursor: "pointer" }}>
+                        <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
+                      </Box>
 
-                  <Typography mt='0px' component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
-                    You can use these extensions PNG or JPG
-                  </Typography>
+                    </Box>
+                    <Typography mt='0px' component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+                      Maximum size is 5mb
+                    </Typography>
+
+                    <Typography mt='0px' component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
+                      You can use these extensions PNG or JPG
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
 
-            ) : (
-              <UploadBox
-                onDrop={handleCategoryImage}
-                maxFiles={1}
-                maxSize={5242880}
-                accept={{
-                  'image/jpeg': [],
-                  'image/png': []
-                }}
-                placeholder={
-                  <Stack spacing={0.5} alignItems="center">
-                    <Iconify icon="eva:cloud-upload-fill" width={40} />
-                    <Typography variant="body2">Upload file</Typography>
-                  </Stack>
-                }
-                sx={{ flexGrow: 1, height: 'auto', py: 2.5, mb: 3 }}
-              />
-            )}
-          </Stack>
-        </Box>
+              ) : (
+                <UploadBox
+                  onDrop={handleCategoryImage}
+                  maxFiles={1}
+                  maxSize={5242880}
+                  accept={{
+                    'image/jpeg': [],
+                    'image/png': []
+                  }}
+                  placeholder={
+                    <Stack spacing={0.5} alignItems="center">
+                      <Iconify icon="eva:cloud-upload-fill" width={40} />
+                      <Typography variant="body2">Upload file</Typography>
+                    </Stack>
+                  }
+                  sx={{ flexGrow: 1, height: 'auto', py: 2.5, mb: 3 }}
+                />
+              )}
+            </Stack>
+          </Box>
+        </FormProvider>
       </DetailsNavBar>
 
 
@@ -600,98 +697,115 @@ export default function CategoriesView() {
         onClose={handleDrawerCloseCommon('sub')}
         title={editSubCatId ? "Edit Subcategory" : "Add New Subcategory"}
         actions={<Stack alignItems='center' justifyContent='center' spacing="10px">
-          <Button
+          <LoadingButton
             fullWidth
             variant="soft"
             color="success"
             size="large"
-            onClick={editSubCatId ? handleEditSubCategory : handleCreateSubCategory}
+            // onClick={editSubCatId ? handleEditSubCategory : handleCreateSubCategory}
+            loading={subCatMethods.formState.isSubmitting}
+            onClick={() => subCatMethods.handleSubmit(onSubmitSubCat as any)()}
             sx={{ borderRadius: '30px' }}
           >
             {editSubCatId ? "Update" : "Save"}
-          </Button>
+          </LoadingButton>
         </Stack>}
       >
 
-        <Divider flexItem />
+        <FormProvider methods={subCatMethods} onSubmit={onSubmitSubCat}>
+          <Divider flexItem />
+          {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
-        <Box width='100%'>
-          <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Subcategory Name (English)
-          </Typography>
-          <TextField fullWidth variant='filled' value={subCategoriesData?.name?.en || ""} onChange={handleSubCategoryData} name="name.en" />
+          <Box width='100%'>
+            <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Subcategory Name (English)
+            </Typography>
+            {/* <TextField fullWidth variant='filled' value={subCategoriesData?.name?.en || ""} onChange={handleSubCategoryData} name="name.en" /> */}
+            <RHFTextField fullWidth variant='filled' value={subCategoriesData?.name?.en || ""} settingStateValue={handleSubCategoryData} name="name.en" />
 
-          <Typography mt='20px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Subcategory Name (Arabic)
-          </Typography>
-          {/* <TextField fullWidth variant='filled' defaultValue='الهواتف الذكية' name='itemname' /> */}
-          <TextField fullWidth variant='filled' value={subCategoriesData?.name?.ar || ""} onChange={handleSubCategoryData} name="name.ar" />
 
-          <Typography mt='20px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Category
-          </Typography>
-          <FormControl fullWidth>
-            <Select
+            <Typography mt='20px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Subcategory Name (Arabic)
+            </Typography>
+            {/* <TextField fullWidth variant='filled' defaultValue='الهواتف الذكية' name='itemname' /> */}
+            <RHFTextField fullWidth variant='filled' value={subCategoriesData?.name?.ar || ""} settingStateValue={handleSubCategoryData} name="name.ar" />
+
+            <Typography mt='20px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Category
+            </Typography>
+            {/* <FormControl fullWidth>
+              <Select
+                variant='filled'
+                name='category'
+                value={subCategoriesData?.category || null}
+                onChange={handleChangeMySubCat}
+              >
+                {list.length > 0 && list.map((item: any, i: any) => <MenuItem key={i} value={item._id}>{item.name || ""}</MenuItem>)}
+              </Select>
+            </FormControl> */}
+            <RHFSelect
+              fullWidth
               variant='filled'
+              name='category'
               value={subCategoriesData?.category || null}
-              onChange={handleChangeMySubCat}
+              settingStateValue={handleChangeMySubCat}
             >
               {list.length > 0 && list.map((item: any, i: any) => <MenuItem key={i} value={item._id}>{item.name || ""}</MenuItem>)}
-            </Select>
-          </FormControl>
+            </RHFSelect>
 
-          <Typography my='20px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Category Image
-          </Typography>
-          <Stack direction='row' spacing='10px' alignItems='center'>
-            {subCategoriesData?.image ? (
+            <Typography my='20px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Category Image
+            </Typography>
+            <Stack direction='row' spacing='10px' alignItems='center'>
+              {subCategoriesData?.image ? (
 
-              <Box sx={{
-                width: '140px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                flexDirection: 'column', position: "relative",
-                border: '2px dashed rgb(134, 136, 163,.5)', borderRadius: '10px', overflow: "hidden"
-              }}>
-                <Box component='img' borderRadius={"5px"} src={typeof subCategoriesData.image === 'string' ? subCategoriesData.image : URL.createObjectURL(subCategoriesData.image)} alt='subCategory' />
-                <Box onClick={removeSubCatImage} sx={{ backgroundColor: 'rgb(134, 136, 163,.09)', padding: '10px 11px 7px 11px', borderRadius: '36px', cursor: "pointer", position: "absolute", top: "0px", right: "0px" }}>
-                  <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
-                </Box>
-              </Box>
-            ) : (
-              <UploadBox
-                onDrop={handleSubCategoryImage}
-                maxFiles={1}
-                maxSize={5242880}
-                accept={{
-                  'image/jpeg': [],
-                  'image/png': []
-                }}
-                placeholder={
-                  <Box sx={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                    flexDirection: 'column',
-                  }}>
-                    <Iconify icon="uil:upload" style={{ color: '#8688A3' }} />
-                    <span style={{ color: '#8688A3', fontSize: '.7rem' }}>Upload Image</span>
+                <Box sx={{
+                  width: '140px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                  flexDirection: 'column', position: "relative",
+                  border: '2px dashed rgb(134, 136, 163,.5)', borderRadius: '10px', overflow: "hidden"
+                }}>
+                  <Box component='img' borderRadius={"5px"} src={typeof subCategoriesData.image === 'string' ? subCategoriesData.image : URL.createObjectURL(subCategoriesData.image)} alt='subCategory' />
+                  <Box onClick={removeSubCatImage} sx={{ backgroundColor: 'rgb(134, 136, 163,.09)', padding: '10px 11px 7px 11px', borderRadius: '36px', cursor: "pointer", position: "absolute", top: "0px", right: "0px" }}>
+                    <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
                   </Box>
-                }
-                sx={{ flexGrow: 1, height: 'auto', py: 2.5, mb: 3 }}
-              />
+                </Box>
+              ) : (
+                <UploadBox
+                  onDrop={handleSubCategoryImage}
+                  maxFiles={1}
+                  maxSize={5242880}
+                  accept={{
+                    'image/jpeg': [],
+                    'image/png': []
+                  }}
+                  placeholder={
+                    <Box sx={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                      flexDirection: 'column',
+                    }}>
+                      <Iconify icon="uil:upload" style={{ color: '#8688A3' }} />
+                      <span style={{ color: '#8688A3', fontSize: '.7rem' }}>Upload Image</span>
+                    </Box>
+                  }
+                  sx={{ flexGrow: 1, height: 'auto', py: 2.5, mb: 3 }}
+                />
 
-            )}
-            <Box>
-              <Typography mt='0px' component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
-                Maximum size is 5mb
-              </Typography>
+              )}
+              <Box>
+                <Typography mt='0px' component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+                  Maximum size is 5mb
+                </Typography>
 
-              <Typography mt='0px' component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
-                You can use these extensions PNG or JPG
-              </Typography>
+                <Typography mt='0px' component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
+                  You can use these extensions PNG or JPG
+                </Typography>
 
-            </Box>
-          </Stack>
+              </Box>
+            </Stack>
 
-        </Box>
+          </Box>
+        </FormProvider>
       </DetailsNavBar >
 
       <ConfirmDialog

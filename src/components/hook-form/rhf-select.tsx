@@ -20,6 +20,7 @@ type RHFSelectProps = TextFieldProps & {
   maxHeight?: boolean | number;
   children: React.ReactNode;
   PaperPropsSx?: SxProps<Theme>;
+  settingStateValue?: any
 };
 
 export function RHFSelect({
@@ -29,6 +30,7 @@ export function RHFSelect({
   helperText,
   children,
   PaperPropsSx,
+  settingStateValue,
   ...other
 }: RHFSelectProps) {
   const { control } = useFormContext();
@@ -58,6 +60,12 @@ export function RHFSelect({
           }}
           error={!!error}
           helperText={error ? error?.message : helperText}
+          onChange={(event) => {
+            field.onChange(event.target.value);
+            if (settingStateValue) {
+              settingStateValue(event)
+            }
+          }}
           {...other}
         >
           {children}

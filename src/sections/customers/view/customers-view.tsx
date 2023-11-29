@@ -6,7 +6,7 @@
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form';
 import LoadingButton from '@mui/lab/LoadingButton';
 
 import { useState, useCallback, useEffect } from 'react';
@@ -99,16 +99,18 @@ export default function OrdersListView() {
 
   const [errorMsg, setErrorMsg] = useState('');
 
-  const CategorySchema = Yup.object().shape({
+  const CustomerSchema = Yup.object().shape({
     firstName: Yup.string().required('Field is required'),
     lastName: Yup.string().required('Field is required'),
     phoneNumber: Yup.string().required('Field is required'),
     email: Yup.string().required('Field is required').email('Email must be a valid email address'),
     location: Yup.string().required('Field is required'),
+    gender: Yup.string().required('gender is required'),
+    country: Yup.mixed<any>().nullable().required('Country is required'),
   });
 
   const methods = useForm({
-    resolver: yupResolver(CategorySchema)
+    resolver: yupResolver(CustomerSchema)
   });
 
   const {
@@ -155,8 +157,8 @@ export default function OrdersListView() {
   // Edit customer
   useEffect(() => {
     if (customer) {
-      if (customer)
-        setCustomerData({
+      if (customer) {
+        const updatedData = {
           avatar: customer.avatar,
           email: customer.email,
           firstName: customer.firstName,
@@ -165,11 +167,21 @@ export default function OrdersListView() {
           phoneNumber: customer.phoneNumber,
           country: customer.country,
           location: customer.location && customer.location.length > 0 ? customer.location[0] : null
-        })
+        };
+
+        setCustomerData(updatedData);
+
+        // Use setValue to update each field separately
+        Object.entries(updatedData).forEach(([fieldName, value]: any) => {
+          methods.setValue(fieldName, value);
+        });
+
+      }
     } else {
       setCustomerData(null)
+      reset();
     }
-  }, [customer])
+  }, [customer, methods, reset])
 
 
 
@@ -601,7 +613,6 @@ export default function OrdersListView() {
                   color="success"
                   size="large"
                   sx={{ borderRadius: '30px' }}
-                  // loading={methods.formState.isSubmitting}
                   loading={isSubmitting}
                   onClick={() => methods.handleSubmit(onSubmit as any)()}
                 >
@@ -677,7 +688,7 @@ export default function OrdersListView() {
                   <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
                     Gender
                   </Typography>
-                  <Select
+                  {/* <Select
                     fullWidth
                     variant='filled'
                     labelId="demo-simple-select-label"
@@ -688,7 +699,19 @@ export default function OrdersListView() {
                   >
                     <MenuItem value="MALE">Male</MenuItem>
                     <MenuItem value="FEMALE">Female</MenuItem>
-                  </Select>
+                  </Select> */}
+                  <RHFSelect
+                    fullWidth
+                    variant='filled'
+                    id="demo-simple-select"
+                    name="gender"
+                    value={customerData?.gender || ""}
+                    settingStateValue={handleCustomerData}
+                  // labelId="demo-simple-select-label"
+                  >
+                    <MenuItem value="MALE">Male</MenuItem>
+                    <MenuItem value="FEMALE">Female</MenuItem>
+                  </RHFSelect>
 
 
                   <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >

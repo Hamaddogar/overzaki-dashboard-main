@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
-import Autocomplete from '@mui/material/Autocomplete';
+import { RHFAutocomplete } from 'src/components/hook-form';
 
 export default function CountrySelect(props: any) {
     const [selectedCountry, setSelectedCountry] = React.useState<any>(null);
@@ -19,42 +18,30 @@ export default function CountrySelect(props: any) {
         props?.onChange(event, value);
     };
     return (
-        <Autocomplete
-            sx={{ py: "10px" }}
-            id="country-select-demo"
-            options={countries}
-            autoHighlight
-            getOptionLabel={(option) => option?.label || ""}
-            renderOption={(inputprops, option) => (
-                <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...inputprops} key={option?.label} >
-                    <img
-                        loading="lazy"
-                        width="20"
-                        srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
-                        src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
-                        alt=""
-                    />
-                    {option.label} ({option.code}) +{option.phone}
-                </Box>
-            )}
-            renderInput={(params) => (
-                <TextField
-                    {...params}
-                    sx={{ '& .MuiFilledInput-root': { py: "10px" } }}
-                    variant='filled'
-                    inputProps={{
-                        ...params.inputProps,
-                        autoComplete: 'new-password', // disable autocomplete and autofill
-                    }}
-                />
-            )}
-            // name={props?.name}
-            // value={props?.value}
-            // onChange={props?.onChange}
-            onChange={handleCountryChange} // Add the onChange event
-            value={selectedCountry} // Controlled component value
-
-        />
+        <Box>
+            <RHFAutocomplete
+                sx={{ py: "10px" }}
+                name={props?.name || "countrySelect"}
+                options={countries}
+                getOptionLabel={(option: any) => option?.label || ""}
+                isOptionEqualToValue={(option: any, value: any) => option?.value === value?.value}
+                renderOption={(inputprops, option) => (
+                    <Box component="li" {...inputprops} sx={{ '& > img': { mr: 2, flexShrink: 0 } }} key={option?.label} >
+                        <img
+                            loading="lazy"
+                            width="20"
+                            srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
+                            src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
+                            alt=""
+                        />
+                        {option.label} ({option.code}) + {option.phone}
+                    </Box>
+                )}
+                settingStateValue={handleCountryChange} // 
+                value={selectedCountry}
+                variant='filled'
+            />
+        </Box>
     );
 }
 
