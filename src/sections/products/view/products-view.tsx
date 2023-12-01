@@ -365,6 +365,7 @@ export default function OrdersListView() {
         dispatch(setProduct({}));
       }
     } else if (state === "variants") {
+      variantMethods.reset();
       setOpenVariant(pv => !pv);
       dispatch(fetchOneVariant(id));
       setTempVariantId(id);
@@ -395,8 +396,31 @@ export default function OrdersListView() {
       ar: Yup.string().required('Arabic Name is required'),
     }),
     selectionType: Yup.string().required('Field is required'),
-    minimum: Yup.number().required('Field is required'),
-    maximum: Yup.number().required('Field is required'),
+    // minimum: Yup.number().required('Field is required'),
+    // maximum: Yup.number().required('Field is required'),
+    minimum: Yup.number().test({
+      name: 'minimum',
+      message: 'Field is required',
+      test: (value: any, context: any) => {
+        console.log("minimum value", value);
+
+        if (variantData?.selectionType !== 'multiple' && !value) {
+          return true;
+        };
+        return false;
+      }
+    }),
+    maximum: Yup.number().test({
+      name: 'maximum',
+      message: 'Field is required',
+      test: (value: any, context: any) => {
+        console.log("maximum value", value);
+        if (variantData?.selectionType !== 'multiple' && !value) {
+          return true;
+        };
+        return false;
+      }
+    }),
   });
 
   const variantMethods = useForm({
@@ -405,9 +429,8 @@ export default function OrdersListView() {
 
   const onVariantSubmit = variantMethods.handleSubmit(async (data) => {
     try {
-
-      console.log("tempVariantId", tempVariantId);
-      console.log("editVariantId", editVariantId);
+      // console.log("tempVariantId", tempVariantId);
+      // console.log("editVariantId", editVariantId);
       if (editVariantId) {
         await editVariantFun();
       } else {
@@ -424,13 +447,16 @@ export default function OrdersListView() {
 
   useEffect(() => {
     if (variant && variant.length > 0) {
+      variantMethods.reset();
+
+
       setEditVariantId(tempVariantId);
       const firstVariant = variant[0];
       const newData = {
         groupName: firstVariant.groupName,
         allowMoreQuantity: firstVariant.allowMoreQuantity,
-        maximum: firstVariant.maximum,
-        minimum: firstVariant.minimum,
+        maximum: firstVariant?.maximum || 0,
+        minimum: firstVariant?.minimum || 0,
         selectionType: firstVariant.selectionType,
       }
       setVariantData(newData);
@@ -1045,7 +1071,7 @@ export default function OrdersListView() {
               variant='filled'
               name='selectionType'
               id="demo-simple-select2"
-              value={variantData?.selectionType || null}
+              value={variantData?.selectionType || ""}
               settingStateValue={handleVariantData}
             >
               <MenuItem value='multiple'>Multiple</MenuItem>
@@ -1053,15 +1079,19 @@ export default function OrdersListView() {
             </RHFSelect>
 
 
-            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-              Minimum
-            </Typography>
-            <RHFTextField fullWidth type='number' variant='filled' settingStateValue={handleVariantData} value={variantData?.minimum || ""} name='minimum' />
+            {variantData?.selectionType === 'multiple' && (
+              <>
+                <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+                  Minimum
+                </Typography>
+                <RHFTextField fullWidth type='number' variant='filled' settingStateValue={handleVariantData} value={variantData?.minimum || ""} name='minimum' />
 
-            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
-              Maximum
-            </Typography>
-            <RHFTextField type='number' fullWidth variant='filled' settingStateValue={handleVariantData} value={variantData?.maximum || ""} name='maximum' />
+                <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+                  Maximum
+                </Typography>
+                <RHFTextField type='number' fullWidth variant='filled' settingStateValue={handleVariantData} value={variantData?.maximum || ""} name='maximum' />
+              </>
+            )}
 
 
             <Stack mt='20px' direction='row' alignItems='center' justifyContent='space-between' sx={{
