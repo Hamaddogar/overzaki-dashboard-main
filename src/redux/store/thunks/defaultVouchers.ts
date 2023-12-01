@@ -36,7 +36,7 @@ export const createVoucher = createAsyncThunk('voucher/create', async (data: any
 
 export const editVoucher = createAsyncThunk(
   'voucher/edit',
-  async (payload: { voucherId: number; data: any }) => {
+  async (payload: { voucherId: any; data: any }) => {
     const { voucherId, data } = payload;
     const response = await putRequest(
       `${endpoints.voucher.list}/${voucherId}`,

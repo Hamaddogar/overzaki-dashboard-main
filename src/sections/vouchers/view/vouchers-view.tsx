@@ -7,7 +7,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form';
+import FormProvider, { RHFMultiSelect, RHFSelect, RHFSwitch, RHFTextField } from 'src/components/hook-form';
 import LoadingButton from '@mui/lab/LoadingButton';
 // @mui
 import Divider from '@mui/material/Divider';
@@ -17,7 +17,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import { Box, Grid, Stack, Typography, Switch, MenuItem, Alert } from '@mui/material';
+import { Box, Grid, Stack, Typography, Switch, MenuItem, Alert, FormControlLabel, Checkbox } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
@@ -37,10 +37,11 @@ import { useSnackbar } from 'src/components/snackbar';
 // types
 import { IOrderItem, IOrderTableFilters, IOrderTableFilterValue } from 'src/types/order';
 //
-import { fetchVouchersList } from 'src/redux/store/thunks/defaultVouchers';
+import { createVoucher, deleteVoucher, editVoucher, fetchOneVoucher, fetchVouchersList, setVoucher } from 'src/redux/store/thunks/defaultVouchers';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
 import { useBoolean } from 'src/hooks/use-boolean';
+import { fetchProductsList } from 'src/redux/store/thunks/products';
 
 
 import Label from 'src/components/label/label';
@@ -82,9 +83,12 @@ const stylesDisabled = { cursor: { xs: 'default', md: "pointer" }, background: '
 // ----------------------------------------------------------------------
 
 export default function OrdersListView() {
+
+
   const dispatch = useDispatch<AppDispatch>();
   const { enqueueSnackbar } = useSnackbar();
 
+  const productsState = useSelector((state: any) => state.products);
   const loadStatus = useSelector((state: any) => state.vouchers.status);
   const { list, error, voucher } = useSelector((state: any) => state.vouchers);
   const [editId, setEditId] = useState(null);
@@ -94,8 +98,10 @@ export default function OrdersListView() {
   const [voucherData, setVoucherData] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const [productList, setProductList] = useState<any>([])
 
-  const [discountTypeToggle, setDiscountTypeToggle] = useState('FIXED');
+
+  const [discountTypeToggle, setDiscountTypeToggle] = useState('FIXED_AMOUNT');
   const { copy } = useCopyToClipboard();
   const onCopy = (color: string) => {
     if (color) {
@@ -116,6 +122,7 @@ export default function OrdersListView() {
   const [tableData] = useState(_orders);
 
   const [filters, setFilters] = useState(defaultFilters);
+  const [voucherStatus, setVoucherStatus] = useState(true);
 
 
   // ----------------------------------------------------------------------------------
@@ -126,14 +133,23 @@ export default function OrdersListView() {
       ar: Yup.string().required('Arabic Name is required'),
     }),
     code: Yup.string().required('Field is required'),
-
-    discountAmount: discountTypeToggle === 'FIXED' ? Yup.number().required('Field is required') : Yup.number(),
-    discountPercentage: discountTypeToggle === 'PERCENTAGE' ? Yup.number().required('Field is required') : Yup.number(),
-    upTo: discountTypeToggle === 'PERCENTAGE' ? Yup.number().required('Field is required') : Yup.number(),
-
-    totalUses: Yup.number().required('Field is required'),
+    discountAmount: discountTypeToggle === 'FIXED_AMOUNT' ? Yup.number().required('Field is required').typeError('Must be a valid number') : Yup.number().typeError('Must be a valid number'),
+    discountPercentage: discountTypeToggle === 'PERCENTAGE' ? Yup.number().required('Field is required').typeError('Must be a valid number') : Yup.number().typeError('Must be a valid number'),
+    upTo: discountTypeToggle === 'PERCENTAGE' ? Yup.number().required('Field is required').typeError('Must be a valid number') : Yup.number().typeError('Must be a valid number'),
+    totalUses: Yup.number().required('Field is required').typeError('Must be a valid number'),
     availabitiyStarts: Yup.string().required('Field is required'),
     availabitiyEnds: Yup.string().required('Field is required'),
+    coverage: Yup
+      .array().test({
+        name: 'coverage',
+        message: 'Please select at least one option',
+        test: (value: any) => {
+          if (voucherData?.converageAll) {
+            return true;
+          }
+          return value && value.length > 0;
+        },
+      }),
   });
 
   const methods = useForm({
@@ -148,13 +164,13 @@ export default function OrdersListView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      console.log("data", data);
 
-      // if (editId) {
-      //   await editCustomerFun();
-      // } else {
-      //   await createCustomerFun();
-      // }
+      if (editId) {
+        console.log("data", voucherData);
+        await editVoucherFun();
+      } else {
+        await createVoucherFun();
+      }
     } catch (error) {
       console.error(error);
       reset();
@@ -171,6 +187,18 @@ export default function OrdersListView() {
     }
   }, [loadStatus, dispatch, error, list]);
 
+
+  useEffect(() => {
+    if (productsState.status === 'idle') {
+      dispatch(fetchProductsList(productsState.error)).then((response: any) => {
+        console.log(response?.data?.data);
+        // setProductList(response.data.data)
+      });
+    } else {
+      setProductList(productsState.list.map((item: any) => ({ value: item._id, label: item.name.en || item.name })))
+    }
+  }, [productsState, dispatch]);
+
   useEffect(() => {
     setData(list || [])
   }, [list]);
@@ -185,26 +213,39 @@ export default function OrdersListView() {
   // Edit customer
   useEffect(() => {
     if (voucher) {
-      if (voucher) {
-        console.log("voucher", voucher);
-        // const updatedData = {
-        //   avatar: customer.avatar,
-        //   email: customer.email,
-        //   firstName: customer.firstName,
-        //   gender: customer.gender,
-        //   lastName: customer.lastName,
-        //   phoneNumber: customer.phoneNumber,
-        //   country: customer.country,
-        //   location: customer.location && customer.location.length > 0 ? customer.location[0] : null
-        // };
-        // setVoucherData(updatedData);
-        // // Use setValue to update each field separately
-        // Object.entries(updatedData).forEach(([fieldName, value]: any) => {
-        //   methods.setValue(fieldName, value);
-        // });
+      if (voucher && Object.entries(voucher).length > 0) {
+        // Convert the string dates to Date objects
+        const startDate = new Date(voucher?.availabitiyStarts);
+        const endDate = new Date(voucher?.availabitiyEnds);
 
+        const updatedData = {
+          name: {
+            en: voucher?.name?.en || voucher?.name
+          },
+          code: voucher?.code,
+          status: voucher?.status,
+          discountAmount: voucher?.discountAmount,
+          discountCurrency: voucher?.discountCurrency,
+          discountPercentage: voucher?.discountPercentage,
+          upTo: voucher?.upTo,
+          totalUses: voucher?.totalUses,
+          availabitiyStarts: startDate.toISOString().split('T')[0],
+          availabitiyEnds: endDate.toISOString().split('T')[0],
+          converageAll: voucher?.converageAll,
+          coverage: voucher?.coverage,
+        };
+        setVoucherData(updatedData);
+        setDiscountTypeToggle(voucher?.type);
+        Object.entries(updatedData).forEach(([fieldName, value]: any) => {
+          if (fieldName === 'name') {
+            methods.setValue('name.en', value.en);
+          } else {
+            methods.setValue(fieldName, value);
+          }
+        });
       }
     } else {
+      setDiscountTypeToggle('FIXED_AMOUNT');
       setVoucherData(null)
       reset();
     }
@@ -215,19 +256,16 @@ export default function OrdersListView() {
   const handleVoucherData = (e: any) => {
     setVoucherData((prevData: any) => ({
       ...prevData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.type === 'number' ? Number(e.target.value) : e.target.value
     }));
   }
   const handleNestedVoucherData = (e: any) => {
     const { name, value } = e.target;
     const [parentKey, nestedKey] = name.split('.');
-
     setVoucherData((prevData: any) => ({
       ...prevData,
-      [parentKey]: prevData?.parentKey ? {
-        ...prevData[parentKey],
-        [nestedKey]: value,
-      } : {
+      [parentKey]: {
+        ...(prevData[parentKey] || {}),
         [nestedKey]: value,
       },
     }));
@@ -236,11 +274,71 @@ export default function OrdersListView() {
 
 
 
+  const createVoucherFun = () => {
+    const fotmData = {
+      ...voucherData,
+      status: voucherData?.status || true,
+      type: voucherData?.type || discountTypeToggle,
+      discountPercentage: voucherData?.discountPercentage || 0,
+      upTo: voucherData?.upTo || 0,
+      discountCurrency: voucherData?.discountCurrency || "KWD",
+      converageAll: voucherData?.converageAll || false,
+    };
+
+    if (fotmData) {
+      dispatch(createVoucher(fotmData)).then((response: any) => {
+        console.log(response);
+
+        if (response.meta.requestStatus === 'fulfilled') {
+          setVoucherData(null);
+          dispatch(fetchVouchersList(error));
+          enqueueSnackbar('Successfully Created!', { variant: 'success' });
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    }
+  }
 
 
 
 
+  const editVoucherFun = () => {
+    const fotmData = {
+      ...voucherData,
+      status: voucherData?.status || true,
+      type: discountTypeToggle,
+      discountPercentage: voucherData?.discountPercentage || 0,
+      upTo: voucherData?.upTo || 0,
+      discountCurrency: voucherData?.discountCurrency || "KWD",
+      converageAll: voucherData?.converageAll || false,
+    };
+    dispatch(editVoucher({ voucherId: editId, data: fotmData })).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        dispatch(fetchVouchersList(error));
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  }
 
+
+  const removeVoucherFun = () => {
+    console.log("removeData", removeData);
+
+    if (removeData) {
+      dispatch(deleteVoucher(removeData)).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          dispatch(fetchVouchersList(error));
+          enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
+          confirm.onFalse();
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    }
+  }
 
 
 
@@ -314,10 +412,22 @@ export default function OrdersListView() {
   const [openDetails, setOpenDetails] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
-  const toggleDrawerCommon = (state: string) => (event: React.SyntheticEvent | React.MouseEvent) => {
-    if (state === "new") setOpenCreateVoucher(pv => !pv)
+  const toggleDrawerCommon = (state: string, id: any = null) => (event: React.SyntheticEvent | React.MouseEvent) => {
+    if (state === "new") {
+      setOpenCreateVoucher(pv => !pv)
+      setEditId(id);
+      if (id) {
+        dispatch(fetchOneVoucher(id));
+      } else {
+        setVoucherData({});
+        dispatch(setVoucher({}));
+      }
+    }
+    else if (state === "delete") {
+      setOpenDelete(pv => !pv);
+
+    }
     else if (state === "details") setOpenDetails(pv => !pv)
-    else if (state === "delete") setOpenDelete(pv => !pv)
   };
 
   const handleDrawerCloseCommon = (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -426,29 +536,29 @@ export default function OrdersListView() {
 
               <TabPanel value={value} sx={{ px: 0, pb: 0 }}>
                 <Grid container spacing={2}>
-                  {data.map((order: any, indx: any) =>
+                  {data.map((voucher: any, indx: any) =>
                     <Grid key={indx} item xs={12}>
                       {/* <Paper elevation={4} > */}
-                      <Grid container item alignItems='center' justifyContent='space-between' rowGap={3} p={3} minHeight="80px" sx={order.status ? stylesActive : stylesDisabled}
+                      <Grid container item alignItems='center' justifyContent='space-between' rowGap={3} p={3} minHeight="80px" sx={voucher.status ? stylesActive : stylesDisabled}
                       >
 
                         <Grid item xs={6} md='auto'>
                           <Box sx={{ minWidth: { xs: 'auto', md: '140px' } }}>
-                            <Typography component='p' color='#8688A3' variant="subtitle2" sx={{ fontSize: '.8rem' }} >{order.title}</Typography>
+                            <Typography component='p' color='#8688A3' variant="subtitle2" sx={{ fontSize: '.8rem' }} >{voucher.name || voucher.name.en}</Typography>
                             {
-                              order.status ?
-                                <Typography component='p' color='#0D6EFD' variant="subtitle2" sx={{ mt: '5px', fontWeight: 900, cursor: 'pointer', fontSize: '.8rem', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => onCopy(order.copen)} >{order.copen} <Iconify icon="tabler:copy" />  </Typography>
+                              voucher.status ?
+                                <Typography component='p' color='#0D6EFD' variant="subtitle2" sx={{ mt: '5px', fontWeight: 900, cursor: 'pointer', fontSize: '.8rem', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => onCopy(voucher.code)} >{voucher.code} <Iconify icon="tabler:copy" />  </Typography>
                                 :
-                                <Typography component='p' color='#8688A3' variant="subtitle2" sx={{ mt: '5px', fontWeight: 900, fontSize: '.8rem', }} >{order.copen}</Typography>
+                                <Typography component='p' color='#8688A3' variant="subtitle2" sx={{ mt: '5px', fontWeight: 900, fontSize: '.8rem', }} >{voucher.code}</Typography>
                             }
                           </Box>
                         </Grid>
 
                         <Grid item xs={6} md='auto' >
-                          <Typography component='p' color='#0F1349' variant="subtitle2" sx={{ fontSize: '.8rem' }} >{order.discount} {order.discountType === "Amount" ? "KWD" : "%"} <span style={{ fontSize: '.7rem' }}>({order.discountType})</span>  </Typography>
+                          <Typography component='p' color='#0F1349' variant="subtitle2" sx={{ fontSize: '.8rem' }} >{voucher.type === "FIXED_AMOUNT" ? `${voucher.discountAmount} KWD` : `${voucher.discountPercentage}%`} <span style={{ fontSize: '.7rem' }}>({voucher.type})</span>  </Typography>
                         </Grid>
                         <Grid item xs={6} md='auto' >
-                          <Typography component='p' color='#0F1349' variant="subtitle2" sx={{ fontSize: '.8rem' }} >{order.userCount} Uses </Typography>
+                          <Typography component='p' color='#0F1349' variant="subtitle2" sx={{ fontSize: '.8rem' }} >{voucher.totalUses} Uses </Typography>
                         </Grid>
 
                         <Grid item xs={6} md='auto' >
@@ -468,7 +578,11 @@ export default function OrdersListView() {
                                   background: 'rgb(134, 136, 163,0.2)',
                                 }
                               }}
-                              onClick={order.status ? toggleDrawerCommon("delete") : () => { }}
+                              // onClick={toggleDrawerCommon("delete", voucher._id)}
+                              onClick={() => {
+                                setRemoveData(voucher._id);
+                                confirm.onTrue();
+                              }}
                             >
                               <Box component='img' src='/raw/trash-can-solid.svg' width='13px' />
                             </Box>
@@ -486,11 +600,11 @@ export default function OrdersListView() {
                                   background: 'rgb(134, 136, 163,0.2)',
                                 }
                               }}
-                              onClick={toggleDrawerCommon("details")}
+                              onClick={toggleDrawerCommon("new", voucher._id)}
                             >
                               <Box component='img' src='/raw/edit-pen.svg' width='13px' />
                             </Box>
-                            <Switch checked={order.status} />
+                            {/* <Switch checked={voucher.status} /> */}
                           </Box>
                         </Grid>
 
@@ -721,7 +835,30 @@ export default function OrdersListView() {
                         Available
                       </Typography>
                     </Box>
-                    <Switch checked={voucherData?.status || false} onChange={handleVoucherData} name='status' />
+
+                    {/* <Switch
+                      checked={voucherData?.status || true}
+                      onChange={(e) => {
+                        setVoucherData({ ...voucherData, status: e.target.checked })
+                      }}
+                      inputProps={{ 'aria-label': 'controlled' }}
+                      name='status'
+                    /> */}
+                    <RHFSwitch
+                      label="status"
+                      checked={voucherData?.status || true}
+                      onChange={(e: any) => {
+                        console.log(e.target.checked);
+                        setVoucherData((prevData: any) => {
+                          if (prevData && Object.entries(prevData).length > 0) {
+                            return { ...voucherData, status: e.target.checked }
+                          }
+                          return { status: e.target.checked };
+                        })
+                      }}
+                      name='status'
+                      inputProps={{ 'aria-label': 'secondary checkbox' }}
+                    />
                   </Stack>
 
 
@@ -739,9 +876,9 @@ export default function OrdersListView() {
                         fontSize: '.9rem',
                         borderRadius: '16px',
                         fontWeight: 800,
-                        ...(discountTypeToggle === 'FIXED' ? activeTab : nonActiveTab)
+                        ...(discountTypeToggle === 'FIXED_AMOUNT' ? activeTab : nonActiveTab)
                       }}
-                        onClick={() => setDiscountTypeToggle('FIXED')}
+                        onClick={() => setDiscountTypeToggle('FIXED_AMOUNT')}
                       >
                         Fixed Amount
                       </Box>
@@ -766,31 +903,12 @@ export default function OrdersListView() {
                       </Box>
                     </Grid>
 
-                    {discountTypeToggle === 'FIXED' ? (
+                    {discountTypeToggle === 'FIXED_AMOUNT' ? (
                       <Grid item xs={6}>
                         <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
                           Discount Amount
                         </Typography>
-                        {/* <TextField fullWidth variant='filled' defaultValue='10' name='PHONE'
-                          sx={{
-                            '& .MuiInputAdornment-root': {
-                              marginTop: '0px !important',
-                            },
-                            '& input': {
-                              paddingRight: '0px !important'
-                            }
-                          }}
-                          InputProps={{
-                            endAdornment: <InputAdornment position="end">
-                              <Stack direction='row' alignItems='center' spacing="5px">
-                                <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.6rem' }} >
-                                  KWD
-                                </Typography>
-                                <Iconify icon="mingcute:down-fill" width={20} />
-                              </Stack>
-                            </InputAdornment>,
-                          }} /> */}
-                        <RHFTextField fullWidth variant='filled' settingStateValue={handleVoucherData} value={voucherData?.discountAmount || ""} name='discountAmount'
+                        <RHFTextField type="number" fullWidth variant='filled' settingStateValue={handleVoucherData} value={voucherData?.discountAmount || ''} name='discountAmount'
                           sx={{
                             '& .MuiInputAdornment-root': {
                               marginTop: '0px !important',
@@ -816,33 +934,13 @@ export default function OrdersListView() {
                           <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
                             Discount Percentage
                           </Typography>
-                          {/* <TextField fullWidth variant='filled' defaultValue="20%" name='Percentage' /> */}
-                          <RHFTextField fullWidth variant='filled' settingStateValue={handleVoucherData} value={voucherData?.discountPercentage || ""} name='discountPercentage' />
+                          <RHFTextField type="number" fullWidth variant='filled' settingStateValue={handleVoucherData} value={voucherData?.discountPercentage || ""} name='discountPercentage' />
                         </Grid>
                         <Grid item xs={6}>
                           <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
                             Up to
                           </Typography>
-                          {/* <TextField fullWidth variant='filled' defaultValue='10' name='PHONE'
-                            sx={{
-                              '& .MuiInputAdornment-root': {
-                                marginTop: '0px !important',
-                              },
-                              '& input': {
-                                paddingRight: '0px !important'
-                              }
-                            }}
-                            InputProps={{
-                              endAdornment: <InputAdornment position="end">
-                                <Stack direction='row' alignItems='center' spacing="5px">
-                                  <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.6rem' }} >
-                                    KWD
-                                  </Typography>
-                                  <Iconify icon="mingcute:down-fill" width={20} />
-                                </Stack>
-                              </InputAdornment>,
-                            }} /> */}
-                          <RHFTextField fullWidth variant='filled' settingStateValue={handleVoucherData} value={voucherData?.upTo || ""} name='upTo'
+                          <RHFTextField type="number" fullWidth variant='filled' settingStateValue={handleVoucherData} value={voucherData?.upTo || ""} name='upTo'
                             sx={{
                               '& .MuiInputAdornment-root': {
                                 marginTop: '0px !important',
@@ -865,28 +963,23 @@ export default function OrdersListView() {
                       </>
                     )}
 
-
-
                     <Grid item xs={12}>
                       <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
                         Total Uses
                       </Typography>
-                      {/* <TextField fullWidth variant='filled' defaultValue='500' name='PHONE' /> */}
-                      <RHFTextField fullWidth variant='filled' settingStateValue={handleVoucherData} value={voucherData?.totalUses || ""} name='totalUses' />
+                      <RHFTextField type="number" fullWidth variant='filled' settingStateValue={handleVoucherData} value={voucherData?.totalUses || ""} name='totalUses' />
                     </Grid>
 
                     <Grid item xs={6}>
                       <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
                         Start Date
                       </Typography>
-                      {/* <TextField fullWidth type='date' variant='filled' defaultValue='2023-06-28' name='sd' /> */}
                       <RHFTextField fullWidth type='date' variant='filled' settingStateValue={handleVoucherData} value={voucherData?.availabitiyStarts || ""} name='availabitiyStarts' />
                     </Grid>
                     <Grid item xs={6}>
                       <Typography component='p' mb='5px' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
                         End Date
                       </Typography>
-                      {/* <TextField fullWidth type='date' variant='filled' defaultValue='2023-10-07' name='ed' /> */}
                       <RHFTextField fullWidth type='date' variant='filled' settingStateValue={handleVoucherData} value={voucherData?.availabitiyEnds || ""} name='availabitiyEnds' />
                     </Grid>
 
@@ -895,23 +988,47 @@ export default function OrdersListView() {
                         Voucher Coverage
                       </Typography>
                       <FormControl fullWidth>
-                        <Select
+                        {/* <Select
                           variant='filled'
                           sx={{
                             fontWeight: 900
                           }}
                           // value={mySubCat}
                           // onChange={handleChangeMySubCat}
-
-                          value={voucherData?.coverage}
+                          value={voucherData?.coverage || null}
                           onChange={handleVoucherData}
                           name='coverage'
                         >
                           <MenuItem value='AllProducts'>All Products</MenuItem>
                           <MenuItem value='Laptops'>Laptops</MenuItem>
                           <MenuItem value='Clothes'>Clothes</MenuItem>
-                        </Select>
+                        </Select> */}
+                        <RHFMultiSelect
+                          variant='filled'
+                          checkbox
+                          name="coverage"
+                          label="Multi select"
+                          options={productList}
+                          settingStateValue={handleVoucherData}
+                          value={voucherData?.coverage || []}
+                        />
                       </FormControl>
+
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            size="medium"
+                            onChange={(e) => {
+                              setVoucherData({ ...voucherData, converageAll: e.target.checked })
+                            }}
+                            name='converageAll'
+                            color="primary"
+                            checked={voucherData?.converageAll || false}
+                          />
+                        }
+                        label="All Products"
+                      />
+
                     </Grid>
 
 
@@ -981,8 +1098,8 @@ export default function OrdersListView() {
 
 
             <ConfirmDialog
-              open={openDelete}
-              onClose={handleDrawerCloseCommon('delete')}
+              open={confirm.value}
+              onClose={confirm.onFalse}
               noCancel={false}
               maxWidth='sm'
               action={<Button
@@ -990,6 +1107,7 @@ export default function OrdersListView() {
                 color="error"
                 variant='soft'
                 size="large"
+                onClick={removeVoucherFun}
                 sx={{ borderRadius: '30px' }}
               >
                 Delete

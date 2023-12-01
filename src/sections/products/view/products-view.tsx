@@ -20,7 +20,7 @@ import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Switch from '@mui/material/Switch';
-import { Box, Grid, Stack, Typography, Paper, Alert } from '@mui/material';
+import { Box, Grid, Stack, Typography, Paper, Alert, Checkbox } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
@@ -37,7 +37,7 @@ import { useSnackbar } from 'notistack';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { UploadBox } from 'src/components/upload';
-import { createProduct, deleteProduct, editProduct, fetchOneProduct, fetchProductsList, setProduct } from 'src/redux/store/thunks/products';
+import { createProduct, createVariant, deleteProduct, editProduct, editVariant, fetchOneProduct, fetchOneVariant, fetchProductsList, setProduct } from 'src/redux/store/thunks/products';
 // components
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
@@ -63,7 +63,7 @@ export default function OrdersListView() {
   const { enqueueSnackbar } = useSnackbar();
   const categoryState = useSelector((state: any) => state.category);
   const loadStatus = useSelector((state: any) => state.products.status);
-  const { list, error, product } = useSelector((state: any) => state.products);
+  const { list, error, product, variant } = useSelector((state: any) => state.products);
 
 
   const [productData, setProductData] = useState<any>(null);
@@ -338,7 +338,7 @@ export default function OrdersListView() {
 
 
 
-
+  const [tempVariantId, setTempVariantId] = useState<any>(null);
 
   const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -351,6 +351,7 @@ export default function OrdersListView() {
   };
 
   const [openDetails, setOpenDetails] = useState(false);
+  const [openVariant, setOpenVariant] = useState(false);
 
   // common
   const toggleDrawerCommon = (state: string, id: any = null) => (event: React.SyntheticEvent | React.MouseEvent) => {
@@ -363,6 +364,10 @@ export default function OrdersListView() {
         setProductData({});
         dispatch(setProduct({}));
       }
+    } else if (state === "variants") {
+      setOpenVariant(pv => !pv);
+      dispatch(fetchOneVariant(id));
+      setTempVariantId(id);
     }
   };
 
@@ -373,10 +378,170 @@ export default function OrdersListView() {
         (event as React.KeyboardEvent).key === 'Shift')
     ) { return; }
     if (state === "new") setOpenDetails(false)
+    if (state === "variants") {
+      setOpenVariant(false);
+      setTempVariantId(null);
+    }
   };
+  // -------------------------------------------------- Variants ---------------------
+
+  const [variantData, setVariantData] = useState<any>(null);
+  const [editVariantId, setEditVariantId] = useState(null);
+
+
+  const VaiantSchema = Yup.object().shape({
+    groupName: Yup.object().shape({
+      en: Yup.string().required('English Name is required'),
+      ar: Yup.string().required('Arabic Name is required'),
+    }),
+    selectionType: Yup.string().required('Field is required'),
+    minimum: Yup.number().required('Field is required'),
+    maximum: Yup.number().required('Field is required'),
+  });
+
+  const variantMethods = useForm({
+    resolver: yupResolver(VaiantSchema),
+  });
+
+  const onVariantSubmit = variantMethods.handleSubmit(async (data) => {
+    try {
+
+      console.log("tempVariantId", tempVariantId);
+      console.log("editVariantId", editVariantId);
+      if (editVariantId) {
+        await editVariantFun();
+      } else {
+        await createVariantFun();
+      }
+    } catch (error) {
+      console.error(error);
+      variantMethods.reset();
+      setErrorMsg(typeof error === 'string' ? error : error.message);
+    }
+  });
+
+
+
+  useEffect(() => {
+    if (variant && variant.length > 0) {
+      setEditVariantId(tempVariantId);
+      const firstVariant = variant[0];
+      const newData = {
+        groupName: firstVariant.groupName,
+        allowMoreQuantity: firstVariant.allowMoreQuantity,
+        maximum: firstVariant.maximum,
+        minimum: firstVariant.minimum,
+        selectionType: firstVariant.selectionType,
+      }
+      setVariantData(newData);
+      Object.entries(newData).forEach(([fieldName, nestedData]: any) => {
+        if (fieldName === 'groupName') {
+          Object.entries(nestedData).forEach(([nestedFieldName, value]: any) => {
+            const fullFieldName: string = `${fieldName}.${nestedFieldName}`;
+            variantMethods.setValue(fullFieldName as "groupName.en" | "groupName.ar", value);
+          });
+        } else {
+          variantMethods.setValue(fieldName, nestedData);
+        }
+      });
+    } else {
+      variantMethods.reset();
+      setVariantData(null);
+      setEditVariantId(null);
+    }
+  }, [variant, variantMethods, tempVariantId])
+
+
+
+  const handleNestedVariantData = (e: any) => {
+    const { name, value } = e.target;
+    const [parentKey, nestedKey] = name.split('.');
+    const obj = {
+      ...variantData,
+      groupName: {
+        ...(variantData?.groupName || {}),
+        [nestedKey]: value,
+      }
+    }
+    setVariantData(obj);
+
+  }
+  const handleVariantData = (e: any) => {
+    const { name, value } = e.target;
+    setVariantData((prevData: any) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  }
+  const handleVariantCheckBox = (e: any, value: any) => {
+    const { name, checked } = e.target;
+    console.log(name, checked);
+    setVariantData((prevData: any) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  }
+
+
+  // ------------
+  const createVariantFun = () => {
+    if (variantData && Object.entries(variantData).length > 0) {
+      console.log("variantData", tempVariantId);
+      dispatch(createVariant({ productId: tempVariantId, data: variantData })).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          variantMethods.reset();
+          setVariantData(null);
+          setEditVariantId(null);
+          handleDrawerCloseCommon('variants');
+
+          dispatch(fetchProductsList(error));
+          enqueueSnackbar('Successfully Created!', { variant: 'success' });
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+
+    }
+  }
+
+
+  const editVariantFun = () => {
+    if (variantData && Object.entries(variantData).length > 0) {
+
+      dispatch(editVariant({ productId: tempVariantId, data: variantData })).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          dispatch(fetchProductsList(error));
+          enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    }
+  }
+
+  // const removeProductFun = () => {
+  //   if (removeData) {
+  //     dispatch(deleteProduct(removeData)).then((response: any) => {
+  //       if (response.meta.requestStatus === 'fulfilled') {
+  //         dispatch(fetchProductsList(error));
+  //         enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
+  //         confirm.onFalse();
+  //       } else {
+  //         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+  //       }
+  //     });
+  //   }
+  // }
+
+
+
+
+
+
+
+
 
   const imagesItrations = Array.from({ length: 3 }, (_, index) => index);
-
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <Grid container justifyContent='space-between' alignItems={{ xs: 'flex-start', md: 'center' }}>
@@ -485,6 +650,7 @@ export default function OrdersListView() {
                             >
                               <Typography component='p' variant="subtitle2" sx={{ fontSize: '.8rem', fontWeight: 800 }} > {product.price} KWD </Typography>
                               &nbsp; &nbsp;
+                              <Iconify icon="mdi:pen-plus" onClick={toggleDrawerCommon('variants', product._id)} style={{ cursor: 'pointer' }} /> &nbsp; &nbsp;
                               <Iconify icon="carbon:delete" onClick={() => {
                                 setRemoveData(product._id)
                                 confirm.onTrue();
@@ -830,6 +996,101 @@ export default function OrdersListView() {
 
             </Select>
           </FormControl> */}
+          </Box>
+        </FormProvider>
+      </DetailsNavBar>
+
+
+      <DetailsNavBar
+        open={openVariant}
+        onClose={handleDrawerCloseCommon('variants')}
+        title={editVariantId ? "Edit Variant" : "Add New Variant"}
+        actions={<Stack alignItems='center' justifyContent='center' spacing="10px">
+          <LoadingButton
+            fullWidth
+            variant="soft"
+            color="success"
+            size="large"
+            loading={variantMethods.formState.isSubmitting}
+            onClick={() => variantMethods.handleSubmit(onVariantSubmit as any)()}
+            sx={{ borderRadius: '30px' }}
+          >
+            {editVariantId ? "Update" : "Save"}
+          </LoadingButton>
+        </Stack>}
+      >
+
+        <FormProvider methods={variantMethods} onSubmit={onVariantSubmit}>
+          <Divider flexItem />
+          {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+          <Box width='100%'>
+            <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Group Name (English)
+            </Typography>
+            <RHFTextField fullWidth variant='filled' settingStateValue={handleNestedVariantData} value={variantData?.groupName?.en || ""} name='groupName.en' />
+
+            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Group Name (Arabic)
+            </Typography>
+
+            <RHFTextField fullWidth variant='filled' settingStateValue={handleNestedVariantData} value={variantData?.groupName?.ar || ""} name='groupName.ar' />
+
+
+            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Selection Type
+            </Typography>
+
+            <RHFSelect
+              fullWidth
+              variant='filled'
+              name='selectionType'
+              id="demo-simple-select2"
+              value={variantData?.selectionType || null}
+              settingStateValue={handleVariantData}
+            >
+              <MenuItem value='multiple'>Multiple</MenuItem>
+              <MenuItem value='single'>Single</MenuItem>
+            </RHFSelect>
+
+
+            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              Minimum
+            </Typography>
+            <RHFTextField fullWidth type='number' variant='filled' settingStateValue={handleVariantData} value={variantData?.minimum || ""} name='minimum' />
+
+            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+              Maximum
+            </Typography>
+            <RHFTextField type='number' fullWidth variant='filled' settingStateValue={handleVariantData} value={variantData?.maximum || ""} name='maximum' />
+
+
+            <Stack mt='20px' direction='row' alignItems='center' justifyContent='space-between' sx={{
+              borderRadius: '16px', padding: '7px 14px', backgroundColor: '#F5F6F8'
+            }} >
+              <Typography component='p' variant="subtitle2" sx={{ fontWeight: 900, fontSize: '.9rem' }} >
+                Allow More Quantity
+              </Typography>
+              <Checkbox
+                size="medium"
+                name="allowMoreQuantity"
+                checked={variantData?.allowMoreQuantity || false}
+                // onChange={(e: any) => setVariantData({ ...variantData, allowMoreQuantity: e.target.checked })}
+                onChange={handleVariantCheckBox}
+                inputProps={{ 'aria-label': 'secondary checkbox' }}
+              />
+              {/* <Switch size="medium"
+                checked={!!variantData?.allowMoreQuantity}
+                // onChange={(e: any) => setVariantData({ ...variantData, allowMoreQuantity: e.target.checked })}
+                onChange={(e) => {
+                  console.log('Previous variantData:', variantData);
+                  setVariantData((prevData: any) => ({ ...prevData, allowMoreQuantity: !!e.target.checked }));
+                  console.log('Updated variantData:', variantData);
+                }}
+                inputProps={{ 'aria-label': 'secondary checkbox' }}
+              /> */}
+            </Stack>
+
+
           </Box>
         </FormProvider>
       </DetailsNavBar>

@@ -60,11 +60,50 @@ export const deleteProduct = createAsyncThunk('products/delete', async (productI
   return response.data;
 });
 
+export const fetchOneVariant = createAsyncThunk(
+  'products/fetchOneVariant',
+  async (productId: number) => {
+    const response = await getRequest(`${endpoints.product.varient}/${productId}`, defaultConfig);
+
+    return response.data;
+  }
+);
+// createVariant;
+
+export const createVariant = createAsyncThunk(
+  'products/createVariant',
+  async ({ productId, data }: any) => {
+    const response = await postRequest(
+      `${endpoints.product.varient}/${productId}`,
+      data,
+      defaultConfig
+    );
+
+    return response.data;
+  }
+);
+
+// editVariant;
+export const editVariant = createAsyncThunk(
+  'products/editVariant',
+  async (payload: { productId: any; data: any }) => {
+    const { productId, data } = payload;
+    const response = await putRequest(
+      `${endpoints.product.varient}/${productId}`,
+      data,
+      defaultConfig
+    );
+
+    return response.data;
+  }
+);
+
 const productsSlice = createSlice({
   name: 'products',
   initialState: {
     list: [],
     product: null,
+    variant: null,
     loading: false,
     error: null as string | null,
     status: 'idle',
@@ -72,6 +111,9 @@ const productsSlice = createSlice({
   reducers: {
     setProduct: (state, action: PayloadAction<any>) => {
       state.product = action.payload;
+    },
+    setVariant: (state, action: PayloadAction<any>) => {
+      state.variant = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -102,6 +144,41 @@ const productsSlice = createSlice({
         state.product = action.payload;
       })
       .addCase(fetchOneProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message !== undefined ? action.error.message : null;
+      })
+      .addCase(fetchOneVariant.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchOneVariant.fulfilled, (state, action) => {
+        state.loading = false;
+        state.variant = action.payload;
+      })
+      .addCase(fetchOneVariant.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message !== undefined ? action.error.message : null;
+      })
+
+      .addCase(createVariant.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createVariant.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(createVariant.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message !== undefined ? action.error.message : null;
+      })
+      .addCase(editVariant.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(editVariant.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(editVariant.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
       })
@@ -143,5 +220,5 @@ const productsSlice = createSlice({
       });
   },
 });
-export const { setProduct } = productsSlice.actions;
+export const { setProduct, setVariant } = productsSlice.actions;
 export default productsSlice.reducer;

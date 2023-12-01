@@ -84,6 +84,8 @@ type RHFMultiSelectProps = SelectProps & {
   checkbox?: boolean;
   placeholder?: string;
   helperText?: React.ReactNode;
+  value?: string[];
+  settingStateValue?: any;
   options: {
     label: string;
     value: string;
@@ -99,11 +101,13 @@ export function RHFMultiSelect({
   placeholder,
   helperText,
   sx,
+  value,
+  settingStateValue,
   ...other
 }: RHFMultiSelectProps) {
   const { control } = useFormContext();
 
-  const renderValues = (selectedIds: string[]) => {
+  const renderValues = (selectedIds: any) => {
     const selectedItems = options.filter((item) => selectedIds.includes(item.value));
 
     if (!selectedItems.length && placeholder) {
@@ -142,6 +146,13 @@ export function RHFMultiSelect({
             labelId={name}
             input={<OutlinedInput fullWidth label={label} error={!!error} />}
             renderValue={renderValues}
+            value={value || []}
+            onChange={(event) => {
+              field.onChange(event.target.value);
+              if (settingStateValue) {
+                settingStateValue(event)
+              }
+            }}
             {...other}
           >
             {placeholder && (
@@ -151,7 +162,8 @@ export function RHFMultiSelect({
             )}
 
             {options.map((option) => {
-              const selected = field.value.includes(option.value);
+              // const selected = field.value && field.value.includes(option.value);
+              const selected = value && value.includes(option.value);
 
               return (
                 <MenuItem key={option.value} value={option.value}>

@@ -9,9 +9,11 @@ import FormControlLabel, { FormControlLabelProps } from '@mui/material/FormContr
 interface Props extends Omit<FormControlLabelProps, 'control'> {
   name: string;
   helperText?: React.ReactNode;
+  inputProps?: any;
+  onChange?: any
 }
 
-export default function RHFSwitch({ name, helperText, ...other }: Props) {
+export default function RHFSwitch({ name, helperText, inputProps, onChange, ...other }: Props) {
   const { control } = useFormContext();
 
   return (
@@ -20,7 +22,7 @@ export default function RHFSwitch({ name, helperText, ...other }: Props) {
       control={control}
       render={({ field, fieldState: { error } }) => (
         <div>
-          <FormControlLabel control={<Switch {...field} checked={field.value} />} {...other} />
+          <FormControlLabel control={<Switch {...field} checked={field.value} onChange={onChange} inputProps={inputProps} />} {...other} />
 
           {(!!error || helperText) && (
             <FormHelperText error={!!error}>{error ? error?.message : helperText}</FormHelperText>

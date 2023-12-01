@@ -103,6 +103,7 @@ export const endpoints = {
     list: '/products',
     details: '/product/details',
     search: '/product/search',
+    varient: '/varient',
   },
   customer: {
     list: '/customers',
