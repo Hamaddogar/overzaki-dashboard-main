@@ -135,7 +135,7 @@ export default function OrdersListView() {
   useEffect(() => {
     if (loadStatus === 'idle') {
       dispatch(fetchProductsList(error)).then((response: any) => {
-        console.log("list", list);;
+        // console.log("list", list);;
       });
     }
     setValue('All');
@@ -190,7 +190,7 @@ export default function OrdersListView() {
   useEffect(() => {
     if (categoryState.status === 'idle') {
       dispatch(fetchCategorysList(categoryState.error)).then((response: any) => {
-        console.log("response", response);
+        // console.log("response", response);
         dispatch(fetchSubCategorysList(categoryState.error));
       });
     }
@@ -248,8 +248,6 @@ export default function OrdersListView() {
     }
   }
   const handleRemoveImage = (index: any) => {
-    console.log(index);
-
     setProductData((current: any) => {
       const { images, ...rest } = current;
       const updatedImages = images.filter((_: any, i: any) => i !== index);
@@ -402,23 +400,22 @@ export default function OrdersListView() {
       name: 'minimum',
       message: 'Field is required',
       test: (value: any, context: any) => {
-        console.log("minimum value", value);
-
-        if (variantData?.selectionType !== 'multiple' && !value) {
-          return true;
+        // console.log("value", value);
+        if (context.parent?.selectionType === 'multiple' && !value) {
+          return false;
         };
-        return false;
+        return true;
       }
     }),
     maximum: Yup.number().test({
       name: 'maximum',
       message: 'Field is required',
       test: (value: any, context: any) => {
-        console.log("maximum value", value);
-        if (variantData?.selectionType !== 'multiple' && !value) {
-          return true;
+        // console.log("selectionType", context.parent?.selectionType);
+        if (context.parent?.selectionType === 'multiple' && !value) {
+          return false;
         };
-        return false;
+        return true;
       }
     }),
   });
@@ -501,7 +498,7 @@ export default function OrdersListView() {
   }
   const handleVariantCheckBox = (e: any, value: any) => {
     const { name, checked } = e.target;
-    console.log(name, checked);
+    // console.log(name, checked);
     setVariantData((prevData: any) => ({
       ...prevData,
       [name]: value,
@@ -512,7 +509,7 @@ export default function OrdersListView() {
   // ------------
   const createVariantFun = () => {
     if (variantData && Object.entries(variantData).length > 0) {
-      console.log("variantData", tempVariantId);
+      // console.log("variantData", tempVariantId);
       dispatch(createVariant({ productId: tempVariantId, data: variantData })).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
           variantMethods.reset();
