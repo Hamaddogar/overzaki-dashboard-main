@@ -35,7 +35,7 @@ export const fetchCustomersList = createAsyncThunk(
 export const fetchOneCustomer = createAsyncThunk('customers/fetchOne', async (customerId: any) => {
   const response = await getRequest(`${endpoints.customer.list}/${customerId}`, defaultConfig);
   console.log('customerId....', customerId);
-  return response.data;
+  return response.data?.user || {};
 });
 
 export const createCustomer = createAsyncThunk('customers/create', async (data: ICustomerForm) => {

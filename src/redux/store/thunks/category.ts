@@ -184,17 +184,8 @@ const categorySlice = createSlice({
         state.error = null;
       })
       .addCase(fetchOneSubCategory.fulfilled, (state, action) => {
-        const subCategoryObj: any = {
-          ...action.payload,
-          category: action.payload.category.id,
-          name: {
-            en: action.payload.name,
-            ar: '',
-          },
-        };
         state.loading = false;
-        // state.subCategory = action.payload;
-        state.subCategory = subCategoryObj;
+        state.subCategory = action.payload;
       })
       .addCase(fetchOneSubCategory.rejected, (state, action) => {
         state.loading = false;

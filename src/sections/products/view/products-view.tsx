@@ -5,13 +5,11 @@
 
 import { useEffect, useState } from 'react';
 
-
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form';
 import LoadingButton from '@mui/lab/LoadingButton';
-
 
 // @mui
 import Divider from '@mui/material/Divider';
@@ -28,6 +26,7 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
@@ -37,7 +36,17 @@ import { useSnackbar } from 'notistack';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { UploadBox } from 'src/components/upload';
-import { createProduct, createVariant, deleteProduct, editProduct, editVariant, fetchOneProduct, fetchOneVariant, fetchProductsList, setProduct } from 'src/redux/store/thunks/products';
+import {
+  createProduct,
+  createVariant,
+  deleteProduct,
+  editProduct,
+  editVariant,
+  fetchOneProduct,
+  fetchOneVariant,
+  fetchProductsList,
+  setProduct,
+} from 'src/redux/store/thunks/products';
 // components
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
@@ -49,26 +58,22 @@ import Iconify from 'src/components/iconify/iconify';
 
 import { fetchCategorysList, fetchSubCategorysList } from 'src/redux/store/thunks/category';
 
+import Link from 'next/link';
 import DetailsNavBar from '../DetailsNavBar';
 import ProductTableToolbar from '../product-table-toolbar';
-
-
-
 
 // ----------------------------------------------------------------------
 
 export default function OrdersListView() {
-
   const dispatch = useDispatch<AppDispatch>();
   const { enqueueSnackbar } = useSnackbar();
   const categoryState = useSelector((state: any) => state.category);
   const loadStatus = useSelector((state: any) => state.products.status);
   const { list, error, product, variant } = useSelector((state: any) => state.products);
 
-
   const [productData, setProductData] = useState<any>(null);
   const [editProductId, setEditProductId] = useState<any>(null);
-  const [removeData, setRemoveData] = useState<any>(null)
+  const [removeData, setRemoveData] = useState<any>(null);
 
   const settings = useSettingsContext();
 
@@ -96,7 +101,7 @@ export default function OrdersListView() {
   });
 
   const methods = useForm({
-    resolver: yupResolver(ProductSchema)
+    resolver: yupResolver(ProductSchema),
   });
 
   const {
@@ -107,7 +112,7 @@ export default function OrdersListView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      console.log("data", data);
+      console.log('data', data);
       if (editProductId) {
         await editProductFun();
       } else {
@@ -120,18 +125,6 @@ export default function OrdersListView() {
     }
   });
 
-
-
-
-
-
-
-
-
-
-
-
-
   useEffect(() => {
     if (loadStatus === 'idle') {
       dispatch(fetchProductsList(error)).then((response: any) => {
@@ -139,41 +132,44 @@ export default function OrdersListView() {
       });
     }
     setValue('All');
-    setData(list || [])
+    setData(list || []);
   }, [loadStatus, dispatch, error, list]);
 
   // reseting removeData value
   useEffect(() => {
     if (!confirm.value) {
-      setRemoveData(null)
+      setRemoveData(null);
     }
-  }, [confirm])
+  }, [confirm]);
 
   useEffect(() => {
     if (product && Object.entries(product).length > 0) {
       const newProduct = {
         name: {
-          en: product.name,
-          ar: "",
+          en: product.name.en,
+          ar: product.name.ar,
         },
         categoryId: product.categoryId,
         subCategory: product.subCategory,
         price: product.price,
         images: product.images,
         description: {
-          en: product.description,
-          ar: "",
+          en: product.description.en,
+          ar: product.description.ar,
         },
         quantity: product.quantity,
         publish_app: product.publish_app,
-      }
+      };
       setProductData(newProduct);
       // Use setValue to update each field separately
       Object.entries(newProduct).forEach(([fieldName, nestedData]: any) => {
         if (fieldName === 'name' || fieldName === 'description') {
           Object.entries(nestedData).forEach(([nestedFieldName, value]: any) => {
             const fullFieldName: string = `${fieldName}.${nestedFieldName}`;
-            methods.setValue(fullFieldName as "name.en" | "name.ar" | "description.en" | "description.ar", value);
+            methods.setValue(
+              fullFieldName as 'name.en' | 'name.ar' | 'description.en' | 'description.ar',
+              value
+            );
           });
         } else {
           methods.setValue(fieldName, nestedData);
@@ -183,9 +179,7 @@ export default function OrdersListView() {
       setProductData(null);
       reset();
     }
-  }, [product, reset, methods])
-
-
+  }, [product, reset, methods]);
 
   useEffect(() => {
     if (categoryState.status === 'idle') {
@@ -196,25 +190,12 @@ export default function OrdersListView() {
     }
   }, [categoryState, dispatch]);
 
-
   useEffect(() => {
     setProductData((prevData: any) => ({
       ...prevData,
       subCategory: product?.subCategory || null,
     }));
-
   }, [productData?.categoryId, product]);
-
-
-
-
-
-
-
-
-
-
-
 
   const handleProductData = (e: any) => {
     const { name, value } = e.target;
@@ -222,7 +203,7 @@ export default function OrdersListView() {
       ...prevData,
       [name]: value,
     }));
-  }
+  };
   const handleNestedProductData = (e: any) => {
     const { name, value } = e.target;
     const [parentKey, nestedKey] = name.split('.');
@@ -234,30 +215,27 @@ export default function OrdersListView() {
         [nestedKey]: value,
       },
     }));
-  }
+  };
 
   const handleAddImage = (files: any) => {
     if (files.length > 0) {
-      setProductData((prevData: any) => (
-        {
-          ...prevData,
-          images: prevData.images ? [...prevData.images, files[0]] : [files[0]]
-          // images: files[0]
-        }
-      ));
+      setProductData((prevData: any) => ({
+        ...prevData,
+        images: prevData.images ? [...prevData.images, files[0]] : [files[0]],
+        // images: files[0]
+      }));
     }
-  }
+  };
   const handleRemoveImage = (index: any) => {
     setProductData((current: any) => {
       const { images, ...rest } = current;
       const updatedImages = images.filter((_: any, i: any) => i !== index);
       return {
         ...rest,
-        images: updatedImages
+        images: updatedImages,
       };
-    })
-  }
-
+    });
+  };
 
   const createProductFun = () => {
     const formData = convertStateToFormData(productData);
@@ -270,7 +248,7 @@ export default function OrdersListView() {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
       }
     });
-  }
+  };
   const editProductFun = () => {
     const formData = convertStateToFormData(productData);
     dispatch(editProduct({ productId: editProductId, data: formData })).then((response: any) => {
@@ -282,7 +260,7 @@ export default function OrdersListView() {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
       }
     });
-  }
+  };
 
   const removeProductFun = () => {
     if (removeData) {
@@ -296,9 +274,7 @@ export default function OrdersListView() {
         }
       });
     }
-  }
-
-
+  };
 
   const convertStateToFormData = (state: any) => {
     const formData = new FormData();
@@ -306,7 +282,7 @@ export default function OrdersListView() {
     // Iterate over the properties of the state
     Object.entries(state).forEach(([key, value]: any) => {
       // this is only for the products and sending single image.
-      // && key !== 'images'  
+      // && key !== 'images'
       if (typeof value === 'object' && !Array.isArray(value) && key !== 'images') {
         Object.entries(value).forEach(([nestedKey, nestedValue]: any) => {
           formData.append(`${key}[${nestedKey}]`, nestedValue);
@@ -332,10 +308,6 @@ export default function OrdersListView() {
     return formData;
   };
 
-
-
-
-
   const [tempVariantId, setTempVariantId] = useState<any>(null);
 
   const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
@@ -343,7 +315,7 @@ export default function OrdersListView() {
     if (newValue === 'All') {
       setData(list);
     } else {
-      const newData = list.filter((order: any) => order?.categoryId === newValue)
+      const newData = list.filter((order: any) => order?.categoryId === newValue);
       setData(newData);
     }
   };
@@ -352,41 +324,45 @@ export default function OrdersListView() {
   const [openVariant, setOpenVariant] = useState(false);
 
   // common
-  const toggleDrawerCommon = (state: string, id: any = null) => (event: React.SyntheticEvent | React.MouseEvent) => {
-    if (state === "new") {
-      setOpenDetails(pv => !pv)
-      setEditProductId(id);
-      if (id) {
-        dispatch(fetchOneProduct(id));
-      } else {
-        setProductData({});
-        dispatch(setProduct({}));
-      }
-    } else if (state === "variants") {
-      variantMethods.reset();
-      setOpenVariant(pv => !pv);
-      dispatch(fetchOneVariant(id));
-      setTempVariantId(id);
-    }
-  };
+  const toggleDrawerCommon =
+    (state: string, id: any = null) =>
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'new') {
+          setOpenDetails((pv) => !pv);
+          setEditProductId(id);
+          if (id) {
+            dispatch(fetchOneProduct(id));
+          } else {
+            setProductData({});
+            dispatch(setProduct({}));
+          }
+        } else if (state === 'variants') {
+          variantMethods.reset();
+          setOpenVariant((pv) => !pv);
+          dispatch(fetchOneVariant(id));
+          setTempVariantId(id);
+        }
+      };
 
-  const handleDrawerCloseCommon = (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
-    if (
-      event.type === 'keydown' &&
-      ((event as React.KeyboardEvent).key === 'Tab' ||
-        (event as React.KeyboardEvent).key === 'Shift')
-    ) { return; }
-    if (state === "new") setOpenDetails(false)
-    if (state === "variants") {
-      setOpenVariant(false);
-      setTempVariantId(null);
-    }
-  };
+  const handleDrawerCloseCommon =
+    (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
+      if (
+        event.type === 'keydown' &&
+        ((event as React.KeyboardEvent).key === 'Tab' ||
+          (event as React.KeyboardEvent).key === 'Shift')
+      ) {
+        return;
+      }
+      if (state === 'new') setOpenDetails(false);
+      if (state === 'variants') {
+        setOpenVariant(false);
+        setTempVariantId(null);
+      }
+    };
   // -------------------------------------------------- Variants ---------------------
 
   const [variantData, setVariantData] = useState<any>(null);
   const [editVariantId, setEditVariantId] = useState(null);
-
 
   const VaiantSchema = Yup.object().shape({
     groupName: Yup.object().shape({
@@ -394,8 +370,6 @@ export default function OrdersListView() {
       ar: Yup.string().required('Arabic Name is required'),
     }),
     selectionType: Yup.string().required('Field is required'),
-    // minimum: Yup.number().required('Field is required'),
-    // maximum: Yup.number().required('Field is required'),
     minimum: Yup.number().test({
       name: 'minimum',
       message: 'Field is required',
@@ -403,9 +377,9 @@ export default function OrdersListView() {
         // console.log("value", value);
         if (context.parent?.selectionType === 'multiple' && !value) {
           return false;
-        };
+        }
         return true;
-      }
+      },
     }),
     maximum: Yup.number().test({
       name: 'maximum',
@@ -414,9 +388,9 @@ export default function OrdersListView() {
         // console.log("selectionType", context.parent?.selectionType);
         if (context.parent?.selectionType === 'multiple' && !value) {
           return false;
-        };
+        }
         return true;
-      }
+      },
     }),
   });
 
@@ -440,28 +414,28 @@ export default function OrdersListView() {
     }
   });
 
-
-
   useEffect(() => {
     if (variant && variant.length > 0) {
       variantMethods.reset();
 
-
       setEditVariantId(tempVariantId);
       const firstVariant = variant[0];
       const newData = {
-        groupName: firstVariant.groupName,
+        groupName: {
+          en: firstVariant.groupName.en,
+          ar: firstVariant.groupName.ar,
+        },
         allowMoreQuantity: firstVariant.allowMoreQuantity,
         maximum: firstVariant?.maximum || 0,
         minimum: firstVariant?.minimum || 0,
         selectionType: firstVariant.selectionType,
-      }
+      };
       setVariantData(newData);
       Object.entries(newData).forEach(([fieldName, nestedData]: any) => {
         if (fieldName === 'groupName') {
           Object.entries(nestedData).forEach(([nestedFieldName, value]: any) => {
             const fullFieldName: string = `${fieldName}.${nestedFieldName}`;
-            variantMethods.setValue(fullFieldName as "groupName.en" | "groupName.ar", value);
+            variantMethods.setValue(fullFieldName as 'groupName.en' | 'groupName.ar', value);
           });
         } else {
           variantMethods.setValue(fieldName, nestedData);
@@ -472,9 +446,7 @@ export default function OrdersListView() {
       setVariantData(null);
       setEditVariantId(null);
     }
-  }, [variant, variantMethods, tempVariantId])
-
-
+  }, [variant, variantMethods, tempVariantId]);
 
   const handleNestedVariantData = (e: any) => {
     const { name, value } = e.target;
@@ -484,18 +456,17 @@ export default function OrdersListView() {
       groupName: {
         ...(variantData?.groupName || {}),
         [nestedKey]: value,
-      }
-    }
+      },
+    };
     setVariantData(obj);
-
-  }
+  };
   const handleVariantData = (e: any) => {
     const { name, value } = e.target;
     setVariantData((prevData: any) => ({
       ...prevData,
       [name]: value,
     }));
-  }
+  };
   const handleVariantCheckBox = (e: any, value: any) => {
     const { name, checked } = e.target;
     // console.log(name, checked);
@@ -503,44 +474,44 @@ export default function OrdersListView() {
       ...prevData,
       [name]: value,
     }));
-  }
-
+  };
 
   // ------------
   const createVariantFun = () => {
     if (variantData && Object.entries(variantData).length > 0) {
       // console.log("variantData", tempVariantId);
-      dispatch(createVariant({ productId: tempVariantId, data: variantData })).then((response: any) => {
-        if (response.meta.requestStatus === 'fulfilled') {
-          variantMethods.reset();
-          setVariantData(null);
-          setEditVariantId(null);
-          handleDrawerCloseCommon('variants');
+      dispatch(createVariant({ productId: tempVariantId, data: variantData })).then(
+        (response: any) => {
+          if (response.meta.requestStatus === 'fulfilled') {
+            variantMethods.reset();
+            setVariantData(null);
+            setEditVariantId(null);
+            handleDrawerCloseCommon('variants');
 
-          dispatch(fetchProductsList(error));
-          enqueueSnackbar('Successfully Created!', { variant: 'success' });
-        } else {
-          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+            dispatch(fetchProductsList(error));
+            enqueueSnackbar('Successfully Created!', { variant: 'success' });
+          } else {
+            enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+          }
         }
-      });
-
+      );
     }
-  }
-
+  };
 
   const editVariantFun = () => {
     if (variantData && Object.entries(variantData).length > 0) {
-
-      dispatch(editVariant({ productId: tempVariantId, data: variantData })).then((response: any) => {
-        if (response.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchProductsList(error));
-          enqueueSnackbar('Successfully Updated!', { variant: 'success' });
-        } else {
-          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      dispatch(editVariant({ productId: tempVariantId, data: variantData })).then(
+        (response: any) => {
+          if (response.meta.requestStatus === 'fulfilled') {
+            dispatch(fetchProductsList(error));
+            enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+          } else {
+            enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+          }
         }
-      });
+      );
     }
-  }
+  };
 
   // const removeProductFun = () => {
   //   if (removeData) {
@@ -555,27 +526,47 @@ export default function OrdersListView() {
   //     });
   //   }
   // }
-
-
-
-
-
-
-
-
+  const listStuff = data;
+  const [listItems, setListItems] = useState([]);
+  useEffect(() => {
+    setListItems(listStuff);
+  }, [listStuff]);
+  const handleOnDragEnd = (result: any) => {
+    if (!result.destination) return;
+    const items = Array.from(listItems);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    setListItems(items);
+  };
 
   const imagesItrations = Array.from({ length: 3 }, (_, index) => index);
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <Grid container justifyContent='space-between' alignItems={{ xs: 'flex-start', md: 'center' }}>
+      <Grid
+        container
+        justifyContent="space-between"
+        alignItems={{ xs: 'flex-start', md: 'center' }}
+      >
         <Grid item xs={12} md="auto">
           <CustomCrumbs heading="Products" crums={false} />
         </Grid>
 
         <Grid item xs={12} md={5}>
           <BottomActions>
-            <Stack direction={{ xs: 'column', sm: 'row' }} alignItems='center' justifyContent={{ xs: 'flex-start', sm: 'flex-end' }} spacing='20px' sx={{ width: '100%', maxWidth: { xs: '100%', md: '250px' } }}>
-              <Button startIcon="+" fullWidth sx={{ borderRadius: '30px', color: '#0F1349' }} component='button' variant='contained' color='primary'
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              alignItems="center"
+              justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
+              spacing="20px"
+              sx={{ width: '100%', maxWidth: { xs: '100%', md: '250px' } }}
+            >
+              <Button
+                startIcon="+"
+                fullWidth
+                sx={{ borderRadius: '30px', color: '#0F1349' }}
+                component="button"
+                variant="contained"
+                color="primary"
                 onClick={toggleDrawerCommon('new')}
               >
                 Add New Product
@@ -600,7 +591,8 @@ export default function OrdersListView() {
                   onChange={handleChangeTab}
                   sx={{
                     px: 2.5,
-                    boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+                    boxShadow: (theme) =>
+                      `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
                   }}
                 >
                   <Tab
@@ -608,12 +600,7 @@ export default function OrdersListView() {
                     value="All"
                     label="All Products"
                     icon={
-                      <Label
-                        variant={
-                          ((value === 'All') && 'filled') || 'outlined'
-                        }
-                        color='primary'
-                      >
+                      <Label variant={(value === 'All' && 'filled') || 'outlined'} color="primary">
                         {list.length}
                       </Label>
                     }
@@ -623,15 +610,16 @@ export default function OrdersListView() {
                       key={categoryObj._id}
                       iconPosition="end"
                       value={categoryObj._id}
-                      label={categoryObj.name}
+                      label={categoryObj?.name?.en || ''}
                       icon={
                         <Label
-                          variant={
-                            ((categoryObj._id === value) && 'filled') || 'outlined'
-                          }
-                          color='primary'
+                          variant={(categoryObj._id === value && 'filled') || 'outlined'}
+                          color="primary"
                         >
-                          {list.filter((product: any) => product.categoryId === categoryObj._id).length}
+                          {
+                            list.filter((product: any) => product.categoryId === categoryObj._id)
+                              .length
+                          }
                         </Label>
                       }
                     />
@@ -639,154 +627,301 @@ export default function OrdersListView() {
                 </TabList>
               </Box>
 
-              <TabPanel value={value} sx={{ px: 0, }}>
-                <Grid container spacing={2}>
-                  {data.map((product: any, indx: any) =>
-                    <Grid key={indx} item xs={12}>
-                      <Paper elevation={4}>
-                        <Grid container item alignItems='center' justifyContent='space-between' rowGap={3} sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}>
+              <TabPanel value={value} sx={{ px: 0 }}>
+                <DragDropContext onDragEnd={handleOnDragEnd}>
+                  <Droppable droppableId="items">
+                    {(provided) => (
+                      <Grid
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        container
+                        spacing={2}
+                      >
+                        {/* DND START */}
+                        {listItems.map((product: any, indx: any) => (
+                          <Draggable key={indx} index={indx} draggableId={indx.toString()}>
+                            {(provided) => (
+                              <Grid
+                                {...provided.draggableProps}
+                                ref={provided.innerRef}
+                                item
+                                xs={12}
+                              >
+                                <Paper elevation={4}>
+                                  <Grid
+                                    container
+                                    item
+                                    alignItems="center"
+                                    justifyContent="space-between"
+                                    rowGap={3}
+                                    sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
+                                  >
+                                    <Grid item xs={12} md={6}>
+                                      <Box
+                                        sx={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '8px',
+                                        }}
+                                      >
+                                        <div {...provided.dragHandleProps}>
+                                          <Iconify icon="ci:drag-vertical" />
+                                        </div>
+                                        <Box
+                                          component="img"
+                                          src={product.images[0]}
+                                          alt=" "
+                                          width="60px"
+                                        />
+                                        <Box display="flex" gap="0px" flexDirection="column">
+                                          <Typography
+                                            component="p"
+                                            noWrap
+                                            variant="subtitle2"
+                                            sx={{
+                                              fontSize: '.9rem',
+                                              fontWeight: 800,
+                                              maxWidth: { xs: '100%', md: '188px' },
+                                            }}
+                                          >
+                                            {' '}
+                                            {product?.name?.en}{' '}
+                                          </Typography>
+                                          <Typography
+                                            component="p"
+                                            noWrap
+                                            variant="subtitle2"
+                                            sx={{
+                                              opacity: 0.7,
+                                              fontSize: '.9rem',
+                                              maxWidth: { xs: '100%', md: '188px' },
+                                            }}
+                                          >
+                                            {product.category}
+                                          </Typography>
+                                        </Box>
+                                      </Box>
+                                    </Grid>
 
-                          <Grid item xs={12} md={6} >
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px'
-                              }}
-                            >
-                              <Box component='img' src={product.images[0]} alt=" " width='60px' />
-                              <Box display='flex' gap='0px' flexDirection='column' >
-                                <Typography component='p' noWrap variant="subtitle2" sx={{ fontSize: '.9rem', fontWeight: 800, maxWidth: { xs: '100%', md: '188px' } }} > {product.name} </Typography>
-                                <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '100%', md: '188px' } }} >{product.category}</Typography>
-                              </Box>
-                            </Box>
-                          </Grid>
-
-                          <Grid item xs={12} md={6} >
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                justifyContent: { xs: 'flex-start', md: 'flex-end' }
-                              }}
-                            >
-                              <Typography component='p' variant="subtitle2" sx={{ fontSize: '.8rem', fontWeight: 800 }} > {product.price} KWD </Typography>
-                              &nbsp; &nbsp;
-                              <Iconify icon="mdi:pen-plus" onClick={toggleDrawerCommon('variants', product._id)} style={{ cursor: 'pointer' }} /> &nbsp; &nbsp;
-                              <Iconify icon="carbon:delete" onClick={() => {
-                                setRemoveData(product._id)
-                                confirm.onTrue();
-                              }} style={{ cursor: 'pointer' }} /> &nbsp; &nbsp;
-                              <Iconify icon="bx:edit" onClick={toggleDrawerCommon('new', product._id)} style={{ cursor: 'pointer' }} />
-                            </Box>
-                          </Grid>
-
-                        </Grid>
-                      </Paper>
-                    </Grid>
-                  )}
-                </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      <Box
+                                        sx={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '8px',
+                                          justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                                        }}
+                                      >
+                                        <Typography
+                                          component="p"
+                                          variant="subtitle2"
+                                          sx={{ fontSize: '.8rem', fontWeight: 800 }}
+                                        >
+                                          {' '}
+                                          {product.price} KWD{' '}
+                                        </Typography>
+                                        &nbsp; &nbsp;
+                                        {/* <Iconify
+                                          icon="mdi:pen-plus"
+                                          onClick={toggleDrawerCommon('variants', product._id)}
+                                          style={{ cursor: 'pointer' }}
+                                        />{' '} */}
+                                        <Link href={`/dashboard/products/${product._id}`} >
+                                          <Iconify
+                                            icon="mdi:pen-plus"
+                                            style={{ cursor: 'pointer' }}
+                                          />{' '}
+                                        </Link>
+                                        &nbsp; &nbsp;
+                                        <Iconify
+                                          icon="carbon:delete"
+                                          onClick={() => {
+                                            setRemoveData(product._id);
+                                            confirm.onTrue();
+                                          }}
+                                          style={{ cursor: 'pointer' }}
+                                        />{' '}
+                                        &nbsp; &nbsp;
+                                        <Iconify
+                                          icon="bx:edit"
+                                          onClick={toggleDrawerCommon('new', product._id)}
+                                          style={{ cursor: 'pointer' }}
+                                        />
+                                      </Box>
+                                    </Grid>
+                                  </Grid>
+                                </Paper>
+                              </Grid>
+                            )}
+                          </Draggable>
+                        ))}
+                      </Grid>
+                    )}
+                  </Droppable>
+                </DragDropContext>
               </TabPanel>
-
             </TabContext>
-
           </Box>
         </Grid>
       </Grid>
 
-
       <DetailsNavBar
         open={openDetails}
         onClose={handleDrawerCloseCommon('new')}
-        title={editProductId ? "Edit Product" : "Add New Product"}
-        actions={<Stack alignItems='center' justifyContent='center' spacing="10px">
-          <LoadingButton
-            fullWidth
-            variant="soft"
-            color="success"
-            size="large"
-            // onClick={editProductId ? editProductFun : createProductFun}
-            loading={isSubmitting}
-            onClick={() => methods.handleSubmit(onSubmit as any)()}
-            sx={{ borderRadius: '30px' }}
-          >
-            {editProductId ? "Update" : "Save"}
-          </LoadingButton>
-        </Stack>}
+        title={editProductId ? 'Edit Product' : 'Add New Product'}
+        actions={
+          <Stack alignItems="center" justifyContent="center" spacing="10px">
+            <LoadingButton
+              fullWidth
+              variant="soft"
+              color="success"
+              size="large"
+              // onClick={editProductId ? editProductFun : createProductFun}
+              loading={isSubmitting}
+              onClick={() => methods.handleSubmit(onSubmit as any)()}
+              sx={{ borderRadius: '30px' }}
+            >
+              {editProductId ? 'Update' : 'Save'}
+            </LoadingButton>
+          </Stack>
+        }
       >
-
         <FormProvider methods={methods} onSubmit={onSubmit}>
           <Divider flexItem />
           {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
-          <Box width='100%'>
-            <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+          <Box width="100%">
+            <Typography
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            >
               Product Name (English)
             </Typography>
             {/* defaultValue='iPhone 13 Pro Max' */}
             {/* <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.en || ""} name='name.en' /> */}
-            <RHFTextField fullWidth variant='filled' settingStateValue={handleNestedProductData} value={productData?.name?.en || ""} name='name.en' />
+            <RHFTextField
+              fullWidth
+              variant="filled"
+              settingStateValue={handleNestedProductData}
+              value={productData?.name?.en || ''}
+              name="name.en"
+            />
 
-            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            >
               Product Name (Arabic)
             </Typography>
             {/* defaultValue="ايفون 13 برو ماكس" */}
             {/* <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.ar || ""} name='name.ar' /> */}
-            <RHFTextField fullWidth variant='filled' settingStateValue={handleNestedProductData} value={productData?.name?.ar || ""} name='name.ar' />
+            <RHFTextField
+              fullWidth
+              variant="filled"
+              settingStateValue={handleNestedProductData}
+              value={productData?.name?.ar || ''}
+              name="name.ar"
+            />
 
-
-            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            >
               Upload Product Images
             </Typography>
 
-
-            <Box mt='10px' sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+            <Box mt="10px" sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
               {imagesItrations.map((itration: any, ind: any) => {
                 return (
                   <Box key={ind}>
                     {/* {productData?.images ? ( */}
                     {productData?.images?.length > 0 && productData?.images[itration] ? (
-                      <Box sx={{
-                        width: '100px', height: '100px',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                        flexDirection: 'column', border: '1px dashed rgb(134, 136, 163,.5)', borderRadius: '16px',
-                        position: 'relative', overflow: "hidden"
-                      }}>
-                        <Box component='img'
-                          src={typeof productData?.images[itration] === 'string' ? productData?.images[itration] : URL.createObjectURL(productData?.images[itration])}
+                      <Box
+                        sx={{
+                          width: '100px',
+                          height: '100px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '10px',
+                          flexDirection: 'column',
+                          border: '1px dashed rgb(134, 136, 163,.5)',
+                          borderRadius: '16px',
+                          position: 'relative',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <Box
+                          component="img"
+                          src={
+                            typeof productData?.images[itration] === 'string'
+                              ? productData?.images[itration]
+                              : URL.createObjectURL(productData?.images[itration])
+                          }
                           // src={typeof productData?.images === 'string' ? productData?.images : URL.createObjectURL(productData?.images)}
-                          alt=''
-                          sx={{ maxHeight: "95px" }} />
-                        <Box onClick={() => handleRemoveImage(itration)} sx={{ backgroundColor: 'rgb(134, 136, 163,.09)', padding: '10px 11px 7px 11px', borderRadius: '36px', cursor: "pointer", position: 'absolute', top: 0, right: 0 }}>
+                          alt=""
+                          sx={{ maxHeight: '95px' }}
+                        />
+                        <Box
+                          onClick={() => handleRemoveImage(itration)}
+                          sx={{
+                            backgroundColor: 'rgb(134, 136, 163,.09)',
+                            padding: '10px 11px 7px 11px',
+                            borderRadius: '36px',
+                            cursor: 'pointer',
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
+                          }}
+                        >
                           <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
                         </Box>
                       </Box>
                     ) : (
                       <UploadBox
-                        sx={{ width: '100px!important', height: '100px!important', textAlign: 'center', padding: '20px' }}
+                        sx={{
+                          width: '100px!important',
+                          height: '100px!important',
+                          textAlign: 'center',
+                          padding: '20px',
+                        }}
                         onDrop={handleAddImage}
                         maxFiles={1}
                         maxSize={5242880}
                         accept={{
                           'image/jpeg': [],
-                          'image/png': []
+                          'image/png': [],
                         }}
                         placeholder={
-                          <Box sx={{
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                            flexDirection: 'column',
-                          }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '10px',
+                              flexDirection: 'column',
+                            }}
+                          >
                             <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
-                            <span style={{ color: '#8688A3', fontSize: '.6rem' }}>Upload Image</span>
+                            <span style={{ color: '#8688A3', fontSize: '.6rem' }}>
+                              Upload Image
+                            </span>
                           </Box>
                         }
                       />
                     )}
                   </Box>
-
-                )
+                );
               })}
-
             </Box>
 
             {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
@@ -802,7 +937,14 @@ export default function OrdersListView() {
             </Box>
           </Box> */}
 
-            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            >
               Category
             </Typography>
 
@@ -820,18 +962,27 @@ export default function OrdersListView() {
             </FormControl> */}
             <RHFSelect
               fullWidth
-              variant='filled'
-              name='categoryId'
+              variant="filled"
+              name="categoryId"
               id="demo-simple-select2"
               value={productData?.categoryId || null}
               settingStateValue={handleProductData}
             >
               {categoryState.list.map((cat: any, index: any) => (
-                <MenuItem key={index} value={cat._id}>{cat.name.en || cat.name}</MenuItem>
+                <MenuItem key={index} value={cat._id}>
+                  {cat?.name?.en || cat?.name || ''}
+                </MenuItem>
               ))}
             </RHFSelect>
 
-            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            >
               Sub-Category
             </Typography>
 
@@ -849,24 +1000,41 @@ export default function OrdersListView() {
             </FormControl> */}
             <RHFSelect
               fullWidth
-              variant='filled'
+              variant="filled"
               id="demo-simple-select"
-              name='subCategory'
+              name="subCategory"
               value={productData?.subCategory || null}
               settingStateValue={handleProductData}
             >
-              {productData?.categoryId && categoryState.subCatList.filter((item: any) => item.category === productData.categoryId).map((item: any, ind: any) => (
-                <MenuItem key={ind} value={item._id}>{item.name}</MenuItem>
-              ))}
+              {productData?.categoryId &&
+                categoryState.subCatList
+                  .filter((item: any) => item.category === productData.categoryId)
+                  .map((item: any, ind: any) => (
+                    <MenuItem key={ind} value={item._id}>
+                      {item?.name?.en || item?.name || ''}
+                    </MenuItem>
+                  ))}
             </RHFSelect>
 
-            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            >
               Price
             </Typography>
 
             {/* <TextField fullWidth variant='filled' onChange={handleProductData} value={productData?.price || ""} name='price' /> */}
-            <RHFTextField fullWidth variant='filled' settingStateValue={handleProductData} value={productData?.price || ""} name='price' />
-
+            <RHFTextField
+              fullWidth
+              variant="filled"
+              settingStateValue={handleProductData}
+              value={productData?.price || ''}
+              name="price"
+            />
 
             {/* <FormControl fullWidth>
             <Select
@@ -879,7 +1047,14 @@ export default function OrdersListView() {
             </Select>
           </FormControl> */}
 
-            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+            <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem' }}
+            >
               Description (English)
             </Typography>
 
@@ -894,17 +1069,24 @@ export default function OrdersListView() {
               name='description.en'
             /> */}
             <RHFTextField
-              variant='filled'
+              variant="filled"
               multiline
               fullWidth
               rows={5}
               sx={{ fontWeight: 900, fontSize: '26px' }}
-              value={productData?.description?.en || ""}
+              value={productData?.description?.en || ''}
               settingStateValue={handleNestedProductData}
-              name='description.en'
+              name="description.en"
             />
 
-            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+            <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem' }}
+            >
               Description (Arabic)
             </Typography>
 
@@ -921,15 +1103,15 @@ export default function OrdersListView() {
               name='description.ar'
             /> */}
             <RHFTextField
-              variant='filled'
+              variant="filled"
               multiline
               fullWidth
               rows={5}
               dir="rtl"
               sx={{ fontWeight: 900, fontSize: '26px' }}
-              value={productData?.description?.ar || ""}
+              value={productData?.description?.ar || ''}
               settingStateValue={handleNestedProductData}
-              name='description.ar'
+              name="description.ar"
             />
 
             {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
@@ -946,11 +1128,25 @@ export default function OrdersListView() {
             </Select>
           </FormControl> */}
 
-            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+            <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem' }}
+            >
               Quantity (in stock)
             </Typography>
             {/* <TextField type='number' fullWidth variant='filled' onChange={handleProductData} value={productData?.quantity || ""} name='quantity' /> */}
-            <RHFTextField type='number' fullWidth variant='filled' settingStateValue={handleProductData} value={productData?.quantity || ""} name='quantity' />
+            <RHFTextField
+              type="number"
+              fullWidth
+              variant="filled"
+              settingStateValue={handleProductData}
+              value={productData?.quantity || ''}
+              name="quantity"
+            />
 
             {/* <FormControl fullWidth>
             <Select
@@ -963,22 +1159,42 @@ export default function OrdersListView() {
             </Select>
           </FormControl> */}
 
-            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+            <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem' }}
+            >
               Product Status
             </Typography>
 
-            <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
-              borderRadius: '16px', padding: '7px 14px', backgroundColor: '#F5F6F8'
-            }} >
-              <Typography component='p' variant="subtitle2" sx={{ fontWeight: 900, fontSize: '.9rem' }} >
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{
+                borderRadius: '16px',
+                padding: '7px 14px',
+                backgroundColor: '#F5F6F8',
+              }}
+            >
+              <Typography
+                component="p"
+                variant="subtitle2"
+                sx={{ fontWeight: 900, fontSize: '.9rem' }}
+              >
                 Published
               </Typography>
-              <Switch size="medium"
+              <Switch
+                size="medium"
                 checked={productData?.publish_app || false}
-                onChange={(e: any) => setProductData({ ...productData, publish_app: e.target.checked })}
+                onChange={(e: any) =>
+                  setProductData({ ...productData, publish_app: e.target.checked })
+                }
               />
             </Stack>
-
 
             {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
             Barcode (Optional)
@@ -1023,78 +1239,146 @@ export default function OrdersListView() {
         </FormProvider>
       </DetailsNavBar>
 
-
       <DetailsNavBar
         open={openVariant}
         onClose={handleDrawerCloseCommon('variants')}
-        title={editVariantId ? "Edit Variant" : "Add New Variant"}
-        actions={<Stack alignItems='center' justifyContent='center' spacing="10px">
-          <LoadingButton
-            fullWidth
-            variant="soft"
-            color="success"
-            size="large"
-            loading={variantMethods.formState.isSubmitting}
-            onClick={() => variantMethods.handleSubmit(onVariantSubmit as any)()}
-            sx={{ borderRadius: '30px' }}
-          >
-            {editVariantId ? "Update" : "Save"}
-          </LoadingButton>
-        </Stack>}
+        title={editVariantId ? 'Edit Variant' : 'Add New Variant'}
+        actions={
+          <Stack alignItems="center" justifyContent="center" spacing="10px">
+            <LoadingButton
+              fullWidth
+              variant="soft"
+              color="success"
+              size="large"
+              loading={variantMethods.formState.isSubmitting}
+              onClick={() => variantMethods.handleSubmit(onVariantSubmit as any)()}
+              sx={{ borderRadius: '30px' }}
+            >
+              {editVariantId ? 'Update' : 'Save'}
+            </LoadingButton>
+          </Stack>
+        }
       >
-
         <FormProvider methods={variantMethods} onSubmit={onVariantSubmit}>
           <Divider flexItem />
           {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
-          <Box width='100%'>
-            <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+          <Box width="100%">
+            <Typography
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            >
               Group Name (English)
             </Typography>
-            <RHFTextField fullWidth variant='filled' settingStateValue={handleNestedVariantData} value={variantData?.groupName?.en || ""} name='groupName.en' />
+            <RHFTextField
+              fullWidth
+              variant="filled"
+              settingStateValue={handleNestedVariantData}
+              value={variantData?.groupName?.en || ''}
+              name="groupName.en"
+            />
 
-            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            >
               Group Name (Arabic)
             </Typography>
 
-            <RHFTextField fullWidth variant='filled' settingStateValue={handleNestedVariantData} value={variantData?.groupName?.ar || ""} name='groupName.ar' />
+            <RHFTextField
+              fullWidth
+              variant="filled"
+              settingStateValue={handleNestedVariantData}
+              value={variantData?.groupName?.ar || ''}
+              name="groupName.ar"
+            />
 
-
-            <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            >
               Selection Type
             </Typography>
 
             <RHFSelect
               fullWidth
-              variant='filled'
-              name='selectionType'
+              variant="filled"
+              name="selectionType"
               id="demo-simple-select2"
-              value={variantData?.selectionType || ""}
+              value={variantData?.selectionType || ''}
               settingStateValue={handleVariantData}
             >
-              <MenuItem value='multiple'>Multiple</MenuItem>
-              <MenuItem value='single'>Single</MenuItem>
+              <MenuItem value="multiple">Multiple</MenuItem>
+              <MenuItem value="single">Single</MenuItem>
             </RHFSelect>
-
 
             {variantData?.selectionType === 'multiple' && (
               <>
-                <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+                <Typography
+                  mt="20px"
+                  mb="5px"
+                  component="p"
+                  noWrap
+                  variant="subtitle2"
+                  sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                >
                   Minimum
                 </Typography>
-                <RHFTextField fullWidth type='number' variant='filled' settingStateValue={handleVariantData} value={variantData?.minimum || ""} name='minimum' />
+                <RHFTextField
+                  fullWidth
+                  type="number"
+                  variant="filled"
+                  settingStateValue={handleVariantData}
+                  value={variantData?.minimum || ''}
+                  name="minimum"
+                />
 
-                <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+                <Typography
+                  mt="20px"
+                  mb="5px"
+                  component="p"
+                  noWrap
+                  variant="subtitle2"
+                  sx={{ opacity: 0.7, fontSize: '.9rem' }}
+                >
                   Maximum
                 </Typography>
-                <RHFTextField type='number' fullWidth variant='filled' settingStateValue={handleVariantData} value={variantData?.maximum || ""} name='maximum' />
+                <RHFTextField
+                  type="number"
+                  fullWidth
+                  variant="filled"
+                  settingStateValue={handleVariantData}
+                  value={variantData?.maximum || ''}
+                  name="maximum"
+                />
               </>
             )}
 
-
-            <Stack mt='20px' direction='row' alignItems='center' justifyContent='space-between' sx={{
-              borderRadius: '16px', padding: '7px 14px', backgroundColor: '#F5F6F8'
-            }} >
-              <Typography component='p' variant="subtitle2" sx={{ fontWeight: 900, fontSize: '.9rem' }} >
+            <Stack
+              mt="20px"
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{
+                borderRadius: '16px',
+                padding: '7px 14px',
+                backgroundColor: '#F5F6F8',
+              }}
+            >
+              <Typography
+                component="p"
+                variant="subtitle2"
+                sx={{ fontWeight: 900, fontSize: '.9rem' }}
+              >
                 Allow More Quantity
               </Typography>
               <Checkbox
@@ -1116,34 +1400,29 @@ export default function OrdersListView() {
                 inputProps={{ 'aria-label': 'secondary checkbox' }}
               /> */}
             </Stack>
-
-
           </Box>
         </FormProvider>
       </DetailsNavBar>
-
 
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}
         title="Delete"
         noCancel={false}
-        content={
-          <>
-            Are you sure want to delete items?
-          </>
+        content={<>Are you sure want to delete items?</>}
+        action={
+          <Button
+            fullWidth
+            color="error"
+            variant="soft"
+            size="large"
+            onClick={removeProductFun}
+            sx={{ borderRadius: '30px' }}
+          >
+            Delete
+          </Button>
         }
-        action={<Button
-          fullWidth
-          color="error"
-          variant='soft'
-          size="large"
-          onClick={removeProductFun}
-          sx={{ borderRadius: '30px' }}
-        >
-          Delete
-        </Button>}
       />
-    </Container >
+    </Container>
   );
 }

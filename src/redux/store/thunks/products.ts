@@ -73,6 +73,7 @@ export const fetchOneVariant = createAsyncThunk(
 export const createVariant = createAsyncThunk(
   'products/createVariant',
   async ({ productId, data }: any) => {
+    defaultConfig.headers['Content-Type'] = 'multipart/form-data';
     const response = await postRequest(
       `${endpoints.product.varient}/${productId}`,
       data,

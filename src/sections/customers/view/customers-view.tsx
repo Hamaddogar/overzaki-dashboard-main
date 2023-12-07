@@ -17,7 +17,7 @@ import Tab from '@mui/material/Tab';
 // import InputAdornment from '@mui/material/InputAdornment';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import { Box, Grid, Stack, Chip, Typography, Paper, Select, MenuItem, Alert } from '@mui/material';
+import { Box, Grid, Stack, Chip, Typography, Paper, Select, MenuItem, Alert, InputAdornment, IconButton } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
@@ -107,6 +107,8 @@ export default function OrdersListView() {
     location: Yup.string().required('Field is required'),
     gender: Yup.string().required('gender is required'),
     country: Yup.mixed<any>().nullable().required('Country is required'),
+    password: !editId ? Yup.string().min(8, 'Code must be at least 8 characters').required('Password is required') : Yup.string().nullable(),
+    preferedLanguage: Yup.string().required('Field is required'),
   });
 
   const methods = useForm({
@@ -127,7 +129,6 @@ export default function OrdersListView() {
         await createCustomerFun();
       }
     } catch (error) {
-      console.error(error);
       reset();
       setErrorMsg(typeof error === 'string' ? error : error.message);
     }
@@ -160,13 +161,14 @@ export default function OrdersListView() {
       if (customer) {
         const updatedData = {
           avatar: customer.avatar,
-          email: customer.email,
           firstName: customer.firstName,
-          gender: customer.gender,
           lastName: customer.lastName,
+          email: customer.email,
           phoneNumber: customer.phoneNumber,
+          gender: customer.gender,
           country: customer.country,
-          location: customer.location && customer.location.length > 0 ? customer.location[0] : null
+          location: customer.location && customer.location.length > 0 ? customer.location[0] : null,
+          preferedLanguage: customer.preferedLanguage && customer.preferedLanguage.length > 0 ? customer.preferedLanguage[0] : null,
         };
 
         setCustomerData(updatedData);
@@ -182,6 +184,8 @@ export default function OrdersListView() {
       reset();
     }
   }, [customer, methods, reset])
+
+  const password = useBoolean();
 
 
 
@@ -209,9 +213,9 @@ export default function OrdersListView() {
       Object?.keys(customerData).forEach((key) => {
         if (key === "avatar" && typeof customerData.avatar !== "string") {
           FormValues.append('avatar', customerData.avatar);
-        } else if (key === "location") {
+        } else if (key === "location" || key === 'preferedLanguage') {
           FormValues.append(`${key}[0]`, customerData[key]);
-        } else if (key !== "location" && key !== 'avatar') {
+        } else if (key !== "location" && key !== 'avatar' && key !== 'preferedLanguage') {
           FormValues.append(key, customerData[key]);
         }
       });
@@ -236,13 +240,12 @@ export default function OrdersListView() {
     Object?.keys(customerData).forEach((key) => {
       if (key === 'avatar' && (typeof customerData[key] !== 'string' || !customerData[key].startsWith('https://'))) {
         FormValues.append('avatar', customerData.avatar);
-      } else if (key === "location") {
+      } else if (key === "location" || key === 'preferedLanguage') {
         FormValues.append(`${key}[0]`, customerData[key]);
-      } else if (key !== "location" && key !== 'avatar') {
+      } else if (key !== "location" && key !== 'avatar' && key !== 'preferedLanguage') {
         FormValues.append(key, customerData[key]);
       }
     });
-    FormValues.append('deviceToken', "only for android and ios app. Edited");
     dispatch(editCustomer({ customerId: editId, data: FormValues })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
         dispatch(fetchCustomersList(error));
@@ -679,6 +682,33 @@ export default function OrdersListView() {
                   {/* <TextField fullWidth variant='filled' type='email' onChange={handleCustomerData} value={customerData?.email || ""} name='email' /> */}
                   <RHFTextField fullWidth variant='filled' type='email' settingStateValue={handleCustomerData} value={customerData?.email || ""} name='email' />
 
+                  {!editId && (
+                    <>
+                      <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+                        Password
+                      </Typography>
+
+                      <RHFTextField
+                        fullWidth
+                        variant='filled'
+                        name="password"
+                        type={password.value ? 'text' : 'password'}
+                        settingStateValue={handleCustomerData}
+                        value={customerData?.password || ""}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton onClick={password.onToggle} edge="end">
+                                <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </>
+                  )}
+
+
 
                   <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
                     Country
@@ -711,6 +741,23 @@ export default function OrdersListView() {
                   >
                     <MenuItem value="MALE">Male</MenuItem>
                     <MenuItem value="FEMALE">Female</MenuItem>
+                  </RHFSelect>
+
+
+
+                  <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+                    Prefered Language
+                  </Typography>
+                  <RHFSelect
+                    fullWidth
+                    variant='filled'
+                    id="demo-simple-select"
+                    name="preferedLanguage"
+                    value={customerData?.preferedLanguage || ""}
+                    settingStateValue={handleCustomerData}
+                  >
+                    <MenuItem value="en">English</MenuItem>
+                    <MenuItem value="ar">Arabic</MenuItem>
                   </RHFSelect>
 
 
