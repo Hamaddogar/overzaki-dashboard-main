@@ -5,9 +5,17 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import { Box } from '@mui/material';
 
-export default function ProductTableToolbar() {
-
-
+export default function ProductTableToolbar({
+  query,
+  setQuery,
+  sort,
+  setSort,
+}: {
+  query: string;
+  setQuery: any;
+  sort: boolean;
+  setSort: any;
+}) {
   return (
     <Stack
       spacing={2}
@@ -22,18 +30,20 @@ export default function ProductTableToolbar() {
         pl: { xs: 2.5, md: 1 },
       }}
     >
-
       <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
         <TextField
-          placeholder='Search for a product...'
+          placeholder="Search for a product..."
           fullWidth
-          variant='filled'
+          variant="filled"
+          onChange={(e) => setQuery(e.target.value)}
           // value={filters.name}
           // onChange={handleFilterName}
           InputProps={{
-            startAdornment: <InputAdornment position="start">
-              <Box component='img' src='/raw/search.svg' sx={{ width: '15px' }} />
-            </InputAdornment>,
+            startAdornment: (
+              <InputAdornment position="start">
+                <Box component="img" src="/raw/search.svg" sx={{ width: '15px' }} />
+              </InputAdornment>
+            ),
           }}
           sx={{
             borderRadius: '16px',
@@ -42,26 +52,40 @@ export default function ProductTableToolbar() {
             },
             '& .MuiInputAdornment-root': {
               marginTop: '0px !important',
-              paddingLeft: '10px'
+              paddingLeft: '10px',
             },
             '& input': {
               color: '#8898AA',
               paddingLeft: '10px',
               fontSize: '14px',
-              padding: '15px 20px 15px 0px !important'
-            }
+              padding: '15px 20px 15px 0px !important',
+            },
           }}
         />
 
-        <Button variant='contained' sx={{ backgroundColor: 'rgb(15, 19, 73,.04)', borderRadius: '16px', padding: '15px 15px' }} >
-          <Box component='img' src='/raw/sort.svg' />
+        <Button
+          variant="contained"
+          onClick={() => setSort((prev: any) => !prev)}
+          sx={{
+            backgroundColor: sort ? '#c1ced6' : 'rgb(15, 19, 73,.04)',
+            borderRadius: '16px',
+            padding: '15px 15px',
+          }}
+        >
+          <Box component="img" src="/raw/sort.svg" />
         </Button>
 
-        <Button variant='contained' sx={{ backgroundColor: 'rgb(15, 19, 73,.04)', borderRadius: '16px', padding: '15px 15px' }} >
-          <Box component='img' src='/raw/filter.svg' />
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: 'rgb(15, 19, 73,.04)',
+            borderRadius: '16px',
+            padding: '15px 15px',
+          }}
+        >
+          <Box component="img" src="/raw/filter.svg" />
         </Button>
       </Stack>
-
     </Stack>
   );
 }

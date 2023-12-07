@@ -164,9 +164,19 @@ export default function OrdersListView() {
     };
   const listStuff = data;
   const [listItems, setListItems] = useState<any>([]);
+  const [sort, setSort] = useState(false);
+
   useEffect(() => {
     setListItems(listStuff);
   }, [listStuff]);
+  useEffect(() => {
+    const sortedList = sort
+      ? [...listStuff].sort((a: any, b: any) =>
+        b.name.toLowerCase().localeCompare(a.name.toLowerCase())
+      )
+      : listStuff;
+    setListItems(sortedList);
+  }, [listStuff, sort]);
   const handleOnDragEnd = (result: any) => {
     if (!result.destination) return;
     const items = Array.from(listItems);
@@ -174,6 +184,10 @@ export default function OrdersListView() {
     items.splice(result.destination.index, 0, reorderedItem);
     setListItems(items);
   };
+  const [query, setQuery] = useState('');
+  const queryItems = listItems.filter((item: any) =>
+    item.name.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+  );
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -229,19 +243,21 @@ export default function OrdersListView() {
             <OrderTableToolbar
               filters={filters}
               onFilters={handleFilters}
-              //
+              query={query}
+              sort={sort}
+              setSort={setSort}
+              setQuery={setQuery}
               canReset={canReset}
               onResetFilters={handleResetFilters}
             />
 
-            {canReset && (
+            {query && (
               <OrderTableFiltersResult
                 filters={filters}
                 onFilters={handleFilters}
-                //
+                setQuery={setQuery}
                 onResetFilters={handleResetFilters}
-                //
-                results={dataFiltered.length}
+                results={queryItems.length}
                 sx={{ p: 2.5, pt: 0 }}
               />
             )}
@@ -312,145 +328,154 @@ export default function OrdersListView() {
                         container
                         spacing={2}
                       >
-                        {listItems.map((order: any, indx: any) => (
-                          <Draggable key={indx} index={indx} draggableId={indx.toString()}>
-                            {(provided) => (
-                              <Grid
-                                {...provided.draggableProps}
-                                ref={provided.innerRef}
-                                key={indx}
-                                sx={{ cursor: 'pointer' }}
-                                item
-                                xs={12}
-                              >
-                                <Paper elevation={4} onClick={toggleDrawer(order)}>
-                                  <Grid
-                                    container
-                                    item
-                                    alignItems="center"
-                                    justifyContent="space-between"
-                                    rowGap={3}
-                                    sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
-                                  >
+                        {listItems
+                          .filter((item: any) =>
+                            item.name.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+                          )
+                          .map((order: any, indx: any) => (
+                            <Draggable key={indx} index={indx} draggableId={indx.toString()}>
+                              {(provided) => (
+                                <Grid
+                                  {...provided.draggableProps}
+                                  ref={provided.innerRef}
+                                  key={indx}
+                                  sx={{ cursor: 'pointer' }}
+                                  item
+                                  xs={12}
+                                >
+                                  <Paper elevation={4} onClick={toggleDrawer(order)}>
                                     <Grid
-                                      sx={{ display: 'flex', gap: '6px' }}
-                                      alignItems="center"
+                                      container
                                       item
-                                      xs={6}
-                                      md="auto"
+                                      alignItems="center"
+                                      justifyContent="space-between"
+                                      rowGap={3}
+                                      sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
                                     >
-                                      <div {...provided.dragHandleProps}>
-                                        <Iconify icon="ci:drag-vertical" />
-                                      </div>
-                                      <div className="flex flex-col">
-                                        <Typography
-                                          component="p"
-                                          variant="subtitle2"
-                                          sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                                        >
-                                          {order.idNo}
-                                        </Typography>
-                                        <Typography
-                                          component="p"
-                                          variant="subtitle2"
-                                          sx={{
-                                            opacity: 0.7,
-                                            fontSize: '.8rem',
-                                            maxWidth: { xs: '120px', md: '180px' },
-                                          }}
-                                          noWrap
-                                        >
-                                          {order.time}
-                                        </Typography>
-                                      </div>
-                                    </Grid>
-
-                                    <Grid item xs={6} md="auto">
-                                      <Box
-                                        sx={{
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          gap: '8px',
-                                        }}
+                                      <Grid
+                                        sx={{ display: 'flex', gap: '6px' }}
+                                        alignItems="center"
+                                        item
+                                        xs={6}
+                                        md="auto"
                                       >
+                                        <div {...provided.dragHandleProps}>
+                                          <Iconify icon="ci:drag-vertical" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                          <Typography
+                                            component="p"
+                                            variant="subtitle2"
+                                            sx={{ fontSize: '.8rem', fontWeight: 800 }}
+                                          >
+                                            {order.idNo}
+                                          </Typography>
+                                          <Typography
+                                            component="p"
+                                            variant="subtitle2"
+                                            sx={{
+                                              opacity: 0.7,
+                                              fontSize: '.8rem',
+                                              maxWidth: { xs: '120px', md: '180px' },
+                                            }}
+                                            noWrap
+                                          >
+                                            {order.time}
+                                          </Typography>
+                                        </div>
+                                      </Grid>
+
+                                      <Grid item xs={6} md="auto">
                                         <Box
-                                          component="img"
-                                          src={order.flag}
-                                          alt=" "
-                                          width="22px"
+                                          sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                          }}
+                                        >
+                                          <Box
+                                            component="img"
+                                            src={order.flag}
+                                            alt=" "
+                                            width="22px"
+                                          />
+                                          <Box display="flex" gap="0px" flexDirection="column">
+                                            <Typography
+                                              component="p"
+                                              variant="subtitle2"
+                                              sx={{ fontSize: '.8rem', fontWeight: 800 }}
+                                            >
+                                              {' '}
+                                              {order.name}{' '}
+                                            </Typography>
+                                            <Typography
+                                              component="p"
+                                              noWrap
+                                              variant="subtitle2"
+                                              sx={{
+                                                opacity: 0.7,
+                                                fontSize: '.8rem',
+                                                maxWidth: { xs: '120px', md: '188px' },
+                                              }}
+                                            >
+                                              {order.address}
+                                            </Typography>
+                                          </Box>
+                                        </Box>
+                                      </Grid>
+
+                                      <Grid item xs={6} md="auto">
+                                        <Box
+                                          sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                          }}
+                                        >
+                                          <Box
+                                            component="img"
+                                            src={order.pay}
+                                            alt=" "
+                                            width="25px"
+                                          />
+                                          <Box display="flex" gap="0px" flexDirection="column">
+                                            <Typography
+                                              component="p"
+                                              variant="subtitle2"
+                                              sx={{ fontSize: '.8rem', fontWeight: 800 }}
+                                            >
+                                              {' '}
+                                              {order.price} KWD{' '}
+                                            </Typography>
+                                            <Typography
+                                              component="p"
+                                              noWrap
+                                              variant="subtitle2"
+                                              sx={{
+                                                opacity: 0.7,
+                                                fontSize: '.8rem',
+                                                maxWidth: { xs: '120px', md: '188px' },
+                                              }}
+                                            >
+                                              {order.totalItems} items
+                                            </Typography>
+                                          </Box>
+                                        </Box>
+                                      </Grid>
+
+                                      <Grid item xs={6} md="auto">
+                                        <Chip
+                                          label={order.status}
+                                          size="small"
+                                          sx={{ backgroundColor: order.color }}
                                         />
-                                        <Box display="flex" gap="0px" flexDirection="column">
-                                          <Typography
-                                            component="p"
-                                            variant="subtitle2"
-                                            sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                                          >
-                                            {' '}
-                                            {order.name}{' '}
-                                          </Typography>
-                                          <Typography
-                                            component="p"
-                                            noWrap
-                                            variant="subtitle2"
-                                            sx={{
-                                              opacity: 0.7,
-                                              fontSize: '.8rem',
-                                              maxWidth: { xs: '120px', md: '188px' },
-                                            }}
-                                          >
-                                            {order.address}
-                                          </Typography>
-                                        </Box>
-                                      </Box>
+                                      </Grid>
                                     </Grid>
-
-                                    <Grid item xs={6} md="auto">
-                                      <Box
-                                        sx={{
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          gap: '8px',
-                                        }}
-                                      >
-                                        <Box component="img" src={order.pay} alt=" " width="25px" />
-                                        <Box display="flex" gap="0px" flexDirection="column">
-                                          <Typography
-                                            component="p"
-                                            variant="subtitle2"
-                                            sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                                          >
-                                            {' '}
-                                            {order.price} KWD{' '}
-                                          </Typography>
-                                          <Typography
-                                            component="p"
-                                            noWrap
-                                            variant="subtitle2"
-                                            sx={{
-                                              opacity: 0.7,
-                                              fontSize: '.8rem',
-                                              maxWidth: { xs: '120px', md: '188px' },
-                                            }}
-                                          >
-                                            {order.totalItems} items
-                                          </Typography>
-                                        </Box>
-                                      </Box>
-                                    </Grid>
-
-                                    <Grid item xs={6} md="auto">
-                                      <Chip
-                                        label={order.status}
-                                        size="small"
-                                        sx={{ backgroundColor: order.color }}
-                                      />
-                                    </Grid>
-                                  </Grid>
-                                </Paper>
-                              </Grid>
-                            )}
-                          </Draggable>
-                        ))}
+                                  </Paper>
+                                </Grid>
+                              )}
+                            </Draggable>
+                          ))}
                       </Grid>
                     )}
                   </Droppable>

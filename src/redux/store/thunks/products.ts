@@ -60,6 +60,14 @@ export const deleteProduct = createAsyncThunk('products/delete', async (productI
   return response.data;
 });
 
+export const fetchAllVariant = createAsyncThunk(
+  'products/fetchAllVariant',
+  async (productId: number) => {
+    const response = await getRequest(`${endpoints.product.varient}/${productId}`, defaultConfig);
+
+    return response.data;
+  }
+);
 export const fetchOneVariant = createAsyncThunk(
   'products/fetchOneVariant',
   async (productId: number) => {
@@ -88,6 +96,7 @@ export const createVariant = createAsyncThunk(
 export const editVariant = createAsyncThunk(
   'products/editVariant',
   async (payload: { productId: any; data: any }) => {
+    defaultConfig.headers['Content-Type'] = 'multipart/form-data';
     const { productId, data } = payload;
     const response = await putRequest(
       `${endpoints.product.varient}/${productId}`,
@@ -98,6 +107,12 @@ export const editVariant = createAsyncThunk(
     return response.data;
   }
 );
+
+export const deleteVariant = createAsyncThunk('products/deleteVariant', async (productId: any) => {
+  const response = await deleteRequest(`${endpoints.product.varient}/${productId}`, defaultConfig);
+
+  return response.data;
+});
 
 const productsSlice = createSlice({
   name: 'products',

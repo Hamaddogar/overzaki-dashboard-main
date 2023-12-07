@@ -18,17 +18,23 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 type Props = {
   filters: IOrderTableFilters;
   onFilters: (name: string, value: IOrderTableFilterValue) => void;
-  //
+  query: string;
+  setQuery: any;
   canReset: boolean;
   onResetFilters: VoidFunction;
+  setSort: any;
+  sort: boolean;
 };
 
 export default function OrderTableToolbar({
   filters,
   onFilters,
-  //
   canReset,
+  setSort,
   onResetFilters,
+  query,
+  setQuery,
+  sort,
 }: Props) {
   const popover = usePopover();
 
@@ -38,8 +44,6 @@ export default function OrderTableToolbar({
     },
     [onFilters]
   );
-
-
 
   return (
     <>
@@ -56,18 +60,19 @@ export default function OrderTableToolbar({
           pl: { xs: 2.5, md: 1 },
         }}
       >
-
         <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
           <TextField
-            placeholder='Search by order ID, phone or customer...'
+            placeholder="Search by order ID, phone or customer..."
             fullWidth
-            variant='filled'
-            value={filters.name}
-            onChange={handleFilterName}
+            variant="filled"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             InputProps={{
-              startAdornment: <InputAdornment position="start">
-                <Box component='img' src='/raw/search.svg' sx={{ width: '15px' }} />
-              </InputAdornment>,
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Box component="img" src="/raw/search.svg" sx={{ width: '15px' }} />
+                </InputAdornment>
+              ),
             }}
             sx={{
               borderRadius: '16px',
@@ -76,23 +81,38 @@ export default function OrderTableToolbar({
               },
               '& .MuiInputAdornment-root': {
                 marginTop: '0px !important',
-                paddingLeft: '10px'
+                paddingLeft: '10px',
               },
               '& input': {
                 color: '#8898AA',
                 paddingLeft: '10px',
                 fontSize: '14px',
-                padding: '15px 20px 15px 0px !important'
-              }
+                padding: '15px 20px 15px 0px !important',
+              },
             }}
           />
 
-          <Button variant='contained' sx={{ backgroundColor: 'rgb(15, 19, 73,.04)', borderRadius: '16px', padding: '15px 15px' }} >
-            <Box component='img' src='/raw/sort.svg' />
+          <Button
+            variant="contained"
+            onClick={() => setSort((prev: any) => !prev)}
+            sx={{
+              backgroundColor: sort ? '#c1ced6' : 'rgb(15, 19, 73,.04)',
+              borderRadius: '16px',
+              padding: '15px 15px',
+            }}
+          >
+            <Box component="img" src="/raw/sort.svg" />
           </Button>
 
-          <Button variant='contained' sx={{ backgroundColor: 'rgb(15, 19, 73,.04)', borderRadius: '16px', padding: '15px 15px' }} >
-            <Box component='img' src='/raw/filter.svg' />
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: 'rgb(15, 19, 73,.04)',
+              borderRadius: '16px',
+              padding: '15px 15px',
+            }}
+          >
+            <Box component="img" src="/raw/filter.svg" />
           </Button>
           <IconButton onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />

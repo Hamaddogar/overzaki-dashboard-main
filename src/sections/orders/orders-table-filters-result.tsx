@@ -17,14 +17,14 @@ type Props = StackProps & {
   onFilters: (name: string, value: IOrderTableFilterValue) => void;
   //
   onResetFilters: VoidFunction;
-  //
+  setQuery: any;
   results: number;
 };
 
 export default function OrderTableFiltersResult({
   filters,
   onFilters,
-  //
+  setQuery,
   onResetFilters,
   //
   results,
@@ -65,7 +65,7 @@ export default function OrderTableFiltersResult({
 
         <Button
           color="error"
-          onClick={onResetFilters}
+          onClick={() => setQuery('')}
           startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
         >
           Clear

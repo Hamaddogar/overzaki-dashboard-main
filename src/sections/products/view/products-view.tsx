@@ -538,7 +538,16 @@ export default function OrdersListView() {
     items.splice(result.destination.index, 0, reorderedItem);
     setListItems(items);
   };
-
+  const [query, setQuery] = useState('');
+  const [sort, setSort] = useState(false);
+  useEffect(() => {
+    const sortedList = sort
+      ? [...listStuff].sort((a: any, b: any) =>
+        b.name.en.toLowerCase().localeCompare(a.name.en.toLowerCase())
+      )
+      : listStuff;
+    setListItems(sortedList);
+  }, [listStuff, sort]);
   const imagesItrations = Array.from({ length: 3 }, (_, index) => index);
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -577,7 +586,7 @@ export default function OrdersListView() {
 
         <Grid item xs={12}>
           <Box mt="20px">
-            <ProductTableToolbar />
+            <ProductTableToolbar sort={sort} setSort={setSort} query={query} setQuery={setQuery} />
           </Box>
         </Grid>
 
@@ -638,123 +647,127 @@ export default function OrdersListView() {
                         spacing={2}
                       >
                         {/* DND START */}
-                        {listItems.map((product: any, indx: any) => (
-                          <Draggable key={indx} index={indx} draggableId={indx.toString()}>
-                            {(provided) => (
-                              <Grid
-                                {...provided.draggableProps}
-                                ref={provided.innerRef}
-                                item
-                                xs={12}
-                              >
-                                <Paper elevation={4}>
-                                  <Grid
-                                    container
-                                    item
-                                    alignItems="center"
-                                    justifyContent="space-between"
-                                    rowGap={3}
-                                    sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
-                                  >
-                                    <Grid item xs={12} md={6}>
-                                      <Box
-                                        sx={{
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          gap: '8px',
-                                        }}
-                                      >
-                                        <div {...provided.dragHandleProps}>
-                                          <Iconify icon="ci:drag-vertical" />
-                                        </div>
+                        {listItems
+                          .filter((item: any) =>
+                            item.name.en.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+                          )
+                          .map((product: any, indx: any) => (
+                            <Draggable key={indx} index={indx} draggableId={indx.toString()}>
+                              {(provided) => (
+                                <Grid
+                                  {...provided.draggableProps}
+                                  ref={provided.innerRef}
+                                  item
+                                  xs={12}
+                                >
+                                  <Paper elevation={4}>
+                                    <Grid
+                                      container
+                                      item
+                                      alignItems="center"
+                                      justifyContent="space-between"
+                                      rowGap={3}
+                                      sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
+                                    >
+                                      <Grid item xs={12} md={6}>
                                         <Box
-                                          component="img"
-                                          src={product.images[0]}
-                                          alt=" "
-                                          width="60px"
-                                        />
-                                        <Box display="flex" gap="0px" flexDirection="column">
+                                          sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                          }}
+                                        >
+                                          <div {...provided.dragHandleProps}>
+                                            <Iconify icon="ci:drag-vertical" />
+                                          </div>
+                                          <Box
+                                            component="img"
+                                            src={product.images[0]}
+                                            alt=" "
+                                            width="60px"
+                                          />
+                                          <Box display="flex" gap="0px" flexDirection="column">
+                                            <Typography
+                                              component="p"
+                                              noWrap
+                                              variant="subtitle2"
+                                              sx={{
+                                                fontSize: '.9rem',
+                                                fontWeight: 800,
+                                                maxWidth: { xs: '100%', md: '188px' },
+                                              }}
+                                            >
+                                              {' '}
+                                              {product?.name?.en}{' '}
+                                            </Typography>
+                                            <Typography
+                                              component="p"
+                                              noWrap
+                                              variant="subtitle2"
+                                              sx={{
+                                                opacity: 0.7,
+                                                fontSize: '.9rem',
+                                                maxWidth: { xs: '100%', md: '188px' },
+                                              }}
+                                            >
+                                              {product.category}
+                                            </Typography>
+                                          </Box>
+                                        </Box>
+                                      </Grid>
+
+                                      <Grid item xs={12} md={6}>
+                                        <Box
+                                          sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                                          }}
+                                        >
                                           <Typography
                                             component="p"
-                                            noWrap
                                             variant="subtitle2"
-                                            sx={{
-                                              fontSize: '.9rem',
-                                              fontWeight: 800,
-                                              maxWidth: { xs: '100%', md: '188px' },
-                                            }}
+                                            sx={{ fontSize: '.8rem', fontWeight: 800 }}
                                           >
                                             {' '}
-                                            {product?.name?.en}{' '}
+                                            {product.price} KWD{' '}
                                           </Typography>
-                                          <Typography
-                                            component="p"
-                                            noWrap
-                                            variant="subtitle2"
-                                            sx={{
-                                              opacity: 0.7,
-                                              fontSize: '.9rem',
-                                              maxWidth: { xs: '100%', md: '188px' },
-                                            }}
-                                          >
-                                            {product.category}
-                                          </Typography>
-                                        </Box>
-                                      </Box>
-                                    </Grid>
-
-                                    <Grid item xs={12} md={6}>
-                                      <Box
-                                        sx={{
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          gap: '8px',
-                                          justifyContent: { xs: 'flex-start', md: 'flex-end' },
-                                        }}
-                                      >
-                                        <Typography
-                                          component="p"
-                                          variant="subtitle2"
-                                          sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                                        >
-                                          {' '}
-                                          {product.price} KWD{' '}
-                                        </Typography>
-                                        &nbsp; &nbsp;
-                                        {/* <Iconify
+                                          &nbsp; &nbsp;
+                                          {/* <Iconify
                                           icon="mdi:pen-plus"
                                           onClick={toggleDrawerCommon('variants', product._id)}
                                           style={{ cursor: 'pointer' }}
                                         />{' '} */}
-                                        <Link href={`/dashboard/products/${product._id}`} >
+                                          <Link href={`/dashboard/products/${product._id}`}>
+                                            <Iconify
+                                              icon="mdi:pen-plus"
+                                              style={{ cursor: 'pointer' }}
+                                            />{' '}
+                                          </Link>
+                                          &nbsp; &nbsp;
                                           <Iconify
-                                            icon="mdi:pen-plus"
+                                            icon="carbon:delete"
+                                            onClick={() => {
+                                              setRemoveData(product._id);
+                                              confirm.onTrue();
+                                            }}
                                             style={{ cursor: 'pointer' }}
                                           />{' '}
-                                        </Link>
-                                        &nbsp; &nbsp;
-                                        <Iconify
-                                          icon="carbon:delete"
-                                          onClick={() => {
-                                            setRemoveData(product._id);
-                                            confirm.onTrue();
-                                          }}
-                                          style={{ cursor: 'pointer' }}
-                                        />{' '}
-                                        &nbsp; &nbsp;
-                                        <Iconify
-                                          icon="bx:edit"
-                                          onClick={toggleDrawerCommon('new', product._id)}
-                                          style={{ cursor: 'pointer' }}
-                                        />
-                                      </Box>
+                                          &nbsp; &nbsp;
+                                          <Iconify
+                                            icon="bx:edit"
+                                            onClick={toggleDrawerCommon('new', product._id)}
+                                            style={{ cursor: 'pointer' }}
+                                          />
+                                        </Box>
+                                      </Grid>
                                     </Grid>
-                                  </Grid>
-                                </Paper>
-                              </Grid>
-                            )}
-                          </Draggable>
-                        ))}
+                                  </Paper>
+                                </Grid>
+                              )}
+                            </Draggable>
+                          ))}
                       </Grid>
                     )}
                   </Droppable>
