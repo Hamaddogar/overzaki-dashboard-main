@@ -500,7 +500,7 @@ export default function OrdersListView() {
 
   const editVariantFun = () => {
     if (variantData && Object.entries(variantData).length > 0) {
-      dispatch(editVariant({ productId: tempVariantId, data: variantData })).then(
+      dispatch(editVariant({ variantId: tempVariantId, data: variantData })).then(
         (response: any) => {
           if (response.meta.requestStatus === 'fulfilled') {
             dispatch(fetchProductsList(error));

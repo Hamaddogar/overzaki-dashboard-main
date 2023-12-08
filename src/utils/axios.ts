@@ -104,6 +104,7 @@ export const endpoints = {
     details: '/product/details',
     search: '/product/search',
     varient: '/varient',
+    rows: '/rows',
   },
   customer: {
     list: '/customers',

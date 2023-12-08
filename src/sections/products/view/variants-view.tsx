@@ -12,31 +12,20 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form';
 import LoadingButton from '@mui/lab/LoadingButton';
-
 // @mui
 import Divider from '@mui/material/Divider';
 import { alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import Switch from '@mui/material/Switch';
 import { Box, Grid, Stack, Typography, Paper, Alert, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
-import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
-
-
-
-// import { useRouter } from 'next/router';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-
-
-import { useDispatch, useSelector } from 'react-redux';
+import { usePathname } from 'next/navigation';
+import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
 import { useSnackbar } from 'notistack';
 // _mock
@@ -48,19 +37,17 @@ import {
     createVariant,
     editVariant,
     fetchAllVariant,
-    fetchOneVariant,
     deleteVariant,
+    editVariantRow,
+    deleteVariantRow,
 } from 'src/redux/store/thunks/products';
 // components
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
 import { BottomActions } from 'src/components/bottom-actions';
-//
 import Label from 'src/components/label/label';
 import Iconify from 'src/components/iconify/iconify';
-
-import DetailsNavBar from '../DetailsNavBar';
 
 
 
@@ -75,7 +62,6 @@ export default function OrdersListView() {
 
     const settings = useSettingsContext();
 
-    // const [value, setValue] = useState<any>('All');
     const confirm = useBoolean();
 
     const [data, setData] = useState([]);
@@ -95,8 +81,6 @@ export default function OrdersListView() {
         fetchVariants(newProductId);
     }, [router]);
 
-
-
     const fetchVariants = (id: any) => {
         if (id) {
             dispatch(fetchAllVariant(id)).then((response: any) => {
@@ -107,50 +91,6 @@ export default function OrdersListView() {
             });
         }
     }
-
-
-
-
-    const convertStateToFormData = (state: any) => {
-        const formData = new FormData();
-
-        formData.append('groupName[en]', state.groupName.en);
-        formData.append('groupName[ar]', state.groupName.ar);
-        formData.append('selectionType', state.selectionType);
-        formData.append('allowMoreQuantity', state.allowMoreQuantity);
-        if (state?.minimum) {
-            formData.append('minimum', state?.minimum);
-        }
-        if (state?.maximum) {
-            formData.append('maximum', state?.maximum);
-        }
-
-        formData.append('required', state.required);
-
-        if (state?.rows) {
-            state.rows.forEach((row: any, index: any) => {
-                const rowKey = `rows[${index}]`;
-                const rowData = JSON.stringify({
-                    name: { en: row.name.en, ar: row.name.ar },
-                    price: row.price,
-                    priceAfterDiscount: row.priceAfterDiscount,
-                    barcode: row.barcode,
-                    sku: row.sku,
-                });
-                formData.append(rowKey, rowData);
-            });
-        }
-        // Append images
-        if (state?.images) {
-            state.images.forEach((image: any, index: any) => {
-                formData.append(`images`, image);
-            });
-        }
-
-        return formData;
-    };
-
-
 
     // -------------------------------------------------- Variants ---------------------
 
@@ -193,7 +133,7 @@ export default function OrdersListView() {
 
     const onVariantSubmit = variantMethods.handleSubmit(async (data) => {
         try {
-            if (editVariantId) {
+            if (editVariantId !== null) {
                 await editVariantFun();
             } else {
                 await createVariantFun();
@@ -210,7 +150,8 @@ export default function OrdersListView() {
         variantMethods.reset();
         dialog.onTrue();
         if (editVariantObj && Object.entries(editVariantObj).length > 0) {
-
+            // setEditVariantId(editVariantObj.productId);
+            setEditVariantId(editVariantObj._id);
             handleEditVariantData(editVariantObj)
         } else {
 
@@ -221,7 +162,10 @@ export default function OrdersListView() {
 
 
     const handleEditVariantData = (vobj: any) => {
-        setEditVariantId(vobj.productId);
+
+        console.log("vobj", vobj);
+
+
         const newData = {
             groupName: {
                 en: vobj.groupName.en,
@@ -231,6 +175,7 @@ export default function OrdersListView() {
             maximum: vobj?.maximum || 0,
             minimum: vobj?.minimum || 0,
             selectionType: vobj?.selectionType,
+            required: vobj?.required
         };
 
         Object.entries(newData).forEach(([fieldName, nestedData]: any) => {
@@ -246,26 +191,29 @@ export default function OrdersListView() {
 
 
         const rowsArray: any = [];
-        const imagesArray: any = [];
+        // const imagesArray: any = [];
         vobj.rows.forEach((row: any) => {
             const nameObj = {
                 en: row?.name?.en || "",
                 ar: row?.name?.ar || "",
             };
             rowsArray.push({
+                _id: row?._id || null,
+                isNew: false,
                 name: nameObj,
                 barcode: row?.barcode || "",
                 price: row?.price || "",
                 priceAfterDiscount: row?.priceAfterDiscount || "",
                 sku: row?.sku || "",
+                image: row?.image
             });
-            imagesArray.push(row.image)
+            // imagesArray.push(row.image)
         });
 
         const editVariantObj = {
             ...newData,
             rows: rowsArray,
-            images: imagesArray
+            // images: imagesArray
         }
         setVariantData(editVariantObj);
     }
@@ -327,9 +275,9 @@ export default function OrdersListView() {
     const editVariantFun = () => {
         if (variantData && Object.entries(variantData).length > 0) {
             const _nVariantData = { ...variantData, required: 'true' }
-            const newFormData = convertStateToFormData(_nVariantData);
+            const newFormData = convertStateToFormData(_nVariantData, false);
 
-            dispatch(editVariant({ productId: pId, data: newFormData })).then(
+            dispatch(editVariant({ variantId: editVariantId, data: newFormData })).then(
                 (response: any) => {
                     if (response.meta.requestStatus === 'fulfilled') {
                         // dispatch(fetchProductsList(error));
@@ -359,6 +307,73 @@ export default function OrdersListView() {
     }
 
 
+
+    const convertStateToFormData = (state: any, isCreate: any = true) => {
+        if (isCreate) {
+            const formData = new FormData();
+
+            formData.append('groupName[en]', state.groupName.en);
+            formData.append('groupName[ar]', state.groupName.ar);
+            formData.append('selectionType', state.selectionType);
+            formData.append('allowMoreQuantity', state.allowMoreQuantity);
+            if (state?.minimum) {
+                formData.append('minimum', state?.minimum);
+            }
+            if (state?.maximum) {
+                formData.append('maximum', state?.maximum);
+            }
+
+
+            formData.append('required', state.required);
+            if (state?.rows) {
+                state.rows.forEach((row: any, index: any) => {
+                    if (row?.isNew === true) {
+                        const rowKey = `rows[${index}]`;
+                        const rowData = JSON.stringify({
+                            name: { en: row.name.en, ar: row.name.ar },
+                            price: row.price,
+                            priceAfterDiscount: row.priceAfterDiscount,
+                            barcode: row.barcode,
+                            sku: row.sku,
+                        });
+                        formData.append(rowKey, rowData);
+                        formData.append(`images`, row.image);
+                    }
+                });
+            }
+            return formData;
+
+        }
+        // For Edit API
+        const formData = {
+            groupName: {
+                en: state.groupName.en,
+                ar: state.groupName.ar
+            },
+            selectionType: state.selectionType,
+            minimum: state?.minimum || 0,
+            maximum: state?.maximum || 0,
+            allowMoreQuantity: state.allowMoreQuantity
+        };
+
+        return formData;
+
+    };
+    const convertRowDataStateToFormData = (state: any) => {
+        const formData = new FormData();
+        formData.append('name[en]', state.name.en);
+        formData.append('name[ar]', state.name.ar);
+        formData.append('price', state.price);
+        formData.append('priceAfterDiscount', state.priceAfterDiscount);
+        formData.append('barcode', state.barcode);
+        formData.append('sku', state.sku);
+        if (state?.image && typeof (state.image) !== 'string') {
+            formData.append('image', state?.image);
+        }
+        return formData;
+    };
+
+
     // ------------------------------------------------------ Rows Data ----------------------------
 
     const [rowData, setRowData] = useState<any>(null);
@@ -386,21 +401,33 @@ export default function OrdersListView() {
     };
     const handleAddImage = (files: any) => {
         if (files.length > 0) {
-            setVariantData((prevData: any) => ({
+            // setVariantData((prevData: any) => ({
+            //     ...prevData,
+            //     images: prevData?.images?.length > 0 ? [...prevData.images, files[0]] : [files[0]],
+            // }));
+            setRowData((prevData: any) => ({
                 ...prevData,
-                images: prevData?.images?.length > 0 ? [...prevData.images, files[0]] : [files[0]],
+                image: files[0],
             }));
             rowMethods.setValue('image.name', files[0].name);
             rowMethods.clearErrors('image.name');
         }
     };
     const handleRemoveImage = (index: any = null) => {
-        setVariantData((current: any) => {
-            const { images, ...rest } = current;
-            const updatedImages = (index) ? images.filter((_: any, i: any) => i !== index) : images.slice(0, -1);
+        // setVariantData((current: any) => {
+        //     const { images, ...rest } = current;
+        //     const updatedImages = (index) ? images.filter((_: any, i: any) => i !== index) : images.slice(0, -1);
+        //     return {
+        //         ...rest,
+        //         images: updatedImages,
+        //     };
+        // });
+        console.log("setRowData", rowData);
+
+        setRowData((current: any) => {
+            const { image, ...rest } = current;
             return {
                 ...rest,
-                images: updatedImages,
             };
         });
         rowMethods.setValue('image.name', '');
@@ -426,12 +453,40 @@ export default function OrdersListView() {
     });
     const onRowSubmit = rowMethods.handleSubmit(async (data) => {
         try {
-            if (editRowId) {
-                const updatedRows = [...variantData.rows];
-                updatedRows[editRowId] = rowData;
+            if (editRowId !== null) {
+
+                console.log("rowData", rowData);
+
+                const updatedRows = variantData.rows.map((row: any) => {
+                    if (row._id === editRowId) {
+                        return rowData;
+                    }
+                    return row;
+                });
                 setVariantData({ ...variantData, rows: updatedRows });
+
+                if (rowData.isNew === false) {
+                    // edit fun
+                    const newFormData = convertRowDataStateToFormData(rowData);
+                    dispatch(editVariantRow({ rowId: editRowId, data: newFormData })).then(
+                        (response: any) => {
+                            if (response.meta.requestStatus === 'fulfilled') {
+                                enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+                            } else {
+                                enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+                            }
+                        }
+                    );
+                }
+
+
             } else {
-                setVariantData({ ...variantData, rows: variantData?.rows ? [...variantData.rows, rowData] : [rowData] })
+                const newRowData = {
+                    ...rowData,
+                    _id: Math.random(),
+                    isNew: true
+                };
+                setVariantData({ ...variantData, rows: variantData?.rows ? [...variantData.rows, newRowData] : [newRowData] })
             }
             setRowData(null);
             rowMethods.reset();
@@ -443,10 +498,12 @@ export default function OrdersListView() {
         }
     });
 
-    const handleEditRow = (row: any, index: any) => {
-        setEditRowId(index);
+    const handleEditRow = (row: any) => {
+
+        setEditRowId(row?._id);
         rowMethods.reset();
         const newData = {
+            _id: row?._id,
             name: {
                 en: row.name.en,
                 ar: row.name.ar,
@@ -455,6 +512,8 @@ export default function OrdersListView() {
             priceAfterDiscount: row?.priceAfterDiscount,
             barcode: row?.barcode,
             sku: row?.sku,
+            isNew: row?.isNew,
+            image: row?.image,
         };
         setRowData(newData);
 
@@ -474,15 +533,26 @@ export default function OrdersListView() {
         });
         rowDialog.onTrue();
     }
-    const handleRemoveRow = (indexToRemove: any) => {
-        const updatedRows = variantData.rows.filter((_: any, index: any) => index !== indexToRemove);
+    const handleRemoveRow = (indexToRemove: any, isNew: any) => {
+        const updatedRows = variantData.rows.filter((row: any) => row?._id !== indexToRemove);
         setVariantData({ ...variantData, rows: updatedRows });
+
+        if (!isNew) {
+            // remove fun
+            dispatch(deleteVariantRow(indexToRemove)).then(
+                (response: any) => {
+                    if (response.meta.requestStatus === 'fulfilled') {
+                        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+                    } else {
+                        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+                    }
+                }
+            );
+
+        }
+
+
     }
-
-
-
-
-
 
 
     // -----------------------------------------Drag Divs----------------------------
@@ -651,7 +721,7 @@ export default function OrdersListView() {
                                                                                 <Iconify
                                                                                     icon="carbon:delete"
                                                                                     onClick={() => {
-                                                                                        setRemoveData(variant.productId);
+                                                                                        setRemoveData(variant._id);
                                                                                         confirm.onTrue();
                                                                                     }}
                                                                                     style={{ cursor: 'pointer' }}
@@ -682,31 +752,9 @@ export default function OrdersListView() {
 
 
 
-            <ConfirmDialog
-                open={confirm.value}
-                onClose={confirm.onFalse}
-                title="Delete"
-                noCancel={false}
-                content={<>Are you sure want to delete items?</>}
-                action={
-                    <Button
-                        fullWidth
-                        color="error"
-                        variant="soft"
-                        size="large"
-                        onClick={removeVariantFun}
-                        sx={{ borderRadius: '30px' }}
-                    >
-                        Delete
-                    </Button>
-                }
-            />
-
-
-
             {/* create Variant Model */}
             <Dialog open={dialog.value} onClose={dialog.onFalse} scroll='body' maxWidth='xl' fullWidth >
-                <DialogTitle>Add New Variant</DialogTitle>
+                <DialogTitle>{editVariantId !== null ? "Edit Variant" : "Add New Variant"}</DialogTitle>
                 <DialogContent>
                     <FormProvider methods={variantMethods} onSubmit={onVariantSubmit}>
                         <Divider flexItem />
@@ -845,22 +893,24 @@ export default function OrdersListView() {
                                     </>
                                 )}
                             </Grid>
-                            <Grid item xs={12}>
-                                <Button
-                                    startIcon="+"
-                                    sx={{ borderRadius: '30px', color: '#0F1349', float: 'right', px: 3 }}
-                                    component="button"
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() => {
-                                        rowDialog.onTrue();
-                                        setRowData(null);
-                                        setEditRowId(null);
-                                    }}
-                                >
-                                    Add Row
-                                </Button>
-                            </Grid>
+                            {!editVariantId && (
+                                <Grid item xs={12}>
+                                    <Button
+                                        startIcon="+"
+                                        sx={{ borderRadius: '30px', color: '#0F1349', float: 'right', px: 3 }}
+                                        component="button"
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={() => {
+                                            rowDialog.onTrue();
+                                            setRowData(null);
+                                            setEditRowId(null);
+                                        }}
+                                    >
+                                        Add Row
+                                    </Button>
+                                </Grid>
+                            )}
                             <Grid item xs={12}>
                                 {variantData?.rows?.map((row: any, index: any) => (
                                     <Paper elevation={4} key={index} sx={{ mt: 2 }} >
@@ -884,13 +934,15 @@ export default function OrdersListView() {
 
                                                     <Iconify icon="ci:drag-vertical" />
 
-                                                    {variantData?.images && variantData?.images.length > 0 ? (
+                                                    {/* {variantData?.images && variantData?.images.length > 0 ? ( */}
+                                                    {row?.image ? (
                                                         <Box
                                                             component="img"
                                                             // src={row?.image}
-                                                            src={typeof variantData?.images[index] === 'string'
-                                                                ? variantData?.images[index]
-                                                                : URL.createObjectURL(variantData?.images[index])}
+                                                            src={typeof (row.image) === 'string' ? (row.image) : URL.createObjectURL(row?.image)}
+                                                            // src={typeof variantData?.images[index] === 'string'
+                                                            //     ? variantData?.images[index]
+                                                            //     : URL.createObjectURL(variantData?.images[index])}
                                                             alt=" "
                                                             width="60px"
                                                         />
@@ -944,19 +996,20 @@ export default function OrdersListView() {
                                                         variant="subtitle2"
                                                         sx={{ fontSize: '.8rem', fontWeight: 800 }}
                                                     >
+                                                        {/* {`'${row?.isNew} dx'`} */}
                                                         {row?.barcode}
                                                     </Typography>
                                                     &nbsp; &nbsp;
                                                     <Iconify
                                                         icon="carbon:delete"
                                                         style={{ cursor: 'pointer' }}
-                                                        onClick={() => handleRemoveRow(index)}
+                                                        onClick={() => handleRemoveRow(row?._id, row?.isNew)}
                                                     />{' '}
                                                     &nbsp; &nbsp;
                                                     <Iconify
                                                         icon="bx:edit"
                                                         style={{ cursor: 'pointer' }}
-                                                        onClick={() => handleEditRow(row, index)}
+                                                        onClick={() => handleEditRow(row)}
                                                     />
                                                 </Box>
                                             </Grid>
@@ -988,7 +1041,7 @@ export default function OrdersListView() {
                         onClick={() => variantMethods.handleSubmit(onVariantSubmit as any)()}
                         sx={{ borderRadius: '30px', px: 2 }}
                     >
-                        {editVariantId ? 'Update' : 'Save'}
+                        {editVariantId !== null ? 'Update' : 'Save'}
                     </LoadingButton>
                 </DialogActions>
             </Dialog>
@@ -997,7 +1050,7 @@ export default function OrdersListView() {
 
             {/* create Row Model */}
             <Dialog open={rowDialog.value} onClose={rowDialog.onFalse} scroll='body' maxWidth='md' fullWidth >
-                <DialogTitle>{editRowId ? "Edit Row" : "Add New Row"}</DialogTitle>
+                <DialogTitle>{editRowId !== null ? "Edit Row" : "Add New Row"}</DialogTitle>
                 <DialogContent>
                     <FormProvider methods={rowMethods} onSubmit={onRowSubmit}>
                         <Divider flexItem />
@@ -1041,7 +1094,8 @@ export default function OrdersListView() {
                             <Grid item xs={12} sm={6} mt={2} order={{ xs: 1, sm: 2 }} >
                                 <Stack direction="row" spacing="10px">
 
-                                    {variantData?.images && variantData?.images.length > 0 ? (
+                                    {/* {variantData?.images && variantData?.images.length > 0 ? ( */}
+                                    {rowData?.image ? (
                                         <Box width='100%' display='flex'>
                                             <Box
                                                 display='flex'
@@ -1051,7 +1105,7 @@ export default function OrdersListView() {
                                                 width='160px'
                                                 height='160px'
                                             >
-                                                {editRowId ? (
+                                                {/* {editRowId !== null ? (
                                                     <Box
                                                         component="img"
                                                         borderRadius='5px'
@@ -1063,23 +1117,20 @@ export default function OrdersListView() {
                                                         alt="rowImage"
                                                     />
                                                 ) : (
-                                                    <Box
-                                                        component="img"
-                                                        borderRadius='5px'
-                                                        src={
-                                                            typeof variantData.images[variantData.images.length - 1] === 'string'
-                                                                ? variantData.images[variantData.images.length - 1]
-                                                                : URL.createObjectURL(variantData.images[variantData.images.length - 1])
-                                                        }
-                                                        alt="rowImage"
-                                                    />
-                                                )}
+                                                    )} */}
+                                                <Box
+                                                    component="img"
+                                                    borderRadius='5px'
+                                                    src={typeof (rowData.image) === 'string' ? (rowData.image) : URL.createObjectURL(rowData.image)}
+                                                    alt="rowImage"
+                                                />
 
                                             </Box>
                                             <Box>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                     <Box
-                                                        onClick={() => handleRemoveImage(editRowId)}
+                                                        // onClick={() => handleRemoveImage(editRowId)}
+                                                        onClick={() => handleRemoveImage()}
                                                         sx={{
                                                             backgroundColor: 'rgb(134, 136, 163,.09)',
                                                             padding: '10px 11px 7px 11px',
@@ -1222,13 +1273,37 @@ export default function OrdersListView() {
                         onClick={() => rowMethods.handleSubmit(onRowSubmit as any)()}
                         sx={{ borderRadius: '30px' }}
                     >
-                        {editRowId ? "Update" : "Add"}
+                        {editRowId !== null ? "Update" : "Add"}
                     </LoadingButton>
                     {/* <Button onClick={rowDialog.onFalse} variant="contained">
                         Add
                     </Button> */}
                 </DialogActions>
             </Dialog>
+
+
+
+
+
+            <ConfirmDialog
+                open={confirm.value}
+                onClose={confirm.onFalse}
+                title="Delete"
+                noCancel={false}
+                content={<>Are you sure want to delete items?</>}
+                action={
+                    <Button
+                        fullWidth
+                        color="error"
+                        variant="soft"
+                        size="large"
+                        onClick={removeVariantFun}
+                        sx={{ borderRadius: '30px' }}
+                    >
+                        Delete
+                    </Button>
+                }
+            />
         </Container>
     );
 }
