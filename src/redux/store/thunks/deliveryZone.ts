@@ -15,11 +15,11 @@ export const fetchDeliveryZonesList = createAsyncThunk('deliveryZone/fetchList',
   return response;
 });
 
-export const fetchOneDeliveryZone = createAsyncThunk(
-  'deliveryZone/fetchOne',
-  async (deliveryZoneId: number) => {
+export const fetchDeliveryZonesForBranch = createAsyncThunk(
+  'deliveryZone/fetchDeliveryZones',
+  async (locationId: any) => {
     const response = await getRequest(
-      `${endpoints.deliveryZone.list}/${deliveryZoneId}`,
+      `${endpoints.deliveryPickup.deliveryZones}/branch/${locationId}`,
       defaultConfig
     );
 
@@ -27,18 +27,37 @@ export const fetchOneDeliveryZone = createAsyncThunk(
   }
 );
 
-export const createDeliveryZone = createAsyncThunk('deliveryZone/create', async (data: any) => {
-  const response = await postRequest(endpoints.deliveryZone.list, data, defaultConfig);
+export const fetchOneDeliveryZone = createAsyncThunk(
+  'deliveryZone/fetchOne',
+  async (deliveryZoneId: number) => {
+    const response = await getRequest(
+      `${endpoints.deliveryPickup.deliveryZones}/${deliveryZoneId}`,
+      defaultConfig
+    );
 
-  return response.data;
-});
+    return response.data;
+  }
+);
+
+export const createDeliveryZone = createAsyncThunk(
+  'deliveryZone/create',
+  async ({ id, data }: any) => {
+    const response = await postRequest(
+      `${endpoints.deliveryPickup.deliveryZones}/${id}`,
+      data,
+      defaultConfig
+    );
+
+    return response.data;
+  }
+);
 
 export const editDeliveryZone = createAsyncThunk(
   'deliveryZone/edit',
-  async (payload: { deliveryZoneId: number; data: any }) => {
+  async (payload: { deliveryZoneId: any; data: any }) => {
     const { deliveryZoneId, data } = payload;
     const response = await putRequest(
-      `${endpoints.deliveryZone.list}/${deliveryZoneId}`,
+      `${endpoints.deliveryPickup.deliveryZones}/${deliveryZoneId}`,
       data,
       defaultConfig
     );
@@ -49,9 +68,9 @@ export const editDeliveryZone = createAsyncThunk(
 
 export const deleteDeliveryZone = createAsyncThunk(
   'deliveryZone/delete',
-  async (deliveryZoneId: number) => {
+  async (deliveryZoneId: any) => {
     const response = await deleteRequest(
-      `${endpoints.deliveryZone.list}/${deliveryZoneId}`,
+      `${endpoints.deliveryPickup.deliveryZones}/${deliveryZoneId}`,
       defaultConfig
     );
 
@@ -62,10 +81,11 @@ export const deleteDeliveryZone = createAsyncThunk(
 const deliveryZoneSlice = createSlice({
   name: 'deliveryZone',
   initialState: {
-    list: [],
-    deliveryZone: null,
+    list: [] as any,
+    deliveryZone: null as any,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setDeliveryZone: (state, action: PayloadAction<any>) => {
@@ -78,14 +98,17 @@ const deliveryZoneSlice = createSlice({
       .addCase(fetchDeliveryZonesList.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.status = 'loading';
       })
       .addCase(fetchDeliveryZonesList.fulfilled, (state, action) => {
         state.loading = false;
-        state.list = action.payload;
+        state.list = action.payload.data.data;
+        state.status = 'success';
       })
       .addCase(fetchDeliveryZonesList.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
+        state.status = 'failed';
       })
 
       .addCase(fetchOneDeliveryZone.pending, (state) => {

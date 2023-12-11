@@ -7,35 +7,50 @@ import {
   postRequest,
   putRequest,
   deleteRequest,
+  IRequest,
 } from 'src/utils/axios';
 
-export const fetchLocationsList = createAsyncThunk('location/fetchList', async () => {
-  const response = await getRequest(`${endpoints.location.list}`, defaultConfig);
+export const fetchLocationsList = createAsyncThunk(
+  'location/fetchList',
+  async (params: IRequest, { rejectWithValue }) => {
+    try {
+      const response = await getRequest(`${endpoints.deliveryPickup.branches}`, defaultConfig);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 
-  return response;
+export const fetchOneLocation = createAsyncThunk('location/fetchOne', async (locationId: any) => {
+  const response = await getRequest(
+    `${endpoints.deliveryPickup.branches}/${locationId}`,
+    defaultConfig
+  );
+
+  return response.data;
 });
-
-export const fetchOneLocation = createAsyncThunk(
-  'location/fetchOne',
-  async (locationId: number) => {
-    const response = await getRequest(`${endpoints.location.list}/${locationId}`, defaultConfig);
+export const fetchWorkingHoursForBranch = createAsyncThunk(
+  'location/fetchWorkingHours',
+  async (locationId: any) => {
+    const response = await getRequest(
+      `${endpoints.deliveryPickup.workingHours}/branch/${locationId}`,
+      defaultConfig
+    );
 
     return response.data;
   }
 );
-
 export const createLocation = createAsyncThunk('location/create', async (data: any) => {
-  const response = await postRequest(endpoints.location.list, data, defaultConfig);
+  const response = await postRequest(endpoints.deliveryPickup.branches, data, defaultConfig);
 
   return response.data;
 });
-
-export const editLocation = createAsyncThunk(
-  'location/edit',
-  async (payload: { locationId: number; data: any }) => {
-    const { locationId, data } = payload;
-    const response = await putRequest(
-      `${endpoints.location.list}/${locationId}`,
+export const createWorkingHours = createAsyncThunk(
+  'location/create_workingHours',
+  async ({ id, data }: any) => {
+    const response = await postRequest(
+      `${endpoints.deliveryPickup.workingHours}/${id}`,
       data,
       defaultConfig
     );
@@ -44,19 +59,62 @@ export const editLocation = createAsyncThunk(
   }
 );
 
-export const deleteLocation = createAsyncThunk('location/delete', async (locationId: number) => {
-  const response = await deleteRequest(`${endpoints.location.list}/${locationId}`, defaultConfig);
+export const editLocation = createAsyncThunk(
+  'location/edit',
+  async (payload: { branchId: any; data: any }) => {
+    const { branchId, data } = payload;
+    const response = await putRequest(
+      `${endpoints.deliveryPickup.branches}/${branchId}`,
+      data,
+      defaultConfig
+    );
+
+    return response.data;
+  }
+);
+export const editWorkingHours = createAsyncThunk(
+  'location/edit_workingHours',
+  async (payload: { id: any; data: any }) => {
+    const { id, data } = payload;
+    const response = await putRequest(
+      `${endpoints.deliveryPickup.workingHours}/${id}`,
+      data,
+      defaultConfig
+    );
+
+    return response.data;
+  }
+);
+
+export const deleteLocation = createAsyncThunk('location/delete', async (branchId: any) => {
+  const response = await deleteRequest(
+    `${endpoints.deliveryPickup.branches}/${branchId}`,
+    defaultConfig
+  );
 
   return response.data;
 });
 
+export const deleteWorkingHours = createAsyncThunk(
+  'location/delete_workingHours',
+  async (id: any) => {
+    const response = await deleteRequest(
+      `${endpoints.deliveryPickup.workingHours}/${id}`,
+      defaultConfig
+    );
+
+    return response.data;
+  }
+);
+
 const locationSlice = createSlice({
   name: 'location',
   initialState: {
-    list: [],
-    location: null,
+    list: [] as any,
+    location: null as any,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setLocation: (state, action: PayloadAction<any>) => {
@@ -69,14 +127,17 @@ const locationSlice = createSlice({
       .addCase(fetchLocationsList.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.status = 'loading';
       })
       .addCase(fetchLocationsList.fulfilled, (state, action) => {
         state.loading = false;
-        state.list = action.payload;
+        state.list = action.payload.data.data;
+        state.status = 'succeeded';
       })
       .addCase(fetchLocationsList.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
+        state.status = 'failed';
       })
 
       .addCase(fetchOneLocation.pending, (state) => {

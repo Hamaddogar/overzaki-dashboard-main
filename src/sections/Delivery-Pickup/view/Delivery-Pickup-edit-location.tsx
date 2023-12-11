@@ -1,22 +1,20 @@
+/* eslint-disable prefer-spread */
+/* eslint-disable no-nested-ternary */
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable array-callback-return */
 /* eslint-disable consistent-return */
 /* eslint-disable @typescript-eslint/default-param-last */
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-// import { TimePicker } from 'material-ui-time-picker';
-// import TimeInput from 'material-ui-time-picker'
-
 // @mui
 import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import Grid from '@mui/system/Unstable_Grid/Grid';
-// import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import {
   Button,
-  TextField,
   Typography,
   FormControlLabel,
   Switch,
@@ -26,18 +24,14 @@ import {
   DialogTitle,
   DialogContent,
 } from '@mui/material';
-import { useRouter } from 'src/routes/hooks';
 import { Stack, Box } from '@mui/system';
 import Divider from '@mui/material/Divider';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Checkbox from '@mui/material/Checkbox';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-// routes
-// import { paths } from 'src/routes/paths';
 // components
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
@@ -56,9 +50,8 @@ import { LoadingButton } from '@mui/lab';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
 import { useSnackbar } from 'notistack';
-import { createLocation, createWorkingHours, fetchLocationsList } from 'src/redux/store/thunks/location';
-import { createDeliveryZone } from 'src/redux/store/thunks/deliveryZone';
-
+import { createWorkingHours, deleteWorkingHours, editLocation, editWorkingHours, fetchLocationsList, fetchOneLocation, fetchWorkingHoursForBranch } from 'src/redux/store/thunks/location';
+import { createDeliveryZone, deleteDeliveryZone, editDeliveryZone, fetchDeliveryZonesForBranch } from 'src/redux/store/thunks/deliveryZone';
 
 
 const MapDraggableMarkers = dynamic(
@@ -92,13 +85,18 @@ const StyledMapContainer = styled('div')(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-export default function AccountView() {
-  const router = useRouter();
+export default function AccountView(props: any) {
+
   const dispatch = useDispatch<AppDispatch>();
-  const { error } = useSelector((state: any) => state.locations);
+
+  const { error } = useSelector(
+    (state: any) => state.locations
+  );
+
+
+
   const { enqueueSnackbar } = useSnackbar();
   const [openDetails, setOpenDetails] = useState(false);
-  const [openTime, setOpenTime] = useState({ open: false });
 
   const settings = useSettingsContext();
   const [activeSection, setActiveSection] = React.useState('Location Info');
@@ -111,6 +109,7 @@ export default function AccountView() {
 
 
 
+  const [branchId, setbranchId] = useState<any>(null)
   const [branchData, setBranchData] = useState<any>(null)
   const [locationV, setLocationV] = useState<any>({
     latitude: 31.53208528429136,
@@ -161,11 +160,6 @@ export default function AccountView() {
       end: '',
     },
   ]);
-  const updateWorkingHours = (index: any = null, newData: any) => {
-    setWorkingHours((prev: any) =>
-      prev.map((obj: any, indx: any) => (indx === index ? newData : obj))
-    );
-  };
 
 
   // --------------------------------------------------------
@@ -175,21 +169,114 @@ export default function AccountView() {
 
 
   // ----------------------------------------------------------------------------------
-  // const validateWorkingHours = (workingHoursArray: any) => {
-  //   const errors: any = [];
-  //   workingHoursArray.forEach((workingHour: any, index: any) => {
-  //     if (workingHour.status) {
-  //       if (!workingHour.start) {
-  //         errors[index] = { ...errors[index], start: 'Start time is required when status is true' };
-  //       }
-  //       if (!workingHour.end) {
-  //         errors[index] = { ...errors[index], end: 'End time is required when status is true' };
-  //       }
-  //     }
-  //   });
 
-  //   return errors;
-  // };
+  const fetchAllData = useCallback((id: any) => {
+    if (id) {
+      dispatch(fetchOneLocation(id)).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          settingDataIntoState(response.payload, 'details');
+          fetchWorkingHours(id);
+          fetchDeliveyZones(id);
+        }
+      });
+    }
+  }, [dispatch])
+
+  useEffect(() => {
+    const { id } = props;
+    if (id) {
+      fetchAllData(id);
+      setbranchId(id);
+    }
+  }, [props, fetchAllData]);
+
+  const fetchWorkingHours = (id: any) => {
+    dispatch(fetchWorkingHoursForBranch(id)).then((workingHoursRes: any) => {
+      if (workingHoursRes.meta.requestStatus === 'fulfilled') {
+        settingDataIntoState(workingHoursRes.payload.data, 'workinghours');
+      }
+    });
+  }
+  const fetchDeliveyZones = (id: any) => {
+    dispatch(fetchDeliveryZonesForBranch(id)).then((dzRes: any) => {
+      if (dzRes.meta.requestStatus === 'fulfilled') {
+        settingDataIntoState(dzRes.payload.data, 'deliveryZone');
+      }
+    });
+  }
+
+  const settingDataIntoState: any = (data: any, dataType: any) => {
+    if (dataType === 'details') {
+      const DetailsData = {
+        name: {
+          en: data?.name?.en || "",
+          ar: data?.name?.ar || "",
+        },
+        country: data?.country || "",
+        address: {
+          en: data?.address.en,
+          ar: data?.address.ar
+        },
+        currency: data?.currency,
+        phoneNumber: data?.phoneNumber,
+        allowDeliveryOrders: data?.allowDeliveryOrders,
+        allowPickUpOrders: data?.allowPickUpOrders,
+      }
+      setBranchData(DetailsData);
+      Object.entries(DetailsData).forEach(([fieldName, value]: any) => {
+        methods.setValue(fieldName, value);
+      });
+      setLocationV({
+        latitude: data?.latitude,
+        longitude: data?.longitude
+      });
+    }
+    if (dataType === 'workinghours') {
+      setWorkingHours((prevData: any) => prevData.map((prev: any) => {
+        const dayObj = data.find((dataObj: any) => dataObj.day === prev.day);
+        if (dayObj) {
+
+          const startDate: number[] = dayObj.from.split(':').map(Number);
+          const newStartDate = new Date();
+          newStartDate.setHours(...(startDate as [number, number?]));
+
+          const endDate: number[] = dayObj.to.split(':').map(Number);
+          const newEndDate = new Date();
+          newEndDate.setHours(...(endDate as [number, number?]));
+
+          return {
+            _id: dayObj._id,
+            day: dayObj.day,
+            start: newStartDate,
+            end: newEndDate,
+            status: true,
+          }
+        }
+        return prev;
+      }))
+    }
+    if (dataType === 'deliveryZone') {
+      const FormData = data.map((listItem: any) => ({
+        _id: listItem._id,
+        government: listItem?.government,
+        zoneName: listItem?.zoneName,
+        deliveryFees: listItem?.deliveryFees,
+        minOrder: listItem?.minOrder,
+        deliveryTime: listItem?.deliveryTime,
+      }));
+
+      setdeliveryZoneList(FormData);
+      Object.entries(FormData).forEach(([fieldName, value]: any) => {
+        DZMethods.setValue(fieldName, value);
+      });
+    }
+  };
+
+
+
+
+
+  // ----------------------------------------------------------------------------------
 
   const detailsSchema = Yup.object().shape({
     name: Yup.object().shape({
@@ -203,7 +290,6 @@ export default function AccountView() {
     country: Yup.mixed<any>().nullable().required('Country is required'),
     currency: Yup.string().required('Currency is required'),
     phoneNumber: Yup.number().required('Phone Number is required'),
-    // location: Yup.string().required('Field is required'),
   });
   const methods = useForm({
     resolver: yupResolver(detailsSchema),
@@ -213,10 +299,6 @@ export default function AccountView() {
   const { isSubmitting } = formState;
 
   const onSubmit = handleSubmit(async (submitData: any) => {
-
-    if (!customValidations()) {
-      return false;
-    }
 
     // setting up data
     const FormValues = {
@@ -231,59 +313,77 @@ export default function AccountView() {
       scheduleDayNO: 2,
     }
 
-    const WorkingHoursFormData = workingHours.filter((dayObj: any) => dayObj.status === true).map((dayObj: any) => ({
-      day: dayObj.day,
-      from: new Date(dayObj.start).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-      to: new Date(dayObj.end).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
-    }))
-    // console.log(WorkingHoursFormData);
-    const DeliveryZones = deliveryZoneList.map((dzObj: any) => ({
-      government: dzObj.government,
-      zoneName: dzObj.zoneName,
-      deliveryFees: dzObj.deliveryFees,
-      minOrder: dzObj.minOrder,
-      deliveryTime: dzObj.deliveryTime,
-    }));
-    // console.log(DeliveryZones);
-
-
     // create branch
-    dispatch(createLocation(FormValues)).then((response: any) => {
-      console.log(response);
+    dispatch(editLocation({ branchId, data: FormValues })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
-        setBranchData(null);
-        methods.reset();
-        const branchId = response.payload._id;
-        createWorkingHoursFun(branchId, WorkingHoursFormData);
-        createDeliveryZoneFun(branchId, DeliveryZones)
         dispatch(fetchLocationsList(error));
-        enqueueSnackbar('Successfully Created!', { variant: 'success' });
-        router.push(paths.dashboard.deliveryPickup.root);
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
       }
     });
-
-
   });
 
-  // create working hours
-  const createWorkingHoursFun = (branchId: any, WorkingHoursFormData: any) => {
-    WorkingHoursFormData.map((WH_obj: any) => {
-      dispatch(createWorkingHours({ id: branchId, data: WH_obj })).then((response: any) => {
-        console.log(response);
-      });
-    })
-  }
-  // create Delivery Zone 
-  const createDeliveryZoneFun = (branchId: any, DeliveryZones: any) => {
-    DeliveryZones.map((DZ_obj: any) => {
-      dispatch(createDeliveryZone({ id: branchId, data: DZ_obj })).then((response: any) => {
-        console.log(response);
-      });
-    })
-  }
 
+
+  const updateWorkingHours = (index: any = null, newData: any) => {
+    if (newData?._id) {
+      if (newData.status === true) {
+        editWorkingHoursFun(newData);
+      } else {
+        deleteWorkingHoursFun(newData?._id);
+      }
+    } else if (newData.start !== "" && newData.end !== "") {
+      createWorkingHoursFun(newData);
+    }
+    setWorkingHours((prev: any) =>
+      prev.map((obj: any, indx: any) => (indx === index ? newData : obj))
+    );
+  };
+
+  // create working hours
+  const createWorkingHoursFun = (newData: any) => {
+    const FormValues = {
+      day: newData.day,
+      from: new Date(newData.start).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+      to: new Date(newData.end).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+    };
+    dispatch(createWorkingHours({ id: branchId, data: FormValues })).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+        fetchWorkingHours(branchId);
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  }
+  // edit working hours
+  const editWorkingHoursFun = (newData: any) => {
+    const FormValues = {
+      day: newData.day,
+      from: new Date(newData.start).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+      to: new Date(newData.end).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+    }
+    dispatch(editWorkingHours({ id: newData._id, data: FormValues })).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+        fetchWorkingHours(branchId);
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  }
+  // remove working hours
+  const deleteWorkingHoursFun = (id: any) => {
+    dispatch(deleteWorkingHours(id)).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
+        fetchWorkingHours(branchId);
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  }
 
 
   const handleNestedBranchData = (e: any, targetEl: any) => {
@@ -321,23 +421,18 @@ export default function AccountView() {
   });
 
   const onDZSubmitFun = DZMethods.handleSubmit(async (submitData: any) => {
-
+    const formData = {
+      government: submitData?.government,
+      zoneName: submitData?.zoneName,
+      deliveryFees: submitData?.deliveryFees,
+      minOrder: submitData?.minOrder,
+      deliveryTime: submitData?.deliveryTime,
+    }
     if (deliveryEditId) {
-      setdeliveryZoneList((prev: any) => prev.map((itemData: any) => {
-        if (itemData._id === deliveryEditId) {
-          return {
-            _id: deliveryEditId,
-            ...submitData
-          }
-        }
-        return itemData;
-      }));
+
+      editDeliveryZoneFun(deliveryEditId, formData)
     } else {
-      const newDeliveryZone = {
-        ...submitData,
-        _id: Math.random(),
-      }
-      setdeliveryZoneList([...deliveryZoneList, newDeliveryZone]);
+      createDeliveryZoneFun(formData);
 
     }
     DZMethods.reset();
@@ -352,38 +447,57 @@ export default function AccountView() {
     }));
   };
 
-  const handleEditDZ = (locationObj: any) => {
-    setDeliveryZoneData(locationObj);
+  const handleEditDZ = (dzObj: any) => {
+    setDeliveryZoneData(dzObj);
     setOpenDetails(true);
-    setDeliveryEditId(locationObj._id);
+    setDeliveryEditId(dzObj._id);
 
-    Object.entries(locationObj).forEach(([fieldName, value]: any) => {
+    Object.entries(dzObj).forEach(([fieldName, value]: any) => {
       DZMethods.setValue(fieldName, value);
     });
   };
 
   const handleRemoveDZ = (removeId: any) => {
-    setdeliveryZoneList((prev: any) => prev.filter((itemObj: any) => itemObj._id !== removeId));
+    removeDeliveryZoneFun(removeId);
   }
 
-  // Custom Validations
-  const customValidations = () => {
-    // Working Hours
-    const inValidHours = workingHours.filter((dayObj: any) => {
-      if (dayObj.status === true) {
-        if (dayObj.start === "" || dayObj.end === "") {
-          return true;
-        }
-        return false
-      }
-      return false
-    });
 
-    if (inValidHours.length > 0) {
-      enqueueSnackbar(`Error! Please Select Valid Working Hours`, { variant: 'error' });
-      return false;
-    }
-    return true;
+
+  // create Delivery Zone 
+  const createDeliveryZoneFun = (formData: any) => {
+    dispatch(createDeliveryZone({ id: branchId, data: formData })).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        setdeliveryZoneList([...deliveryZoneList, response.payload]);
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+
+    });
+  }
+
+
+  // edit Delivery Zone 
+  const editDeliveryZoneFun = (id: any, formData: any) => {
+    dispatch(editDeliveryZone({ deliveryZoneId: id, data: formData })).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        fetchDeliveyZones(branchId);
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  }
+  // remove Delivery Zone
+  const removeDeliveryZoneFun = (id: any) => {
+    dispatch(deleteDeliveryZone(id)).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        setdeliveryZoneList((prev: any) => prev.filter((itemObj: any) => itemObj._id !== id));
+        enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
   }
 
 
@@ -416,12 +530,12 @@ export default function AccountView() {
         sx={{
           boxShadow: '0px 3px 20px #00000014',
           p: '20px',
-          m: { xs: '0px', md: '-10px -15px 0px -15px' },
+          // m: { xs: '0px', md: '-10px -15px 0px -15px' },
         }}
       >
         <Grid container alignItems="center" justifyContent="space-between">
           <Grid xs={12} sm={12} md={3}>
-            <CustomCrumbs heading="Add New Location" crums={false} />
+            <CustomCrumbs heading="Edit Location" crums={false} />
           </Grid>
 
           <Grid xs={12} sm={6} md={4}>
@@ -586,31 +700,6 @@ export default function AccountView() {
                         setBranchData({ ...branchData, country: value?.code || '' })
                       }
                     />
-                    {/* <RHFTextField
-                      fullWidth
-                      variant="filled"
-                      name="country"
-                      sx={{
-                        '& .MuiInputAdornment-root': {
-                          marginTop: '0px !important',
-                          // paddingLeft: '10px'
-                        },
-                        '& input': {
-                          paddingLeft: '2px !important',
-                        },
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Stack direction="row" alignItems="center" spacing="8px">
-                              <Iconify icon="mingcute:down-fill" width={43} />
-                              <Box component="img" src="/raw/flagN.png" />
-                              <Divider orientation="vertical" variant='middle' flexItem />
-                            </Stack>
-                          </InputAdornment>
-                        ),
-                      }}
-                    /> */}
                   </Grid>
                   <Grid xs={12} md={6}>
                     <Typography
@@ -630,21 +719,9 @@ export default function AccountView() {
                         name="currency"
                         value={branchData?.currency || ""}
                         settingStateValue={handleBranchData}
-                      // labelId="demo-simple-select-label"
                       >
                         <MenuItem value="KWD">KWD</MenuItem>
                       </RHFSelect>
-                      {/* <Select
-                        variant="filled"
-                        // value={currency}
-                        name="currency"
-                        value={branchData?.currency || ""}
-                        onChange={handleBranchData}
-                      // onChange={handleChangeDropDown('currency')}
-                      >
-                        <MenuItem value="">Default Currency</MenuItem>
-                        <MenuItem value="KWD">KWD</MenuItem>
-                      </Select> */}
                     </FormControl>
                   </Grid>
                   <Grid xs={12} md={6}>
@@ -663,26 +740,6 @@ export default function AccountView() {
                       value={branchData?.phoneNumber || ""}
                       settingStateValue={handleBranchData}
                       name="phoneNumber"
-                    // sx={{
-                    //   '& .MuiInputAdornment-root': {
-                    //     marginTop: '0px !important',
-                    //     // paddingLeft: '10px'
-                    //   },
-                    //   '& input': {
-                    //     paddingLeft: '2px !important',
-                    //   },
-                    // }}
-                    // InputProps={{
-                    //   startAdornment: (
-                    //     <InputAdornment position="start">
-                    //       <Stack direction="row" alignItems="center" spacing="8px">
-                    //         <Iconify icon="mingcute:down-fill" width={43} />
-                    //         <Box component="img" src="/raw/flagN.png" />
-                    //         <Divider orientation="vertical" variant="middle" flexItem />
-                    //       </Stack>
-                    //     </InputAdornment>
-                    //   ),
-                    // }}
                     />
                   </Grid>
                 </Grid>
@@ -729,7 +786,6 @@ export default function AccountView() {
                   sx={{ mt: '20px' }}
                 >
                   <Grid xs={12}>
-                    {/* <Box sx={{ minHeight: '150px', backgroundColor: '#CFCFCF', borderRadius: '16px' }} /> */}
                     <Box sx={{ minHeight: '150px', borderRadius: '16px' }}>
                       <StyledMapContainer>
                         <MapDraggableMarkers {...baseSettings} mapStyle={THEMES.light}
@@ -790,7 +846,6 @@ export default function AccountView() {
               >
                 <Grid xs={12}>
                   <FormControlLabel
-                    // control={<Switch color="primary" size="medium" defaultChecked />}
                     control={<Switch color="primary" size="medium" name='allowPickUpOrders' checked={branchData?.allowPickUpOrders || false}
                       onChange={(e: any) => {
                         setBranchData({ ...branchData, allowPickUpOrders: e.target.checked })
@@ -812,32 +867,6 @@ export default function AccountView() {
                   />
                 </Grid>
 
-                {/* <Grid xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    name="tax"
-                    sx={{
-                      '& .MuiInputAdornment-root': {
-                        marginTop: '0px !important',
-                        // paddingLeft: '10px'
-                      },
-                      // '& input': {
-                      //   paddingLeft: '2px !important'
-                      // }
-                    }}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <Typography variant="caption" sx={{ fontWeight: 900 }}>
-                            5 &nbsp; KWD
-                          </Typography>
-                        </InputAdornment>
-                      ),
-                    }}
-                    placeholder="Delivery Fees"
-                  />
-                </Grid> */}
               </Grid>
             </Box>
 
@@ -905,7 +934,7 @@ export default function AccountView() {
                                 setTimerDialogOpen(true);
                               }}
                             >
-                              {dataObj?.start ? dataObj?.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'hh:mm A'}{' '}
+                              {dataObj?.start ? (typeof dataObj?.start === 'string' ? dataObj?.start : dataObj?.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })) : 'hh:mm A'}{' '}
                               <Iconify icon="material-symbols:keyboard-arrow-down-rounded" />{' '}
                             </Typography>
                           </Stack>
@@ -928,18 +957,10 @@ export default function AccountView() {
                               }}
                             >
                               {' '}
-                              {dataObj?.end ? dataObj?.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'hh:mm A'}{' '}
+                              {dataObj?.end ? (typeof dataObj?.end === 'string' ? dataObj?.end : dataObj?.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })) : 'hh:mm A'}{' '}
                               <Iconify icon="material-symbols:keyboard-arrow-down-rounded" />{' '}
                             </Typography>
                           </Stack>
-                          <Typography variant="body2" color="error">
-                            {/* {errors?.workingHours?.[index]?.start && (
-                              <span>{errors.workingHours[index]?.start?.message}</span>
-                            )}
-                            {errors?.workingHours?.[index]?.end && (
-                              <span>{errors.workingHours[index]?.end?.message}</span>
-                            )} */}
-                          </Typography>
                         </Stack>
                       </Box>
                     )}
@@ -964,9 +985,6 @@ export default function AccountView() {
                 sx={{ mt: '20px' }}
               >
                 <Grid xs={12}>
-                  {/* <Box
-                    sx={{ minHeight: '150px', backgroundColor: '#CFCFCF', borderRadius: '16px' }}
-                  /> */}
                   <Box sx={{ minHeight: '140px', borderRadius: '16px', pointerEvents: 'none' }}>
                     <StyledMapContainer>
                       <MapDraggableMarkers {...baseSettings} mapStyle={THEMES.light}
@@ -1059,7 +1077,6 @@ export default function AccountView() {
                           >
                             <Iconify icon="uiw:delete" />
                           </Box>
-                          {/* <Switch color="primary" checked={locationObj.active} /> */}
                         </Stack>
                       </Stack>
                       <Stack

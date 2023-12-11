@@ -115,6 +115,11 @@ export const endpoints = {
     summary: '/analytics/summary',
     vouchers: '/analytics/vouchers',
   },
+  deliveryPickup: {
+    branches: '/delivery-pickup/branches',
+    workingHours: '/delivery-pickup/working-hours',
+    deliveryZones: '/delivery-pickup/delivery-zones',
+  },
   location: {
     list: '/location',
     search: '/location/search',
