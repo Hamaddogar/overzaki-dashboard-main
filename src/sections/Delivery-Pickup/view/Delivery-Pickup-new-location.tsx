@@ -286,11 +286,16 @@ export default function AccountView() {
     // console.log(WorkingHoursFormData);
     const DeliveryZones = deliveryZoneList.map((dzObj: any) => ({
       government: dzObj.government,
-      zoneName: dzObj.zoneName,
-      deliveryFees: dzObj.deliveryFees,
-      minOrder: dzObj.minOrder,
-      deliveryTime: dzObj.deliveryTime,
-
+      zoneName: {
+        en: dzObj.zoneName.en,
+        ar: dzObj.zoneName.ar
+      },
+      deliveryFees: Number(dzObj.deliveryFees),
+      minOrder: Number(dzObj.minOrder),
+      deliveryTime: Number(dzObj.deliveryTime),
+      isPublished: dzObj?.isPublished || false,
+      deliveryTimeUnit: dzObj?.deliveryTimeUnit,
+      country: dzObj?.country,
     }));
     // console.log(DeliveryZones);
 
@@ -367,7 +372,7 @@ export default function AccountView() {
     minOrder: Yup.number().required('Field is required'),
     deliveryTime: Yup.number().required('Field is required'),
     country: Yup.mixed<any>().nullable().required('Country is required'),
-
+    // deliveryTimeUnit: Yup.string().required('Required'),
   });
   const DZMethods = useForm({
     resolver: yupResolver(deliveryZoneSchema),
@@ -379,18 +384,22 @@ export default function AccountView() {
       setdeliveryZoneList((prev: any) => prev.map((itemData: any) => {
         if (itemData._id === deliveryEditId) {
           return {
-            ...submitData,
+            ...deliveryZoneData,
             _id: deliveryEditId,
-            isPublished: submitData?.isPublished || false
+            isPublished: deliveryZoneData?.isPublished || false,
+            deliveryTimeUnit: deliveryZoneData?.deliveryTimeUnit || "Minute",
+            country: typeof deliveryZoneData?.country === 'object' ? deliveryZoneData?.country.code : deliveryZoneData?.country,
           }
         }
         return itemData;
       }));
     } else {
       const newDeliveryZone = {
-        ...submitData,
+        ...deliveryZoneData,
         _id: Math.random(),
-        isPublished: submitData?.isPublished || false
+        isPublished: deliveryZoneData?.isPublished || false,
+        deliveryTimeUnit: deliveryZoneData?.deliveryTimeUnit || "Minute",
+        country: typeof deliveryZoneData?.country === 'object' ? deliveryZoneData?.country.code : deliveryZoneData?.country,
       }
       setdeliveryZoneList([...deliveryZoneList, newDeliveryZone]);
 
@@ -421,15 +430,16 @@ export default function AccountView() {
   };
 
   const handleEditDZ = (locationObj: any) => {
-    setDeliveryZoneData(locationObj);
+
     setOpenDetails(true);
     setDeliveryEditId(locationObj._id);
 
-    console.log("locationObj", locationObj);
-
+    setDeliveryZoneData(locationObj);
     Object.entries(locationObj).forEach(([fieldName, value]: any) => {
-      // if (fieldName === 'zoneName'){
-      // }
+      if (fieldName === 'zoneName') {
+        DZMethods.setValue('zoneName.en', value?.en);
+        DZMethods.setValue('zoneName.ar', value?.ar);
+      }
       DZMethods.setValue(fieldName, value);
     });
   };
@@ -1390,12 +1400,11 @@ export default function AccountView() {
                     <InputAdornment position="end">
                       <Stack direction="row" alignItems="center" spacing="8px">
                         <Divider orientation="vertical" variant="middle" flexItem />
-                        {/* <Typography>Minutes</Typography> */}
-
+                        {/* <Typography>Minute</Typography> */}
                         <Select
                           variant="standard"
                           name="deliveryTimeUnit"
-                          value={deliveryZoneData?.deliveryTimeUnit || "Minutes"}
+                          value={deliveryZoneData?.deliveryTimeUnit || "Minute"}
                           onChange={(e: any) => handleDeliveryZoneData(e)}
                           sx={{
                             backgroundColor: "transparent",
@@ -1405,8 +1414,8 @@ export default function AccountView() {
                             }
                           }}
                         >
-                          <MenuItem value="Minutes">Minutes</MenuItem>
-                          <MenuItem value="Hours">Hours</MenuItem>
+                          <MenuItem value="Minute">Minutes</MenuItem>
+                          <MenuItem value="Hour">Hours</MenuItem>
                         </Select>
 
                       </Stack>
@@ -1423,6 +1432,7 @@ export default function AccountView() {
                 }} />}
               label="Published"
               labelPlacement="end"
+              name='isPublished'
               sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
             />
 
