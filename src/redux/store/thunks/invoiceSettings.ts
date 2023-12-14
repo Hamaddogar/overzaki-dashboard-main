@@ -38,13 +38,8 @@ export const createInvoiceSettings = createAsyncThunk(
 
 export const editInvoiceSettings = createAsyncThunk(
   'invoiceSettings/edit',
-  async (payload: { invoiceSettingsId: number; data: any }) => {
-    const { invoiceSettingsId, data } = payload;
-    const response = await putRequest(
-      `${endpoints.invoiceSettings.list}/${invoiceSettingsId}`,
-      data,
-      defaultConfig
-    );
+  async (payload: any) => {
+    const response = await putRequest(`${endpoints.invoiceSettings.list}`, payload, defaultConfig);
 
     return response.data;
   }

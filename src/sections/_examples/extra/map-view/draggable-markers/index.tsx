@@ -55,7 +55,7 @@ function MapDraggableMarkers({ ...other }: MapBoxProps | any) {
     <>
       {/* <Map initialViewState={{ latitude: 40, longitude: -100, zoom: 3.5 }} {...other} > */}
       {marker && (
-        <Map initialViewState={{ latitude: marker?.latitude, longitude: marker?.longitude, zoom: 5.5 }} {...other} >
+        <Map initialViewState={{ latitude: marker?.latitude, longitude: marker?.longitude, zoom: 15.5 }} {...other} >
           <MapControl />
 
           <MapMarker

@@ -41,13 +41,8 @@ export const createNotificationsSettings = createAsyncThunk(
 
 export const editNotificationsSettings = createAsyncThunk(
   'notificationsSettings/edit',
-  async (payload: { notificationsSettingsId: number; data: any }) => {
-    const { notificationsSettingsId, data } = payload;
-    const response = await putRequest(
-      `${endpoints.notificationsSettings.list}/${notificationsSettingsId}`,
-      data,
-      defaultConfig
-    );
+  async (data: any) => {
+    const response = await putRequest(endpoints.notificationsSettings.list, data, defaultConfig);
 
     return response.data;
   }

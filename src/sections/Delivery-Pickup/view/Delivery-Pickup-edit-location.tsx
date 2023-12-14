@@ -111,10 +111,54 @@ export default function AccountView(props: any) {
 
   const [branchId, setbranchId] = useState<any>(null)
   const [branchData, setBranchData] = useState<any>(null)
+  // const [locationV, setLocationV] = useState<any>({
+  //   latitude: 31.53208528429136,
+  //   longitude: 74.34418413749019
+  // });
   const [locationV, setLocationV] = useState<any>({
-    latitude: 31.53208528429136,
-    longitude: 74.34418413749019
+    latitude: 0,
+    longitude: 0
   });
+
+
+
+
+  useEffect(() => {
+    markCurrentLocation();
+  }, []);
+
+
+  const markCurrentLocation = () => {
+    getLocation()
+      .then((location: any) => {
+        setLocationV({
+          latitude: location.latitude,
+          longitude: location.longitude,
+        })
+      })
+      .catch((err: any) => {
+        console.error("Error:", err);
+      });
+  }
+
+  const getLocation = () => new Promise((resolve, reject) => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude } = position.coords;
+          const { longitude } = position.coords;
+          resolve({ latitude, longitude });
+        },
+        (err) => {
+          reject(err.message);
+        }
+      );
+    } else {
+      console.log("Geolocation is not supported by your browser");
+    }
+  });
+
+
   // --------------------------------------------------------
   const [workingHours, setWorkingHours] = useState<any>([
     {
@@ -765,6 +809,7 @@ export default function AccountView(props: any) {
                   <Box>
                     <Button
                       startIcon={<Iconify icon="fluent:location-12-filled" />}
+                      onClick={markCurrentLocation}
                       sx={{
                         borderRadius: '30px',
                         color: '#0F1349',
@@ -774,7 +819,7 @@ export default function AccountView(props: any) {
                       variant="contained"
                       color="primary"
                     >
-                      Pin Location
+                      Pin Current Location
                     </Button>
                   </Box>
                 </Stack>

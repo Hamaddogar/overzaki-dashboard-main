@@ -33,19 +33,11 @@ export const createTaxSettings = createAsyncThunk('taxSettingss/create', async (
   return response.data;
 });
 
-export const editTaxSettings = createAsyncThunk(
-  'taxSettingss/edit',
-  async (payload: { taxSettingsId: number; data: any }) => {
-    const { taxSettingsId, data } = payload;
-    const response = await putRequest(
-      `${endpoints.taxSettings.list}/${taxSettingsId}`,
-      data,
-      defaultConfig
-    );
+export const editTaxSettings = createAsyncThunk('taxSettingss/edit', async (data: any) => {
+  const response = await putRequest(endpoints.taxSettings.list, data, defaultConfig);
 
-    return response.data;
-  }
-);
+  return response.data;
+});
 
 export const deleteTaxSettings = createAsyncThunk(
   'taxSettingss/delete',

@@ -25,11 +25,14 @@ import { useAuthContext } from 'src/auth/hooks';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
-
+import ReCAPTCHA from 'react-google-recaptcha';
+import { Box } from '@mui/system';
 // ----------------------------------------------------------------------
 
 export default function JwtRegisterView() {
   const { register, sendOtp } = useAuthContext();
+  const [captcha, setCaptcha] = useState<any>();
+  const [captchaError, setCaptchaError] = useState<string>();
 
   const router = useRouter();
 
@@ -45,7 +48,9 @@ export default function JwtRegisterView() {
     firstName: Yup.string().required('First name required'),
     lastName: Yup.string().required('Last name required'),
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string().required('Password is required').min(8, 'Code must be at least 8 characters'),
+    password: Yup.string()
+      .required('Password is required')
+      .min(8, 'Code must be at least 8 characters'),
   });
 
   const defaultValues = {
@@ -66,31 +71,38 @@ export default function JwtRegisterView() {
     formState: { isSubmitting },
   } = methods;
 
-  const onSubmit = handleSubmit(async (data) => {
-    try {
-      // need to change this
-      // await register?.(data.email, data.password, data.firstName, data.lastName);
+  const onSubmit = handleSubmit(async (data: any) => {
+    if (captcha) {
+      try {
+        // need to change this
+        // await register?.(data.email, data.password, data.firstName, data.lastName);
 
-      const result: any = await sendOtp?.(data.email);
-      if (result) {
-        const { success } = result;
-        // eslint-disable-next-line no-empty
-        if (success) {
-          sessionStorage.setItem('register_user_data', JSON.stringify({ email: data.email, password: data.password, firstName: data.firstName, lastName: data.lastName }))
-          router.push(PATH_AFTER_REGISTER);
+        const result: any = await sendOtp?.(data.email);
+        if (result) {
+          const { success } = result;
+          // eslint-disable-next-line no-empty
+          if (success) {
+            sessionStorage.setItem(
+              'register_user_data',
+              JSON.stringify({
+                email: data.email,
+                password: data.password,
+                firstName: data.firstName,
+                lastName: data.lastName,
+              })
+            );
+            router.push(PATH_AFTER_REGISTER);
+          }
         }
+
+        // router.push(returnTo || PATH_AFTER_LOGIN);
+      } catch (error) {
+        console.error(error);
+        reset();
+        setErrorMsg(typeof error === 'string' ? error : error.message);
       }
-
-
-
-
-
-
-      // router.push(returnTo || PATH_AFTER_LOGIN);
-    } catch (error) {
-      console.error(error);
-      reset();
-      setErrorMsg(typeof error === 'string' ? error : error.message);
+    } else {
+      setCaptchaError("Please verify that you're a human");
     }
   });
 
@@ -156,6 +168,17 @@ export default function JwtRegisterView() {
             ),
           }}
         />
+        {/* ReCaptcha */}
+        <Box sx={{ width: '100%', marginRight: 'auto', marginLeft: 'auto' }}>
+          <ReCAPTCHA
+            style={{ width: '100%' }}
+            onChange={setCaptcha}
+            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
+          />
+        </Box>
+        {captchaError && (
+          <Typography sx={{ fontSize: '14px', color: 'red' }}>{captchaError}</Typography>
+        )}
 
         <LoadingButton
           fullWidth
