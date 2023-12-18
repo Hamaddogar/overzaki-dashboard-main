@@ -25,6 +25,8 @@ import { useAuthContext } from 'src/auth/hooks';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { Box } from '@mui/material';
+import Image from 'next/image';
 
 // ----------------------------------------------------------------------
 
@@ -43,19 +45,13 @@ export default function JwtLoginView() {
 
   const LoginSchema = Yup.object().shape({
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string().min(8, 'Code must be at least 8 characters').required('Password is required'),
+    password: Yup.string()
+      .min(8, 'Code must be at least 8 characters')
+      .required('Password is required'),
   });
-
-  const defaultValues = {
-    // email: 'demo@minimals.cc',
-    // password: 'demo1234',
-    email: 'contactus@friendsack.com',
-    password: '12345678',
-  };
 
   const methods = useForm({
     resolver: yupResolver(LoginSchema),
-    defaultValues,
   });
 
   const {
@@ -77,7 +73,12 @@ export default function JwtLoginView() {
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5 }}>
-      <Typography variant="h4">Sign in to Minimal</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <Typography sx={{ color: '#0F1546' }} variant="h4">
+          Login
+        </Typography>
+        <Image alt="" width={30} height={30} src="/raw/smile.png" />
+      </Box>
 
       <Stack direction="row" spacing={0.5}>
         <Typography variant="body2">New user?</Typography>
@@ -93,47 +94,107 @@ export default function JwtLoginView() {
     <Stack spacing={2.5}>
       {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
-      <RHFTextField name="email" label="Email address" />
-
       <RHFTextField
+        variant="filled"
+        name="email"
+        sx={{
+          '& > :not(style)': { color: 'black' },
+          '& input:-webkit-autofill': {
+            '-webkit-box-shadow': '0 0 0 100px #18ddbe inset',
+            borderRadius: '9999px',
+          },
+          '& input': {
+            backgroundColor: 'white',
+            borderRadius: '9999px',
+          },
+          backgroundColor: 'transparent',
+          borderRadius: '9999px',
+        }}
+        placeholder="Email address"
+      />
+      <RHFTextField
+        sx={{
+          '& > :not(style)': { color: 'black', backgroundColor: 'transparent' },
+          '& input': {
+            backgroundColor: 'white',
+            borderRadius: '9999px',
+          },
+          '& input::hover': {
+            backgroundColor: 'white',
+          },
+          '& input::focused': {
+            backgroundColor: 'white',
+          },
+          '& .MuiInputBase-root': {
+            backgroundColor: 'white',
+            // Set the background color for the side icons
+            borderRadius: '9999px',
+          },
+          '& input:-webkit-autofill': {
+            '-webkit-box-shadow': '0 0 0 100px #18ddbe inset',
+            borderRadius: '9999px',
+          },
+
+          borderRadius: '9999px',
+        }}
         name="password"
-        label="Password"
+        placeholder="Password"
+        variant="filled"
         type={password.value ? 'text' : 'password'}
         InputProps={{
           endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={password.onToggle} edge="end">
-                <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+            <InputAdornment sx={{ backgroundColor: 'white' }} position="end">
+              <IconButton sx={{ backgroundColor: 'white' }} onClick={password.onToggle} edge="end">
+                <Iconify
+                  sx={{ backgroundColor: 'white' }}
+                  icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
+                />
               </IconButton>
             </InputAdornment>
           ),
         }}
       />
-
-      <Link component={RouterLink} href={paths.auth.jwt.forgotPassword} variant="body2" color="inherit" underline="always" sx={{ alignSelf: 'flex-end' }}>
-        Forgot password?
-      </Link>
-
-      <LoadingButton
-        fullWidth
-        color="inherit"
-        size="large"
-        type="submit"
-        variant="contained"
-        loading={isSubmitting}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          flexDirection: 'row-reverse',
+          justifyContent: 'space-between',
+        }}
       >
-        Login
-      </LoadingButton>
+        <Link
+          component={RouterLink}
+          href={paths.auth.jwt.forgotPassword}
+          variant="body2"
+          color="inherit"
+          underline="always"
+          sx={{ color: '#101746' }}
+        >
+          Forgot password?
+        </Link>
+
+        <button
+          type="submit"
+          style={{
+            cursor: 'pointer',
+            border: '2px solid #101746',
+            padding: '16px',
+            borderRadius: '300px',
+            background: 'transparent',
+            fontSize: '17px',
+            width: '50%',
+          }}
+          disabled={isSubmitting}
+        >
+          Login
+        </button>
+      </Box>
     </Stack>
   );
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
       {renderHead}
-
-      <Alert severity="info" sx={{ mb: 3 }}>
-        Use email : <strong>contactus@friendsack.com</strong> / password :<strong> 12345678</strong>
-      </Alert>
 
       {renderForm}
     </FormProvider>

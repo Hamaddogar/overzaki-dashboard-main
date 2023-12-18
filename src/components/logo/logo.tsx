@@ -30,11 +30,7 @@ const Logo = forwardRef<HTMLDivElement, LogoProps>(
     // OR using local (public folder)
     // -------------------------------------------------------
     const logo = (
-      <Box
-        component="img"
-        src="/logo/logo_single.png"
-        sx={{ cursor: 'pointer', ...sx }}
-      />
+      <Box component="img" src="/logo/logo_single.png" sx={{ cursor: 'pointer', ...sx }} />
     );
 
     // const logo = (
@@ -91,19 +87,22 @@ const Logo = forwardRef<HTMLDivElement, LogoProps>(
 
     return (
       <Link component={RouterLink} href="/" sx={{ display: 'contents' }}>
-
         {/* {isMini && <Box component="img" sx={{ cursor: 'pointer', ...sx }}
           src="/logo/logo_single.png" />} */}
 
-        {!full && isMini && <Box component="img" sx={{ width :'45px',cursor: 'pointer', ...sx }}
-          src="/logo/logo_single.png" />}
+        {!full && isMini && (
+          <Box
+            component="img"
+            sx={{ width: '45px', cursor: 'pointer', ...sx }}
+            src="/logo/logo_single.png"
+          />
+        )}
 
-        {full && !isMini && <Box component="img" sx={{width :'130px', cursor: 'pointer', ...sx }}
+        {/* {full && !isMini && <Box component="img" sx={{width :'130px', cursor: 'pointer', ...sx }}
           src="/logo/logo.png" />}
 
         {!full && !isMini && <Box component="img" sx={{width :'130px', cursor: 'pointer', ...sx }}
-          src="/logo/logo.png" />}
-
+          src="/logo/logo.png" />} */}
       </Link>
     );
   }

@@ -50,6 +50,7 @@ export default function StaffManagment() {
       setAuthUser(user);
     }
   }, [user]);
+  console.log(authUser);
 
   const settings = useSettingsContext();
   const dispatch = useDispatch<any>();
@@ -64,29 +65,29 @@ export default function StaffManagment() {
   const [toDelId, setToDelId] = useState('');
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-      (event: React.SyntheticEvent | React.MouseEvent) => {
-        if (state === 'new') {
-          setOpenCreateStaff((pv) => !pv);
-          setEditId(id);
-          if (id) {
-            dispatch(fetchOneStaffManagement(id)).then((response: any) => {
-              const { user, adminName } = response.payload;
-              const { gender, email, location, phoneNumber, preferedLanguage, roles } = user;
-              delete adminName.localized
-              const userObj = {
-                adminName,
-                gender,
-                email,
-                location,
-                phoneNumber,
-                preferedLanguage,
-                roles,
-              };
-              setUserData(userObj);
-            });
-          }
-        } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
-      };
+    (event: React.SyntheticEvent | React.MouseEvent) => {
+      if (state === 'new') {
+        setOpenCreateStaff((pv) => !pv);
+        setEditId(id);
+        if (id) {
+          dispatch(fetchOneStaffManagement(id)).then((response: any) => {
+            const { user, adminName } = response.payload;
+            const { gender, email, location, phoneNumber, preferedLanguage, roles } = user;
+            delete adminName.localized;
+            const userObj = {
+              adminName,
+              gender,
+              email,
+              location,
+              phoneNumber,
+              preferedLanguage,
+              roles,
+            };
+            setUserData(userObj);
+          });
+        }
+      } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
+    };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -144,7 +145,7 @@ export default function StaffManagment() {
   const editAdmin = () => {
     const { roles, gender, country, email, phoneNumber, preferedLanguage, location } = userData;
     const { adminName } = userData;
-    delete adminName.localized
+    delete adminName.localized;
 
     const dataToPush = {
       roles,
@@ -257,12 +258,13 @@ export default function StaffManagment() {
         <Grid item xs={12} md="auto">
           <CustomCrumbs
             heading="Staff Management"
-            description={`${newUsersData
-              ? newUsersData?.length === 1
-                ? `${newUsersData?.length} Staff Member`
-                : `${newUsersData?.length} Staff Members`
-              : `${0} Staff Members`
-              }`}
+            description={`${
+              newUsersData
+                ? newUsersData?.length === 1
+                  ? `${newUsersData?.length} Staff Member`
+                  : `${newUsersData?.length} Staff Members`
+                : `${0} Staff Members`
+            }`}
           />
         </Grid>
 
@@ -363,65 +365,66 @@ export default function StaffManagment() {
           </Stack>
         </Grid>
         {/* Business Owner Card */}
-        <Card
-          sx={{
-            border: '2px solid transparent ',
-            '&:hover': { borderColor: '#1BFCB6' },
-            padding: '20px',
-            width: '100%',
-            boxShadow: '0px 4px 20px #0F134914',
-            borderRadius: '16px',
-            marginTop: '16px',
-          }}
-        >
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing="20px"
-            alignItems="center"
-            justifyContent="space-between"
+        {authUser && (
+          <Card
+            sx={{
+              border: '2px solid transparent ',
+              '&:hover': { borderColor: '#1BFCB6' },
+              padding: '20px',
+              width: '100%',
+              boxShadow: '0px 4px 20px #0F134914',
+              borderRadius: '16px',
+              marginTop: '16px',
+            }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div>
-                <Typography component="p" variant="h6" sx={{ fontWeight: 900 }}>
-                  {authUser && `${authUser.firstName} ${authUser.lastName}`}
-                </Typography>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing="20px"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div>
+                  <Typography component="p" variant="h6" sx={{ fontWeight: 900 }}>
+                    {authUser && `${authUser.firstName} ${authUser.lastName}`}
+                  </Typography>
+                  <Typography
+                    component="p"
+                    variant="subtitle2"
+                    sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                  >
+                    {' '}
+                    {authUser && authUser.email}{' '}
+                  </Typography>
+                </div>
+              </Box>
+
+              <Stack
+                alignItems="center"
+                direction="row"
+                spacing={{ xs: '10px', sm: '20px' }}
+                justifyContent={{ xs: 'space-between', sm: 'flex-start' }}
+              >
                 <Typography
                   component="p"
                   variant="subtitle2"
                   sx={{ opacity: 0.7, fontSize: '.8rem' }}
                 >
-                  {' '}
-                  {authUser && authUser.email}{' '}
+                  Joined on {formatDate(authUser && authUser.createdAt)}
                 </Typography>
-              </div>
-            </Box>
 
-            <Stack
-              alignItems="center"
-              direction="row"
-              spacing={{ xs: '10px', sm: '20px' }}
-              justifyContent={{ xs: 'space-between', sm: 'flex-start' }}
-            >
-              <Typography
-                component="p"
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.8rem' }}
-              >
-                Joined on {formatDate(authUser && authUser.createdAt)}
-              </Typography>
+                <Chip
+                  label={authUser && authUser.roles.includes('BUSINESS_OWNER') ? 'Owner' : ''}
+                  size="small"
+                  sx={{
+                    backgroundColor:
+                      authUser && authUser.roles.includes('BUSINESS_OWNER') ? '#76FDD3' : '#F1D169',
+                    color: '#0F1349',
+                    borderRadius: '16px',
+                  }}
+                />
 
-              <Chip
-                label={authUser && authUser.roles.includes('BUSINESS_OWNER') ? 'Owner' : ''}
-                size="small"
-                sx={{
-                  backgroundColor:
-                    authUser && authUser.roles.includes('BUSINESS_OWNER') ? '#76FDD3' : '#F1D169',
-                  color: '#0F1349',
-                  borderRadius: '16px',
-                }}
-              />
-
-              {/* {order.role !== 'Owner' && (
+                {/* {order.role !== 'Owner' && (
                   <Iconify
                       style={{ cursor: 'pointer' }}
                       icon="bx:edit"
@@ -429,9 +432,10 @@ export default function StaffManagment() {
                       onClick={toggleDrawerCommon('details')}
                     />
                   )}  */}
+              </Stack>
             </Stack>
-          </Stack>
-        </Card>
+          </Card>
+        )}
         {/* Cards of acc admins */}
         <DragDropContext onDragEnd={handleOnDragEnd}>
           <Droppable droppableId="items">
