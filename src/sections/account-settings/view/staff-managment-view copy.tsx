@@ -53,6 +53,7 @@ export default function StaffManagment() {
       setAuthUser(user);
     }
   }, [user]);
+  console.log(authUser);
 
   const settings = useSettingsContext();
   const dispatch = useDispatch<any>();
