@@ -17,12 +17,15 @@ export interface ICategoryForm extends IRequest {
 
 export const fetchCategorysList = createAsyncThunk(
   'category/fetchList',
-  async (params: IRequest, { rejectWithValue }) => {
+  async ({ pageNumber, pageSize }: { pageNumber: any; pageSize: any }) => {
     try {
-      const response = await getRequest(`${endpoints.category.list}`, defaultConfig);
+      const response = await getRequest(
+        `${endpoints.category.list}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+        defaultConfig
+      );
       return response;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return error;
     }
   }
 );

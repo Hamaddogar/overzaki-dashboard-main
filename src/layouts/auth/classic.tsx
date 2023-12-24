@@ -73,8 +73,18 @@ export default function AuthClassicLayout({ children, image, title }: Props) {
     <Stack
       sx={{
         width: 1,
+        background: 'url(/login-ellipse.png)',
+        backgroundPosition: 'left',
+        backgroundSize: '700px',
+        backgroundRepeat: 'no-repeat',
+        backgroundColor: 'white',
         mx: 'auto',
-        maxWidth: 480,
+        display: 'flex',
+        flexDirection: 'column',
+
+        justifyContent: 'center',
+
+        maxWidth: 600,
         px: { xs: 2, md: 8 },
         py: { xs: 15, md: 30 },
       }}
@@ -82,6 +92,19 @@ export default function AuthClassicLayout({ children, image, title }: Props) {
       {children}
     </Stack>
   );
+  //   <video
+  //   style={{ width: '100%', height: '100%', top: '0px', right: '0px' }}
+  //   id="video-background"
+  //   autoPlay
+  //   muted
+  //   loop
+  // >
+  //   <source
+  //     style={{ minWidth: '100%', objectFit: 'cover' }}
+  //     src="/bg-video.mp4"
+  //     type="video/mp4"
+  //   />
+  // </video>
 
   const renderSection = (
     <Stack
@@ -90,60 +113,106 @@ export default function AuthClassicLayout({ children, image, title }: Props) {
       justifyContent="center"
       spacing={10}
       sx={{
-        ...bgGradient({
-          color: alpha(
-            theme.palette.background.default,
-            theme.palette.mode === 'light' ? 0.88 : 0.94
-          ),
-          imgUrl: '/assets/background/overlay_2.jpg',
-        }),
+        background: 'url(/new-gif.gif)',
+        backgroundSize: '100%',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'left',
+        width: upMd ? '70%' : '100%',
       }}
     >
-      <Typography variant="h3" sx={{ maxWidth: 480, textAlign: 'center' }}>
-        {title || 'Hi, Welcome back'}
-      </Typography>
+      {/* Stuff To Keep */}
+      {/* <Stack width={'70%'} spacing={2}>
+        <Box
+          sx={{
+            marginTop: '10px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '-6px',
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Stack>
+              <Typography
+                fontSize={30}
+                sx={{ maxWidth: 300, fontSize: '20px', textAlign: 'start' }}
+              >
+                Get access
+              </Typography>
+              <Typography fontSize={30} sx={{ maxWidth: 300, textAlign: 'start' }}>
+                for managing your
+              </Typography>
+            </Stack>
+            <Box component="img" sx={{ width: '60px', cursor: 'pointer' }} src="/logo.png" />
+          </Box>
+          <Typography
+            variant="h1"
+            sx={{ maxWidth: 300, color: '#75F7BB', textAlign: 'start', paddingTop: '20px' }}
+          >
+            {/* {title || 'Hi, Welcome back'} */}
+      {/* Websites
+          </Typography>
+        </Box> */}
 
-      <Box
-        component="img"
-        alt="auth"
-        src={image || '/assets/illustrations/illustration_dashboard.png'}
-        sx={{ maxWidth: 720 }}
-      />
+      {/* <Box
+          sx={{
+            minWidth: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        > */}
+      {/* <Box
+            component="img"
+            alt="auth"
+            alignItems={'center'}
+            justifyContent={'center'}
+            src={'/laptop.png'}
+            sx={{
+              maxWidth: 420,
+              display: 'flex',
 
-      <Stack direction="row" spacing={2}>
-        {METHODS.map((option) => (
-          <Tooltip key={option.label} title={option.label}>
-            <Link component={RouterLink} href={option.path}>
-              <Box
-                component="img"
-                alt={option.label}
-                src={option.icon}
-                sx={{
-                  width: 32,
-                  height: 32,
-                  ...(method !== option.id && {
-                    filter: 'grayscale(100%)',
-                  }),
-                }}
-              />
-            </Link>
-          </Tooltip>
-        ))}
-      </Stack>
+              width: '100%',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          />
+        </Box> */}
+
+      {/* <Stack alignItems={'center'} justifyContent={'center'} direction="row" spacing={2}>
+          {METHODS.map((option) => (
+            <Tooltip key={option.label} title={option.label}>
+              <Link component={RouterLink} href={option.path}>
+                <Box
+                  component="img"
+                  alt={option.label}
+                  src={option.icon}
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    ...(method !== option.id && {
+                      filter: 'grayscale(100%)',
+                    }),
+                  }}
+                />
+              </Link>
+            </Tooltip>
+          ))}
+        </Stack> */}
+      {/* </Stack> */}
     </Stack>
   );
 
   return (
     <Stack
       component="main"
-      direction="row"
+      direction={upMd ? 'row-reverse' : 'column-reverse'}
       sx={{
-        minHeight: '100vh',
+        height: '100vh',
       }}
     >
       {renderLogo}
 
-      {upMd && renderSection}
+      {renderSection}
 
       {renderContent}
     </Stack>

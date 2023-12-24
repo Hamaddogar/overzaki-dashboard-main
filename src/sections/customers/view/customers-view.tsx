@@ -42,6 +42,7 @@ import { _orders } from 'src/_mock';
 import { fTimestamp } from 'src/utils/format-time';
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
+// import NavigatorBar from 'src/components/NavigatorBar';
 import { UploadAvatar } from 'src/components/upload';
 import { BottomActions } from 'src/components/bottom-actions';
 import { useSettingsContext } from 'src/components/settings';
@@ -60,13 +61,14 @@ import CustomersTableToolbar from '../customers-toolbar';
 import CustomersTableFiltersResult from '../customers-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
 import CountrySelect from './CountryField';
+import NavigatorBar from "../../../components/NavigatorBar";
 import {
   createCustomer,
   deleteCustomer,
   editCustomer,
   fetchCustomersList,
   fetchOneCustomer,
-  setCustomer,
+  setCustomers,
 } from '../../../redux/store/thunks/customers';
 
 // ----------------------------------------------------------------------
@@ -90,10 +92,11 @@ const defaultFilters: IOrderTableFilters = {
 
 export default function OrdersListView() {
   const dispatch = useDispatch<AppDispatch>();
+  const pageSize = 5;
   const { enqueueSnackbar } = useSnackbar();
-
   const loadStatus = useSelector((state: any) => state.customers.status);
   const { list, error, customer } = useSelector((state: any) => state.customers);
+  const [pageNumber, setPageNumber] = useState(1);
 
   const [editId, setEditId] = useState(null);
   const [removeData, setRemoveData] = useState<any>(null);
@@ -114,6 +117,8 @@ export default function OrdersListView() {
   const [customerData, setCustomerData] = useState<any>(null);
 
   const [errorMsg, setErrorMsg] = useState('');
+  // Pagination
+  const [customersLength, setCustomersLength] = useState<number>();
 
   const CustomerSchema = Yup.object().shape({
     firstName: Yup.string().required('Field is required'),
@@ -154,16 +159,24 @@ export default function OrdersListView() {
 
   useEffect(() => {
     if (loadStatus === 'idle') {
-      dispatch(fetchCustomersList(error)).then((response: any) => {
-        console.log(list);
+      dispatch(fetchCustomersList({ pageNumber, pageSize })).then((response: any) => {
+        setData(response.payload.data);
+        setCustomersLength(response.payload.count);
         // setData(list)
       });
     }
-  }, [loadStatus, dispatch, error, list]);
+  }, [loadStatus, dispatch, error, list, pageNumber]);
+  useEffect(() => {
+    dispatch(fetchCustomersList({ pageNumber, pageSize })).then((response: any) => {
+      setCustomersLength(response.payload.count);
+      setData(response.payload.data);
+    });
+  }, [dispatch, pageNumber]);
 
   useEffect(() => {
     setData(list || []);
-  }, [list]);
+    dispatch(setCustomers(list || []));
+  }, [dispatch, list]);
 
   // reseting removeData value
   useEffect(() => {
@@ -243,7 +256,9 @@ export default function OrdersListView() {
 
         if (response.meta.requestStatus === 'fulfilled') {
           setCustomerData(null);
-          dispatch(fetchCustomersList(error));
+          dispatch(fetchCustomersList({ pageNumber, pageSize })).then((response: any) =>
+            setCustomersLength(response.payload.count)
+          );
           enqueueSnackbar('Successfully Created!', { variant: 'success' });
         } else {
           enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -268,7 +283,7 @@ export default function OrdersListView() {
     });
     dispatch(editCustomer({ customerId: editId, data: FormValues })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
-        dispatch(fetchCustomersList(error));
+        dispatch(fetchCustomersList({ pageNumber, pageSize }));
         enqueueSnackbar('Successfully Updated!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -280,7 +295,9 @@ export default function OrdersListView() {
     if (removeData && removeData.type === 'customer') {
       dispatch(deleteCustomer(removeData.id)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchCustomersList(error));
+          dispatch(fetchCustomersList({ pageNumber, pageSize })).then((response: any) =>
+            setCustomersLength(response.payload.count)
+          );
           enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
           confirm.onFalse();
         } else {
@@ -347,7 +364,7 @@ export default function OrdersListView() {
             dispatch(fetchOneCustomer(id));
           } else {
             setCustomerData({});
-            dispatch(setCustomer(null));
+            dispatch(setCustomers(null));
           }
         } else if (state === 'details') setOpenDetails((pv) => !pv);
         else if (state === 'analytics') setOpenAnalytics((pv) => !pv);
@@ -384,10 +401,12 @@ export default function OrdersListView() {
     (item: any) =>
       item.phoneNumber.includes(query) ||
       item._id.toLowerCase().includes(query.toLocaleLowerCase()) ||
-      (`${item.firstName.toLocaleLowerCase()} ${item.lastName.toLocaleLowerCase()}`).includes(
+      `${item.firstName.toLocaleLowerCase()} ${item.lastName.toLocaleLowerCase()}`.includes(
         query.toLocaleLowerCase()
       )
   );
+
+  // Pagination
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -461,8 +480,8 @@ export default function OrdersListView() {
           </Box>
         </Grid>
 
-        <Grid item xs={12}>
-          <Box>
+        <Grid sx={{ width: '100%' }} item xs={12}>
+          <Box sx={{ width: '100%' }}>
             <TabContext value={value}>
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <TabList
@@ -494,7 +513,7 @@ export default function OrdersListView() {
                             'default'
                           }
                         >
-                          {tab.value === 'All' && list.length}
+                          {tab.value === 'All' && customersLength}
                           {tab.value === 'New' &&
                             list.length > 0 &&
                             list.filter((item: any) => item.type === 'New').length}
@@ -514,7 +533,7 @@ export default function OrdersListView() {
                 </TabList>
               </Box>
 
-              <TabPanel value={value} sx={{ px: 0 }}>
+              <TabPanel value={value} sx={{ px: 0, minHeight: '50vh' }}>
                 <DragDropContext onDragEnd={handleOnDragEnd}>
                   <Droppable droppableId="items">
                     {(provided) => (
@@ -529,10 +548,9 @@ export default function OrdersListView() {
                             (item: any) =>
                               item.phoneNumber.includes(query) ||
                               item._id.toLowerCase().includes(query.toLocaleLowerCase()) ||
-                              (
-                                `${item.firstName.toLocaleLowerCase()
-                                } ${item.lastName.toLocaleLowerCase()}`
-                              ).includes(query.toLocaleLowerCase())
+                              `${item.firstName.toLocaleLowerCase()} ${item.lastName.toLocaleLowerCase()}`.includes(
+                                query.toLocaleLowerCase()
+                              )
                           )
                           .map((itemObj: any, indx: any) => (
                             <Draggable key={indx} index={indx} draggableId={indx.toString()}>
@@ -676,6 +694,22 @@ export default function OrdersListView() {
                   </Droppable>
                 </DragDropContext>
               </TabPanel>
+              <Box
+                sx={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {customersLength && Math.ceil(customersLength / pageSize) !== 1 && (
+                  <NavigatorBar
+                    pageSize={pageSize}
+                    setPageNumber={setPageNumber}
+                    itemsLength={customersLength}
+                  />
+                )}
+              </Box>
             </TabContext>
 
             {/* customer details */}

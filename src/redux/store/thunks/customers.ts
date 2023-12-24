@@ -17,17 +17,20 @@ export interface ICustomerForm extends IRequest {
 }
 export const fetchCustomersList = createAsyncThunk(
   'customers/fetchList',
-  async (params: IRequest, { rejectWithValue }) => {
+  async (paramsData: any = null) => {
     try {
-      const response = await getRequestWithParams(
-        `${endpoints.customer.list}?pageSize=10&pageNumber=1`,
-        params,
-        defaultConfig
-      );
-
+      if (paramsData) {
+        const { pageNumber, pageSize } = paramsData;
+        const response = await getRequestWithParams(
+          `${endpoints.customer.list}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+          defaultConfig
+        );
+        return response.data;
+      }
+      const response = await getRequestWithParams(`${endpoints.customer.list}`, defaultConfig);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return error;
     }
   }
 );
@@ -76,7 +79,7 @@ const customersSlice = createSlice({
     status: 'idle',
   },
   reducers: {
-    setCustomer: (state, action: PayloadAction<any>) => {
+    setCustomers: (state, action: PayloadAction<any>) => {
       state.customer = action.payload;
     },
   },
@@ -149,5 +152,5 @@ const customersSlice = createSlice({
       });
   },
 });
-export const { setCustomer } = customersSlice.actions;
+export const { setCustomers } = customersSlice.actions;
 export default customersSlice.reducer;

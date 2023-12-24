@@ -8,6 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
+import '../../../globals.css';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
@@ -27,6 +28,7 @@ import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Box } from '@mui/system';
+import Image from 'next/image';
 // ----------------------------------------------------------------------
 
 export default function JwtRegisterView() {
@@ -108,7 +110,12 @@ export default function JwtRegisterView() {
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5, position: 'relative' }}>
-      <Typography variant="h4">Get started absolutely free</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <Typography sx={{ color: '#0F1546' }} variant="h4">
+          Sign Up
+        </Typography>
+        <Image alt="" width={30} height={30} src="/raw/smile.png" />
+      </Box>
 
       <Stack direction="row" spacing={0.5}>
         <Typography variant="body2"> Already have an account? </Typography>
@@ -148,15 +155,87 @@ export default function JwtRegisterView() {
         {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField name="firstName" label="First name" />
-          <RHFTextField name="lastName" label="Last name" />
+          <RHFTextField
+            sx={{
+              '& > :not(style)': { color: 'black' },
+              '& input:-webkit-autofill': {
+                '-webkit-box-shadow': '0 0 0 100px #18ddbe inset',
+                borderRadius: '9999px',
+              },
+              '& input': {
+                backgroundColor: 'white',
+                borderRadius: '9999px',
+              },
+              backgroundColor: 'transparent',
+              borderRadius: '9999px',
+              outline: 'none',
+            }}
+            variant="filled"
+            name="firstName"
+            placeholder="First name"
+          />
+          <RHFTextField
+            sx={{
+              '& > :not(style)': { color: 'black' },
+              '& input:-webkit-autofill': {
+                '-webkit-box-shadow': '0 0 0 100px #18ddbe inset',
+                borderRadius: '9999px',
+              },
+              '& input': {
+                backgroundColor: 'white',
+                borderRadius: '9999px',
+              },
+              backgroundColor: 'transparent',
+              borderRadius: '9999px',
+            }}
+            name="lastName"
+            variant="filled"
+            placeholder="Last name"
+          />
         </Stack>
 
-        <RHFTextField name="email" label="Email address" />
+        <RHFTextField
+          sx={{
+            '& > :not(style)': { color: 'black' },
+            '& input:-webkit-autofill': {
+              '-webkit-box-shadow': '0 0 0 100px #18ddbe inset',
+              borderRadius: '9999px',
+            },
+            '& input': {
+              backgroundColor: 'white',
+              borderRadius: '9999px',
+            },
+            backgroundColor: 'transparent',
+            borderRadius: '9999px',
+            outline: 'none',
+          }}
+          variant="filled"
+          name="email"
+          placeholder="Email address"
+        />
 
         <RHFTextField
+          sx={{
+            '& > :not(style)': { color: 'black', backgroundColor: 'transparent' },
+            '& input': {
+              backgroundColor: 'white',
+              borderRadius: '9999px',
+            },
+            '& .MuiInputBase-root': {
+              backgroundColor: 'white',
+              // Set the background color for the side icons
+              borderRadius: '9999px',
+            },
+            '& input:-webkit-autofill': {
+              '-webkit-box-shadow': '0 0 0 100px #18ddbe inset',
+              borderRadius: '9999px',
+            },
+
+            borderRadius: '9999px',
+          }}
+          variant="filled"
           name="password"
-          label="Password"
+          placeholder="Password"
           type={password.value ? 'text' : 'password'}
           InputProps={{
             endAdornment: (
@@ -171,7 +250,8 @@ export default function JwtRegisterView() {
         {/* ReCaptcha */}
         <Box sx={{ width: '100%', marginRight: 'auto', marginLeft: 'auto' }}>
           <ReCAPTCHA
-            style={{ width: '100%' }}
+            className="recaptcha"
+            style={{ width: '100%', padding: '9px' }}
             onChange={setCaptcha}
             sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
           />
@@ -180,16 +260,21 @@ export default function JwtRegisterView() {
           <Typography sx={{ fontSize: '14px', color: 'red' }}>{captchaError}</Typography>
         )}
 
-        <LoadingButton
-          fullWidth
-          color="inherit"
-          size="large"
+        <button
           type="submit"
-          variant="contained"
-          loading={isSubmitting}
+          style={{
+            cursor: 'pointer',
+            border: '2px solid #101746',
+            padding: '16px',
+            borderRadius: '300px',
+            background: 'transparent',
+            fontSize: '17px',
+            width: '50%',
+          }}
+          disabled={isSubmitting}
         >
-          Create account
-        </LoadingButton>
+          Sign Up
+        </button>
       </Stack>
     </FormProvider>
   );

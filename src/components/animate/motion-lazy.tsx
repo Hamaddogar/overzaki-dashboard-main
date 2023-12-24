@@ -11,7 +11,7 @@ const loadFeatures = () => import('./features.js').then((res) => res.default);
 type Props = {
   children: React.ReactNode;
 };
-
+ 
 function MotionLazy({ children }: Props) {
   return (
     <LazyMotion strict features={loadFeatures}>

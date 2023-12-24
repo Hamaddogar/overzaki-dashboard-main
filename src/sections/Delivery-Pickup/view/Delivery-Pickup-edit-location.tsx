@@ -24,6 +24,7 @@ import {
   DialogTitle,
   DialogContent,
   Select,
+  Chip,
 } from '@mui/material';
 import { Stack, Box } from '@mui/system';
 import Divider from '@mui/material/Divider';
@@ -252,12 +253,15 @@ export default function AccountView(props: any) {
 
   const settingDataIntoState: any = (data: any, dataType: any) => {
     if (dataType === 'details') {
+      console.log(data);
+
       const DetailsData = {
         name: {
           en: data?.name?.en || "",
           ar: data?.name?.ar || "",
         },
-        country: data?.country || "",
+        // country: data?.country || "",
+        availableCountryForDelivery: data?.availableCountryForDelivery || [],
         address: {
           en: data?.address.en,
           ar: data?.address.ar
@@ -312,6 +316,7 @@ export default function AccountView(props: any) {
         minOrder: Number(listItem?.minOrder),
         deliveryTime: Number(listItem?.deliveryTime),
         isPublished: listItem?.isPublished || false,
+        allowCashOnDelivery: listItem?.allowCashOnDelivery || false,
         deliveryTimeUnit: listItem?.deliveryTimeUnit,
         country: listItem?.country,
       }));
@@ -342,7 +347,7 @@ export default function AccountView(props: any) {
       en: Yup.string().required('Field is required'),
       ar: Yup.string().required('Field is required'),
     }),
-    country: Yup.mixed<any>().nullable().required('Country is required'),
+    // country: Yup.mixed<any>().nullable().required('Country is required'),
     currency: Yup.string().required('Currency is required'),
     phoneNumber: Yup.number().required('Phone Number is required'),
   });
@@ -490,6 +495,7 @@ export default function AccountView(props: any) {
       minOrder: Number(deliveryZoneData?.minOrder),
       deliveryTime: Number(deliveryZoneData?.deliveryTime),
       isPublished: deliveryZoneData?.isPublished,
+      allowCashOnDelivery: deliveryZoneData?.allowCashOnDelivery,
       deliveryTimeUnit: deliveryZoneData?.deliveryTimeUnit || "Minute",
       country: typeof deliveryZoneData?.country === 'object' ? deliveryZoneData?.country.code : deliveryZoneData?.country,
 
@@ -607,6 +613,24 @@ export default function AccountView(props: any) {
     setTimerDialogOpen(false);
     setTimerDialogData({ index: null, prevData: null, property: null });
   };
+
+  const handleAddCountries = (value: any) => {
+    let list = branchData?.availableCountryForDelivery || [];
+
+
+    const isExist = list.find((li: any) => li === value?.code);
+    if (!isExist) {
+      list = [...list, value?.code];
+      setBranchData({ ...branchData, availableCountryForDelivery: list })
+    }
+  }
+
+  const handleRemoveCountries = (value: any) => {
+    const list = branchData?.availableCountryForDelivery || [];
+    const filteredList = list.filter((li: any) => li !== value);
+    setBranchData({ ...branchData, availableCountryForDelivery: filteredList })
+  }
+
 
   return (
     <Box>
@@ -774,16 +798,24 @@ export default function AccountView(props: any) {
                       color="#8688A3"
                       sx={{ ml: '5px', mb: '5px' }}
                     >
-                      Country
+                      Select Countries
                     </Typography>
                     <CountrySelect
-                      name="country"
+                      name="availableCountryForDelivery"
                       variant="filled"
-                      value={branchData?.country || ''}
+                      // value={branchData?.country || ''}
+                      value=''
                       onChange={(event: any, value: any) =>
-                        setBranchData({ ...branchData, country: value?.code || '' })
+                        // setBranchData({ ...branchData, country: value?.code || '' })
+                        handleAddCountries(value)
                       }
                     />
+                    <Box display='flex' sx={{ flexWrap: "wrap" }} gap={2} >
+                      {branchData?.availableCountryForDelivery?.map((country: any, ind: any) => (
+                        <Chip variant="outlined" key={ind} label={country} color="info" onDelete={() => handleRemoveCountries(country)} />
+                      ))}
+                    </Box>
+
                   </Grid>
                   <Grid xs={12} md={6}>
                     <Typography
@@ -1452,6 +1484,18 @@ export default function AccountView(props: any) {
               label="Published"
               labelPlacement="end"
               name='isPublished'
+              sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
+            />
+
+            <FormControlLabel
+
+              control={<Switch color="primary" size="medium" name='allowCashOnDelivery' checked={deliveryZoneData?.allowCashOnDelivery || false}
+                onChange={(e: any) => {
+                  setDeliveryZoneData({ ...deliveryZoneData, allowCashOnDelivery: e.target.checked })
+                }} />}
+              label="Allow Cash On Delivery"
+              labelPlacement="end"
+              name='allowCashOnDelivery'
               sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
             />
 

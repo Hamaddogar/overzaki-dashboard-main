@@ -18,6 +18,20 @@ export const fetchStaffManagementsList = createAsyncThunk('staffManagement/fetch
     console.log(error);
   }
 });
+export const fetchStaffManagementsWithParams = createAsyncThunk(
+  'staffManagement/fetchList',
+  async ({ pageNumber, pageSize }: { pageNumber: any; pageSize: any }) => {
+    try {
+      const response = await getRequest(
+        `${endpoints.staffManagement.list}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+        defaultConfig
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 
 export const fetchOneStaffManagement = createAsyncThunk(
   'staffManagement/fetchOne',

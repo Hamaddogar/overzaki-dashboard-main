@@ -33,6 +33,7 @@ import { UploadBox } from 'src/components/upload';
 import { useSnackbar } from 'notistack';
 import { useDispatch, useSelector } from 'react-redux';
 // import { fetchCustomersList, fetchOneCustomer } from '../../../redux/store/thunks/customers';
+import NavigatorBar from 'src/components/NavigatorBar';
 import {
   createCategory,
   createSubCategory,
@@ -53,7 +54,9 @@ import type { AppDispatch } from '../../../redux/store/store';
 
 export default function CategoriesView() {
   const dispatch = useDispatch<AppDispatch>();
-
+  const pageSize = 5;
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [categoriesLength, setCategoriesLength] = useState<number>(0);
   const [editCatId, setEditCatId] = useState<any>(null);
   const [editSubCatId, setEditSubCatId] = useState<any>(null);
   const [removeData, setRemoveData] = useState<any>(null);
@@ -140,14 +143,6 @@ export default function CategoriesView() {
       setErrorMsg(typeof err === 'string' ? err : err.message);
     }
   });
-
-  useEffect(() => {
-    if (loadStatus === 'idle') {
-      dispatch(fetchCategorysList(error)).then((response: any) => {
-        dispatch(fetchSubCategorysList(error));
-      });
-    }
-  }, [loadStatus, dispatch, error, list]);
 
   // reseting removeData value
   useEffect(() => {
@@ -242,7 +237,7 @@ export default function CategoriesView() {
 
     dispatch(editCategory({ categoryId: editCatId, data: FormValues })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
-        dispatch(fetchCategorysList(error));
+        dispatch(fetchCategorysList({ pageNumber, pageSize }));
         enqueueSnackbar('Successfully Updated!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${error}`, { variant: 'error' });
@@ -253,7 +248,8 @@ export default function CategoriesView() {
     if (removeData && removeData.type === 'category') {
       dispatch(deleteCategory(removeData.id)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchCategorysList(error));
+          dispatch(fetchCategorysList({ pageNumber, pageSize }));
+
           enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
           confirm.onFalse();
         } else {
@@ -382,27 +378,27 @@ export default function CategoriesView() {
   // common
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'cat') {
-        setCategoryDrawer((pv) => !pv);
-        setEditCatId(id);
-        if (id) {
-          dispatch(fetchOneCategory(id));
-        } else {
-          setCategoriesData({});
-          dispatch(setCategory({}));
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'cat') {
+          setCategoryDrawer((pv) => !pv);
+          setEditCatId(id);
+          if (id) {
+            dispatch(fetchOneCategory(id));
+          } else {
+            setCategoriesData({});
+            dispatch(setCategory({}));
+          }
+        } else if (state === 'sub') {
+          setSubCategoryDrawer((pv) => !pv);
+          setEditSubCatId(id);
+          if (id) {
+            dispatch(fetchOneSubCategory(id));
+          } else {
+            setSubCategoriesData({});
+            dispatch(setSubCategory({}));
+          }
         }
-      } else if (state === 'sub') {
-        setSubCategoryDrawer((pv) => !pv);
-        setEditSubCatId(id);
-        if (id) {
-          dispatch(fetchOneSubCategory(id));
-        } else {
-          setSubCategoriesData({});
-          dispatch(setSubCategory({}));
-        }
-      }
-    };
+      };
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
       if (
@@ -416,10 +412,16 @@ export default function CategoriesView() {
       if (state === 'cat') setCategoryDrawer(false);
       else if (state === 'sub') setSubCategoryDrawer(false);
     };
+
   const [listItems, setListItems] = useState([]);
   useEffect(() => {
-    setListItems(listStuff);
-  }, [listStuff]);
+    dispatch(fetchCategorysList({ pageNumber, pageSize })).then((response: any) => {
+      setCategoriesLength(response.payload.data.count);
+      setListItems(response.payload.data.data);
+      // dispatch(fetchSubCategorysList(error));
+    });
+  }, [pageNumber]);
+
   const handleOnDragEnd = (result: any) => {
     if (!result.destination) return;
     const items = Array.from(listItems);
@@ -457,18 +459,18 @@ export default function CategoriesView() {
               sx={
                 activeCategory === 'main'
                   ? {
-                      borderRadius: '12px',
-                      color: '#0F1349',
-                      backgroundColor: '#FFFFFF',
-                      boxShadow: '0px 6px 20px #00000033',
-                      '&:hover': { backgroundColor: '#FFFFFF' },
-                    }
+                    borderRadius: '12px',
+                    color: '#0F1349',
+                    backgroundColor: '#FFFFFF',
+                    boxShadow: '0px 6px 20px #00000033',
+                    '&:hover': { backgroundColor: '#FFFFFF' },
+                  }
                   : {
-                      borderRadius: '12px',
-                      color: '#8688A3',
-                      backgroundColor: 'background.neutral',
-                      '&:hover': { backgroundColor: 'background.neutral' },
-                    }
+                    borderRadius: '12px',
+                    color: '#8688A3',
+                    backgroundColor: 'background.neutral',
+                    '&:hover': { backgroundColor: 'background.neutral' },
+                  }
               }
             >
               {' '}
@@ -481,18 +483,18 @@ export default function CategoriesView() {
               sx={
                 activeCategory === 'sub'
                   ? {
-                      borderRadius: '12px',
-                      color: '#0F1349',
-                      backgroundColor: '#FFFFFF',
-                      boxShadow: '0px 6px 20px #00000033',
-                      '&:hover': { backgroundColor: '#FFFFFF' },
-                    }
+                    borderRadius: '12px',
+                    color: '#0F1349',
+                    backgroundColor: '#FFFFFF',
+                    boxShadow: '0px 6px 20px #00000033',
+                    '&:hover': { backgroundColor: '#FFFFFF' },
+                  }
                   : {
-                      borderRadius: '12px',
-                      color: '#8688A3',
-                      backgroundColor: 'background.neutral',
-                      '&:hover': { backgroundColor: '#FFFFFF' },
-                    }
+                    borderRadius: '12px',
+                    color: '#8688A3',
+                    backgroundColor: 'background.neutral',
+                    '&:hover': { backgroundColor: '#FFFFFF' },
+                  }
               }
             >
               {' '}
@@ -509,7 +511,7 @@ export default function CategoriesView() {
           <>
             <Grid item xs={12} sm={6}>
               <Typography component="h5" variant="h5">
-                You have {list?.length} categories
+                You have {categoriesLength} categories
               </Typography>
             </Grid>
 
@@ -536,129 +538,150 @@ export default function CategoriesView() {
                 </Stack>
               </BottomActions>
             </Grid>
-
-            {listItems?.length > 0 && (
-              <DragDropContext onDragEnd={handleOnDragEnd}>
-                <Droppable droppableId="items">
-                  {(provided) => (
-                    <Grid
-                      {...provided.droppableProps}
-                      ref={provided.innerRef}
-                      item
-                      xs={12}
-                      container
-                      sx={{ mt: '20px' }}
-                      spacing={2}
-                    >
-                      {
-                        // Start
-                        listItems.map((category: any, indx: number) => (
-                          <Draggable key={indx} index={indx} draggableId={indx.toString()}>
-                            {(provided) => (
-                              <Grid
-                                {...provided.draggableProps}
-                                ref={provided.innerRef}
-                                item
-                                xs={12}
-                              >
-                                <Paper
-                                  elevation={4}
-                                  sx={{
-                                    border: '2px solid #FFFFFF',
-                                    '&:hover': { border: '2px solid #1BFCB6' },
-                                  }}
+            <Box sx={{ minHeight: '60vh', width: '100%' }}>
+              {listItems?.length > 0 && (
+                <DragDropContext onDragEnd={handleOnDragEnd}>
+                  <Droppable droppableId="items">
+                    {(provided) => (
+                      <Grid
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        item
+                        xs={12}
+                        container
+                        sx={{ mt: '20px' }}
+                        spacing={2}
+                      >
+                        {
+                          // Start
+                          listItems.map((category: any, indx: number) => (
+                            <Draggable key={indx} index={indx} draggableId={indx.toString()}>
+                              {(provided) => (
+                                <Grid
+                                  {...provided.draggableProps}
+                                  ref={provided.innerRef}
+                                  item
+                                  xs={12}
                                 >
-                                  <Grid
-                                    container
-                                    item
-                                    alignItems="center"
-                                    justifyContent="space-between"
-                                    rowGap={3}
-                                    sx={{ px: 3, py: { xs: 1.5 } }}
+                                  <Paper
+                                    elevation={4}
+                                    sx={{
+                                      border: '2px solid #FFFFFF',
+                                      '&:hover': { border: '2px solid #1BFCB6' },
+                                    }}
                                   >
-                                    <Grid item xs="auto">
-                                      <Box
-                                        sx={{
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          gap: '15px',
-                                        }}
-                                      >
-                                        <div {...provided.dragHandleProps}>
-                                          <Iconify icon="ci:drag-vertical" />
-                                        </div>
-                                        {category?.image ? (
-                                          <Box
-                                            component="img"
-                                            src={category.image}
-                                            alt=" "
-                                            width="60px"
-                                          />
-                                        ) : (
-                                          <Box
-                                            component="div"
-                                            width="60px"
-                                            height="60px"
-                                            display={'flex'}
-                                            alignItems={'center'}
-                                            justifyContent={'center'}
-                                          >
-                                            <Iconify icon="uil:images" width="40px" height="40px" />
+                                    <Grid
+                                      container
+                                      item
+                                      alignItems="center"
+                                      justifyContent="space-between"
+                                      rowGap={3}
+                                      sx={{ px: 3, py: { xs: 1.5 } }}
+                                    >
+                                      <Grid item xs="auto">
+                                        <Box
+                                          sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '15px',
+                                          }}
+                                        >
+                                          <div {...provided.dragHandleProps}>
+                                            <Iconify icon="ci:drag-vertical" />
+                                          </div>
+                                          {category?.image ? (
+                                            <Box
+                                              component="img"
+                                              src={category.image}
+                                              alt=" "
+                                              width="60px"
+                                            />
+                                          ) : (
+                                            <Box
+                                              component="div"
+                                              width="60px"
+                                              height="60px"
+                                              display={'flex'}
+                                              alignItems={'center'}
+                                              justifyContent={'center'}
+                                            >
+                                              <Iconify
+                                                icon="uil:images"
+                                                width="40px"
+                                                height="40px"
+                                              />
+                                            </Box>
+                                          )}
+                                          <Box display="flex" gap="0px" flexDirection="column">
+                                            <Typography
+                                              component="p"
+                                              variant="subtitle2"
+                                              sx={{ fontSize: '.9rem', fontWeight: 800 }}
+                                            >
+                                              {' '}
+                                              {category?.name?.en || category.name}{' '}
+                                            </Typography>
+                                            <Typography
+                                              component="p"
+                                              noWrap
+                                              variant="subtitle2"
+                                              sx={{
+                                                opacity: 0.7,
+                                                fontSize: '.9rem',
+                                                maxWidth: { xs: '120px', md: '218px' },
+                                              }}
+                                            >
+                                              {/* {category.tcategpries} subcategories -   {category.tproduct} products */}
+                                              {0} subcategories - {0} products
+                                            </Typography>
                                           </Box>
-                                        )}
-                                        <Box display="flex" gap="0px" flexDirection="column">
-                                          <Typography
-                                            component="p"
-                                            variant="subtitle2"
-                                            sx={{ fontSize: '.9rem', fontWeight: 800 }}
-                                          >
-                                            {' '}
-                                            {category?.name?.en || category.name}{' '}
-                                          </Typography>
-                                          <Typography
-                                            component="p"
-                                            noWrap
-                                            variant="subtitle2"
-                                            sx={{
-                                              opacity: 0.7,
-                                              fontSize: '.9rem',
-                                              maxWidth: { xs: '120px', md: '218px' },
-                                            }}
-                                          >
-                                            {/* {category.tcategpries} subcategories -   {category.tproduct} products */}
-                                            {0} subcategories - {0} products
-                                          </Typography>
                                         </Box>
-                                      </Box>
-                                    </Grid>
+                                      </Grid>
 
-                                    <Grid item xs="auto" textAlign="right">
-                                      <Iconify
-                                        icon="carbon:delete"
-                                        onClick={() => {
-                                          setRemoveData({ type: 'category', id: category._id });
-                                          confirm.onTrue();
-                                        }}
-                                      />{' '}
-                                      &nbsp; &nbsp; &nbsp;
-                                      <Iconify
-                                        icon="bx:edit"
-                                        onClick={toggleDrawerCommon('cat', category._id)}
-                                      />
+                                      <Grid item xs="auto" textAlign="right">
+                                        <Iconify
+                                          icon="carbon:delete"
+                                          onClick={() => {
+                                            setRemoveData({ type: 'category', id: category._id });
+                                            confirm.onTrue();
+                                          }}
+                                        />{' '}
+                                        &nbsp; &nbsp; &nbsp;
+                                        <Iconify
+                                          icon="bx:edit"
+                                          onClick={toggleDrawerCommon('cat', category._id)}
+                                        />
+                                      </Grid>
                                     </Grid>
-                                  </Grid>
-                                </Paper>
-                              </Grid>
-                            )}
-                          </Draggable>
-                        ))
-                      }
-                      {provided.placeholder}
-                    </Grid>
-                  )}
-                </Droppable>
-              </DragDropContext>
-            )}
+                                  </Paper>
+                                </Grid>
+                              )}
+                            </Draggable>
+                          ))
+                        }
+                        {provided.placeholder}
+                      </Grid>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              )}
+            </Box>
+            <Stack
+              sx={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {Math.ceil(categoriesLength / pageSize) !== 1 && (
+                <NavigatorBar
+                  setPageNumber={setPageNumber}
+                  pageSize={pageSize}
+                  itemsLength={categoriesLength}
+                />
+              )}
+            </Stack>
           </>
         )}
 

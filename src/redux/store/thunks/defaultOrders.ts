@@ -7,13 +7,28 @@ import {
   postRequest,
   putRequest,
   deleteRequest,
+  getRequestWithParams,
 } from 'src/utils/axios';
 
-export const fetchOrderssList = createAsyncThunk('orders/fetchList', async () => {
-  const response = await getRequest(`${endpoints.orders.list}`, defaultConfig);
-
-  return response;
-});
+export const fetchOrderssList = createAsyncThunk(
+  'orders/fetchList',
+  async (paramsData: any = undefined) => {
+    try {
+      if (paramsData !== undefined) {
+        const { pageNumber, pageSize } = paramsData;
+        const response = await getRequestWithParams(
+          `${endpoints.orders.list}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+          defaultConfig
+        );
+        return response.data;
+      }
+      const response = await getRequest(`${endpoints.orders.list}`, defaultConfig);
+      return response.data;
+    } catch (error) {
+      return error;
+    }
+  }
+);
 
 export const fetchOneOrders = createAsyncThunk('orders/fetchOne', async (ordersId: number) => {
   const response = await getRequest(`${endpoints.orders.list}/${ordersId}`, defaultConfig);
@@ -22,7 +37,7 @@ export const fetchOneOrders = createAsyncThunk('orders/fetchOne', async (ordersI
 });
 
 export const createOrders = createAsyncThunk('orders/create', async (data: any) => {
-  const response = await postRequest(endpoints.orders.list, data, defaultConfig);
+  const response = await postRequest(endpoints.orders.viaAdmin, data, defaultConfig);
 
   return response.data;
 });
@@ -47,9 +62,10 @@ const ordersSlice = createSlice({
   name: 'orders',
   initialState: {
     list: [],
-    orders: null,
+    orders: null as any,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setOrders: (state, action: PayloadAction<any>) => {
@@ -62,12 +78,15 @@ const ordersSlice = createSlice({
       .addCase(fetchOrderssList.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.status = 'loading';
       })
       .addCase(fetchOrderssList.fulfilled, (state, action) => {
+        state.status = 'succeeded';
         state.loading = false;
-        state.list = action.payload;
+        state.list = action.payload.data;
       })
       .addCase(fetchOrderssList.rejected, (state, action) => {
+        state.status = 'failed';
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
       })

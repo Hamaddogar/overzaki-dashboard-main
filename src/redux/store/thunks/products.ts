@@ -25,6 +25,20 @@ export const fetchProductsList = createAsyncThunk(
     }
   }
 );
+export const fetchProductsWithParams = createAsyncThunk(
+  'products/fetchListWithParams',
+  async ({ pageNumber, pageSize }: { pageNumber: any; pageSize: any }, { rejectWithValue }) => {
+    try {
+      const response = await getRequest(
+        `${endpoints.product.list}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+        defaultConfig
+      );
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 
 export const fetchOneProduct = createAsyncThunk('products/fetchOne', async (productId: number) => {
   const response = await getRequest(`${endpoints.product.list}/${productId}`, defaultConfig);
