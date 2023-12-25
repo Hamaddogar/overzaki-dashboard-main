@@ -803,6 +803,7 @@ export default function AccountView(props: any) {
                     <CountrySelect
                       name="availableCountryForDelivery"
                       variant="filled"
+                      specificCountries
                       // value={branchData?.country || ''}
                       value=''
                       onChange={(event: any, value: any) =>

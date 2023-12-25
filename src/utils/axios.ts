@@ -125,7 +125,10 @@ export const endpoints = {
     search: '/location/search',
   },
   orders: {
+    myOrders: '/orders/my_order',
     viaAdmin: '/orders/via_admin',
+    cancel: '/orders/cancel',
+    status: '/orders/status',
     list: '/orders',
     search: '/orders/search',
   },

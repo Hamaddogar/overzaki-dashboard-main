@@ -22,7 +22,7 @@ export const fetchOrderssList = createAsyncThunk(
         );
         return response.data;
       }
-      const response = await getRequest(`${endpoints.orders.list}`, defaultConfig);
+      const response = await getRequest(`${endpoints.orders.myOrders}`, defaultConfig);
       return response.data;
     } catch (error) {
       return error;
@@ -58,18 +58,37 @@ export const deleteOrders = createAsyncThunk('orders/delete', async (ordersId: n
   return response.data;
 });
 
+export const cancellOrder = createAsyncThunk('orders/cancell', async (ordersId: number) => {
+  const response = await putRequest(`${endpoints.orders.cancel}/${ordersId}`, {}, defaultConfig);
+
+  return response.data;
+});
+export const changeOrderStatus = createAsyncThunk(
+  'orders/status',
+  async (payload: { ordersId: any; data: any }) => {
+    const { ordersId, data } = payload;
+    const response = await putRequest(
+      `${endpoints.orders.status}/${ordersId}`,
+      data,
+      defaultConfig
+    );
+
+    return response.data;
+  }
+);
+
 const ordersSlice = createSlice({
   name: 'orders',
   initialState: {
-    list: [],
-    orders: null as any,
+    list: [] as any,
+    order: null as any,
     loading: false,
     error: null as string | null,
     status: 'idle',
   },
   reducers: {
     setOrders: (state, action: PayloadAction<any>) => {
-      state.orders = action.payload;
+      state.order = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -83,7 +102,7 @@ const ordersSlice = createSlice({
       .addCase(fetchOrderssList.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.loading = false;
-        state.list = action.payload.data;
+        state.list = action.payload;
       })
       .addCase(fetchOrderssList.rejected, (state, action) => {
         state.status = 'failed';
@@ -97,7 +116,7 @@ const ordersSlice = createSlice({
       })
       .addCase(fetchOneOrders.fulfilled, (state, action) => {
         state.loading = false;
-        state.orders = action.payload;
+        state.order = action.payload;
       })
       .addCase(fetchOneOrders.rejected, (state, action) => {
         state.loading = false;

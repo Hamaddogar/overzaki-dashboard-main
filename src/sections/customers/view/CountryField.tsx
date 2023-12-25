@@ -21,7 +21,7 @@ export default function CountrySelect(props: any) {
       <RHFAutocomplete
         sx={{ py: '10px' }}
         name={props?.name || 'countrySelect'}
-        options={countries}
+        options={props?.specificCountries ? specificCountriesList : countries}
         getOptionLabel={(option: any) => option?.label || ''}
         isOptionEqualToValue={(option: any, value: any) => option?.value === value?.value}
         renderOption={(inputprops, option) => (
@@ -55,6 +55,18 @@ interface CountryType {
   phone: string;
   suggested?: boolean;
 }
+
+
+const specificCountriesList: readonly CountryType[] = [
+  {
+    code: 'US',
+    label: 'United States',
+    phone: '1',
+    suggested: true,
+  },
+  { code: 'SA', label: 'Saudi Arabia', phone: '966' },
+  { code: 'KW', label: 'Kuwait', phone: '965' },
+];
 
 const countries: readonly CountryType[] = [
   { code: 'AD', label: 'Andorra', phone: '376' },

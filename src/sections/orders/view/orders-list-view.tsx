@@ -28,11 +28,15 @@ import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { _orders, allOrders } from 'src/_mock';
 // utils
 import { fTimestamp } from 'src/utils/format-time';
+import { useSnackbar } from 'notistack';
+import { AppDispatch } from 'src/redux/store/store';
+import { useDispatch, useSelector } from 'react-redux';
 // components
 import { BottomActions } from 'src/components/bottom-actions';
 import { useSettingsContext } from 'src/components/settings';
 import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
 import { useTable, getComparator } from 'src/components/table';
+import { cancellOrder, changeOrderStatus, fetchOneOrders, fetchOrderssList } from 'src/redux/store/thunks/defaultOrders';
 // types
 import { IOrderItem, IOrderTableFilters, IOrderTableFilterValue } from 'src/types/order';
 //
@@ -43,6 +47,8 @@ import OrderTableToolbar from '../orders-table-toolbar';
 import OrderTableFiltersResult from '../orders-table-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
 import StepsNewOrders from '../Steps-New-Order';
+
+
 
 // ----------------------------------------------------------------------
 
@@ -65,6 +71,23 @@ const defaultFilters: IOrderTableFilters = {
 // ----------------------------------------------------------------------
 
 export default function OrdersListView() {
+  const { enqueueSnackbar } = useSnackbar();
+
+  const dispatch = useDispatch<AppDispatch>();
+  // const [data, setData] = useState(allOrders);
+  const { list, error, order, setOrders, status } = useSelector((state: any) => state.orders);
+  const [data, setData] = useState<any>(list);
+
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchOrderssList(undefined));
+    }
+    setData(list)
+  }, [status, dispatch, list]);
+
+
+
+
   const table = useTable({ defaultOrderBy: 'orderNumber' });
 
   const settings = useSettingsContext();
@@ -73,23 +96,10 @@ export default function OrdersListView() {
 
   const theme = useTheme();
 
-  const [data, setData] = useState(allOrders);
 
-  const [tableData] = useState(_orders);
 
   const [filters, setFilters] = useState(defaultFilters);
 
-  const dateError =
-    filters.startDate && filters.endDate
-      ? filters.startDate.getTime() > filters.endDate.getTime()
-      : false;
-
-  const dataFiltered = applyFilter({
-    inputData: tableData,
-    comparator: getComparator(table.order, table.orderBy),
-    filters,
-    dateError,
-  });
 
   const canReset =
     !!filters.name || filters.status !== 'all' || (!!filters.startDate && !!filters.endDate);
@@ -112,9 +122,9 @@ export default function OrdersListView() {
   const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
     if (newValue === 'All') {
-      setData(allOrders);
+      setData(list);
     } else {
-      const newData = allOrders.filter((order) => order.status === newValue);
+      const newData = list.filter((order: any) => order.status === newValue);
       setData(newData);
     }
   };
@@ -125,6 +135,7 @@ export default function OrdersListView() {
   });
 
   const toggleDrawer = (item: any) => (event: React.SyntheticEvent | React.MouseEvent) => {
+    dispatch(fetchOneOrders(item?._id));
     setOpenDetails({ open: true, item });
   };
 
@@ -165,14 +176,13 @@ export default function OrdersListView() {
   const listStuff = data;
   const [listItems, setListItems] = useState<any>([]);
   const [sort, setSort] = useState(false);
-
   useEffect(() => {
     setListItems(listStuff);
   }, [listStuff]);
   useEffect(() => {
     const sortedList = sort
       ? [...listStuff].sort((a: any, b: any) =>
-        b.name.toLowerCase().localeCompare(a.name.toLowerCase())
+        b?.name.toLowerCase().localeCompare(a?.name.toLowerCase())
       )
       : listStuff;
     setListItems(sortedList);
@@ -186,8 +196,32 @@ export default function OrdersListView() {
   };
   const [query, setQuery] = useState('');
   const queryItems = listItems.filter((item: any) =>
-    item.name.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+    item?.name?.toLocaleLowerCase().includes(query.toLocaleLowerCase())
   );
+  // ------------------------------------------------------------------
+
+  const handleChangeStatus = (orderID: any, status: any) => {
+    if (status !== 'cancelled') {
+      dispatch(changeOrderStatus({ ordersId: orderID, data: { status } })).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          dispatch(fetchOrderssList(undefined));
+          enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+        } else {
+          enqueueSnackbar(`Error! ${response?.error?.message}`, { variant: 'error' });
+        }
+      });
+    } else {
+      dispatch(cancellOrder(orderID)).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          dispatch(fetchOrderssList(undefined));
+          enqueueSnackbar('Successfully Cancelled!', { variant: 'success' });
+        } else {
+          enqueueSnackbar(`Error! ${response?.error?.message}`, { variant: 'error' });
+        }
+      });
+
+    }
+  }
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -298,19 +332,19 @@ export default function OrdersListView() {
                             'default'
                           }
                         >
-                          {tab.value === 'All' && allOrders.length}
+                          {tab.value === 'All' && list.length}
                           {tab.value === 'Completed' &&
-                            allOrders.filter((order) => order.status === 'Completed').length}
+                            list.filter((order: any) => order.status === 'Completed').length}
                           {tab.value === 'Pending' &&
-                            allOrders.filter((order) => order.status === 'Pending').length}
+                            list.filter((order: any) => order.status === 'Pending').length}
                           {tab.value === 'Cancelled' &&
-                            allOrders.filter((order) => order.status === 'Cancelled').length}
+                            list.filter((order: any) => order.status === 'Cancelled').length}
                           {tab.value === 'refunded' &&
-                            allOrders.filter((order) => order.status === 'refunded').length}
+                            list.filter((order: any) => order.status === 'refunded').length}
                           {tab.value === 'Ready' &&
-                            allOrders.filter((order) => order.status === 'Ready').length}
+                            list.filter((order: any) => order.status === 'Ready').length}
                           {tab.value === 'Accepted' &&
-                            allOrders.filter((order) => order.status === 'Accepted').length}
+                            list.filter((order: any) => order.status === 'Accepted').length}
                         </Label>
                       }
                     />
@@ -318,7 +352,7 @@ export default function OrdersListView() {
                 </TabList>
               </Box>
 
-              <TabPanel value="All" sx={{ px: 0 }}>
+              {/* <TabPanel value={value} sx={{ px: 0 }}>
                 <DragDropContext onDragEnd={handleOnDragEnd}>
                   <Droppable droppableId="items">
                     {(provided) => (
@@ -480,10 +514,10 @@ export default function OrdersListView() {
                     )}
                   </Droppable>
                 </DragDropContext>
-              </TabPanel>
-              <TabPanel value="Pending" sx={{ px: 0 }}>
+              </TabPanel> */}
+              <TabPanel value={value} sx={{ px: 0 }}>
                 <Grid container spacing={2}>
-                  {data.map((order, indx) => (
+                  {data.map((order: any, indx: any) => (
                     <Grid key={indx} item xs={12}>
                       <Paper elevation={4} onClick={toggleDrawer(order)}>
                         <Grid
@@ -500,7 +534,7 @@ export default function OrdersListView() {
                               variant="subtitle2"
                               sx={{ fontSize: '.8rem', fontWeight: 800 }}
                             >
-                              {order.idNo}
+                              # {order?._id}
                             </Typography>
                             <Typography
                               component="p"
@@ -512,7 +546,7 @@ export default function OrdersListView() {
                                 maxWidth: { xs: '120px', md: '188px' },
                               }}
                             >
-                              {order.time}
+                              {order?.createdAt}
                             </Typography>
                           </Grid>
 
@@ -524,7 +558,7 @@ export default function OrdersListView() {
                                 gap: '8px',
                               }}
                             >
-                              <Box component="img" src={order.flag} alt=" " width="22px" />
+                              {/* <Box component="img" src={order.flag} alt=" " width="22px" /> */}
                               <Box display="flex" gap="0px" flexDirection="column">
                                 <Typography
                                   component="p"
@@ -532,7 +566,7 @@ export default function OrdersListView() {
                                   sx={{ fontSize: '.8rem', fontWeight: 800 }}
                                 >
                                   {' '}
-                                  {order.name}{' '}
+                                  {order?.userId}{' '}
                                 </Typography>
                                 <Typography
                                   component="p"
@@ -544,7 +578,7 @@ export default function OrdersListView() {
                                     maxWidth: { xs: '120px', md: '188px' },
                                   }}
                                 >
-                                  {order.address}
+                                  {order?.addressId}
                                 </Typography>
                               </Box>
                             </Box>
@@ -558,7 +592,7 @@ export default function OrdersListView() {
                                 gap: '8px',
                               }}
                             >
-                              <Box component="img" src={order.pay} alt=" " width="25px" />
+                              {/* <Box component="img" src={order.pay} alt=" " width="25px" /> */}
                               <Box display="flex" gap="0px" flexDirection="column">
                                 <Typography
                                   component="p"
@@ -566,7 +600,7 @@ export default function OrdersListView() {
                                   sx={{ fontSize: '.8rem', fontWeight: 800 }}
                                 >
                                   {' '}
-                                  {order.price} KWD{' '}
+                                  {order?.totalPrice} KWD{' '}
                                 </Typography>
                                 <Typography
                                   component="p"
@@ -574,7 +608,7 @@ export default function OrdersListView() {
                                   variant="subtitle2"
                                   sx={{ opacity: 0.7, fontSize: '.8rem', maxWidth: '188px' }}
                                 >
-                                  {order.totalItems} items
+                                  {order?.totalCount} items
                                 </Typography>
                               </Box>
                             </Box>
@@ -582,7 +616,7 @@ export default function OrdersListView() {
 
                           <Grid item xs={6} md="auto">
                             <Chip
-                              label={order.status}
+                              label={order?.status}
                               size="small"
                               sx={{ backgroundColor: order.color }}
                             />
@@ -593,460 +627,14 @@ export default function OrdersListView() {
                   ))}
                 </Grid>
               </TabPanel>
-              <TabPanel value="Accepted" sx={{ px: 0 }}>
-                <Grid container spacing={2}>
-                  {data.map((order, indx) => (
-                    <Grid key={indx} item xs={12}>
-                      <Paper elevation={4} onClick={toggleDrawer(order)}>
-                        <Grid
-                          container
-                          item
-                          alignItems="center"
-                          justifyContent="space-between"
-                          rowGap={3}
-                          sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
-                        >
-                          <Grid item xs={6} md="auto">
-                            <Typography
-                              component="p"
-                              variant="subtitle2"
-                              sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                            >
-                              {order.idNo}
-                            </Typography>
-                            <Typography
-                              component="p"
-                              noWrap
-                              variant="subtitle2"
-                              sx={{
-                                opacity: 0.7,
-                                fontSize: '.8rem',
-                                maxWidth: { xs: '120px', md: '180px' },
-                              }}
-                            >
-                              {order.time}
-                            </Typography>
-                          </Grid>
 
-                          <Grid item xs={6} md="auto">
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                              }}
-                            >
-                              <Box component="img" src={order.flag} alt=" " width="22px" />
-                              <Box display="flex" gap="0px" flexDirection="column">
-                                <Typography
-                                  component="p"
-                                  variant="subtitle2"
-                                  sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                                >
-                                  {' '}
-                                  {order.name}{' '}
-                                </Typography>
-                                <Typography
-                                  component="p"
-                                  noWrap
-                                  variant="subtitle2"
-                                  sx={{
-                                    opacity: 0.7,
-                                    fontSize: '.8rem',
-                                    maxWidth: { xs: '120px', md: '180px' },
-                                  }}
-                                >
-                                  {order.address}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Grid>
-
-                          <Grid item xs={6} md="auto">
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                              }}
-                            >
-                              <Box component="img" src={order.pay} alt=" " width="25px" />
-                              <Box display="flex" gap="0px" flexDirection="column">
-                                <Typography
-                                  component="p"
-                                  variant="subtitle2"
-                                  sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                                >
-                                  {' '}
-                                  {order.price} KWD{' '}
-                                </Typography>
-                                <Typography
-                                  component="p"
-                                  noWrap
-                                  variant="subtitle2"
-                                  sx={{ opacity: 0.7, fontSize: '.8rem', maxWidth: '188px' }}
-                                >
-                                  {order.totalItems} items
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Grid>
-
-                          <Grid item xs={6} md="auto">
-                            <Chip
-                              label={order.status}
-                              size="small"
-                              sx={{ backgroundColor: order.color }}
-                            />
-                          </Grid>
-                        </Grid>
-                      </Paper>
-                    </Grid>
-                  ))}
-                </Grid>
-              </TabPanel>
-              <TabPanel value="Ready" sx={{ px: 0 }}>
-                <Grid container spacing={2}>
-                  {data.map((order, indx) => (
-                    <Grid key={indx} item xs={12}>
-                      <Paper elevation={4} onClick={toggleDrawer(order)}>
-                        <Grid
-                          container
-                          item
-                          alignItems="center"
-                          justifyContent="space-between"
-                          rowGap={3}
-                          sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
-                        >
-                          <Grid item xs={6} md="auto">
-                            <Typography
-                              component="p"
-                              variant="subtitle2"
-                              sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                            >
-                              {order.idNo}
-                            </Typography>
-                            <Typography
-                              component="p"
-                              variant="subtitle2"
-                              sx={{
-                                opacity: 0.7,
-                                fontSize: '.8rem',
-                                maxWidth: { xs: '120px', md: '180px' },
-                              }}
-                              noWrap
-                            >
-                              {order.time}
-                            </Typography>
-                          </Grid>
-
-                          <Grid item xs={6} md="auto">
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                              }}
-                            >
-                              <Box component="img" src={order.flag} alt=" " width="22px" />
-                              <Box display="flex" gap="0px" flexDirection="column">
-                                <Typography
-                                  component="p"
-                                  variant="subtitle2"
-                                  sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                                >
-                                  {' '}
-                                  {order.name}{' '}
-                                </Typography>
-                                <Typography
-                                  component="p"
-                                  noWrap
-                                  variant="subtitle2"
-                                  sx={{
-                                    opacity: 0.7,
-                                    fontSize: '.8rem',
-                                    maxWidth: { xs: '120px', md: '180px' },
-                                  }}
-                                >
-                                  {order.address}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Grid>
-
-                          <Grid item xs={6} md="auto">
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                              }}
-                            >
-                              <Box component="img" src={order.pay} alt=" " width="25px" />
-                              <Box display="flex" gap="0px" flexDirection="column">
-                                <Typography
-                                  component="p"
-                                  variant="subtitle2"
-                                  sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                                >
-                                  {' '}
-                                  {order.price} KWD{' '}
-                                </Typography>
-                                <Typography
-                                  component="p"
-                                  noWrap
-                                  variant="subtitle2"
-                                  sx={{ opacity: 0.7, fontSize: '.8rem', maxWidth: '188px' }}
-                                >
-                                  {order.totalItems} items
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Grid>
-
-                          <Grid item xs={6} md="auto">
-                            <Chip
-                              label={order.status}
-                              size="small"
-                              sx={{ backgroundColor: order.color }}
-                            />
-                          </Grid>
-                        </Grid>
-                      </Paper>
-                    </Grid>
-                  ))}
-                </Grid>
-              </TabPanel>
-              <TabPanel value="Completed" sx={{ px: 0 }}>
-                <Grid container spacing={2}>
-                  {data.map((order, indx) => (
-                    <Grid key={indx} item xs={12}>
-                      <Paper elevation={4} onClick={toggleDrawer(order)}>
-                        <Grid
-                          container
-                          item
-                          alignItems="center"
-                          justifyContent="space-between"
-                          rowGap={3}
-                          sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
-                        >
-                          <Grid item xs={6} md="auto">
-                            <Typography
-                              component="p"
-                              variant="subtitle2"
-                              sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                            >
-                              {order.idNo}
-                            </Typography>
-                            <Typography
-                              component="p"
-                              variant="subtitle2"
-                              sx={{
-                                opacity: 0.7,
-                                fontSize: '.8rem',
-                                maxWidth: { xs: '120px', md: '180px' },
-                              }}
-                              noWrap
-                            >
-                              {order.time}
-                            </Typography>
-                          </Grid>
-
-                          <Grid item xs={6} md="auto">
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                              }}
-                            >
-                              <Box component="img" src={order.flag} alt=" " width="22px" />
-                              <Box display="flex" gap="0px" flexDirection="column">
-                                <Typography
-                                  component="p"
-                                  variant="subtitle2"
-                                  sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                                >
-                                  {' '}
-                                  {order.name}{' '}
-                                </Typography>
-                                <Typography
-                                  component="p"
-                                  noWrap
-                                  variant="subtitle2"
-                                  sx={{
-                                    opacity: 0.7,
-                                    fontSize: '.8rem',
-                                    maxWidth: { xs: '120px', md: '180px' },
-                                  }}
-                                >
-                                  {order.address}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Grid>
-
-                          <Grid item xs={6} md="auto">
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                              }}
-                            >
-                              <Box component="img" src={order.pay} alt=" " width="25px" />
-                              <Box display="flex" gap="0px" flexDirection="column">
-                                <Typography
-                                  component="p"
-                                  variant="subtitle2"
-                                  sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                                >
-                                  {' '}
-                                  {order.price} KWD{' '}
-                                </Typography>
-                                <Typography
-                                  component="p"
-                                  noWrap
-                                  variant="subtitle2"
-                                  sx={{ opacity: 0.7, fontSize: '.8rem', maxWidth: '188px' }}
-                                >
-                                  {order.totalItems} items
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Grid>
-
-                          <Grid item xs={6} md="auto">
-                            <Chip
-                              label={order.status}
-                              size="small"
-                              sx={{ backgroundColor: order.color }}
-                            />
-                          </Grid>
-                        </Grid>
-                      </Paper>
-                    </Grid>
-                  ))}
-                </Grid>
-              </TabPanel>
-              <TabPanel value="Cancelled" sx={{ px: 0 }}>
-                <Grid container spacing={2}>
-                  {data.map((order, indx) => (
-                    <Grid key={indx} item xs={12}>
-                      <Paper elevation={4} onClick={toggleDrawer(order)}>
-                        <Grid
-                          container
-                          item
-                          alignItems="center"
-                          justifyContent="space-between"
-                          rowGap={3}
-                          sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
-                        >
-                          <Grid item xs={6} md="auto">
-                            <Typography
-                              component="p"
-                              variant="subtitle2"
-                              sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                            >
-                              {order.idNo}
-                            </Typography>
-                            <Typography
-                              component="p"
-                              variant="subtitle2"
-                              sx={{
-                                opacity: 0.7,
-                                fontSize: '.8rem',
-                                maxWidth: { xs: '120px', md: '180px' },
-                              }}
-                              noWrap
-                            >
-                              {order.time}
-                            </Typography>
-                          </Grid>
-
-                          <Grid item xs={6} md="auto">
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                              }}
-                            >
-                              <Box component="img" src={order.flag} alt=" " width="22px" />
-                              <Box display="flex" gap="0px" flexDirection="column">
-                                <Typography
-                                  component="p"
-                                  variant="subtitle2"
-                                  sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                                >
-                                  {' '}
-                                  {order.name}{' '}
-                                </Typography>
-                                <Typography
-                                  component="p"
-                                  noWrap
-                                  variant="subtitle2"
-                                  sx={{
-                                    opacity: 0.7,
-                                    fontSize: '.8rem',
-                                    maxWidth: { xs: '120px', md: '180px' },
-                                  }}
-                                >
-                                  {order.address}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Grid>
-
-                          <Grid item xs={6} md="auto">
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                              }}
-                            >
-                              <Box component="img" src={order.pay} alt=" " width="25px" />
-                              <Box display="flex" gap="0px" flexDirection="column">
-                                <Typography
-                                  component="p"
-                                  variant="subtitle2"
-                                  sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                                >
-                                  {' '}
-                                  {order.price} KWD{' '}
-                                </Typography>
-                                <Typography
-                                  component="p"
-                                  noWrap
-                                  variant="subtitle2"
-                                  sx={{ opacity: 0.7, fontSize: '.8rem', maxWidth: '188px' }}
-                                >
-                                  {order.totalItems} items
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Grid>
-
-                          <Grid item xs={6} md="auto">
-                            <Chip
-                              label={order.status}
-                              size="small"
-                              sx={{ backgroundColor: order.color }}
-                            />
-                          </Grid>
-                        </Grid>
-                      </Paper>
-                    </Grid>
-                  ))}
-                </Grid>
-              </TabPanel>
             </TabContext>
 
             <DetailsNavBar
               open={openDetails.open}
               onClose={handleDrawerClose}
-              details={openDetails.item}
+              // details={openDetails.item}
+              details={order}
               title="Order Details"
               actions={
                 <Stack alignItems="center" justifyContent="center" spacing="10px">
@@ -1057,6 +645,7 @@ export default function OrdersListView() {
                     size="large"
                     startIcon={<Iconify icon="subway:tick" />}
                     sx={{ borderRadius: '30px' }}
+                    onClick={() => handleChangeStatus(order?._id, 'Accepted')}
                   >
                     Accept Offer
                   </Button>
@@ -1068,6 +657,7 @@ export default function OrdersListView() {
                     size="large"
                     startIcon={<Iconify icon="entypo:cross" />}
                     sx={{ borderRadius: '30px' }}
+                    onClick={() => handleChangeStatus(order?._id, 'cancelled')}
                   >
                     Cancel Order
                   </Button>
@@ -1088,8 +678,7 @@ export default function OrdersListView() {
                     variant="subtitle2"
                     sx={{ fontSize: '.8rem', fontWeight: 800 }}
                   >
-                    {' '}
-                    #4254538741{' '}
+                    #{order?._id}
                   </Typography>
                   <Typography
                     component="p"
@@ -1097,11 +686,11 @@ export default function OrdersListView() {
                     sx={{ opacity: 0.7, fontSize: '.8rem', maxWidth: { xs: '120px', md: '180px' } }}
                     noWrap
                   >
-                    22/03/2023, 3:54 PM
+                    {order?.createdAt}
                   </Typography>
                 </Box>
                 <Chip
-                  label="Pending"
+                  label={order?.status}
                   size="small"
                   sx={{ backgroundColor: 'rbg(241, 209, 105,.2)' }}
                 />
@@ -1118,77 +707,45 @@ export default function OrdersListView() {
                   sx={{ fontSize: '.8rem', fontWeight: 800 }}
                 >
                   {' '}
-                  2 Items is added{' '}
+                  {order?.totalCount} Items is added{' '}
                 </Typography>
 
-                <Stack
-                  spacing="20px"
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="flex-start"
-                >
-                  <Typography
-                    component="p"
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '14px', color: '#8688A3', fontWeight: 800 }}
+                {order?.items && order?.items.map((item: any, ind: any) => (
+                  <Stack
+                    key={ind}
+                    spacing="20px"
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="flex-start"
                   >
-                    1x
-                  </Typography>
-                  <Box component="img" src="/raw/s4.png" sx={{ width: '40px' }} />
+                    <Typography
+                      component="p"
+                      variant="subtitle2"
+                      sx={{ opacity: 0.7, fontSize: '14px', color: '#8688A3', fontWeight: 800 }}
+                    >
+                      {item?.count}x
+                    </Typography>
+                    <Box component="img" src="/raw/s4.png" sx={{ width: '40px' }} />
 
-                  <Box>
-                    <Typography
-                      component="p"
-                      variant="subtitle2"
-                      sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                    >
-                      {' '}
-                      iPhone 13 Pro Max{' '}
-                    </Typography>
-                    <Typography
-                      component="p"
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                    >
-                      120.00 KWD
-                    </Typography>
-                  </Box>
-                </Stack>
-
-                <Stack
-                  mt="20px"
-                  spacing="20px"
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="flex-start"
-                >
-                  <Typography
-                    component="p"
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '14px', color: '#8688A3', fontWeight: 800 }}
-                  >
-                    2x
-                  </Typography>
-                  <Box component="img" src="/raw/s5.png" sx={{ width: '40px' }} />
-
-                  <Box>
-                    <Typography
-                      component="p"
-                      variant="subtitle2"
-                      sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                    >
-                      {' '}
-                      Apple AirPods Pro White{' '}
-                    </Typography>
-                    <Typography
-                      component="p"
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                    >
-                      90.00 KWD
-                    </Typography>
-                  </Box>
-                </Stack>
+                    <Box>
+                      <Typography
+                        component="p"
+                        variant="subtitle2"
+                        sx={{ fontSize: '.8rem', fontWeight: 800 }}
+                      >
+                        {' '}
+                        iPhone 13 Pro Max{' '}
+                      </Typography>
+                      <Typography
+                        component="p"
+                        variant="subtitle2"
+                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                      >
+                        {item?.unitPrice} KWD
+                      </Typography>
+                    </Box>
+                  </Stack>
+                ))}
               </Box>
 
               {/* payment summary */}
@@ -1232,7 +789,7 @@ export default function OrdersListView() {
                     sx={{ fontSize: '.8rem', fontWeight: 700 }}
                   >
                     {' '}
-                    210.500 KWD{' '}
+                    {order?.totalPrice} KWD{' '}
                   </Typography>
                 </Stack>
 
@@ -1257,7 +814,7 @@ export default function OrdersListView() {
                     sx={{ fontSize: '.8rem', fontWeight: 700 }}
                   >
                     {' '}
-                    - 8.000 KWD
+                    - {order?.totalPriceAfterDiscount} KWD
                   </Typography>
                 </Stack>
 
@@ -1303,7 +860,7 @@ export default function OrdersListView() {
                     sx={{ fontSize: '.8rem', fontWeight: 700 }}
                   >
                     {' '}
-                    5.000 KWD{' '}
+                    0.000 KWD{' '}
                   </Typography>
                 </Stack>
 
@@ -1327,7 +884,7 @@ export default function OrdersListView() {
                     sx={{ fontSize: '.8rem', fontWeight: 900 }}
                   >
                     {' '}
-                    84.55 KWD{' '}
+                    {order?.totalPriceAfterDiscount} KWD{' '}
                   </Typography>
                 </Stack>
 
@@ -1349,8 +906,7 @@ export default function OrdersListView() {
                     variant="subtitle2"
                     sx={{ fontSize: '.8rem', fontWeight: 900 }}
                   >
-                    {' '}
-                    MasterCard{' '}
+                    {order?.paymentMethod}
                   </Typography>
                 </Stack>
               </Box>
@@ -1465,7 +1021,8 @@ export default function OrdersListView() {
                 </Typography>
                 <Stack direction="row" spacing="10px">
                   <Box>
-                    <Box component="img" src="/raw/flag.png" />
+                    {/* <Box component="img" src="/raw/flag.png" /> */}
+                    <Box component="img" src={order?.userId?.avatar} width="100px" />
                   </Box>
                   <Box>
                     <Typography
@@ -1473,22 +1030,23 @@ export default function OrdersListView() {
                       variant="subtitle2"
                       sx={{ fontSize: '.9rem', fontWeight: 700 }}
                     >
-                      {' '}
-                      Mohamed Hassan{' '}
+                      {order?.userId?.firstName} {order?.userId?.lastName}
+
                     </Typography>
                     <Typography
                       component="p"
                       variant="subtitle2"
                       sx={{ opacity: 0.7, fontSize: '.85rem' }}
                     >
-                      mohamed.hassan@gmail.com
+
+                      {order?.userId?.email}
                     </Typography>
                     <Typography
                       component="p"
                       variant="subtitle2"
                       sx={{ opacity: 0.7, fontSize: '.85rem' }}
                     >
-                      +9652312127845
+                      {order?.userId?.phoneNumber}
                     </Typography>
                   </Box>
                 </Stack>
@@ -1506,7 +1064,7 @@ export default function OrdersListView() {
                   sx={{ opacity: 0.7, fontSize: '.85rem' }}
                 >
                   {' '}
-                  City: Ahmadi{' '}
+                  Address Type: {order?.addressId?.addressType}
                 </Typography>
                 <Typography
                   component="p"
@@ -1514,7 +1072,7 @@ export default function OrdersListView() {
                   sx={{ opacity: 0.7, fontSize: '.85rem' }}
                 >
                   {' '}
-                  Area: Ali Sabah Al-Salem{' '}
+                  {order?.addressId?.buildingName} {order?.addressId?.avenue} {order?.addressId?.PACI}
                 </Typography>
                 <Typography
                   component="p"
@@ -1522,7 +1080,7 @@ export default function OrdersListView() {
                   sx={{ opacity: 0.7, fontSize: '.85rem' }}
                 >
                   {' '}
-                  Block: 5A{' '}
+                  Block: {order?.addressId?.block}
                 </Typography>
                 <Typography
                   component="p"
@@ -1530,7 +1088,7 @@ export default function OrdersListView() {
                   sx={{ opacity: 0.7, fontSize: '.85rem' }}
                 >
                   {' '}
-                  Street: 10{' '}
+                  Street: {order?.addressId?.street}
                 </Typography>
                 <Typography
                   component="p"
@@ -1538,7 +1096,7 @@ export default function OrdersListView() {
                   sx={{ opacity: 0.7, fontSize: '.85rem' }}
                 >
                   {' '}
-                  House: 4{' '}
+                  House: {order?.addressId?.house}
                 </Typography>
                 <Stack mb="16px" direction="row" alignItems="center" justifyContent="space-between">
                   <Typography

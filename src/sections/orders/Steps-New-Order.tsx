@@ -235,6 +235,8 @@ export default function StepsNewOrders({ closeDrawer }: any) {
         console.log(response);
         if (response.meta.requestStatus === 'fulfilled') {
           setOrderData(defaultOrderData);
+          setSelectedProducts([]);
+          setActiveStep(0);
           dispatch(fetchOrderssList(undefined));
           handleCloseDropDown('analytics')
           enqueueSnackbar('Successfully Created!', { variant: 'success' });
@@ -782,56 +784,58 @@ export default function StepsNewOrders({ closeDrawer }: any) {
           </Paper>
 
           {/* customer info */}
-          <Paper
-            sx={{
-              width: '100%',
-              mt: '12px',
-              padding: '13px 20px',
-              boxShadow: '0px 4px 20px #0F134914',
-              borderRadius: '13px',
-              display: 'flex',
-              gap: '10px',
-              flexDirection: 'column',
-            }}
-          >
-            <Typography
-              component="p"
-              mb="15px"
-              variant="subtitle2"
-              sx={{ fontSize: '.8rem', fontWeight: 800 }}
+          {orderData.customer && (
+            <Paper
+              sx={{
+                width: '100%',
+                mt: '12px',
+                padding: '13px 20px',
+                boxShadow: '0px 4px 20px #0F134914',
+                borderRadius: '13px',
+                display: 'flex',
+                gap: '10px',
+                flexDirection: 'column',
+              }}
             >
-              {' '}
-              Customer Info{' '}
-            </Typography>
-            <Stack direction="row" spacing="10px">
-              <Box>
-                <Box component="img" width="80px" src={orderData?.customer.avatar} />
-              </Box>
-              <Box>
-                <Typography
-                  component="p"
-                  variant="subtitle2"
-                  sx={{ fontSize: '.9rem', fontWeight: 700 }}
-                >
-                  {orderData?.customer.firstName} {orderData?.customer.lastName}
-                </Typography>
-                <Typography
-                  component="p"
-                  variant="subtitle2"
-                  sx={{ opacity: 0.7, fontSize: '.85rem' }}
-                >
-                  {orderData?.customer.email}
-                </Typography>
-                <Typography
-                  component="p"
-                  variant="subtitle2"
-                  sx={{ opacity: 0.7, fontSize: '.85rem' }}
-                >
-                  {orderData?.customer.phoneNumber}
-                </Typography>
-              </Box>
-            </Stack>
-          </Paper>
+              <Typography
+                component="p"
+                mb="15px"
+                variant="subtitle2"
+                sx={{ fontSize: '.8rem', fontWeight: 800 }}
+              >
+                {' '}
+                Customer Info{' '}
+              </Typography>
+              <Stack direction="row" spacing="10px">
+                <Box>
+                  <Box component="img" width="80px" src={orderData?.customer?.avatar} />
+                </Box>
+                <Box>
+                  <Typography
+                    component="p"
+                    variant="subtitle2"
+                    sx={{ fontSize: '.9rem', fontWeight: 700 }}
+                  >
+                    {orderData?.customer?.firstName} {orderData?.customer?.lastName}
+                  </Typography>
+                  <Typography
+                    component="p"
+                    variant="subtitle2"
+                    sx={{ opacity: 0.7, fontSize: '.85rem' }}
+                  >
+                    {orderData?.customer?.email}
+                  </Typography>
+                  <Typography
+                    component="p"
+                    variant="subtitle2"
+                    sx={{ opacity: 0.7, fontSize: '.85rem' }}
+                  >
+                    {orderData?.customer?.phoneNumber}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Paper>
+          )}
 
           <Paper
             sx={{
