@@ -1025,7 +1025,7 @@ export default function StepsNewOrders({ closeDrawer }: any) {
         onClose={handleCloseDropDown('payment')}
         open={Boolean(dropDown.payment_method)}
       >
-        {['Bank Transfer', 'Installment Services', 'Cash On Delivery'].map((item) => (
+        {['Bank Transfer', 'Installment Services', 'Cash On Delivery', 'Payment Gateway'].map((item) => (
           <MenuItem
             key={item}
             // selected={dropDown.payment_value === item}

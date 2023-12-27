@@ -110,6 +110,10 @@ export const endpoints = {
     list: '/customers',
     search: '/customers/search',
   },
+  paymentMethod: {
+    list: '/payment-methods',
+    search: '/payment-methods/search',
+  },
   analytic: {
     customers: '/analytics/customers',
     summary: '/analytics/summary',
