@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Tooltip from '@mui/material/Tooltip';
 import ListItemText from '@mui/material/ListItemText';
+import { useEffect, useState } from 'react';
 // routes
 import { RouterLink } from 'src/routes/components';
 //
@@ -10,6 +11,7 @@ import Iconify from '../../iconify';
 //
 import { NavItemProps, NavConfigProps } from '../types';
 import { StyledItem, StyledIcon, StyledDotIcon } from './styles';
+
 
 // ----------------------------------------------------------------------
 
@@ -27,6 +29,25 @@ export default function NavItem({
   ...other
 }: Props) {
   const { title, path, icon, info, children, disabled, caption, roles, permissions } = item;
+
+
+  const [hasCommonRole, setHasCommonRole] = useState<any>(null);
+  const [hasCommonPermission, setHasCommonPermission] = useState<any>(null);
+
+  useEffect(() => {
+
+    const userRoles = config.currentRoles || [];
+    const userPermissions = config.currentPermissions || [];
+
+    const hasCommonRoleV = userRoles.some((role: string) => roles && roles.includes(role)) || false;
+    const hasCommonPermissionV = permissions && permissions.some((permission: string) => userPermissions && userPermissions.includes(permission)) || false;
+
+    setHasCommonRole(hasCommonRoleV);
+    setHasCommonPermission(hasCommonPermissionV);
+
+
+  }, [config, permissions, roles])
+
 
   const subItem = depth !== 1;
 
@@ -91,18 +112,13 @@ export default function NavItem({
   );
 
 
-
-  const userRoles = config.currentRoles || [];
-  const userPermissions = config.currentPermissions || [];
-
-  const hasCommonRole = userRoles.some((role: string) => roles && roles.includes(role)) || false;
-  const hasCommonPermission = permissions && permissions.some((permission: string) => userPermissions && userPermissions.includes(permission)) || false;
-  
   // Hidden item by role
   if ((roles && !hasCommonRole) || (permissions && !hasCommonPermission)) {
     return null;
   }
-  
+
+
+
   // if (roles && !roles.includes(`${config.currentRole}`)) {
   //   return null;
   // }

@@ -331,23 +331,23 @@ export default function OrdersListView() {
   // common
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'new') {
-        setOpenDetails((pv) => !pv);
-        setEditProductId(id);
-        if (id) {
-          dispatch(fetchOneProduct(id));
-        } else {
-          setProductData({});
-          dispatch(setProduct({}));
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'new') {
+          setOpenDetails((pv) => !pv);
+          setEditProductId(id);
+          if (id) {
+            dispatch(fetchOneProduct(id));
+          } else {
+            setProductData({});
+            dispatch(setProduct({}));
+          }
+        } else if (state === 'variants') {
+          variantMethods.reset();
+          setOpenVariant((pv) => !pv);
+          dispatch(fetchOneVariant(id));
+          setTempVariantId(id);
         }
-      } else if (state === 'variants') {
-        variantMethods.reset();
-        setOpenVariant((pv) => !pv);
-        dispatch(fetchOneVariant(id));
-        setTempVariantId(id);
-      }
-    };
+      };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -561,8 +561,8 @@ export default function OrdersListView() {
   useEffect(() => {
     const sortedList = sort
       ? [...listStuff].sort((a: any, b: any) =>
-          b.name.en.toLowerCase().localeCompare(a.name.en.toLowerCase())
-        )
+        b.name.en.toLowerCase().localeCompare(a.name.en.toLowerCase())
+      )
       : listStuff;
     setListItems(sortedList);
   }, [listStuff, sort]);
@@ -596,7 +596,7 @@ export default function OrdersListView() {
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <RoleBasedGuard roles={['BUSINESS_OWNER', 'ADMIN']} hasContent permission="GET_PRODUCTS">
+      <RoleBasedGuard hasContent permission="GET_PRODUCTS">
         <Grid
           container
           justifyContent="space-between"
@@ -605,7 +605,7 @@ export default function OrdersListView() {
           <Grid item xs={12} md="auto">
             <CustomCrumbs heading="Products" crums={false} />
           </Grid>
-          <RoleBasedGuard roles={['BUSINESS_OWNER', 'ADMIN']} permission="CREATE_PRODUCT">
+          <RoleBasedGuard permission="CREATE_PRODUCT">
             <Grid item xs={12} md={5}>
               <BottomActions>
                 <Stack

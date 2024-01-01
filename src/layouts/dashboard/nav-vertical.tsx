@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -32,8 +32,20 @@ type Props = {
 };
 
 export default function NavVertical({ openNav, onCloseNav }: Props) {
+  const [currentPermission, setCurrentPermission] = useState<any>([]);
+  const [currentRole, setCurrentRole] = useState<any>([]);
   // const { user } = useMockedUser();
   const { user } = useAuthContext();
+
+  useEffect(() => {
+    if (user) {
+      setCurrentRole(user?.roles)
+      setCurrentPermission(user?.permissions);
+    }
+  }, [user])
+
+
+
 
   const pathname = usePathname();
 
@@ -65,8 +77,10 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
         data={navData}
         config={{
           // currentRole: user?.role || 'admin',
-          currentRoles: user?.roles || [],
-          currentPermissions: user?.permissions || [],
+          // currentRoles: user?.roles || [],
+          // currentPermissions: user?.permissions || [],
+          currentRoles: currentRole,
+          currentPermissions: currentPermission,
         }}
       />
 

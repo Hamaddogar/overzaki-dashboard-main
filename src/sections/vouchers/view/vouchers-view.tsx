@@ -421,20 +421,20 @@ export default function OrdersListView() {
 
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'new') {
-        setOpenCreateVoucher((pv) => !pv);
-        setEditId(id);
-        if (id) {
-          dispatch(fetchOneVoucher(id));
-        } else {
-          setVoucherData({});
-          dispatch(setVoucher({}));
-        }
-      } else if (state === 'delete') {
-        setOpenDelete((pv) => !pv);
-      } else if (state === 'details') setOpenDetails((pv) => !pv);
-    };
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'new') {
+          setOpenCreateVoucher((pv) => !pv);
+          setEditId(id);
+          if (id) {
+            dispatch(fetchOneVoucher(id));
+          } else {
+            setVoucherData({});
+            dispatch(setVoucher({}));
+          }
+        } else if (state === 'delete') {
+          setOpenDelete((pv) => !pv);
+        } else if (state === 'details') setOpenDetails((pv) => !pv);
+      };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -500,7 +500,7 @@ export default function OrdersListView() {
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <RoleBasedGuard hasContent roles={['BUSINESS_OWNER', 'ADMIN']} permission="GET_VOUCHERS">
+      <RoleBasedGuard hasContent permission="GET_VOUCHERS">
         <Grid
           container
           justifyContent="space-between"
@@ -519,7 +519,7 @@ export default function OrdersListView() {
             >
               {/* <Button startIcon={<Box component='img' src='/raw/orderreport.svg' />} fullWidth sx={{ borderRadius: '30px', color: '#8688A3', backgroundColor: '#F0F0F4' }} component='h5' variant='contained' color='primary' onClick={toggleDrawerCommon('analytics')}> Analytics </Button> */}
             </Stack>
-            <RoleBasedGuard roles={['BUSINESS_OWNER', 'ADMIN']} permission="CREATE_VOUCHER">
+            <RoleBasedGuard permission="CREATE_VOUCHER">
               <BottomActions>
                 <Stack
                   direction={{ xs: 'column', sm: 'row' }}
@@ -1034,7 +1034,7 @@ export default function OrdersListView() {
                             fontWeight: 900,
                           }}
                           onChange={handleChangeMySubCat}
-                          // endAdornment={<div style={{ fontSize: '12px', marginRight: '20px', marginTop: '3px' }}>KWD</div>}
+                        // endAdornment={<div style={{ fontSize: '12px', marginRight: '20px', marginTop: '3px' }}>KWD</div>}
                         >
                           <MenuItem value="All Products">All Products</MenuItem>
                           <MenuItem value="Laptops">Laptops</MenuItem>

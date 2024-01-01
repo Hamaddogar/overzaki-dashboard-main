@@ -344,7 +344,7 @@ export default function OrdersListView() {
   }, []);
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <RoleBasedGuard hasContent roles={['BUSINESS_OWNER', 'ADMIN']} permission="GET_PAYMENTS">
+      <RoleBasedGuard hasContent permission="GET_PAYMENTS">
         <Grid
           container
           justifyContent="space-between"

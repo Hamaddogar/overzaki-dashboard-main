@@ -382,27 +382,27 @@ export default function CategoriesView() {
   // common
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'cat') {
-        setCategoryDrawer((pv) => !pv);
-        setEditCatId(id);
-        if (id) {
-          dispatch(fetchOneCategory(id));
-        } else {
-          setCategoriesData({});
-          dispatch(setCategory({}));
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'cat') {
+          setCategoryDrawer((pv) => !pv);
+          setEditCatId(id);
+          if (id) {
+            dispatch(fetchOneCategory(id));
+          } else {
+            setCategoriesData({});
+            dispatch(setCategory({}));
+          }
+        } else if (state === 'sub') {
+          setSubCategoryDrawer((pv) => !pv);
+          setEditSubCatId(id);
+          if (id) {
+            dispatch(fetchOneSubCategory(id));
+          } else {
+            setSubCategoriesData({});
+            dispatch(setSubCategory({}));
+          }
         }
-      } else if (state === 'sub') {
-        setSubCategoryDrawer((pv) => !pv);
-        setEditSubCatId(id);
-        if (id) {
-          dispatch(fetchOneSubCategory(id));
-        } else {
-          setSubCategoriesData({});
-          dispatch(setSubCategory({}));
-        }
-      }
-    };
+      };
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
       if (
@@ -494,18 +494,18 @@ export default function CategoriesView() {
                 sx={
                   activeCategory === 'main'
                     ? {
-                        borderRadius: '12px',
-                        color: '#0F1349',
-                        backgroundColor: '#FFFFFF',
-                        boxShadow: '0px 6px 20px #00000033',
-                        '&:hover': { backgroundColor: '#FFFFFF' },
-                      }
+                      borderRadius: '12px',
+                      color: '#0F1349',
+                      backgroundColor: '#FFFFFF',
+                      boxShadow: '0px 6px 20px #00000033',
+                      '&:hover': { backgroundColor: '#FFFFFF' },
+                    }
                     : {
-                        borderRadius: '12px',
-                        color: '#8688A3',
-                        backgroundColor: 'background.neutral',
-                        '&:hover': { backgroundColor: 'background.neutral' },
-                      }
+                      borderRadius: '12px',
+                      color: '#8688A3',
+                      backgroundColor: 'background.neutral',
+                      '&:hover': { backgroundColor: 'background.neutral' },
+                    }
                 }
               >
                 {' '}
@@ -518,18 +518,18 @@ export default function CategoriesView() {
                 sx={
                   activeCategory === 'sub'
                     ? {
-                        borderRadius: '12px',
-                        color: '#0F1349',
-                        backgroundColor: '#FFFFFF',
-                        boxShadow: '0px 6px 20px #00000033',
-                        '&:hover': { backgroundColor: '#FFFFFF' },
-                      }
+                      borderRadius: '12px',
+                      color: '#0F1349',
+                      backgroundColor: '#FFFFFF',
+                      boxShadow: '0px 6px 20px #00000033',
+                      '&:hover': { backgroundColor: '#FFFFFF' },
+                    }
                     : {
-                        borderRadius: '12px',
-                        color: '#8688A3',
-                        backgroundColor: 'background.neutral',
-                        '&:hover': { backgroundColor: '#FFFFFF' },
-                      }
+                      borderRadius: '12px',
+                      color: '#8688A3',
+                      backgroundColor: 'background.neutral',
+                      '&:hover': { backgroundColor: '#FFFFFF' },
+                    }
                 }
               >
                 {' '}
@@ -549,7 +549,7 @@ export default function CategoriesView() {
                   You have {categoriesLength} categories
                 </Typography>
               </Grid>
-              <RoleBasedGuard roles={['BUSINESS_OWNER', 'ADMIN']} permission="CREATE_CATEGORY">
+              <RoleBasedGuard permission="CREATE_CATEGORY">
                 <Grid item xs={12} sm={6} textAlign={{ xs: 'center', sm: 'right' }}>
                   <BottomActions>
                     <Stack

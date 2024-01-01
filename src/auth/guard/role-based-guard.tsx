@@ -32,25 +32,38 @@ const RoleBasedGuard = ({
   sx,
   returnBoolean,
 }: RoleBasedGuardProp) => {
+
+  const [hasCommonRole, setHasCommonRole] = useState<any>(null);
+  const [hasCommonPermission, setHasCommonPermission] = useState<any>(null);
+
   const { user } = useAuthContext();
 
-  const userRoles = user?.roles || [];
-  const userPermissions = user?.permissions || [];
 
-  const hasCommonRole = userRoles.some((role: string) => roles && roles.includes(role));
-  const hasCommonPermission = permission && userPermissions.includes(permission);
+  useEffect(() => {
+
+    if (user) {
+
+      const userRoles = user?.roles || [];
+      const userPermissions = user?.permissions || [];
+
+      const hasCommonRoleV = userRoles.some((role: string) => roles && roles.includes(role));
+      const hasCommonPermissionV = permission && userPermissions.includes(permission);
+
+      setHasCommonRole(hasCommonRoleV);
+      setHasCommonPermission(hasCommonPermissionV);
+    }
+
+
+  }, [permission, roles, user])
+
+
+
 
 
   if (returnBoolean && !hasContent) {
-    if (permission === 'UPDATE_CATEGORY_BY_ID' || permission === 'DELETE_CATEGORY_BY_ID') {
-      // console.log("permission", permission);
-      // console.log("hasCommonPermission", hasCommonPermission);
-      // console.log("hasCommonRole", hasCommonRole);
-    }
-    // return (roles && !hasCommonRole) || (permission && !hasCommonPermission);
     return null;
   }
-  if ((roles && !hasCommonRole) || (permission && !hasCommonPermission)) {
+  if ((roles && hasCommonRole === false) || (permission && hasCommonPermission === false)) {
     return hasContent ? (
       <Container component={MotionContainer} sx={{ textAlign: 'center', ...sx }}>
         <m.div variants={varBounce().in}>

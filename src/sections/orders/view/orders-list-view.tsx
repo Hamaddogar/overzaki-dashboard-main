@@ -227,7 +227,7 @@ export default function OrdersListView() {
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <RoleBasedGuard hasContent roles={['BUSINESS_OWNER', 'ADMIN']} permission='GET_ORDERS' sx={{ pt: 3 }} >
+      <RoleBasedGuard hasContent permission='GET_ORDERS' sx={{ pt: 3 }} >
         <Grid
           container
           justifyContent="space-between"
@@ -259,7 +259,7 @@ export default function OrdersListView() {
                   {' '}
                   Analytics{' '}
                 </Button>
-                <RoleBasedGuard roles={['BUSINESS_OWNER', 'ADMIN']} permission='CREATE_ORDER' sx={{ pt: 3 }} >
+                <RoleBasedGuard permission='CREATE_ORDER' sx={{ pt: 3 }} >
                   <Button
                     startIcon="+"
                     fullWidth
