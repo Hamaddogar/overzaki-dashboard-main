@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-shadow */
 
 'use client';
@@ -69,11 +70,12 @@ import { fetchProductsList } from 'src/redux/store/thunks/products';
 import Label from 'src/components/label/label';
 import Iconify from 'src/components/iconify/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import { RoleBasedGuard } from 'src/auth/guard';
+import { useAuthContext } from 'src/auth/hooks';
 import VouchersToolbar from '../vouchers-toolbar';
 import VouchersFiltersResult from '../vouchers-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
-import { RoleBasedGuard } from 'src/auth/guard';
-import { useAuthContext } from 'src/auth/hooks';
+
 // .....
 // ----------------------------------------------------------------------
 const activeTab = {
@@ -496,7 +498,7 @@ export default function OrdersListView() {
       await getPermission('remove', 'DELETE_VOUCHER_BY_ID');
     };
     fetchData();
-  }, []);
+  }, [getPermission]);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>

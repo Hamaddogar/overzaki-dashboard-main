@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-shadow */
 
@@ -57,6 +58,8 @@ import { AppDispatch } from 'src/redux/store/store';
 import Label from 'src/components/label/label';
 import Iconify from 'src/components/iconify/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import { RoleBasedGuard } from 'src/auth/guard';
+import { useAuthContext } from 'src/auth/hooks';
 import CustomersTableToolbar from '../customers-toolbar';
 import CustomersTableFiltersResult from '../customers-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
@@ -70,8 +73,7 @@ import {
   fetchOneCustomer,
   setCustomers,
 } from '../../../redux/store/thunks/customers';
-import { RoleBasedGuard } from 'src/auth/guard';
-import { useAuthContext } from 'src/auth/hooks';
+
 
 // ----------------------------------------------------------------------
 
@@ -435,7 +437,7 @@ export default function OrdersListView() {
       await getPermission('remove', 'DELETE_CUSTOMER_BY_ID');
     };
     fetchData();
-  }, []);
+  }, [getPermission]);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>

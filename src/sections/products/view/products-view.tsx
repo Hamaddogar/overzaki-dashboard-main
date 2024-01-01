@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable arrow-body-style */
 /* eslint-disable @typescript-eslint/no-shadow */
 
@@ -59,12 +60,12 @@ import Label from 'src/components/label/label';
 import Iconify from 'src/components/iconify/iconify';
 // import NavigatorBar from 'src/components/NavigatorBar';
 import { fetchCategorysList, fetchSubCategorysList } from 'src/redux/store/thunks/category';
+import { RoleBasedGuard } from 'src/auth/guard';
+import { useAuthContext } from 'src/auth/hooks';
 
 import Link from 'next/link';
 import DetailsNavBar from '../DetailsNavBar';
 import ProductTableToolbar from '../product-table-toolbar';
-import { RoleBasedGuard } from 'src/auth/guard';
-import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -592,7 +593,7 @@ export default function OrdersListView() {
       await getPermission('remove', 'DELETE_PRODUCT_BY_ID');
     };
     fetchData();
-  }, []);
+  }, [getPermission]);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
