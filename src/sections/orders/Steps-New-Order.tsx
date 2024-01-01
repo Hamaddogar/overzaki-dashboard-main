@@ -11,7 +11,7 @@ import Stepper from '@mui/material/Stepper';
 import StepLabel from '@mui/material/StepLabel';
 import Typography from '@mui/material/Typography';
 import { LoadingButton } from '@mui/lab';
-import { Autocomplete, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControlLabel, InputAdornment, TextField } from '@mui/material';
+import { Select, Autocomplete, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControlLabel, InputAdornment, TextField, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { Stack } from '@mui/system';
@@ -28,6 +28,8 @@ import { useSelector, useDispatch } from 'react-redux';
 // import { fetchCustomersList } from 'src/redux/store/thunks/customers';
 import { fetchCustomersList } from '../../redux/store/thunks/customers';
 import { fetchProductsList } from '../../redux/store/thunks/products';
+import { fetchLocationsList } from '../../redux/store/thunks/location';
+import { fetchDeliveryZonesForBranch } from '../../redux/store/thunks/deliveryZone';
 
 
 // ----------------------------------------------------------------------
@@ -53,10 +55,13 @@ export default function StepsNewOrders({ closeDrawer }: any) {
 
   const customersState = useSelector((state: any) => state.customers);
   const productState = useSelector((state: any) => state.products);
+  const locationsState = useSelector((state: any) => state.locations);
+
 
   const [selectedProducts, setSelectedProducts] = useState<any>([]);
   const [customersList, setCustomersList] = useState<any>(customersState?.list);
   const [orderData, setOrderData] = useState<any>(defaultOrderData);
+  const [deliveryZoneList, setDeliveryZoneList] = useState<any>([]);
 
   useEffect(() => {
     let subTotal = 0;
@@ -86,6 +91,24 @@ export default function StepsNewOrders({ closeDrawer }: any) {
       dispatch(fetchProductsList(error));
     }
   }, [productState, dispatch]);
+
+  useEffect(() => {
+    if (locationsState?.status === 'idle') {
+      dispatch(fetchLocationsList(locationsState?.error));
+    }
+
+  }, [locationsState, dispatch]);
+
+
+  useEffect(() => {
+    if (orderData?.branchId && orderData?.branchId !== "") {
+      dispatch(fetchDeliveryZonesForBranch(orderData?.branchId)).then((dzRes: any) => {
+        if (dzRes.meta.requestStatus === 'fulfilled') {
+          setDeliveryZoneList(dzRes.payload.data);
+        }
+      });
+    }
+  }, [dispatch, orderData])
 
 
 
@@ -223,12 +246,16 @@ export default function StepsNewOrders({ closeDrawer }: any) {
       const submitData = {
         items: selectedProducts.map((product: any) => ({
           productId: product?._id,
+          varientId: product?.selectedVariant,
+          varientRowId: product?.selectedRow,
           count: product?.count
         })),
         userId: orderData?.customer?._id,
         status: orderData.status,
         address: orderData.address,
         paymentMethod: orderData.paymentMethod,
+        branchId: orderData?.branchId,
+        deliveryZoneId: orderData?.deliveryZoneId,
       }
 
       dispatch(createOrders(submitData)).then((response: any) => {
@@ -247,6 +274,36 @@ export default function StepsNewOrders({ closeDrawer }: any) {
 
     }
 
+  }
+
+  const handleSelectVariant = (variant_id: any, product_id: any) => {
+
+    const selectedArray = selectedProducts.map((prev_product: any) => {
+      if (prev_product?._id === product_id) {
+        return {
+          ...prev_product,
+          selectedVariant: variant_id,
+          selectedRow: ""
+        }
+      }
+      return prev_product;
+    });
+
+    setSelectedProducts(selectedArray)
+  }
+  const handleSelectRow = (event: SelectChangeEvent, product_id: any) => {
+    const row_id: any = event.target.value;
+    const selectedArray = selectedProducts.map((prev_product: any) => {
+      if (prev_product?._id === product_id) {
+        return {
+          ...prev_product,
+          selectedRow: row_id,
+        }
+      }
+      return prev_product;
+    })
+
+    setSelectedProducts(selectedArray)
   }
 
   return (
@@ -485,6 +542,54 @@ export default function StepsNewOrders({ closeDrawer }: any) {
                     >
                       {product?.price} KWD
                     </Typography>
+
+                    <Stack
+                      sx={{ mt: '10px' }}
+                      direction="column"
+                      alignItems="center"
+                      justifyContent="flex-start"
+                      spacing="10px"
+                    >
+
+                      <FormControl fullWidth >
+                        <InputLabel id="variants">Variant</InputLabel>
+                        <Select
+                          labelId="variants"
+                          variant='filled'
+                          name='selectedVariant'
+                          label='Variant'
+                          value={product?.selectedVariant || ""}
+                          onChange={(event: SelectChangeEvent) => handleSelectVariant(event.target.value, product?._id)}
+                        >
+                          {product?.varients?.map((variant: any, i: any) => (
+                            <MenuItem key={i} value={variant?._id}>{variant?.groupName?.localized || variant?.groupName?.en || ""}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
+                      {product?.selectedVariant && (
+                        <FormControl fullWidth >
+                          <InputLabel id="rows">Row</InputLabel>
+                          <Select
+                            labelId="Row"
+                            variant='filled'
+                            name='selectedRow'
+                            value={product?.selectedRow || ""}
+                            onChange={(event: SelectChangeEvent) => handleSelectRow(event, product?._id)}
+                          >
+                            {product?.varients?.find((variant: any) => variant?._id === product?.selectedVariant)?.rows?.map((row: any, indx: any) => (
+                              <MenuItem key={indx} value={row?._id}>{row?.name?.localized || row?.name?.en || ""}</MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+
+
+
+
+                    </Stack>
+
+
                     <Stack
                       sx={{ mt: '10px' }}
                       direction="row"
@@ -837,6 +942,66 @@ export default function StepsNewOrders({ closeDrawer }: any) {
             </Paper>
           )}
 
+          <Paper
+            sx={{
+              width: '100%',
+              mt: '12px',
+              padding: '13px 20px',
+              boxShadow: '0px 4px 20px #0F134914',
+              borderRadius: '13px',
+              display: 'flex',
+              gap: '10px',
+              flexDirection: 'column',
+            }}
+          >
+            <Typography
+              component="p"
+              mb="15px"
+              variant="subtitle2"
+              sx={{ fontSize: '.8rem', fontWeight: 800 }}
+            >
+              Branch
+            </Typography>
+            <FormControl fullWidth >
+              <InputLabel id="branch">Branch</InputLabel>
+              <Select
+                labelId="Branch"
+                variant='filled'
+                name='branchId'
+                value={orderData?.branchId || ""}
+                onChange={(event: SelectChangeEvent) => setOrderData({ ...orderData, branchId: event.target.value, deliveryZoneId: "" })}
+              >
+                {locationsState?.list?.map((delivery: any, indx: any) => (
+                  <MenuItem key={indx} value={delivery?._id}>{delivery?.name?.localized || delivery?.name?.en || ""}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <Typography
+              component="p"
+              mb="15px"
+              variant="subtitle2"
+              sx={{ fontSize: '.8rem', fontWeight: 800 }}
+            >
+              Delivery Zone
+            </Typography>
+            <FormControl fullWidth >
+              <InputLabel id="zone">Delivery Zone</InputLabel>
+              <Select
+                labelId="Delivery Zone"
+                variant='filled'
+                name='deliveryZoneId'
+                value={orderData?.deliveryZoneId || ""}
+                onChange={(event: SelectChangeEvent) => setOrderData({ ...orderData, deliveryZoneId: event.target.value })}
+              >
+                {deliveryZoneList?.map((zone: any, indx: any) => (
+                  <MenuItem key={indx} value={zone?._id}>{zone?.zoneName?.localized || zone?.zoneName?.en || ""}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+
+          </Paper>
           <Paper
             sx={{
               width: '100%',

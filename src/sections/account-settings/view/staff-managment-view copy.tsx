@@ -69,29 +69,29 @@ export default function StaffManagment() {
   const pageSize = 5;
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-      (event: React.SyntheticEvent | React.MouseEvent) => {
-        if (state === 'new') {
-          setOpenCreateStaff((pv) => !pv);
-          setEditId(id);
-          if (id) {
-            dispatch(fetchOneStaffManagement(id)).then((response: any) => {
-              const { user, adminName } = response.payload;
-              const { gender, email, location, phoneNumber, preferedLanguage, roles } = user;
-              delete adminName.localized;
-              const userObj = {
-                adminName,
-                gender,
-                email,
-                location,
-                phoneNumber,
-                preferedLanguage,
-                roles,
-              };
-              setUserData(userObj);
-            });
-          }
-        } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
-      };
+    (event: React.SyntheticEvent | React.MouseEvent) => {
+      if (state === 'new') {
+        setOpenCreateStaff((pv) => !pv);
+        setEditId(id);
+        if (id) {
+          dispatch(fetchOneStaffManagement(id)).then((response: any) => {
+            const { user, adminName } = response.payload;
+            const { gender, email, location, phoneNumber, preferedLanguage, roles } = user;
+            delete adminName.localized;
+            const userObj = {
+              adminName,
+              gender,
+              email,
+              location,
+              phoneNumber,
+              preferedLanguage,
+              roles,
+            };
+            setUserData(userObj);
+          });
+        }
+      } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
+    };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -257,6 +257,33 @@ export default function StaffManagment() {
     items.splice(result.destination.index, 0, reorderedItem);
     setNewUsersData(items);
   };
+  const { verifyPermission } = useAuthContext();
+  const [allowAction, setAllowAction] = useState<{ edit: boolean; remove: boolean }>({
+    edit: false,
+    remove: false,
+  });
+  const getPermission = async (moduleName: string, permissionName: string): Promise<void> => {
+    try {
+      const data = { permission: permissionName };
+      const responseData = await verifyPermission?.(data);
+
+      if (moduleName === 'edit') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, edit: responseData }));
+      } else if (moduleName === 'remove') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, remove: responseData }));
+      }
+    } catch (error) {
+      console.error(`Error while checking ${moduleName} permission:`, error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getPermission('edit', 'UPDATE_STAFF_MANAGEMENT_BY_ID');
+      await getPermission('remove', 'DELETE_STAFF_MANAGEMENT_BY_ID');
+    };
+    fetchData();
+  }, []);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -269,12 +296,13 @@ export default function StaffManagment() {
         <Grid item xs={12} md="auto">
           <CustomCrumbs
             heading="Staff Management"
-            description={`${staffLength
-              ? staffLength === 1
-                ? `${staffLength} Staff Member`
-                : `${staffLength} Staff Members`
-              : `${0} Staff Members`
-              }`}
+            description={`${
+              staffLength
+                ? staffLength === 1
+                  ? `${staffLength} Staff Member`
+                  : `${staffLength} Staff Members`
+                : `${0} Staff Members`
+            }`}
           />
         </Grid>
 
@@ -533,15 +561,17 @@ export default function StaffManagment() {
                                       borderRadius: '16px',
                                     }}
                                   />
-                                  <Iconify
-                                    onClick={() => [
-                                      setOpenDelStaff((prev) => !prev),
-                                      setToDelId(user?.user?._id),
-                                    ]}
-                                    style={{ cursor: 'pointer' }}
-                                    icon="carbon:delete"
-                                    width={24}
-                                  />
+                                  {allowAction.remove && (
+                                    <Iconify
+                                      onClick={() => [
+                                        setOpenDelStaff((prev) => !prev),
+                                        setToDelId(user?.user?._id),
+                                      ]}
+                                      style={{ cursor: 'pointer' }}
+                                      icon="carbon:delete"
+                                      width={24}
+                                    />
+                                  )}
                                   <Box
                                     sx={{
                                       width: '36px',
@@ -558,7 +588,9 @@ export default function StaffManagment() {
                                     }}
                                     onClick={toggleDrawerCommon('new', user?.user?._id)}
                                   >
-                                    <Box component="img" src="/raw/edit-pen.svg" width="13px" />
+                                    {allowAction.edit && (
+                                      <Box component="img" src="/raw/edit-pen.svg" width="13px" />
+                                    )}
                                   </Box>
                                   {/* {order.role !== 'Owner' && (
                   <Iconify

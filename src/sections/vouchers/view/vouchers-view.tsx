@@ -72,6 +72,8 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import VouchersToolbar from '../vouchers-toolbar';
 import VouchersFiltersResult from '../vouchers-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
+import { RoleBasedGuard } from 'src/auth/guard';
+import { useAuthContext } from 'src/auth/hooks';
 // .....
 // ----------------------------------------------------------------------
 const activeTab = {
@@ -467,567 +469,342 @@ export default function OrdersListView() {
     setListItems(items);
   };
 
+  // -----
+  const { verifyPermission } = useAuthContext();
+  const [allowAction, setAllowAction] = useState<{ edit: boolean; remove: boolean }>({
+    edit: false,
+    remove: false,
+  });
+  const getPermission = async (moduleName: string, permissionName: string): Promise<void> => {
+    try {
+      const data = { permission: permissionName };
+      const responseData = await verifyPermission?.(data);
+
+      if (moduleName === 'edit') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, edit: responseData }));
+      } else if (moduleName === 'remove') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, remove: responseData }));
+      }
+    } catch (error) {
+      console.error(`Error while checking ${moduleName} permission:`, error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getPermission('edit', 'UPDATE_VOUCHER_BY_ID');
+      await getPermission('remove', 'DELETE_VOUCHER_BY_ID');
+    };
+    fetchData();
+  }, []);
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <Grid
-        container
-        justifyContent="space-between"
-        alignItems={{ xs: 'flex-start', md: 'center' }}
-      >
-        <Grid item xs={12} md="auto">
-          <CustomCrumbs heading="Vouchers" crums={false} />
-        </Grid>
+      <RoleBasedGuard hasContent roles={['BUSINESS_OWNER', 'ADMIN']} permission="GET_VOUCHERS">
+        <Grid
+          container
+          justifyContent="space-between"
+          alignItems={{ xs: 'flex-start', md: 'center' }}
+        >
+          <Grid item xs={12} md="auto">
+            <CustomCrumbs heading="Vouchers" crums={false} />
+          </Grid>
 
-        <Grid item xs={12} md={3}>
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent={{ xs: 'flex-start', md: 'flex-end' }}
-            spacing="20px"
-          >
-            {/* <Button startIcon={<Box component='img' src='/raw/orderreport.svg' />} fullWidth sx={{ borderRadius: '30px', color: '#8688A3', backgroundColor: '#F0F0F4' }} component='h5' variant='contained' color='primary' onClick={toggleDrawerCommon('analytics')}> Analytics </Button> */}
-          </Stack>
-          <BottomActions>
+          <Grid item xs={12} md={3}>
             <Stack
-              direction={{ xs: 'column', sm: 'row' }}
+              direction="row"
               alignItems="center"
-              justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
-              spacing="10px"
-              sx={{ width: '100%', maxWidth: { xs: '100%', sm: '200px' } }}
+              justifyContent={{ xs: 'flex-start', md: 'flex-end' }}
+              spacing="20px"
             >
-              <Button
-                startIcon="+"
-                fullWidth
-                sx={{ borderRadius: '30px', color: '#0F1349' }}
-                component="h5"
-                variant="contained"
-                color="primary"
-                onClick={toggleDrawerCommon('new')}
-              >
-                {' '}
-                Create New Voucher{' '}
-              </Button>
+              {/* <Button startIcon={<Box component='img' src='/raw/orderreport.svg' />} fullWidth sx={{ borderRadius: '30px', color: '#8688A3', backgroundColor: '#F0F0F4' }} component='h5' variant='contained' color='primary' onClick={toggleDrawerCommon('analytics')}> Analytics </Button> */}
             </Stack>
-          </BottomActions>
-        </Grid>
+            <RoleBasedGuard roles={['BUSINESS_OWNER', 'ADMIN']} permission="CREATE_VOUCHER">
+              <BottomActions>
+                <Stack
+                  direction={{ xs: 'column', sm: 'row' }}
+                  alignItems="center"
+                  justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
+                  spacing="10px"
+                  sx={{ width: '100%', maxWidth: { xs: '100%', sm: '200px' } }}
+                >
+                  <Button
+                    startIcon="+"
+                    fullWidth
+                    sx={{ borderRadius: '30px', color: '#0F1349' }}
+                    component="h5"
+                    variant="contained"
+                    color="primary"
+                    onClick={toggleDrawerCommon('new')}
+                  >
+                    {' '}
+                    Create New Voucher{' '}
+                  </Button>
+                </Stack>
+              </BottomActions>
+            </RoleBasedGuard>
+          </Grid>
 
-        <Grid item xs={12}>
-          <Box mt="20px">
-            <VouchersToolbar
-              filters={filters}
-              onFilters={handleFilters}
-              //
-              canReset={canReset}
-              onResetFilters={handleResetFilters}
-            />
-
-            {canReset && (
-              <VouchersFiltersResult
+          <Grid item xs={12}>
+            <Box mt="20px">
+              <VouchersToolbar
                 filters={filters}
                 onFilters={handleFilters}
                 //
+                canReset={canReset}
                 onResetFilters={handleResetFilters}
-                //
-                results={dataFiltered.length}
-                sx={{ p: 2.5, pt: 0 }}
               />
-            )}
-          </Box>
-        </Grid>
 
-        <Grid item xs={12}>
-          <Box>
-            <TabContext value={value}>
-              <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <TabList
-                  onChange={handleChangeTab}
-                  variant="scrollable"
-                  scrollButtons={false}
-                  sx={{
-                    px: 2.5,
-                    boxShadow: (theme) =>
-                      `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
-                  }}
-                >
-                  {STATUS_OPTIONS.map((tab) => (
-                    <Tab
-                      key={tab.value}
-                      iconPosition="end"
-                      value={tab.value}
-                      label={tab.label}
-                      icon={
-                        <Label
-                          variant={
-                            ((tab.value === 'All' || tab.value === value) && 'filled') || 'soft'
-                          }
-                          color={
-                            (tab.value === 'Active' && 'primary') ||
-                            (tab.value === 'Ready' && 'secondary') ||
-                            'default'
-                          }
+              {canReset && (
+                <VouchersFiltersResult
+                  filters={filters}
+                  onFilters={handleFilters}
+                  //
+                  onResetFilters={handleResetFilters}
+                  //
+                  results={dataFiltered.length}
+                  sx={{ p: 2.5, pt: 0 }}
+                />
+              )}
+            </Box>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Box>
+              <TabContext value={value}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                  <TabList
+                    onChange={handleChangeTab}
+                    variant="scrollable"
+                    scrollButtons={false}
+                    sx={{
+                      px: 2.5,
+                      boxShadow: (theme) =>
+                        `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+                    }}
+                  >
+                    {STATUS_OPTIONS.map((tab) => (
+                      <Tab
+                        key={tab.value}
+                        iconPosition="end"
+                        value={tab.value}
+                        label={tab.label}
+                        icon={
+                          <Label
+                            variant={
+                              ((tab.value === 'All' || tab.value === value) && 'filled') || 'soft'
+                            }
+                            color={
+                              (tab.value === 'Active' && 'primary') ||
+                              (tab.value === 'Ready' && 'secondary') ||
+                              'default'
+                            }
+                          >
+                            {tab.value === 'All' && allVouchers.length}
+                            {tab.value === 'Expired' &&
+                              allVouchers.filter((order) => !order.status).length}
+                            {tab.value === 'Active' &&
+                              allVouchers.filter((order) => order.status).length}
+                          </Label>
+                        }
+                      />
+                    ))}
+                  </TabList>
+                </Box>
+
+                <TabPanel value={value} sx={{ px: 0, pb: 0 }}>
+                  <DragDropContext onDragEnd={handleOnDragEnd}>
+                    <Droppable droppableId="items">
+                      {(provided) => (
+                        <Grid
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          container
+                          spacing={2}
                         >
-                          {tab.value === 'All' && allVouchers.length}
-                          {tab.value === 'Expired' &&
-                            allVouchers.filter((order) => !order.status).length}
-                          {tab.value === 'Active' &&
-                            allVouchers.filter((order) => order.status).length}
-                        </Label>
-                      }
-                    />
-                  ))}
-                </TabList>
-              </Box>
-
-              <TabPanel value={value} sx={{ px: 0, pb: 0 }}>
-                <DragDropContext onDragEnd={handleOnDragEnd}>
-                  <Droppable droppableId="items">
-                    {(provided) => (
-                      <Grid
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                        container
-                        spacing={2}
-                      >
-                        {listItems.map((voucher: any, indx: any) => (
-                          <Draggable key={indx} index={indx} draggableId={indx.toString()}>
-                            {(provided) => (
-                              <Grid
-                                {...provided.draggableProps}
-                                ref={provided.innerRef}
-                                key={indx}
-                                item
-                                xs={12}
-                              >
-                                {/* <Paper elevation={4} > */}
+                          {listItems.map((voucher: any, indx: any) => (
+                            <Draggable key={indx} index={indx} draggableId={indx.toString()}>
+                              {(provided) => (
                                 <Grid
-                                  container
+                                  {...provided.draggableProps}
+                                  ref={provided.innerRef}
+                                  key={indx}
                                   item
-                                  alignItems="center"
-                                  justifyContent="space-between"
-                                  rowGap={3}
-                                  p={3}
-                                  minHeight="80px"
-                                  sx={voucher.status ? stylesActive : stylesDisabled}
+                                  xs={12}
                                 >
+                                  {/* <Paper elevation={4} > */}
                                   <Grid
+                                    container
                                     item
-                                    sx={{ display: 'flex', alignItems: 'end' }}
-                                    xs={6}
-                                    md="auto"
+                                    alignItems="center"
+                                    justifyContent="space-between"
+                                    rowGap={3}
+                                    p={3}
+                                    minHeight="80px"
+                                    sx={voucher.status ? stylesActive : stylesDisabled}
                                   >
-                                    <div {...provided.dragHandleProps}>
-                                      <Iconify icon="ci:drag-vertical" />
-                                    </div>
-                                    <Box sx={{ minWidth: { xs: 'auto', md: '140px' } }}>
-                                      <Typography
-                                        component="p"
-                                        color="#8688A3"
-                                        variant="subtitle2"
-                                        sx={{ fontSize: '.8rem' }}
-                                      >
-                                        {voucher?.name?.en || voucher?.name}
-                                      </Typography>
-                                      {voucher.status ? (
-                                        <Typography
-                                          component="p"
-                                          color="#0D6EFD"
-                                          variant="subtitle2"
-                                          sx={{
-                                            mt: '5px',
-                                            fontWeight: 900,
-                                            cursor: 'pointer',
-                                            fontSize: '.8rem',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                          }}
-                                          onClick={() => onCopy(voucher.code)}
-                                        >
-                                          {voucher.code} <Iconify icon="tabler:copy" />{' '}
-                                        </Typography>
-                                      ) : (
+                                    <Grid
+                                      item
+                                      sx={{ display: 'flex', alignItems: 'end' }}
+                                      xs={6}
+                                      md="auto"
+                                    >
+                                      <div {...provided.dragHandleProps}>
+                                        <Iconify icon="ci:drag-vertical" />
+                                      </div>
+                                      <Box sx={{ minWidth: { xs: 'auto', md: '140px' } }}>
                                         <Typography
                                           component="p"
                                           color="#8688A3"
                                           variant="subtitle2"
-                                          sx={{ mt: '5px', fontWeight: 900, fontSize: '.8rem' }}
+                                          sx={{ fontSize: '.8rem' }}
                                         >
-                                          {voucher.code}
+                                          {voucher?.name?.en || voucher?.name}
                                         </Typography>
-                                      )}
-                                    </Box>
-                                  </Grid>
+                                        {voucher.status ? (
+                                          <Typography
+                                            component="p"
+                                            color="#0D6EFD"
+                                            variant="subtitle2"
+                                            sx={{
+                                              mt: '5px',
+                                              fontWeight: 900,
+                                              cursor: 'pointer',
+                                              fontSize: '.8rem',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              gap: '8px',
+                                            }}
+                                            onClick={() => onCopy(voucher.code)}
+                                          >
+                                            {voucher.code} <Iconify icon="tabler:copy" />{' '}
+                                          </Typography>
+                                        ) : (
+                                          <Typography
+                                            component="p"
+                                            color="#8688A3"
+                                            variant="subtitle2"
+                                            sx={{ mt: '5px', fontWeight: 900, fontSize: '.8rem' }}
+                                          >
+                                            {voucher.code}
+                                          </Typography>
+                                        )}
+                                      </Box>
+                                    </Grid>
 
-                                  <Grid item xs={6} md="auto">
-                                    <Typography
-                                      component="p"
-                                      color="#0F1349"
-                                      variant="subtitle2"
-                                      sx={{ fontSize: '.8rem' }}
-                                    >
-                                      {voucher.type === 'FIXED_AMOUNT'
-                                        ? `${voucher.discountAmount} KWD`
-                                        : `${voucher.discountPercentage}%`}{' '}
-                                      <span style={{ fontSize: '.7rem' }}>({voucher.type})</span>{' '}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid item xs={6} md="auto">
-                                    <Typography
-                                      component="p"
-                                      color="#0F1349"
-                                      variant="subtitle2"
-                                      sx={{ fontSize: '.8rem' }}
-                                    >
-                                      {voucher.totalUses} Uses{' '}
-                                    </Typography>
-                                  </Grid>
+                                    <Grid item xs={6} md="auto">
+                                      <Typography
+                                        component="p"
+                                        color="#0F1349"
+                                        variant="subtitle2"
+                                        sx={{ fontSize: '.8rem' }}
+                                      >
+                                        {voucher.type === 'FIXED_AMOUNT'
+                                          ? `${voucher.discountAmount} KWD`
+                                          : `${voucher.discountPercentage}%`}{' '}
+                                        <span style={{ fontSize: '.7rem' }}>({voucher.type})</span>{' '}
+                                      </Typography>
+                                    </Grid>
+                                    <Grid item xs={6} md="auto">
+                                      <Typography
+                                        component="p"
+                                        color="#0F1349"
+                                        variant="subtitle2"
+                                        sx={{ fontSize: '.8rem' }}
+                                      >
+                                        {voucher.totalUses} Uses{' '}
+                                      </Typography>
+                                    </Grid>
 
-                                  <Grid item xs={6} md="auto">
-                                    <Box
-                                      sx={{ display: 'flex', alignItems: 'center', gap: '13px' }}
-                                    >
+                                    <Grid item xs={6} md="auto">
                                       <Box
-                                        sx={{
-                                          width: '36px',
-                                          height: '36px',
-                                          borderRadius: '20px',
-                                          background: 'rgb(134, 136, 163,0.09)',
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          justifyContent: 'center',
-                                          cursor: 'pointer',
-                                          '&:hover': {
-                                            background: 'rgb(134, 136, 163,0.2)',
-                                          },
-                                        }}
-                                        // onClick={toggleDrawerCommon("delete", voucher._id)}
-                                        onClick={() => {
-                                          setRemoveData(voucher._id);
-                                          confirm.onTrue();
-                                        }}
+                                        sx={{ display: 'flex', alignItems: 'center', gap: '13px' }}
                                       >
                                         <Box
-                                          component="img"
-                                          src="/raw/trash-can-solid.svg"
-                                          width="13px"
-                                        />
+                                          sx={{
+                                            width: '36px',
+                                            height: '36px',
+                                            borderRadius: '20px',
+                                            background: 'rgb(134, 136, 163,0.09)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: 'pointer',
+                                            '&:hover': {
+                                              background: 'rgb(134, 136, 163,0.2)',
+                                            },
+                                          }}
+                                          // onClick={toggleDrawerCommon("delete", voucher._id)}
+                                          onClick={() => {
+                                            setRemoveData(voucher._id);
+                                            confirm.onTrue();
+                                          }}
+                                        >
+                                          {allowAction.remove && (
+                                            <Box
+                                              component="img"
+                                              src="/raw/trash-can-solid.svg"
+                                              width="13px"
+                                            />
+                                          )}
+                                        </Box>
+                                        <Box
+                                          sx={{
+                                            width: '36px',
+                                            height: '36px',
+                                            borderRadius: '20px',
+                                            background: 'rgb(134, 136, 163,0.09)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: 'pointer',
+                                            '&:hover': {
+                                              background: 'rgb(134, 136, 163,0.2)',
+                                            },
+                                          }}
+                                          onClick={toggleDrawerCommon('new', voucher._id)}
+                                        >
+                                          {allowAction.edit && (
+                                            <Box
+                                              component="img"
+                                              src="/raw/edit-pen.svg"
+                                              width="13px"
+                                            />
+                                          )}
+                                        </Box>
+                                        {/* <Switch checked={voucher.status} /> */}
                                       </Box>
-                                      <Box
-                                        sx={{
-                                          width: '36px',
-                                          height: '36px',
-                                          borderRadius: '20px',
-                                          background: 'rgb(134, 136, 163,0.09)',
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          justifyContent: 'center',
-                                          cursor: 'pointer',
-                                          '&:hover': {
-                                            background: 'rgb(134, 136, 163,0.2)',
-                                          },
-                                        }}
-                                        onClick={toggleDrawerCommon('new', voucher._id)}
-                                      >
-                                        <Box component="img" src="/raw/edit-pen.svg" width="13px" />
-                                      </Box>
-                                      {/* <Switch checked={voucher.status} /> */}
-                                    </Box>
+                                    </Grid>
                                   </Grid>
+                                  {/* </Paper> */}
                                 </Grid>
-                                {/* </Paper> */}
-                              </Grid>
-                            )}
-                          </Draggable>
-                        ))}
-                      </Grid>
-                    )}
-                  </Droppable>
-                </DragDropContext>
-              </TabPanel>
-            </TabContext>
+                              )}
+                            </Draggable>
+                          ))}
+                        </Grid>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                </TabPanel>
+              </TabContext>
 
-            <DetailsNavBar
-              open={openDetails}
-              onClose={handleDrawerCloseCommon('details')}
-              title="Voucher Details"
-              actions={
-                <Button
-                  fullWidth
-                  variant="soft"
-                  color="success"
-                  size="large"
-                  sx={{ borderRadius: '30px' }}
-                >
-                  Save
-                </Button>
-              }
-            >
-              <Divider flexItem />
-              <Box width="100%">
-                <Typography
-                  pb="5px"
-                  component="p"
-                  noWrap
-                  variant="subtitle2"
-                  sx={{ opacity: 0.7, fontSize: '.9rem' }}
-                >
-                  Voucher Name (English)
-                </Typography>
-                <TextField fullWidth variant="filled" defaultValue="Happy Eid" name="NAME" />
-
-                <Typography
-                  mt="20px"
-                  pb="5px"
-                  component="p"
-                  noWrap
-                  variant="subtitle2"
-                  sx={{ opacity: 0.7, fontSize: '.9rem' }}
-                >
-                  Voucher Name (Arabic)
-                </Typography>
-                <TextField fullWidth variant="filled" defaultValue="عيد سعيد" name="NAME" />
-
-                <Typography
-                  mt="20px"
-                  pb="5px"
-                  component="p"
-                  noWrap
-                  variant="subtitle2"
-                  sx={{ opacity: 0.7, fontSize: '.9rem' }}
-                >
-                  Voucher Code
-                </Typography>
-                <TextField fullWidth variant="filled" defaultValue="H@PPYEID2023" name="Code" />
-
-                <Stack
-                  mt="20px"
-                  pb="5px"
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Box>
-                    <Typography
-                      component="p"
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.9rem' }}
-                    >
-                      Voucher Status
-                    </Typography>
-                    <Typography
-                      component="p"
-                      variant="subtitle2"
-                      sx={{ fontWeight: 900, fontSize: '1rem' }}
-                    >
-                      Available
-                    </Typography>
-                  </Box>
-                  <Switch defaultChecked />
-                </Stack>
-
-                <Grid
-                  container
-                  mt="20px"
-                  columnSpacing="20px"
-                  pb="5px"
-                  alignItems="flex-end"
-                  rowGap="20px"
-                  justifyContent="space-between"
-                >
-                  <Grid item xs={6}>
-                    <Typography
-                      component="p"
-                      mb="5px"
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                    >
-                      Select Discount Type
-                    </Typography>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        height: '56px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#8688A3',
-                        fontSize: '.9rem',
-                        background: 'rgb(245, 245, 248)',
-                        borderRadius: '16px',
-                        fontWeight: 800,
-                      }}
-                    >
-                      Fixed Amount
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        height: '56px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#0F1349',
-                        fontSize: '.9rem',
-                        background: 'rgb(209, 255, 240)',
-                        borderRadius: '16px',
-                        fontWeight: 800,
-                        border: '2px solid #1AF9B3',
-                      }}
-                    >
-                      Percentage
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Typography
-                      component="p"
-                      mb="5px"
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                    >
-                      Discount Percentage
-                    </Typography>
-                    <TextField fullWidth variant="filled" defaultValue="20%" name="Percentage" />
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Typography
-                      component="p"
-                      mb="5px"
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                    >
-                      Up to
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      variant="filled"
-                      defaultValue="10"
-                      name="PHONE"
-                      sx={{
-                        '& .MuiInputAdornment-root': {
-                          marginTop: '0px !important',
-                        },
-                        '& input': {
-                          paddingRight: '0px !important',
-                        },
-                      }}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <Stack direction="row" alignItems="center" spacing="5px">
-                              <Typography
-                                component="p"
-                                variant="subtitle2"
-                                sx={{ opacity: 0.7, fontSize: '.6rem' }}
-                              >
-                                KWD
-                              </Typography>
-                              <Iconify icon="mingcute:down-fill" width={20} />
-                            </Stack>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Typography
-                      component="p"
-                      mb="5px"
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                    >
-                      Total Uses
-                    </Typography>
-                    <TextField fullWidth variant="filled" defaultValue="500" name="PHONE" />
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Typography
-                      component="p"
-                      mb="5px"
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                    >
-                      Start Date
-                    </Typography>
-                    <TextField fullWidth variant="filled" defaultValue="2023-06-28" name="sd" />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography
-                      component="p"
-                      mb="5px"
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                    >
-                      End Date
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      type="date"
-                      variant="filled"
-                      defaultValue="2023-10-07"
-                      name="ed"
-                    />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Typography
-                      component="p"
-                      mb="5px"
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                    >
-                      Voucher Coverage
-                    </Typography>
-                    <FormControl fullWidth>
-                      <Select
-                        variant="filled"
-                        value={mySubCat}
-                        sx={{
-                          fontWeight: 900,
-                        }}
-                        onChange={handleChangeMySubCat}
-                        // endAdornment={<div style={{ fontSize: '12px', marginRight: '20px', marginTop: '3px' }}>KWD</div>}
-                      >
-                        <MenuItem value="All Products">All Products</MenuItem>
-                        <MenuItem value="Laptops">Laptops</MenuItem>
-                        <MenuItem value="Clothes">Clothes</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                </Grid>
-              </Box>
-            </DetailsNavBar>
-
-            {/* create new Vocher */}
-            <DetailsNavBar
-              open={openCreateVoucher}
-              onClose={handleDrawerCloseCommon('new')}
-              title={editId ? 'Edit Voucher' : 'Add New Voucher'}
-              actions={
-                <Stack alignItems="center" justifyContent="center" spacing="10px">
-                  <LoadingButton
+              <DetailsNavBar
+                open={openDetails}
+                onClose={handleDrawerCloseCommon('details')}
+                title="Voucher Details"
+                actions={
+                  <Button
                     fullWidth
                     variant="soft"
                     color="success"
                     size="large"
                     sx={{ borderRadius: '30px' }}
-                    loading={isSubmitting}
-                    onClick={() => methods.handleSubmit(onSubmit as any)()}
                   >
-                    {editId ? 'Update' : 'Save'}
-                  </LoadingButton>
-                </Stack>
-              }
-            >
-              <FormProvider methods={methods} onSubmit={onSubmit}>
+                    Save
+                  </Button>
+                }
+              >
                 <Divider flexItem />
-                {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
                 <Box width="100%">
                   <Typography
                     pb="5px"
@@ -1038,14 +815,8 @@ export default function OrdersListView() {
                   >
                     Voucher Name (English)
                   </Typography>
-                  {/* <TextField fullWidth variant='filled' defaultValue='Happy Eid' name='NAME' /> */}
-                  <RHFTextField
-                    fullWidth
-                    variant="filled"
-                    settingStateValue={handleNestedVoucherData}
-                    value={voucherData?.name?.en || ''}
-                    name="name.en"
-                  />
+                  <TextField fullWidth variant="filled" defaultValue="Happy Eid" name="NAME" />
+
                   <Typography
                     mt="20px"
                     pb="5px"
@@ -1056,14 +827,7 @@ export default function OrdersListView() {
                   >
                     Voucher Name (Arabic)
                   </Typography>
-                  {/* <TextField fullWidth variant='filled' defaultValue='عيد سعيد' name='NAME' /> */}
-                  <RHFTextField
-                    fullWidth
-                    variant="filled"
-                    settingStateValue={handleNestedVoucherData}
-                    value={voucherData?.name?.ar || ''}
-                    name="name.ar"
-                  />
+                  <TextField fullWidth variant="filled" defaultValue="عيد سعيد" name="NAME" />
 
                   <Typography
                     mt="20px"
@@ -1075,14 +839,7 @@ export default function OrdersListView() {
                   >
                     Voucher Code
                   </Typography>
-                  {/* <TextField fullWidth variant='filled' defaultValue="H@PPYEID2023" name='Code' /> */}
-                  <RHFTextField
-                    fullWidth
-                    variant="filled"
-                    settingStateValue={handleVoucherData}
-                    value={voucherData?.code || ''}
-                    name="code"
-                  />
+                  <TextField fullWidth variant="filled" defaultValue="H@PPYEID2023" name="Code" />
 
                   <Stack
                     mt="20px"
@@ -1107,30 +864,7 @@ export default function OrdersListView() {
                         Available
                       </Typography>
                     </Box>
-
-                    {/* <Switch
-                      checked={voucherData?.status || true}
-                      onChange={(e) => {
-                        setVoucherData({ ...voucherData, status: e.target.checked })
-                      }}
-                      inputProps={{ 'aria-label': 'controlled' }}
-                      name='status'
-                    /> */}
-                    <RHFSwitch
-                      label="status"
-                      checked={voucherData?.status || true}
-                      onChange={(e: any) => {
-                        console.log(e.target.checked);
-                        setVoucherData((prevData: any) => {
-                          if (prevData && Object.entries(prevData).length > 0) {
-                            return { ...voucherData, status: e.target.checked };
-                          }
-                          return { status: e.target.checked };
-                        });
-                      }}
-                      name="status"
-                      inputProps={{ 'aria-label': 'secondary checkbox' }}
-                    />
+                    <Switch defaultChecked />
                   </Stack>
 
                   <Grid
@@ -1158,12 +892,12 @@ export default function OrdersListView() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
+                          color: '#8688A3',
                           fontSize: '.9rem',
+                          background: 'rgb(245, 245, 248)',
                           borderRadius: '16px',
                           fontWeight: 800,
-                          ...(discountTypeToggle === 'FIXED_AMOUNT' ? activeTab : nonActiveTab),
                         }}
-                        onClick={() => setDiscountTypeToggle('FIXED_AMOUNT')}
                       >
                         Fixed Amount
                       </Box>
@@ -1177,18 +911,279 @@ export default function OrdersListView() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
+                          color: '#0F1349',
                           fontSize: '.9rem',
+                          background: 'rgb(209, 255, 240)',
                           borderRadius: '16px',
                           fontWeight: 800,
-                          ...(discountTypeToggle === 'PERCENTAGE' ? activeTab : nonActiveTab),
+                          border: '2px solid #1AF9B3',
                         }}
-                        onClick={() => setDiscountTypeToggle('PERCENTAGE')}
                       >
                         Percentage
                       </Box>
                     </Grid>
 
-                    {discountTypeToggle === 'FIXED_AMOUNT' ? (
+                    <Grid item xs={6}>
+                      <Typography
+                        component="p"
+                        mb="5px"
+                        variant="subtitle2"
+                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                      >
+                        Discount Percentage
+                      </Typography>
+                      <TextField fullWidth variant="filled" defaultValue="20%" name="Percentage" />
+                    </Grid>
+
+                    <Grid item xs={6}>
+                      <Typography
+                        component="p"
+                        mb="5px"
+                        variant="subtitle2"
+                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                      >
+                        Up to
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        variant="filled"
+                        defaultValue="10"
+                        name="PHONE"
+                        sx={{
+                          '& .MuiInputAdornment-root': {
+                            marginTop: '0px !important',
+                          },
+                          '& input': {
+                            paddingRight: '0px !important',
+                          },
+                        }}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <Stack direction="row" alignItems="center" spacing="5px">
+                                <Typography
+                                  component="p"
+                                  variant="subtitle2"
+                                  sx={{ opacity: 0.7, fontSize: '.6rem' }}
+                                >
+                                  KWD
+                                </Typography>
+                                <Iconify icon="mingcute:down-fill" width={20} />
+                              </Stack>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <Typography
+                        component="p"
+                        mb="5px"
+                        variant="subtitle2"
+                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                      >
+                        Total Uses
+                      </Typography>
+                      <TextField fullWidth variant="filled" defaultValue="500" name="PHONE" />
+                    </Grid>
+
+                    <Grid item xs={6}>
+                      <Typography
+                        component="p"
+                        mb="5px"
+                        variant="subtitle2"
+                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                      >
+                        Start Date
+                      </Typography>
+                      <TextField fullWidth variant="filled" defaultValue="2023-06-28" name="sd" />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography
+                        component="p"
+                        mb="5px"
+                        variant="subtitle2"
+                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                      >
+                        End Date
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        type="date"
+                        variant="filled"
+                        defaultValue="2023-10-07"
+                        name="ed"
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <Typography
+                        component="p"
+                        mb="5px"
+                        variant="subtitle2"
+                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                      >
+                        Voucher Coverage
+                      </Typography>
+                      <FormControl fullWidth>
+                        <Select
+                          variant="filled"
+                          value={mySubCat}
+                          sx={{
+                            fontWeight: 900,
+                          }}
+                          onChange={handleChangeMySubCat}
+                          // endAdornment={<div style={{ fontSize: '12px', marginRight: '20px', marginTop: '3px' }}>KWD</div>}
+                        >
+                          <MenuItem value="All Products">All Products</MenuItem>
+                          <MenuItem value="Laptops">Laptops</MenuItem>
+                          <MenuItem value="Clothes">Clothes</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </DetailsNavBar>
+
+              {/* create new Vocher */}
+              <DetailsNavBar
+                open={openCreateVoucher}
+                onClose={handleDrawerCloseCommon('new')}
+                title={editId ? 'Edit Voucher' : 'Add New Voucher'}
+                actions={
+                  <Stack alignItems="center" justifyContent="center" spacing="10px">
+                    <LoadingButton
+                      fullWidth
+                      variant="soft"
+                      color="success"
+                      size="large"
+                      sx={{ borderRadius: '30px' }}
+                      loading={isSubmitting}
+                      onClick={() => methods.handleSubmit(onSubmit as any)()}
+                    >
+                      {editId ? 'Update' : 'Save'}
+                    </LoadingButton>
+                  </Stack>
+                }
+              >
+                <FormProvider methods={methods} onSubmit={onSubmit}>
+                  <Divider flexItem />
+                  {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+                  <Box width="100%">
+                    <Typography
+                      pb="5px"
+                      component="p"
+                      noWrap
+                      variant="subtitle2"
+                      sx={{ opacity: 0.7, fontSize: '.9rem' }}
+                    >
+                      Voucher Name (English)
+                    </Typography>
+                    {/* <TextField fullWidth variant='filled' defaultValue='Happy Eid' name='NAME' /> */}
+                    <RHFTextField
+                      fullWidth
+                      variant="filled"
+                      settingStateValue={handleNestedVoucherData}
+                      value={voucherData?.name?.en || ''}
+                      name="name.en"
+                    />
+                    <Typography
+                      mt="20px"
+                      pb="5px"
+                      component="p"
+                      noWrap
+                      variant="subtitle2"
+                      sx={{ opacity: 0.7, fontSize: '.9rem' }}
+                    >
+                      Voucher Name (Arabic)
+                    </Typography>
+                    {/* <TextField fullWidth variant='filled' defaultValue='عيد سعيد' name='NAME' /> */}
+                    <RHFTextField
+                      fullWidth
+                      variant="filled"
+                      settingStateValue={handleNestedVoucherData}
+                      value={voucherData?.name?.ar || ''}
+                      name="name.ar"
+                    />
+
+                    <Typography
+                      mt="20px"
+                      pb="5px"
+                      component="p"
+                      noWrap
+                      variant="subtitle2"
+                      sx={{ opacity: 0.7, fontSize: '.9rem' }}
+                    >
+                      Voucher Code
+                    </Typography>
+                    {/* <TextField fullWidth variant='filled' defaultValue="H@PPYEID2023" name='Code' /> */}
+                    <RHFTextField
+                      fullWidth
+                      variant="filled"
+                      settingStateValue={handleVoucherData}
+                      value={voucherData?.code || ''}
+                      name="code"
+                    />
+
+                    <Stack
+                      mt="20px"
+                      pb="5px"
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                    >
+                      <Box>
+                        <Typography
+                          component="p"
+                          variant="subtitle2"
+                          sx={{ opacity: 0.7, fontSize: '.9rem' }}
+                        >
+                          Voucher Status
+                        </Typography>
+                        <Typography
+                          component="p"
+                          variant="subtitle2"
+                          sx={{ fontWeight: 900, fontSize: '1rem' }}
+                        >
+                          Available
+                        </Typography>
+                      </Box>
+
+                      {/* <Switch
+                      checked={voucherData?.status || true}
+                      onChange={(e) => {
+                        setVoucherData({ ...voucherData, status: e.target.checked })
+                      }}
+                      inputProps={{ 'aria-label': 'controlled' }}
+                      name='status'
+                    /> */}
+                      <RHFSwitch
+                        label="status"
+                        checked={voucherData?.status || true}
+                        onChange={(e: any) => {
+                          console.log(e.target.checked);
+                          setVoucherData((prevData: any) => {
+                            if (prevData && Object.entries(prevData).length > 0) {
+                              return { ...voucherData, status: e.target.checked };
+                            }
+                            return { status: e.target.checked };
+                          });
+                        }}
+                        name="status"
+                        inputProps={{ 'aria-label': 'secondary checkbox' }}
+                      />
+                    </Stack>
+
+                    <Grid
+                      container
+                      mt="20px"
+                      columnSpacing="20px"
+                      pb="5px"
+                      alignItems="flex-end"
+                      rowGap="20px"
+                      justifyContent="space-between"
+                    >
                       <Grid item xs={6}>
                         <Typography
                           component="p"
@@ -1196,43 +1191,46 @@ export default function OrdersListView() {
                           variant="subtitle2"
                           sx={{ opacity: 0.7, fontSize: '.8rem' }}
                         >
-                          Discount Amount
+                          Select Discount Type
                         </Typography>
-                        <RHFTextField
-                          type="number"
-                          fullWidth
-                          variant="filled"
-                          settingStateValue={handleVoucherData}
-                          value={voucherData?.discountAmount || ''}
-                          name="discountAmount"
+                        <Box
                           sx={{
-                            '& .MuiInputAdornment-root': {
-                              marginTop: '0px !important',
-                            },
-                            '& input': {
-                              paddingRight: '0px !important',
-                            },
+                            width: '100%',
+                            height: '56px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '.9rem',
+                            borderRadius: '16px',
+                            fontWeight: 800,
+                            ...(discountTypeToggle === 'FIXED_AMOUNT' ? activeTab : nonActiveTab),
                           }}
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <Stack direction="row" alignItems="center" spacing="5px">
-                                  <Typography
-                                    component="p"
-                                    variant="subtitle2"
-                                    sx={{ opacity: 0.7, fontSize: '.6rem' }}
-                                  >
-                                    KWD
-                                  </Typography>
-                                  <Iconify icon="mingcute:down-fill" width={20} />
-                                </Stack>
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
+                          onClick={() => setDiscountTypeToggle('FIXED_AMOUNT')}
+                        >
+                          Fixed Amount
+                        </Box>
                       </Grid>
-                    ) : (
-                      <>
+
+                      <Grid item xs={6}>
+                        <Box
+                          sx={{
+                            width: '100%',
+                            height: '56px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '.9rem',
+                            borderRadius: '16px',
+                            fontWeight: 800,
+                            ...(discountTypeToggle === 'PERCENTAGE' ? activeTab : nonActiveTab),
+                          }}
+                          onClick={() => setDiscountTypeToggle('PERCENTAGE')}
+                        >
+                          Percentage
+                        </Box>
+                      </Grid>
+
+                      {discountTypeToggle === 'FIXED_AMOUNT' ? (
                         <Grid item xs={6}>
                           <Typography
                             component="p"
@@ -1240,33 +1238,15 @@ export default function OrdersListView() {
                             variant="subtitle2"
                             sx={{ opacity: 0.7, fontSize: '.8rem' }}
                           >
-                            Discount Percentage
+                            Discount Amount
                           </Typography>
                           <RHFTextField
                             type="number"
                             fullWidth
                             variant="filled"
                             settingStateValue={handleVoucherData}
-                            value={voucherData?.discountPercentage || ''}
-                            name="discountPercentage"
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography
-                            component="p"
-                            mb="5px"
-                            variant="subtitle2"
-                            sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                          >
-                            Up to
-                          </Typography>
-                          <RHFTextField
-                            type="number"
-                            fullWidth
-                            variant="filled"
-                            settingStateValue={handleVoucherData}
-                            value={voucherData?.upTo || ''}
-                            name="upTo"
+                            value={voucherData?.discountAmount || ''}
+                            name="discountAmount"
                             sx={{
                               '& .MuiInputAdornment-root': {
                                 marginTop: '0px !important',
@@ -1293,76 +1273,138 @@ export default function OrdersListView() {
                             }}
                           />
                         </Grid>
-                      </>
-                    )}
+                      ) : (
+                        <>
+                          <Grid item xs={6}>
+                            <Typography
+                              component="p"
+                              mb="5px"
+                              variant="subtitle2"
+                              sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                            >
+                              Discount Percentage
+                            </Typography>
+                            <RHFTextField
+                              type="number"
+                              fullWidth
+                              variant="filled"
+                              settingStateValue={handleVoucherData}
+                              value={voucherData?.discountPercentage || ''}
+                              name="discountPercentage"
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography
+                              component="p"
+                              mb="5px"
+                              variant="subtitle2"
+                              sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                            >
+                              Up to
+                            </Typography>
+                            <RHFTextField
+                              type="number"
+                              fullWidth
+                              variant="filled"
+                              settingStateValue={handleVoucherData}
+                              value={voucherData?.upTo || ''}
+                              name="upTo"
+                              sx={{
+                                '& .MuiInputAdornment-root': {
+                                  marginTop: '0px !important',
+                                },
+                                '& input': {
+                                  paddingRight: '0px !important',
+                                },
+                              }}
+                              InputProps={{
+                                endAdornment: (
+                                  <InputAdornment position="end">
+                                    <Stack direction="row" alignItems="center" spacing="5px">
+                                      <Typography
+                                        component="p"
+                                        variant="subtitle2"
+                                        sx={{ opacity: 0.7, fontSize: '.6rem' }}
+                                      >
+                                        KWD
+                                      </Typography>
+                                      <Iconify icon="mingcute:down-fill" width={20} />
+                                    </Stack>
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                          </Grid>
+                        </>
+                      )}
 
-                    <Grid item xs={12}>
-                      <Typography
-                        component="p"
-                        mb="5px"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                      >
-                        Total Uses
-                      </Typography>
-                      <RHFTextField
-                        type="number"
-                        fullWidth
-                        variant="filled"
-                        settingStateValue={handleVoucherData}
-                        value={voucherData?.totalUses || ''}
-                        name="totalUses"
-                      />
-                    </Grid>
+                      <Grid item xs={12}>
+                        <Typography
+                          component="p"
+                          mb="5px"
+                          variant="subtitle2"
+                          sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                        >
+                          Total Uses
+                        </Typography>
+                        <RHFTextField
+                          type="number"
+                          fullWidth
+                          variant="filled"
+                          settingStateValue={handleVoucherData}
+                          value={voucherData?.totalUses || ''}
+                          name="totalUses"
+                        />
+                      </Grid>
 
-                    <Grid item xs={6}>
-                      <Typography
-                        component="p"
-                        mb="5px"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                      >
-                        Start Date
-                      </Typography>
-                      <RHFTextField
-                        fullWidth
-                        type="date"
-                        variant="filled"
-                        settingStateValue={handleVoucherData}
-                        value={voucherData?.availabitiyStarts || ''}
-                        name="availabitiyStarts"
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography
-                        component="p"
-                        mb="5px"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                      >
-                        End Date
-                      </Typography>
-                      <RHFTextField
-                        fullWidth
-                        type="date"
-                        variant="filled"
-                        settingStateValue={handleVoucherData}
-                        value={voucherData?.availabitiyEnds || ''}
-                        name="availabitiyEnds"
-                      />
-                    </Grid>
+                      <Grid item xs={6}>
+                        <Typography
+                          component="p"
+                          mb="5px"
+                          variant="subtitle2"
+                          sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                        >
+                          Start Date
+                        </Typography>
+                        <RHFTextField
+                          fullWidth
+                          type="date"
+                          variant="filled"
+                          settingStateValue={handleVoucherData}
+                          value={voucherData?.availabitiyStarts || ''}
+                          name="availabitiyStarts"
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography
+                          component="p"
+                          mb="5px"
+                          variant="subtitle2"
+                          sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                        >
+                          End Date
+                        </Typography>
+                        <RHFTextField
+                          fullWidth
+                          type="date"
+                          variant="filled"
+                          settingStateValue={handleVoucherData}
+                          value={voucherData?.availabitiyEnds || ''}
+                          name="availabitiyEnds"
+                        />
+                      </Grid>
 
-                    <Grid item xs={12}>
-                      <Typography
-                        component="p"
-                        mb="5px"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                      >
-                        Voucher Coverage
-                      </Typography>
-                      <FormControl fullWidth>
-                        {/* <Select
+                      <Grid item xs={12}>
+                        <Typography
+                          component="p"
+                          mb="5px"
+                          variant="subtitle2"
+                          sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                        >
+                          Voucher Coverage
+                        </Typography>
+                        <FormControl fullWidth>
+                          {/* <Select
                           variant='filled'
                           sx={{
                             fontWeight: 900
@@ -1377,35 +1419,35 @@ export default function OrdersListView() {
                           <MenuItem value='Laptops'>Laptops</MenuItem>
                           <MenuItem value='Clothes'>Clothes</MenuItem>
                         </Select> */}
-                        <RHFMultiSelect
-                          variant="filled"
-                          checkbox
-                          name="coverage"
-                          label="Multi select"
-                          options={productList}
-                          settingStateValue={handleVoucherData}
-                          value={voucherData?.coverage || []}
-                        />
-                      </FormControl>
-
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            size="medium"
-                            onChange={(e) => {
-                              setVoucherData({ ...voucherData, converageAll: e.target.checked });
-                            }}
-                            name="converageAll"
-                            color="primary"
-                            checked={voucherData?.converageAll || false}
+                          <RHFMultiSelect
+                            variant="filled"
+                            checkbox
+                            name="coverage"
+                            label="Multi select"
+                            options={productList}
+                            settingStateValue={handleVoucherData}
+                            value={voucherData?.coverage || []}
                           />
-                        }
-                        label="All Products"
-                      />
-                    </Grid>
-                  </Grid>
+                        </FormControl>
 
-                  {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              size="medium"
+                              onChange={(e) => {
+                                setVoucherData({ ...voucherData, converageAll: e.target.checked });
+                              }}
+                              name="converageAll"
+                              color="primary"
+                              checked={voucherData?.converageAll || false}
+                            />
+                          }
+                          label="All Products"
+                        />
+                      </Grid>
+                    </Grid>
+
+                    {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
                   Mobile Number
                 </Typography>
 
@@ -1430,7 +1472,7 @@ export default function OrdersListView() {
                   }}
                 /> */}
 
-                  {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+                    {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
                   Email Address (Optional)
                 </Typography>
                 <TextField fullWidth variant='filled' type='email' defaultValue='ahmed.omar@gmail.com' name='email' />
@@ -1457,47 +1499,48 @@ export default function OrdersListView() {
                   </Stack>
 
                 </Box> */}
-                </Box>
-              </FormProvider>
-            </DetailsNavBar>
+                  </Box>
+                </FormProvider>
+              </DetailsNavBar>
 
-            <ConfirmDialog
-              open={confirm.value}
-              onClose={confirm.onFalse}
-              noCancel={false}
-              maxWidth="sm"
-              action={
-                <Button
-                  fullWidth
-                  color="error"
-                  variant="soft"
-                  size="large"
-                  onClick={removeVoucherFun}
-                  sx={{ borderRadius: '30px' }}
-                >
-                  Delete
-                </Button>
-              }
-              content={
-                <Grid container spacing="20px">
-                  <Grid item xs={12} md={12}>
-                    <Typography component="h5" variant="h5">
-                      {' '}
-                      Wana delete it ?
-                    </Typography>
+              <ConfirmDialog
+                open={confirm.value}
+                onClose={confirm.onFalse}
+                noCancel={false}
+                maxWidth="sm"
+                action={
+                  <Button
+                    fullWidth
+                    color="error"
+                    variant="soft"
+                    size="large"
+                    onClick={removeVoucherFun}
+                    sx={{ borderRadius: '30px' }}
+                  >
+                    Delete
+                  </Button>
+                }
+                content={
+                  <Grid container spacing="20px">
+                    <Grid item xs={12} md={12}>
+                      <Typography component="h5" variant="h5">
+                        {' '}
+                        Wana delete it ?
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={12}>
+                      <Typography component="p" variant="subtitle2">
+                        {' '}
+                        Delete this Voucher ?
+                      </Typography>
+                    </Grid>
                   </Grid>
-                  <Grid item xs={12} md={12}>
-                    <Typography component="p" variant="subtitle2">
-                      {' '}
-                      Delete this Voucher ?
-                    </Typography>
-                  </Grid>
-                </Grid>
-              }
-            />
-          </Box>
+                }
+              />
+            </Box>
+          </Grid>
         </Grid>
-      </Grid>
+      </RoleBasedGuard>
     </Container>
   );
 }

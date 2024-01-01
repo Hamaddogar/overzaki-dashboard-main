@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import { m } from 'framer-motion';
 // @mui
 import { Theme, SxProps } from '@mui/material/styles';
@@ -8,25 +9,48 @@ import { useMockedUser } from 'src/hooks/use-mocked-user';
 // assets
 import { ForbiddenIllustration } from 'src/assets/illustrations';
 // components
+import { useEffect, useState } from 'react';
 import { MotionContainer, varBounce } from 'src/components/animate';
+import { useAuthContext } from '../hooks';
 
 // ----------------------------------------------------------------------
 
 type RoleBasedGuardProp = {
   hasContent?: boolean;
   roles?: string[];
-  children: React.ReactNode;
+  permission?: string;
+  returnBoolean?: boolean;
+  children?: React.ReactNode;
   sx?: SxProps<Theme>;
 };
 
-export default function RoleBasedGuard({ hasContent, roles, children, sx }: RoleBasedGuardProp) {
-  // Logic here to get current user role
-  const { user } = useMockedUser();
+const RoleBasedGuard = ({
+  hasContent,
+  roles,
+  permission,
+  children,
+  sx,
+  returnBoolean,
+}: RoleBasedGuardProp) => {
+  const { user } = useAuthContext();
 
-  // const currentRole = 'user';
-  const currentRole = user?.role; // admin;
+  const userRoles = user?.roles || [];
+  const userPermissions = user?.permissions || [];
 
-  if (typeof roles !== 'undefined' && !roles.includes(currentRole)) {
+  const hasCommonRole = userRoles.some((role: string) => roles && roles.includes(role));
+  const hasCommonPermission = permission && userPermissions.includes(permission);
+
+
+  if (returnBoolean && !hasContent) {
+    if (permission === 'UPDATE_CATEGORY_BY_ID' || permission === 'DELETE_CATEGORY_BY_ID') {
+      // console.log("permission", permission);
+      // console.log("hasCommonPermission", hasCommonPermission);
+      // console.log("hasCommonRole", hasCommonRole);
+    }
+    // return (roles && !hasCommonRole) || (permission && !hasCommonPermission);
+    return null;
+  }
+  if ((roles && !hasCommonRole) || (permission && !hasCommonPermission)) {
     return hasContent ? (
       <Container component={MotionContainer} sx={{ textAlign: 'center', ...sx }}>
         <m.div variants={varBounce().in}>
@@ -52,6 +76,11 @@ export default function RoleBasedGuard({ hasContent, roles, children, sx }: Role
       </Container>
     ) : null;
   }
+  if (children) {
+    return <> {children} </>;
+  }
 
-  return <> {children} </>;
 }
+export default RoleBasedGuard;
+
+

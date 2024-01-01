@@ -11,7 +11,10 @@ import SvgColor from 'src/components/svg-color';
 // ----------------------------------------------------------------------
 
 const icon = (name: string, dimentions: number = 1) => (
-  <SvgColor src={`/assets/icons/navbar/${name}.svg`} sx={{ width: dimentions, height: dimentions }} />
+  <SvgColor
+    src={`/assets/icons/navbar/${name}.svg`}
+    sx={{ width: dimentions, height: dimentions }}
+  />
   // OR
   // <Iconify icon="fluent:mail-24-filled" />
   // https://icon-sets.iconify.design/solar/
@@ -75,35 +78,43 @@ export function useNavData() {
             title: t('orders'),
             path: paths.dashboard.orders.root,
             icon: ICONS.order,
+            permissions: ['GET_ORDERS'],
           },
           {
             title: t('Categories'),
             path: paths.dashboard.categories.root,
             icon: ICONS.categorie,
-          }, {
+            permissions: ['GET_CATEGORYS'],
+          },
+          {
             title: t('Products'),
             path: paths.dashboard.products.root,
             icon: ICONS.product,
+            permissions: ['GET_PRODUCTS'],
           },
           {
             title: t('Customers'),
             path: paths.dashboard.customers.root,
             icon: ICONS.customers,
+            permissions: ['GET_CUSTOMERS'],
           },
           {
             title: t('analytics'),
             path: paths.dashboard.general.analytics,
             icon: ICONS.analytics,
+            permissions: ['GET_ORDERS'],
           },
           {
             title: t('Payment Methods'),
             path: paths.dashboard.payments.root,
             icon: ICONS.payments,
+            permissions: ['GET_PAYMENTS'],
           },
           {
             title: t('Vouchers'),
             path: paths.dashboard.vouchers.root,
             icon: ICONS.vouchers,
+            permissions: ['GET_VOUCHERS'],
           },
           {
             title: t('Account Settings'),

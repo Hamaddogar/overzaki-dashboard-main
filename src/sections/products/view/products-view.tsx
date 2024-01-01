@@ -63,6 +63,8 @@ import { fetchCategorysList, fetchSubCategorysList } from 'src/redux/store/thunk
 import Link from 'next/link';
 import DetailsNavBar from '../DetailsNavBar';
 import ProductTableToolbar from '../product-table-toolbar';
+import { RoleBasedGuard } from 'src/auth/guard';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -72,6 +74,7 @@ export default function OrdersListView() {
   const dispatch = useDispatch<AppDispatch>();
   const { enqueueSnackbar } = useSnackbar();
   const categoryState = useSelector((state: any) => state.category);
+  const { verifyPermission } = useAuthContext();
   // const loadStatus = useSelector((state: any) => state.products.status);
   const { list, error, product, variant } = useSelector((state: any) => state.products);
   const [productData, setProductData] = useState<any>(null);
@@ -328,23 +331,23 @@ export default function OrdersListView() {
   // common
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-      (event: React.SyntheticEvent | React.MouseEvent) => {
-        if (state === 'new') {
-          setOpenDetails((pv) => !pv);
-          setEditProductId(id);
-          if (id) {
-            dispatch(fetchOneProduct(id));
-          } else {
-            setProductData({});
-            dispatch(setProduct({}));
-          }
-        } else if (state === 'variants') {
-          variantMethods.reset();
-          setOpenVariant((pv) => !pv);
-          dispatch(fetchOneVariant(id));
-          setTempVariantId(id);
+    (event: React.SyntheticEvent | React.MouseEvent) => {
+      if (state === 'new') {
+        setOpenDetails((pv) => !pv);
+        setEditProductId(id);
+        if (id) {
+          dispatch(fetchOneProduct(id));
+        } else {
+          setProductData({});
+          dispatch(setProduct({}));
         }
-      };
+      } else if (state === 'variants') {
+        variantMethods.reset();
+        setOpenVariant((pv) => !pv);
+        dispatch(fetchOneVariant(id));
+        setTempVariantId(id);
+      }
+    };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -558,420 +561,458 @@ export default function OrdersListView() {
   useEffect(() => {
     const sortedList = sort
       ? [...listStuff].sort((a: any, b: any) =>
-        b.name.en.toLowerCase().localeCompare(a.name.en.toLowerCase())
-      )
+          b.name.en.toLowerCase().localeCompare(a.name.en.toLowerCase())
+        )
       : listStuff;
     setListItems(sortedList);
   }, [listStuff, sort]);
   const imagesItrations = Array.from({ length: 3 }, (_, index) => index);
-  // Pagination
-  // For Length
+  const [allowAction, setAllowAction] = useState<{ edit: boolean; remove: boolean }>({
+    edit: false,
+    remove: false,
+  });
+  const getPermission = async (moduleName: string, permissionName: string): Promise<void> => {
+    try {
+      const data = { permission: permissionName };
+      const responseData = await verifyPermission?.(data);
+
+      if (moduleName === 'edit') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, edit: responseData }));
+      } else if (moduleName === 'remove') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, remove: responseData }));
+      }
+    } catch (error) {
+      console.error(`Error while checking ${moduleName} permission:`, error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getPermission('edit', 'UPDATE_PRODUCT_BY_ID');
+      await getPermission('remove', 'DELETE_PRODUCT_BY_ID');
+    };
+    fetchData();
+  }, []);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <Grid
-        container
-        justifyContent="space-between"
-        alignItems={{ xs: 'flex-start', md: 'center' }}
-      >
-        <Grid item xs={12} md="auto">
-          <CustomCrumbs heading="Products" crums={false} />
-        </Grid>
-
-        <Grid item xs={12} md={5}>
-          <BottomActions>
-            <Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              alignItems="center"
-              justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
-              spacing="20px"
-              sx={{ width: '100%', maxWidth: { xs: '100%', md: '250px' } }}
-            >
-              <Button
-                startIcon="+"
-                fullWidth
-                sx={{ borderRadius: '30px', color: '#0F1349' }}
-                component="button"
-                variant="contained"
-                color="primary"
-                onClick={toggleDrawerCommon('new')}
-              >
-                Add New Product
-              </Button>
-            </Stack>
-          </BottomActions>
-        </Grid>
-
-        <Grid item xs={12}>
-          <Box mt="20px">
-            <ProductTableToolbar sort={sort} setSort={setSort} query={query} setQuery={setQuery} />
-          </Box>
-        </Grid>
-
-        <Grid item xs={12}>
-          <Box>
-            <TabContext value={value}>
-              <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <TabList
-                  variant="scrollable"
-                  scrollButtons={false}
-                  onChange={handleChangeTab}
-                  sx={{
-                    px: 2.5,
-                    boxShadow: (theme) =>
-                      `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
-                  }}
+      <RoleBasedGuard roles={['BUSINESS_OWNER', 'ADMIN']} hasContent permission="GET_PRODUCTS">
+        <Grid
+          container
+          justifyContent="space-between"
+          alignItems={{ xs: 'flex-start', md: 'center' }}
+        >
+          <Grid item xs={12} md="auto">
+            <CustomCrumbs heading="Products" crums={false} />
+          </Grid>
+          <RoleBasedGuard roles={['BUSINESS_OWNER', 'ADMIN']} permission="CREATE_PRODUCT">
+            <Grid item xs={12} md={5}>
+              <BottomActions>
+                <Stack
+                  direction={{ xs: 'column', sm: 'row' }}
+                  alignItems="center"
+                  justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
+                  spacing="20px"
+                  sx={{ width: '100%', maxWidth: { xs: '100%', md: '250px' } }}
                 >
-                  <Tab
-                    iconPosition="end"
-                    value="All"
-                    label="All Products"
-                    icon={
-                      <Label variant={(value === 'All' && 'filled') || 'outlined'} color="primary">
-                        {productsLength}
-                      </Label>
-                    }
-                  />
-                  {categoryState.list.map((categoryObj: any) => (
+                  <Button
+                    startIcon="+"
+                    fullWidth
+                    sx={{ borderRadius: '30px', color: '#0F1349' }}
+                    component="button"
+                    variant="contained"
+                    color="primary"
+                    onClick={toggleDrawerCommon('new')}
+                  >
+                    Add New Product
+                  </Button>
+                </Stack>
+              </BottomActions>
+            </Grid>
+          </RoleBasedGuard>
+
+          <Grid item xs={12}>
+            <Box mt="20px">
+              <ProductTableToolbar
+                sort={sort}
+                setSort={setSort}
+                query={query}
+                setQuery={setQuery}
+              />
+            </Box>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Box>
+              <TabContext value={value}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                  <TabList
+                    variant="scrollable"
+                    scrollButtons={false}
+                    onChange={handleChangeTab}
+                    sx={{
+                      px: 2.5,
+                      boxShadow: (theme) =>
+                        `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+                    }}
+                  >
                     <Tab
-                      key={categoryObj._id}
                       iconPosition="end"
-                      value={categoryObj._id}
-                      label={categoryObj?.name?.en || ''}
+                      value="All"
+                      label="All Products"
                       icon={
                         <Label
-                          variant={(categoryObj._id === value && 'filled') || 'outlined'}
+                          variant={(value === 'All' && 'filled') || 'outlined'}
                           color="primary"
                         >
-                          {
-                            list.filter((product: any) => product.categoryId === categoryObj._id)
-                              .length
-                          }
+                          {productsLength}
                         </Label>
                       }
                     />
-                  ))}
-                </TabList>
-              </Box>
+                    {categoryState.list.map((categoryObj: any) => (
+                      <Tab
+                        key={categoryObj._id}
+                        iconPosition="end"
+                        value={categoryObj._id}
+                        label={categoryObj?.name?.en || ''}
+                        icon={
+                          <Label
+                            variant={(categoryObj._id === value && 'filled') || 'outlined'}
+                            color="primary"
+                          >
+                            {
+                              list.filter((product: any) => product.categoryId === categoryObj._id)
+                                .length
+                            }
+                          </Label>
+                        }
+                      />
+                    ))}
+                  </TabList>
+                </Box>
 
-              <TabPanel value={value} sx={{ px: 0, minHeight: '50vh' }}>
-                <DragDropContext onDragEnd={handleOnDragEnd}>
-                  <Droppable droppableId="items">
-                    {(provided) => (
-                      <Grid
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                        container
-                        spacing={2}
-                      >
-                        {/* DND START */}
-                        {listItems
-                          .filter((item: any) =>
-                            item.name.en.toLocaleLowerCase().includes(query.toLocaleLowerCase())
-                          )
-                          .map((product: any, indx: any) => (
-                            <Draggable key={indx} index={indx} draggableId={indx.toString()}>
-                              {(provided) => (
-                                <Grid
-                                  {...provided.draggableProps}
-                                  ref={provided.innerRef}
-                                  item
-                                  xs={12}
-                                >
-                                  <Paper elevation={4}>
-                                    <Grid
-                                      container
-                                      item
-                                      alignItems="center"
-                                      justifyContent="space-between"
-                                      rowGap={3}
-                                      sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
-                                    >
-                                      <Grid item xs={12} md={6}>
-                                        <Box
-                                          sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                          }}
-                                        >
-                                          <div {...provided.dragHandleProps}>
-                                            <Iconify icon="ci:drag-vertical" />
-                                          </div>
+                <TabPanel value={value} sx={{ px: 0, minHeight: '50vh' }}>
+                  <DragDropContext onDragEnd={handleOnDragEnd}>
+                    <Droppable droppableId="items">
+                      {(provided) => (
+                        <Grid
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          container
+                          spacing={2}
+                        >
+                          {/* DND START */}
+                          {listItems
+                            .filter((item: any) =>
+                              item.name.en.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+                            )
+                            .map((product: any, indx: any) => (
+                              <Draggable key={indx} index={indx} draggableId={indx.toString()}>
+                                {(provided) => (
+                                  <Grid
+                                    {...provided.draggableProps}
+                                    ref={provided.innerRef}
+                                    item
+                                    xs={12}
+                                  >
+                                    <Paper elevation={4}>
+                                      <Grid
+                                        container
+                                        item
+                                        alignItems="center"
+                                        justifyContent="space-between"
+                                        rowGap={3}
+                                        sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
+                                      >
+                                        <Grid item xs={12} md={6}>
                                           <Box
-                                            component="img"
-                                            src={product.images[0]}
-                                            alt=" "
-                                            width="60px"
-                                          />
-                                          <Box display="flex" gap="0px" flexDirection="column">
+                                            sx={{
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              gap: '8px',
+                                            }}
+                                          >
+                                            <div {...provided.dragHandleProps}>
+                                              <Iconify icon="ci:drag-vertical" />
+                                            </div>
+                                            <Box
+                                              component="img"
+                                              src={product.images[0]}
+                                              alt=" "
+                                              width="60px"
+                                            />
+                                            <Box display="flex" gap="0px" flexDirection="column">
+                                              <Typography
+                                                component="p"
+                                                noWrap
+                                                variant="subtitle2"
+                                                sx={{
+                                                  fontSize: '.9rem',
+                                                  fontWeight: 800,
+                                                  maxWidth: { xs: '100%', md: '188px' },
+                                                }}
+                                              >
+                                                {' '}
+                                                {product?.name?.en}{' '}
+                                              </Typography>
+                                              <Typography
+                                                component="p"
+                                                noWrap
+                                                variant="subtitle2"
+                                                sx={{
+                                                  opacity: 0.7,
+                                                  fontSize: '.9rem',
+                                                  maxWidth: { xs: '100%', md: '188px' },
+                                                }}
+                                              >
+                                                {product.category}
+                                              </Typography>
+                                            </Box>
+                                          </Box>
+                                        </Grid>
+
+                                        <Grid item xs={12} md={6}>
+                                          <Box
+                                            sx={{
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              gap: '8px',
+                                              justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                                            }}
+                                          >
                                             <Typography
                                               component="p"
-                                              noWrap
                                               variant="subtitle2"
-                                              sx={{
-                                                fontSize: '.9rem',
-                                                fontWeight: 800,
-                                                maxWidth: { xs: '100%', md: '188px' },
-                                              }}
+                                              sx={{ fontSize: '.8rem', fontWeight: 800 }}
                                             >
                                               {' '}
-                                              {product?.name?.en}{' '}
+                                              {product.price} KWD{' '}
                                             </Typography>
-                                            <Typography
-                                              component="p"
-                                              noWrap
-                                              variant="subtitle2"
-                                              sx={{
-                                                opacity: 0.7,
-                                                fontSize: '.9rem',
-                                                maxWidth: { xs: '100%', md: '188px' },
-                                              }}
-                                            >
-                                              {product.category}
-                                            </Typography>
-                                          </Box>
-                                        </Box>
-                                      </Grid>
-
-                                      <Grid item xs={12} md={6}>
-                                        <Box
-                                          sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                            justifyContent: { xs: 'flex-start', md: 'flex-end' },
-                                          }}
-                                        >
-                                          <Typography
-                                            component="p"
-                                            variant="subtitle2"
-                                            sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                                          >
-                                            {' '}
-                                            {product.price} KWD{' '}
-                                          </Typography>
-                                          &nbsp; &nbsp;
-                                          {/* <Iconify
+                                            &nbsp; &nbsp;
+                                            {/* <Iconify
                                           icon="mdi:pen-plus"
                                           onClick={toggleDrawerCommon('variants', product._id)}
                                           style={{ cursor: 'pointer' }}
                                         />{' '} */}
-                                          <Link href={`/dashboard/products/${product._id}`}>
-                                            <Iconify
-                                              icon="mdi:pen-plus"
-                                              style={{ cursor: 'pointer' }}
-                                            />{' '}
-                                          </Link>
-                                          &nbsp; &nbsp;
-                                          <Iconify
-                                            icon="carbon:delete"
-                                            onClick={() => {
-                                              setRemoveData(product._id);
-                                              confirm.onTrue();
-                                            }}
-                                            style={{ cursor: 'pointer' }}
-                                          />{' '}
-                                          &nbsp; &nbsp;
-                                          <Iconify
-                                            icon="bx:edit"
-                                            onClick={toggleDrawerCommon('new', product._id)}
-                                            style={{ cursor: 'pointer' }}
-                                          />
-                                        </Box>
+                                            <Link href={`/dashboard/products/${product._id}`}>
+                                              <Iconify
+                                                icon="mdi:pen-plus"
+                                                style={{ cursor: 'pointer' }}
+                                              />{' '}
+                                            </Link>
+                                            &nbsp; &nbsp;
+                                            {allowAction.remove && (
+                                              <Iconify
+                                                icon="carbon:delete"
+                                                onClick={() => {
+                                                  setRemoveData(product._id);
+                                                  confirm.onTrue();
+                                                }}
+                                                style={{ cursor: 'pointer' }}
+                                              />
+                                            )}{' '}
+                                            &nbsp; &nbsp;
+                                            {allowAction.edit && (
+                                              <Iconify
+                                                icon="bx:edit"
+                                                onClick={toggleDrawerCommon('new', product._id)}
+                                                style={{ cursor: 'pointer' }}
+                                              />
+                                            )}
+                                          </Box>
+                                        </Grid>
                                       </Grid>
-                                    </Grid>
-                                  </Paper>
-                                </Grid>
-                              )}
-                            </Draggable>
-                          ))}
-                      </Grid>
-                    )}
-                  </Droppable>
-                </DragDropContext>
-              </TabPanel>
-              {Math.ceil(productsLength / pageSize) !== 1 && (
-                <Box
-                  sx={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <NavigatorBar
-                    pageSize={pageSize}
-                    itemsLength={productsLength}
-                    setPageNumber={setPageNumber}
-                  />
-                </Box>
-              )}
-            </TabContext>
-          </Box>
+                                    </Paper>
+                                  </Grid>
+                                )}
+                              </Draggable>
+                            ))}
+                        </Grid>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                </TabPanel>
+                {Math.ceil(productsLength / pageSize) !== 1 && (
+                  <Box
+                    sx={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <NavigatorBar
+                      pageSize={pageSize}
+                      itemsLength={productsLength}
+                      setPageNumber={setPageNumber}
+                    />
+                  </Box>
+                )}
+              </TabContext>
+            </Box>
+          </Grid>
         </Grid>
-      </Grid>
 
-      <DetailsNavBar
-        open={openDetails}
-        onClose={handleDrawerCloseCommon('new')}
-        title={editProductId ? 'Edit Product' : 'Add New Product'}
-        actions={
-          <Stack alignItems="center" justifyContent="center" spacing="10px">
-            <LoadingButton
-              fullWidth
-              variant="soft"
-              color="success"
-              size="large"
-              // onClick={editProductId ? editProductFun : createProductFun}
-              loading={isSubmitting}
-              onClick={() => methods.handleSubmit(onSubmit as any)()}
-              sx={{ borderRadius: '30px' }}
-            >
-              {editProductId ? 'Update' : 'Save'}
-            </LoadingButton>
-          </Stack>
-        }
-      >
-        <FormProvider methods={methods} onSubmit={onSubmit}>
-          <Divider flexItem />
-          {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
-          <Box width="100%">
-            <Typography
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Product Name (English)
-            </Typography>
-            {/* defaultValue='iPhone 13 Pro Max' */}
-            {/* <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.en || ""} name='name.en' /> */}
-            <RHFTextField
-              fullWidth
-              variant="filled"
-              settingStateValue={handleNestedProductData}
-              value={productData?.name?.en || ''}
-              name="name.en"
-            />
+        <DetailsNavBar
+          open={openDetails}
+          onClose={handleDrawerCloseCommon('new')}
+          title={editProductId ? 'Edit Product' : 'Add New Product'}
+          actions={
+            <Stack alignItems="center" justifyContent="center" spacing="10px">
+              <LoadingButton
+                fullWidth
+                variant="soft"
+                color="success"
+                size="large"
+                // onClick={editProductId ? editProductFun : createProductFun}
+                loading={isSubmitting}
+                onClick={() => methods.handleSubmit(onSubmit as any)()}
+                sx={{ borderRadius: '30px' }}
+              >
+                {editProductId ? 'Update' : 'Save'}
+              </LoadingButton>
+            </Stack>
+          }
+        >
+          <FormProvider methods={methods} onSubmit={onSubmit}>
+            <Divider flexItem />
+            {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+            <Box width="100%">
+              <Typography
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Product Name (English)
+              </Typography>
+              {/* defaultValue='iPhone 13 Pro Max' */}
+              {/* <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.en || ""} name='name.en' /> */}
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                settingStateValue={handleNestedProductData}
+                value={productData?.name?.en || ''}
+                name="name.en"
+              />
 
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Product Name (Arabic)
-            </Typography>
-            {/* defaultValue="ايفون 13 برو ماكس" */}
-            {/* <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.ar || ""} name='name.ar' /> */}
-            <RHFTextField
-              fullWidth
-              variant="filled"
-              settingStateValue={handleNestedProductData}
-              value={productData?.name?.ar || ''}
-              name="name.ar"
-            />
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Product Name (Arabic)
+              </Typography>
+              {/* defaultValue="ايفون 13 برو ماكس" */}
+              {/* <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.ar || ""} name='name.ar' /> */}
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                settingStateValue={handleNestedProductData}
+                value={productData?.name?.ar || ''}
+                name="name.ar"
+              />
 
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Upload Product Images
-            </Typography>
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Upload Product Images
+              </Typography>
 
-            <Box mt="10px" sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-              {imagesItrations.map((itration: any, ind: any) => {
-                return (
-                  <Box key={ind}>
-                    {/* {productData?.images ? ( */}
-                    {productData?.images?.length > 0 && productData?.images[itration] ? (
-                      <Box
-                        sx={{
-                          width: '100px',
-                          height: '100px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '10px',
-                          flexDirection: 'column',
-                          border: '1px dashed rgb(134, 136, 163,.5)',
-                          borderRadius: '16px',
-                          position: 'relative',
-                          overflow: 'hidden',
-                        }}
-                      >
+              <Box mt="10px" sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                {imagesItrations.map((itration: any, ind: any) => {
+                  return (
+                    <Box key={ind}>
+                      {/* {productData?.images ? ( */}
+                      {productData?.images?.length > 0 && productData?.images[itration] ? (
                         <Box
-                          component="img"
-                          src={
-                            typeof productData?.images[itration] === 'string'
-                              ? productData?.images[itration]
-                              : URL.createObjectURL(productData?.images[itration])
-                          }
-                          // src={typeof productData?.images === 'string' ? productData?.images : URL.createObjectURL(productData?.images)}
-                          alt=""
-                          sx={{ maxHeight: '95px' }}
-                        />
-                        <Box
-                          onClick={() => handleRemoveImage(itration)}
                           sx={{
-                            backgroundColor: 'rgb(134, 136, 163,.09)',
-                            padding: '10px 11px 7px 11px',
-                            borderRadius: '36px',
-                            cursor: 'pointer',
-                            position: 'absolute',
-                            top: 0,
-                            right: 0,
+                            width: '100px',
+                            height: '100px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '10px',
+                            flexDirection: 'column',
+                            border: '1px dashed rgb(134, 136, 163,.5)',
+                            borderRadius: '16px',
+                            position: 'relative',
+                            overflow: 'hidden',
                           }}
                         >
-                          <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
-                        </Box>
-                      </Box>
-                    ) : (
-                      <UploadBox
-                        sx={{
-                          width: '100px!important',
-                          height: '100px!important',
-                          textAlign: 'center',
-                          padding: '20px',
-                        }}
-                        onDrop={handleAddImage}
-                        maxFiles={1}
-                        maxSize={5242880}
-                        accept={{
-                          'image/jpeg': [],
-                          'image/png': [],
-                        }}
-                        placeholder={
                           <Box
+                            component="img"
+                            src={
+                              typeof productData?.images[itration] === 'string'
+                                ? productData?.images[itration]
+                                : URL.createObjectURL(productData?.images[itration])
+                            }
+                            // src={typeof productData?.images === 'string' ? productData?.images : URL.createObjectURL(productData?.images)}
+                            alt=""
+                            sx={{ maxHeight: '95px' }}
+                          />
+                          <Box
+                            onClick={() => handleRemoveImage(itration)}
                             sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '10px',
-                              flexDirection: 'column',
+                              backgroundColor: 'rgb(134, 136, 163,.09)',
+                              padding: '10px 11px 7px 11px',
+                              borderRadius: '36px',
+                              cursor: 'pointer',
+                              position: 'absolute',
+                              top: 0,
+                              right: 0,
                             }}
                           >
-                            <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
-                            <span style={{ color: '#8688A3', fontSize: '.6rem' }}>
-                              Upload Image
-                            </span>
+                            <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
                           </Box>
-                        }
-                      />
-                    )}
-                  </Box>
-                );
-              })}
-            </Box>
+                        </Box>
+                      ) : (
+                        <UploadBox
+                          sx={{
+                            width: '100px!important',
+                            height: '100px!important',
+                            textAlign: 'center',
+                            padding: '20px',
+                          }}
+                          onDrop={handleAddImage}
+                          maxFiles={1}
+                          maxSize={5242880}
+                          accept={{
+                            'image/jpeg': [],
+                            'image/png': [],
+                          }}
+                          placeholder={
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '10px',
+                                flexDirection: 'column',
+                              }}
+                            >
+                              <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
+                              <span style={{ color: '#8688A3', fontSize: '.6rem' }}>
+                                Upload Image
+                              </span>
+                            </Box>
+                          }
+                        />
+                      )}
+                    </Box>
+                  );
+                })}
+              </Box>
 
-            {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Upload Product Video
           </Typography>
           <Box mt='10px' sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
@@ -984,18 +1025,18 @@ export default function OrdersListView() {
             </Box>
           </Box> */}
 
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Category
-            </Typography>
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Category
+              </Typography>
 
-            {/* <FormControl fullWidth>
+              {/* <FormControl fullWidth>
               <Select
                 variant='filled'
                 value={productData?.categoryId || ""}
@@ -1007,33 +1048,33 @@ export default function OrdersListView() {
                 ))}
               </Select>
             </FormControl> */}
-            <RHFSelect
-              fullWidth
-              variant="filled"
-              name="categoryId"
-              id="demo-simple-select2"
-              value={productData?.categoryId || null}
-              settingStateValue={handleProductData}
-            >
-              {categoryState.list.map((cat: any, index: any) => (
-                <MenuItem key={index} value={cat._id}>
-                  {cat?.name?.en || cat?.name || ''}
-                </MenuItem>
-              ))}
-            </RHFSelect>
+              <RHFSelect
+                fullWidth
+                variant="filled"
+                name="categoryId"
+                id="demo-simple-select2"
+                value={productData?.categoryId || null}
+                settingStateValue={handleProductData}
+              >
+                {categoryState.list.map((cat: any, index: any) => (
+                  <MenuItem key={index} value={cat._id}>
+                    {cat?.name?.en || cat?.name || ''}
+                  </MenuItem>
+                ))}
+              </RHFSelect>
 
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Sub-Category
-            </Typography>
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Sub-Category
+              </Typography>
 
-            {/* <FormControl fullWidth>
+              {/* <FormControl fullWidth>
               <Select
                 variant='filled'
                 value={productData?.subCategory || ""}
@@ -1045,45 +1086,45 @@ export default function OrdersListView() {
                 ))}
               </Select>
             </FormControl> */}
-            <RHFSelect
-              fullWidth
-              variant="filled"
-              id="demo-simple-select"
-              name="subCategory"
-              value={productData?.subCategory || null}
-              settingStateValue={handleProductData}
-            >
-              {productData?.categoryId &&
-                categoryState.subCatList
-                  .filter((item: any) => item.category === productData.categoryId)
-                  .map((item: any, ind: any) => (
-                    <MenuItem key={ind} value={item._id}>
-                      {item?.name?.en || item?.name || ''}
-                    </MenuItem>
-                  ))}
-            </RHFSelect>
+              <RHFSelect
+                fullWidth
+                variant="filled"
+                id="demo-simple-select"
+                name="subCategory"
+                value={productData?.subCategory || null}
+                settingStateValue={handleProductData}
+              >
+                {productData?.categoryId &&
+                  categoryState.subCatList
+                    .filter((item: any) => item.category === productData.categoryId)
+                    .map((item: any, ind: any) => (
+                      <MenuItem key={ind} value={item._id}>
+                        {item?.name?.en || item?.name || ''}
+                      </MenuItem>
+                    ))}
+              </RHFSelect>
 
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Price
-            </Typography>
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Price
+              </Typography>
 
-            {/* <TextField fullWidth variant='filled' onChange={handleProductData} value={productData?.price || ""} name='price' /> */}
-            <RHFTextField
-              fullWidth
-              variant="filled"
-              settingStateValue={handleProductData}
-              value={productData?.price || ''}
-              name="price"
-            />
+              {/* <TextField fullWidth variant='filled' onChange={handleProductData} value={productData?.price || ""} name='price' /> */}
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                settingStateValue={handleProductData}
+                value={productData?.price || ''}
+                name="price"
+              />
 
-            {/* <FormControl fullWidth>
+              {/* <FormControl fullWidth>
             <Select
               variant='filled'
               value={dropDown.price}
@@ -1094,18 +1135,18 @@ export default function OrdersListView() {
             </Select>
           </FormControl> */}
 
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem' }}
-            >
-              Description (English)
-            </Typography>
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem' }}
+              >
+                Description (English)
+              </Typography>
 
-            {/* <TextField
+              {/* <TextField
               variant='filled'
               multiline
               fullWidth
@@ -1115,29 +1156,29 @@ export default function OrdersListView() {
               onChange={handleNestedProductData}
               name='description.en'
             /> */}
-            <RHFTextField
-              variant="filled"
-              multiline
-              fullWidth
-              rows={5}
-              sx={{ fontWeight: 900, fontSize: '26px' }}
-              value={productData?.description?.en || ''}
-              settingStateValue={handleNestedProductData}
-              name="description.en"
-            />
+              <RHFTextField
+                variant="filled"
+                multiline
+                fullWidth
+                rows={5}
+                sx={{ fontWeight: 900, fontSize: '26px' }}
+                value={productData?.description?.en || ''}
+                settingStateValue={handleNestedProductData}
+                name="description.en"
+              />
 
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem' }}
-            >
-              Description (Arabic)
-            </Typography>
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem' }}
+              >
+                Description (Arabic)
+              </Typography>
 
-            {/* <TextField
+              {/* <TextField
               variant='filled'
               multiline
               fullWidth
@@ -1149,19 +1190,19 @@ export default function OrdersListView() {
               onChange={handleNestedProductData}
               name='description.ar'
             /> */}
-            <RHFTextField
-              variant="filled"
-              multiline
-              fullWidth
-              rows={5}
-              dir="rtl"
-              sx={{ fontWeight: 900, fontSize: '26px' }}
-              value={productData?.description?.ar || ''}
-              settingStateValue={handleNestedProductData}
-              name="description.ar"
-            />
+              <RHFTextField
+                variant="filled"
+                multiline
+                fullWidth
+                rows={5}
+                dir="rtl"
+                sx={{ fontWeight: 900, fontSize: '26px' }}
+                value={productData?.description?.ar || ''}
+                settingStateValue={handleNestedProductData}
+                name="description.ar"
+              />
 
-            {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Available
           </Typography>
           <FormControl fullWidth>
@@ -1175,27 +1216,27 @@ export default function OrdersListView() {
             </Select>
           </FormControl> */}
 
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem' }}
-            >
-              Quantity (in stock)
-            </Typography>
-            {/* <TextField type='number' fullWidth variant='filled' onChange={handleProductData} value={productData?.quantity || ""} name='quantity' /> */}
-            <RHFTextField
-              type="number"
-              fullWidth
-              variant="filled"
-              settingStateValue={handleProductData}
-              value={productData?.quantity || ''}
-              name="quantity"
-            />
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem' }}
+              >
+                Quantity (in stock)
+              </Typography>
+              {/* <TextField type='number' fullWidth variant='filled' onChange={handleProductData} value={productData?.quantity || ""} name='quantity' /> */}
+              <RHFTextField
+                type="number"
+                fullWidth
+                variant="filled"
+                settingStateValue={handleProductData}
+                value={productData?.quantity || ''}
+                name="quantity"
+              />
 
-            {/* <FormControl fullWidth>
+              {/* <FormControl fullWidth>
             <Select
               variant='filled'
               value={dropDown.qty}
@@ -1206,44 +1247,44 @@ export default function OrdersListView() {
             </Select>
           </FormControl> */}
 
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem' }}
-            >
-              Product Status
-            </Typography>
-
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              sx={{
-                borderRadius: '16px',
-                padding: '7px 14px',
-                backgroundColor: '#F5F6F8',
-              }}
-            >
               <Typography
+                mt="20px"
+                mb="5px"
                 component="p"
+                noWrap
                 variant="subtitle2"
-                sx={{ fontWeight: 900, fontSize: '.9rem' }}
+                sx={{ opacity: 0.7, fontSize: '.9rem' }}
               >
-                Published
+                Product Status
               </Typography>
-              <Switch
-                size="medium"
-                checked={productData?.publish_app || false}
-                onChange={(e: any) =>
-                  setProductData({ ...productData, publish_app: e.target.checked })
-                }
-              />
-            </Stack>
 
-            {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+              <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{
+                  borderRadius: '16px',
+                  padding: '7px 14px',
+                  backgroundColor: '#F5F6F8',
+                }}
+              >
+                <Typography
+                  component="p"
+                  variant="subtitle2"
+                  sx={{ fontWeight: 900, fontSize: '.9rem' }}
+                >
+                  Published
+                </Typography>
+                <Switch
+                  size="medium"
+                  checked={productData?.publish_app || false}
+                  onChange={(e: any) =>
+                    setProductData({ ...productData, publish_app: e.target.checked })
+                  }
+                />
+              </Stack>
+
+              {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
             Barcode (Optional)
           </Typography>
           <TextField fullWidth variant='filled' defaultValue='481155444762' name='branchCode'
@@ -1254,7 +1295,7 @@ export default function OrdersListView() {
             }}
           /> */}
 
-            {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+              {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Color (Optional)
           </Typography>
           <FormControl fullWidth>
@@ -1282,161 +1323,161 @@ export default function OrdersListView() {
 
             </Select>
           </FormControl> */}
-          </Box>
-        </FormProvider>
-      </DetailsNavBar>
+            </Box>
+          </FormProvider>
+        </DetailsNavBar>
 
-      <DetailsNavBar
-        open={openVariant}
-        onClose={handleDrawerCloseCommon('variants')}
-        title={editVariantId ? 'Edit Variant' : 'Add New Variant'}
-        actions={
-          <Stack alignItems="center" justifyContent="center" spacing="10px">
-            <LoadingButton
-              fullWidth
-              variant="soft"
-              color="success"
-              size="large"
-              loading={variantMethods.formState.isSubmitting}
-              onClick={() => variantMethods.handleSubmit(onVariantSubmit as any)()}
-              sx={{ borderRadius: '30px' }}
-            >
-              {editVariantId ? 'Update' : 'Save'}
-            </LoadingButton>
-          </Stack>
-        }
-      >
-        <FormProvider methods={variantMethods} onSubmit={onVariantSubmit}>
-          <Divider flexItem />
-          {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
-          <Box width="100%">
-            <Typography
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Group Name (English)
-            </Typography>
-            <RHFTextField
-              fullWidth
-              variant="filled"
-              settingStateValue={handleNestedVariantData}
-              value={variantData?.groupName?.en || ''}
-              name="groupName.en"
-            />
-
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Group Name (Arabic)
-            </Typography>
-
-            <RHFTextField
-              fullWidth
-              variant="filled"
-              settingStateValue={handleNestedVariantData}
-              value={variantData?.groupName?.ar || ''}
-              name="groupName.ar"
-            />
-
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Selection Type
-            </Typography>
-
-            <RHFSelect
-              fullWidth
-              variant="filled"
-              name="selectionType"
-              id="demo-simple-select2"
-              value={variantData?.selectionType || ''}
-              settingStateValue={handleVariantData}
-            >
-              <MenuItem value="multiple">Multiple</MenuItem>
-              <MenuItem value="single">Single</MenuItem>
-            </RHFSelect>
-
-            {variantData?.selectionType === 'multiple' && (
-              <>
-                <Typography
-                  mt="20px"
-                  mb="5px"
-                  component="p"
-                  noWrap
-                  variant="subtitle2"
-                  sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                >
-                  Minimum
-                </Typography>
-                <RHFTextField
-                  fullWidth
-                  type="number"
-                  variant="filled"
-                  settingStateValue={handleVariantData}
-                  value={variantData?.minimum || ''}
-                  name="minimum"
-                />
-
-                <Typography
-                  mt="20px"
-                  mb="5px"
-                  component="p"
-                  noWrap
-                  variant="subtitle2"
-                  sx={{ opacity: 0.7, fontSize: '.9rem' }}
-                >
-                  Maximum
-                </Typography>
-                <RHFTextField
-                  type="number"
-                  fullWidth
-                  variant="filled"
-                  settingStateValue={handleVariantData}
-                  value={variantData?.maximum || ''}
-                  name="maximum"
-                />
-              </>
-            )}
-
-            <Stack
-              mt="20px"
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              sx={{
-                borderRadius: '16px',
-                padding: '7px 14px',
-                backgroundColor: '#F5F6F8',
-              }}
-            >
+        <DetailsNavBar
+          open={openVariant}
+          onClose={handleDrawerCloseCommon('variants')}
+          title={editVariantId ? 'Edit Variant' : 'Add New Variant'}
+          actions={
+            <Stack alignItems="center" justifyContent="center" spacing="10px">
+              <LoadingButton
+                fullWidth
+                variant="soft"
+                color="success"
+                size="large"
+                loading={variantMethods.formState.isSubmitting}
+                onClick={() => variantMethods.handleSubmit(onVariantSubmit as any)()}
+                sx={{ borderRadius: '30px' }}
+              >
+                {editVariantId ? 'Update' : 'Save'}
+              </LoadingButton>
+            </Stack>
+          }
+        >
+          <FormProvider methods={variantMethods} onSubmit={onVariantSubmit}>
+            <Divider flexItem />
+            {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+            <Box width="100%">
               <Typography
                 component="p"
+                noWrap
                 variant="subtitle2"
-                sx={{ fontWeight: 900, fontSize: '.9rem' }}
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
               >
-                Allow More Quantity
+                Group Name (English)
               </Typography>
-              <Checkbox
-                size="medium"
-                name="allowMoreQuantity"
-                checked={variantData?.allowMoreQuantity || false}
-                // onChange={(e: any) => setVariantData({ ...variantData, allowMoreQuantity: e.target.checked })}
-                onChange={handleVariantCheckBox}
-                inputProps={{ 'aria-label': 'secondary checkbox' }}
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                settingStateValue={handleNestedVariantData}
+                value={variantData?.groupName?.en || ''}
+                name="groupName.en"
               />
-              {/* <Switch size="medium"
+
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Group Name (Arabic)
+              </Typography>
+
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                settingStateValue={handleNestedVariantData}
+                value={variantData?.groupName?.ar || ''}
+                name="groupName.ar"
+              />
+
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Selection Type
+              </Typography>
+
+              <RHFSelect
+                fullWidth
+                variant="filled"
+                name="selectionType"
+                id="demo-simple-select2"
+                value={variantData?.selectionType || ''}
+                settingStateValue={handleVariantData}
+              >
+                <MenuItem value="multiple">Multiple</MenuItem>
+                <MenuItem value="single">Single</MenuItem>
+              </RHFSelect>
+
+              {variantData?.selectionType === 'multiple' && (
+                <>
+                  <Typography
+                    mt="20px"
+                    mb="5px"
+                    component="p"
+                    noWrap
+                    variant="subtitle2"
+                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                  >
+                    Minimum
+                  </Typography>
+                  <RHFTextField
+                    fullWidth
+                    type="number"
+                    variant="filled"
+                    settingStateValue={handleVariantData}
+                    value={variantData?.minimum || ''}
+                    name="minimum"
+                  />
+
+                  <Typography
+                    mt="20px"
+                    mb="5px"
+                    component="p"
+                    noWrap
+                    variant="subtitle2"
+                    sx={{ opacity: 0.7, fontSize: '.9rem' }}
+                  >
+                    Maximum
+                  </Typography>
+                  <RHFTextField
+                    type="number"
+                    fullWidth
+                    variant="filled"
+                    settingStateValue={handleVariantData}
+                    value={variantData?.maximum || ''}
+                    name="maximum"
+                  />
+                </>
+              )}
+
+              <Stack
+                mt="20px"
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{
+                  borderRadius: '16px',
+                  padding: '7px 14px',
+                  backgroundColor: '#F5F6F8',
+                }}
+              >
+                <Typography
+                  component="p"
+                  variant="subtitle2"
+                  sx={{ fontWeight: 900, fontSize: '.9rem' }}
+                >
+                  Allow More Quantity
+                </Typography>
+                <Checkbox
+                  size="medium"
+                  name="allowMoreQuantity"
+                  checked={variantData?.allowMoreQuantity || false}
+                  // onChange={(e: any) => setVariantData({ ...variantData, allowMoreQuantity: e.target.checked })}
+                  onChange={handleVariantCheckBox}
+                  inputProps={{ 'aria-label': 'secondary checkbox' }}
+                />
+                {/* <Switch size="medium"
                 checked={!!variantData?.allowMoreQuantity}
                 // onChange={(e: any) => setVariantData({ ...variantData, allowMoreQuantity: e.target.checked })}
                 onChange={(e) => {
@@ -1446,30 +1487,31 @@ export default function OrdersListView() {
                 }}
                 inputProps={{ 'aria-label': 'secondary checkbox' }}
               /> */}
-            </Stack>
-          </Box>
-        </FormProvider>
-      </DetailsNavBar>
+              </Stack>
+            </Box>
+          </FormProvider>
+        </DetailsNavBar>
 
-      <ConfirmDialog
-        open={confirm.value}
-        onClose={confirm.onFalse}
-        title="Delete"
-        noCancel={false}
-        content={<>Are you sure want to delete items?</>}
-        action={
-          <Button
-            fullWidth
-            color="error"
-            variant="soft"
-            size="large"
-            onClick={removeProductFun}
-            sx={{ borderRadius: '30px' }}
-          >
-            Delete
-          </Button>
-        }
-      />
+        <ConfirmDialog
+          open={confirm.value}
+          onClose={confirm.onFalse}
+          title="Delete"
+          noCancel={false}
+          content={<>Are you sure want to delete items?</>}
+          action={
+            <Button
+              fullWidth
+              color="error"
+              variant="soft"
+              size="large"
+              onClick={removeProductFun}
+              sx={{ borderRadius: '30px' }}
+            >
+              Delete
+            </Button>
+          }
+        />
+      </RoleBasedGuard>
     </Container>
   );
 }

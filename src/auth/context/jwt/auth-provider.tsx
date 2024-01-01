@@ -112,6 +112,8 @@ export function AuthProvider({ children }: Props) {
 
         const { accessToken, refreshToken } = response.data.data;
 
+        console.log("response", response);
+
 
         setSession(accessToken);
         sessionStorage.setItem(REFRESH_KEY, refreshToken);
@@ -204,6 +206,21 @@ export function AuthProvider({ children }: Props) {
     },
     []
   );
+  // VERIFY PERMISSIONS
+  const verifyPermission = useCallback(
+    (data: any) => {
+      const { permission, roles } = data
+      const userRoles = state.user?.roles || [];
+      const userPermissions = state.user?.permissions || [];
+      const hasCommonRole = userRoles.some((role: string) => roles && roles.includes(role));
+      const hasCommonPermission = permission && userPermissions.includes(permission);
+      if ((roles && !hasCommonRole) || (permission && !hasCommonPermission)) {
+        return false;
+      }
+      return true;
+    },
+    [state]
+  );
   // SENDOTP
   const sendOtp = useCallback(
     async (email: string) => {
@@ -287,10 +304,10 @@ export function AuthProvider({ children }: Props) {
       sendOtp,
       verifyOtp,
       forgotPassword,
-      newPassword
-
+      newPassword,
+      verifyPermission
     }),
-    [login, logout, register, sendOtp, verifyOtp, forgotPassword, newPassword, state.user, status]
+    [login, logout, register, sendOtp, verifyOtp, forgotPassword, newPassword, verifyPermission, state.user, status]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;
