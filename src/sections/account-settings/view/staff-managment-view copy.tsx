@@ -284,7 +284,7 @@ export default function StaffManagment() {
       await getPermission('remove', 'DELETE_STAFF_MANAGEMENT_BY_ID');
     };
     fetchData();
-  }, [getPermission]);
+  }, []);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -298,10 +298,10 @@ export default function StaffManagment() {
           <CustomCrumbs
             heading="Staff Management"
             description={`${staffLength
-                ? staffLength === 1
-                  ? `${staffLength} Staff Member`
-                  : `${staffLength} Staff Members`
-                : `${0} Staff Members`
+              ? staffLength === 1
+                ? `${staffLength} Staff Member`
+                : `${staffLength} Staff Members`
+              : `${0} Staff Members`
               }`}
           />
         </Grid>

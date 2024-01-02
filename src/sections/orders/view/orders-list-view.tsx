@@ -339,17 +339,17 @@ export default function OrdersListView() {
                           >
                             {tab.value === 'All' && list.length}
                             {tab.value === 'Completed' &&
-                              list.filter((order: any) => order.status === 'Completed').length}
+                              list && list?.filter((order: any) => order.status === 'Completed').length}
                             {tab.value === 'Pending' &&
-                              list.filter((order: any) => order.status === 'Pending').length}
+                              list && list?.filter((order: any) => order.status === 'Pending').length}
                             {tab.value === 'Cancelled' &&
-                              list.filter((order: any) => order.status === 'Cancelled').length}
+                              list && list?.filter((order: any) => order.status === 'Cancelled').length}
                             {tab.value === 'refunded' &&
-                              list.filter((order: any) => order.status === 'refunded').length}
+                              list && list?.filter((order: any) => order.status === 'refunded').length}
                             {tab.value === 'Ready' &&
-                              list.filter((order: any) => order.status === 'Ready').length}
+                              list && list?.filter((order: any) => order.status === 'Ready').length}
                             {tab.value === 'Accepted' &&
-                              list.filter((order: any) => order.status === 'Accepted').length}
+                              list && list?.filter((order: any) => order.status === 'Accepted').length}
                           </Label>
                         }
                       />
@@ -555,38 +555,41 @@ export default function OrdersListView() {
                               </Typography>
                             </Grid>
 
-                            <Grid item xs={6} md="auto">
-                              <Box
-                                sx={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '8px',
-                                }}
-                              >
-                                {/* <Box component="img" src={order.flag} alt=" " width="22px" /> */}
-                                <Box display="flex" gap="0px" flexDirection="column">
-                                  <Typography
-                                    component="p"
-                                    variant="subtitle2"
-                                    sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                                  >
-                                    {' '}
-                                    {order?.userId}{' '}
-                                  </Typography>
-                                  <Typography
-                                    component="p"
-                                    noWrap
-                                    variant="subtitle2"
-                                    sx={{
-                                      opacity: 0.7,
-                                      fontSize: '.8rem',
-                                      maxWidth: { xs: '120px', md: '188px' },
-                                    }}
-                                  >
-                                    {order?.addressId}
-                                  </Typography>
+                            <Grid item xs={6} md="auto" sx={{ minWidth: "120px", flex: 1 }} >
+                              {order?.userId && (
+                                <Box
+                                  sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                  }}
+                                >
+                                  <Box component="img" src={order.userId?.avatar} alt=" " width="22px" />
+                                  <Box display="flex" gap="0px" flexDirection="column">
+                                    <Typography
+                                      component="p"
+                                      variant="subtitle2"
+                                      sx={{ fontSize: '.8rem', fontWeight: 800 }}
+                                    >
+                                      {' '}
+                                      {order?.userId?.firstName}{' '} {order?.userId?.lastName}
+                                    </Typography>
+                                    <Typography
+                                      component="p"
+                                      noWrap
+                                      variant="subtitle2"
+                                      sx={{
+                                        opacity: 0.7,
+                                        fontSize: '.8rem',
+                                        maxWidth: { xs: '120px', md: '188px' },
+                                      }}
+                                    >
+                                      {`${order?.addressId?.addressType}  ${order?.addressId?.street} ${order?.addressId?.block} ${order?.addressId?.house}`}
+                                    </Typography>
+                                  </Box>
                                 </Box>
-                              </Box>
+
+                              )}
                             </Grid>
 
                             <Grid item xs={6} md="auto">
@@ -623,7 +626,7 @@ export default function OrdersListView() {
                               <Chip
                                 label={order?.status}
                                 size="small"
-                                sx={{ backgroundColor: order.color }}
+                              // sx={{ backgroundColor: order?.color }}
                               />
                             </Grid>
                           </Grid>
@@ -1004,142 +1007,144 @@ export default function OrdersListView() {
                 </Box>
 
                 {/* customer info */}
-                <Box
-                  sx={{
-                    width: '100%',
-                    bgcolor: 'background.neutral',
-                    borderRadius: '16px',
-                    p: 2.5,
-                    display: 'flex',
-                    gap: '10px',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <Typography
-                    component="p"
-                    mb="15px"
-                    variant="subtitle2"
-                    sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                  >
-                    {' '}
-                    Customer Info{' '}
-                  </Typography>
-                  <Stack direction="row" spacing="10px">
-                    <Box>
-                      {/* <Box component="img" src="/raw/flag.png" /> */}
-                      <Box component="img" src={order?.userId?.avatar} width="100px" />
-                    </Box>
-                    <Box>
-                      <Typography
-                        component="p"
-                        variant="subtitle2"
-                        sx={{ fontSize: '.9rem', fontWeight: 700 }}
-                      >
-                        {order?.userId?.firstName} {order?.userId?.lastName}
-
-                      </Typography>
-                      <Typography
-                        component="p"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.85rem' }}
-                      >
-
-                        {order?.userId?.email}
-                      </Typography>
-                      <Typography
-                        component="p"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.85rem' }}
-                      >
-                        {order?.userId?.phoneNumber}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                  <Divider flexItem sx={{ my: '10px' }} />
-                  <Typography
-                    component="p"
-                    variant="subtitle2"
-                    sx={{ fontSize: '.9rem', fontWeight: 700 }}
-                  >
-                    Delivery Address{' '}
-                  </Typography>
-                  <Typography
-                    component="p"
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.85rem' }}
-                  >
-                    {' '}
-                    Address Type: {order?.addressId?.addressType}
-                  </Typography>
-                  <Typography
-                    component="p"
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.85rem' }}
-                  >
-                    {' '}
-                    {order?.addressId?.buildingName} {order?.addressId?.avenue} {order?.addressId?.PACI}
-                  </Typography>
-                  <Typography
-                    component="p"
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.85rem' }}
-                  >
-                    {' '}
-                    Block: {order?.addressId?.block}
-                  </Typography>
-                  <Typography
-                    component="p"
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.85rem' }}
-                  >
-                    {' '}
-                    Street: {order?.addressId?.street}
-                  </Typography>
-                  <Typography
-                    component="p"
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.85rem' }}
-                  >
-                    {' '}
-                    House: {order?.addressId?.house}
-                  </Typography>
-                  <Stack mb="16px" direction="row" alignItems="center" justifyContent="space-between">
-                    <Typography
-                      component="p"
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.85rem', display: 'flex', alognItems: 'center' }}
-                    >
-                      {' '}
-                      <Iconify icon="mdi:content-copy" /> Copy Address{' '}
-                    </Typography>
-                    <Typography
-                      component="p"
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.85rem', display: 'flex', alognItems: 'center' }}
-                    >
-                      {' '}
-                      <Iconify icon="mdi:map-marker-outline" /> Show On Map{' '}
-                    </Typography>
-                  </Stack>
-                  <Button
-                    fullWidth
-                    variant="soft"
-                    size="large"
-                    startIcon={<Iconify icon="mdi:printer-outline" />}
+                {order?.userId && (
+                  <Box
                     sx={{
-                      borderRadius: '30px',
-                      color: alpha(theme.palette.common.black, 0.8),
-                      backgroundColor: alpha(theme.palette.common.white, 0.48),
-                      boxShadow: '0px 6px 20px #00000014',
-                      '&:hover': {
-                        color: theme.palette.common.black,
-                        backgroundColor: alpha(theme.palette.common.white, 1),
-                      },
+                      width: '100%',
+                      bgcolor: 'background.neutral',
+                      borderRadius: '16px',
+                      p: 2.5,
+                      display: 'flex',
+                      gap: '10px',
+                      flexDirection: 'column',
                     }}
                   >
-                    Send via WhatsApp
-                  </Button>
-                </Box>
+                    <Typography
+                      component="p"
+                      mb="15px"
+                      variant="subtitle2"
+                      sx={{ fontSize: '.8rem', fontWeight: 800 }}
+                    >
+                      {' '}
+                      Customer Info{' '}
+                    </Typography>
+                    <Stack direction="row" spacing="10px">
+                      <Box>
+                        {/* <Box component="img" src="/raw/flag.png" /> */}
+                        <Box component="img" src={order?.userId?.avatar} width="100px" />
+                      </Box>
+                      <Box>
+                        <Typography
+                          component="p"
+                          variant="subtitle2"
+                          sx={{ fontSize: '.9rem', fontWeight: 700 }}
+                        >
+                          {order?.userId?.firstName} {order?.userId?.lastName}
+
+                        </Typography>
+                        <Typography
+                          component="p"
+                          variant="subtitle2"
+                          sx={{ opacity: 0.7, fontSize: '.85rem' }}
+                        >
+
+                          {order?.userId?.email}
+                        </Typography>
+                        <Typography
+                          component="p"
+                          variant="subtitle2"
+                          sx={{ opacity: 0.7, fontSize: '.85rem' }}
+                        >
+                          {order?.userId?.phoneNumber}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                    <Divider flexItem sx={{ my: '10px' }} />
+                    <Typography
+                      component="p"
+                      variant="subtitle2"
+                      sx={{ fontSize: '.9rem', fontWeight: 700 }}
+                    >
+                      Delivery Address{' '}
+                    </Typography>
+                    <Typography
+                      component="p"
+                      variant="subtitle2"
+                      sx={{ opacity: 0.7, fontSize: '.85rem' }}
+                    >
+                      {' '}
+                      Address Type: {order?.addressId?.addressType}
+                    </Typography>
+                    <Typography
+                      component="p"
+                      variant="subtitle2"
+                      sx={{ opacity: 0.7, fontSize: '.85rem' }}
+                    >
+                      {' '}
+                      {order?.addressId?.buildingName} {order?.addressId?.avenue} {order?.addressId?.PACI}
+                    </Typography>
+                    <Typography
+                      component="p"
+                      variant="subtitle2"
+                      sx={{ opacity: 0.7, fontSize: '.85rem' }}
+                    >
+                      {' '}
+                      Block: {order?.addressId?.block}
+                    </Typography>
+                    <Typography
+                      component="p"
+                      variant="subtitle2"
+                      sx={{ opacity: 0.7, fontSize: '.85rem' }}
+                    >
+                      {' '}
+                      Street: {order?.addressId?.street}
+                    </Typography>
+                    <Typography
+                      component="p"
+                      variant="subtitle2"
+                      sx={{ opacity: 0.7, fontSize: '.85rem' }}
+                    >
+                      {' '}
+                      House: {order?.addressId?.house}
+                    </Typography>
+                    <Stack mb="16px" direction="row" alignItems="center" justifyContent="space-between">
+                      <Typography
+                        component="p"
+                        variant="subtitle2"
+                        sx={{ opacity: 0.7, fontSize: '.85rem', display: 'flex', alognItems: 'center' }}
+                      >
+                        {' '}
+                        <Iconify icon="mdi:content-copy" /> Copy Address{' '}
+                      </Typography>
+                      <Typography
+                        component="p"
+                        variant="subtitle2"
+                        sx={{ opacity: 0.7, fontSize: '.85rem', display: 'flex', alognItems: 'center' }}
+                      >
+                        {' '}
+                        <Iconify icon="mdi:map-marker-outline" /> Show On Map{' '}
+                      </Typography>
+                    </Stack>
+                    <Button
+                      fullWidth
+                      variant="soft"
+                      size="large"
+                      startIcon={<Iconify icon="mdi:printer-outline" />}
+                      sx={{
+                        borderRadius: '30px',
+                        color: alpha(theme.palette.common.black, 0.8),
+                        backgroundColor: alpha(theme.palette.common.white, 0.48),
+                        boxShadow: '0px 6px 20px #00000014',
+                        '&:hover': {
+                          color: theme.palette.common.black,
+                          backgroundColor: alpha(theme.palette.common.white, 1),
+                        },
+                      }}
+                    >
+                      Send via WhatsApp
+                    </Button>
+                  </Box>
+                )}
 
                 {/* Time line */}
                 <Box

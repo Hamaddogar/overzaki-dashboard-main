@@ -17,13 +17,17 @@ export const fetchOrderssList = createAsyncThunk(
       if (paramsData !== undefined) {
         const { pageNumber, pageSize } = paramsData;
         const response = await getRequestWithParams(
-          `${endpoints.orders.list}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+          `${endpoints.orders.list}/all?pageSize=${pageSize}&pageNumber=${pageNumber}`,
           defaultConfig
         );
         return response.data;
       }
-      const response = await getRequest(`${endpoints.orders.myOrders}`, defaultConfig);
-      return response.data;
+      // const response = await getRequest(`${endpoints.orders.myOrders}`, defaultConfig);
+      // return response.data;
+      const response = await getRequest(`${endpoints.orders.list}/all`, defaultConfig);
+      console.log(response?.data);
+
+      return response?.data?.data;
     } catch (error) {
       return error;
     }
