@@ -129,10 +129,9 @@ export default function RolesView() {
   const [removeData, setRemoveData] = useState<any>(null);
   const confirm = useBoolean();
 
-  const [roleName, setRoleName] = useState<any>("");
+  const [roleName, setRoleName] = useState<any>('');
   const [rolePermissions, setRolePermissions] = useState<any>([]);
   const [errorMsg, setErrorMsg] = useState('');
-
 
   const [discountTypeToggle, setDiscountTypeToggle] = useState('FIXED_AMOUNT');
   const { copy } = useCopyToClipboard();
@@ -160,22 +159,17 @@ export default function RolesView() {
 
   // ----------------------------------------------------------------------------------
 
-
   useEffect(() => {
     if (defaultPermissionOption.length === 0) {
       dispatch(fetchPermissionsByGroupList(error)).then((response: any) => {
         if (response?.meta?.requestStatus === 'fulfilled') {
-          setDefaultPermissionOption(response.payload)
+          setDefaultPermissionOption(response.payload);
         } else {
           setDefaultPermissionOption([]);
         }
       });
     }
   }, [defaultPermissionOption, dispatch, error]);
-
-
-
-
 
   // ----------------------------------------------------------------------------------
 
@@ -208,21 +202,10 @@ export default function RolesView() {
   });
 
   useEffect(() => {
-    if (loadStatus === 'idle') {
-      dispatch(fetchRolesList(error)).then((response: any) => {
-        if (response?.meta?.requestStatus === 'fulfilled') {
-          setData(response.payload.data);
-        } else {
-          setData([]);
-        }
-      });
-    }
+    dispatch(fetchRolesList(error)).then((response: any) => {
+      setData(response.payload.data);
+    });
   }, [loadStatus, dispatch, error, list]);
-
-
-  useEffect(() => {
-    setData(list || []);
-  }, [list]);
 
   // reseting removeData value
   useEffect(() => {
@@ -235,7 +218,7 @@ export default function RolesView() {
   useEffect(() => {
     if (role) {
       if (role && Object.entries(role).length > 0) {
-        console.log("Edit Role ");
+        console.log('Edit Role ');
         console.log(role);
         setRoleName(role?.name);
         setRolePermissions(role?.permissions);
@@ -248,17 +231,18 @@ export default function RolesView() {
     }
   }, [role, methods, reset]);
 
-
   const createRoleFun = () => {
     const FormData = {
-      name: roleName || "",
-      permissions: rolePermissions
-    }
+      name: roleName || '',
+      permissions: rolePermissions,
+    };
     dispatch(createRole(FormData)).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
         setRoleName(null);
         setRolePermissions([]);
-        dispatch(fetchRolesList(error));
+        dispatch(fetchRolesList(error)).then((response: any) => {
+          setData(response.payload.data);
+        });
         enqueueSnackbar('Successfully Created!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -268,12 +252,14 @@ export default function RolesView() {
 
   const editRoleFun = () => {
     const FormData = {
-      name: roleName || "",
-      permissions: rolePermissions
-    }
+      name: roleName || '',
+      permissions: rolePermissions,
+    };
     dispatch(editRole({ roleId: editId, data: FormData })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
-        dispatch(fetchRolesList(error));
+        dispatch(fetchRolesList(error)).then((response: any) => {
+          setData(response.payload.data);
+        });
         enqueueSnackbar('Successfully Updated!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -285,7 +271,9 @@ export default function RolesView() {
     if (removeData) {
       dispatch(deleteRole(removeData)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchRolesList(error));
+          dispatch(fetchRolesList(error)).then((response: any) => {
+            setData(response.payload.data);
+          });
           enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
           confirm.onFalse();
         } else {
@@ -297,11 +285,12 @@ export default function RolesView() {
 
   // ----------------------------------------------------------------------------------
 
-
   const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
     if (newValue === 'All') {
-      setData(list);
+      dispatch(fetchRolesList(error)).then((response: any) => {
+        setData(response.payload.data);
+      });
     } else {
       const newData = list.filter((order: any) =>
         newValue === 'Active' ? order.status : !order.status
@@ -317,20 +306,20 @@ export default function RolesView() {
 
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-      (event: React.SyntheticEvent | React.MouseEvent) => {
-        if (state === 'new') {
-          setOpenCreateRole((pv) => !pv);
-          setEditId(id);
-          if (id) {
-            dispatch(fetchOneRole(id));
-          } else {
-            // setRoleData({});
-            dispatch(setRole({}));
-          }
-        } else if (state === 'delete') {
-          setOpenDelete((pv) => !pv);
-        } else if (state === 'details') setOpenDetails((pv) => !pv);
-      };
+    (event: React.SyntheticEvent | React.MouseEvent) => {
+      if (state === 'new') {
+        setOpenCreateRole((pv) => !pv);
+        setEditId(id);
+        if (id) {
+          dispatch(fetchOneRole(id));
+        } else {
+          // setRoleData({});
+          dispatch(setRole({}));
+        }
+      } else if (state === 'delete') {
+        setOpenDelete((pv) => !pv);
+      } else if (state === 'details') setOpenDetails((pv) => !pv);
+    };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -346,8 +335,6 @@ export default function RolesView() {
       else if (state === 'details') setOpenDetails(false);
       else if (state === 'delete') setOpenDelete(false);
     };
-
-
   const listStuff = data;
   const [listItems, setListItems] = useState<any>([]);
   useEffect(() => {
@@ -429,8 +416,6 @@ export default function RolesView() {
             </RoleBasedGuard>
           </Grid>
 
-
-
           <Grid item xs={12}>
             <Box>
               <TabContext value={value}>
@@ -462,11 +447,13 @@ export default function RolesView() {
                               'default'
                             }
                           >
-                            {tab.value === 'All' && list && list.length}
+                            {tab.value === 'All' && data && data.length}
                             {tab.value === 'Expired' &&
-                              list && list?.filter((order: any) => !order?.status).length}
+                              data &&
+                              data?.filter((order: any) => !order?.status).length}
                             {tab.value === 'Active' &&
-                              list && list?.filter((order: any) => order?.status).length}
+                              data &&
+                              data?.filter((order: any) => order?.status).length}
                           </Label>
                         }
                       />
@@ -484,7 +471,7 @@ export default function RolesView() {
                           container
                           spacing={2}
                         >
-                          {data.map((role: any, indx: any) => (
+                          {data?.map((role: any, indx: any) => (
                             <Draggable key={indx} index={indx} draggableId={indx.toString()}>
                               {(provided) => (
                                 <Grid
@@ -521,12 +508,10 @@ export default function RolesView() {
                                           variant="subtitle2"
                                           sx={{ fontSize: '.8rem' }}
                                         >
-                                          {role?.name || ""}
+                                          {role?.name || ''}
                                         </Typography>
                                       </Box>
                                     </Grid>
-
-
 
                                     <Grid item xs={6} md="auto">
                                       <Box
@@ -651,10 +636,7 @@ export default function RolesView() {
                         alignItems="flex-start"
                         justifyContent="flex-start"
                       >
-                        <Typography
-                          component="p"
-                          variant="subtitle1"
-                        >
+                        <Typography component="p" variant="subtitle1">
                           {permissionsObj?.subject}
                         </Typography>
                         <Divider />
@@ -682,10 +664,15 @@ export default function RolesView() {
                               checked={rolePermissions?.includes(permissionObj?.action) || false}
                               onChange={(e: any) => {
                                 if (e.target.checked) {
-                                  const rolePermissionsArray = [...rolePermissions, permissionObj?.action]
+                                  const rolePermissionsArray = [
+                                    ...rolePermissions,
+                                    permissionObj?.action,
+                                  ];
                                   setRolePermissions(rolePermissionsArray);
                                 } else {
-                                  const rolePermissionsArray = rolePermissions.filter((item: any) => item !== permissionObj?.action);
+                                  const rolePermissionsArray = rolePermissions.filter(
+                                    (item: any) => item !== permissionObj?.action
+                                  );
                                   setRolePermissions(rolePermissionsArray);
                                 }
                               }}
@@ -695,10 +682,7 @@ export default function RolesView() {
                           </Stack>
                         ))}
                       </Stack>
-
                     ))}
-
-
                   </Box>
                 </FormProvider>
               </DetailsNavBar>

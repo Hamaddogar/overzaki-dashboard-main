@@ -71,29 +71,29 @@ export default function StaffManagment() {
   const pageSize = 5;
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-      (event: React.SyntheticEvent | React.MouseEvent) => {
-        if (state === 'new') {
-          setOpenCreateStaff((pv) => !pv);
-          setEditId(id);
-          if (id) {
-            dispatch(fetchOneStaffManagement(id)).then((response: any) => {
-              const { user, adminName } = response.payload;
-              const { gender, email, location, phoneNumber, preferedLanguage, roles } = user;
-              delete adminName.localized;
-              const userObj = {
-                adminName,
-                gender,
-                email,
-                location,
-                phoneNumber,
-                preferedLanguage,
-                roles,
-              };
-              setUserData(userObj);
-            });
-          }
-        } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
-      };
+    (event: React.SyntheticEvent | React.MouseEvent) => {
+      if (state === 'new') {
+        setOpenCreateStaff((pv) => !pv);
+        setEditId(id);
+        if (id) {
+          dispatch(fetchOneStaffManagement(id)).then((response: any) => {
+            const { user, adminName } = response.payload;
+            const { gender, email, location, phoneNumber, preferedLanguage, roles } = user;
+            delete adminName.localized;
+            const userObj = {
+              adminName,
+              gender,
+              email,
+              location,
+              phoneNumber,
+              preferedLanguage,
+              roles,
+            };
+            setUserData(userObj);
+          });
+        }
+      } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
+    };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -192,6 +192,11 @@ export default function StaffManagment() {
   useEffect(() => {
     dispatch(fetchStaffManagementsWithParams({ pageNumber, pageSize })).then((response: any) => {
       setNewUsersData(response.payload);
+    });
+  }, [dispatch, pageNumber]);
+  useEffect(() => {
+    dispatch(fetchStaffManagementsWithParams({ pageNumber, pageSize })).then((response: any) => {
+      console.log(response.payload);
     });
   }, [dispatch, pageNumber]);
 
@@ -303,12 +308,13 @@ export default function StaffManagment() {
         <Grid item xs={12} md="auto">
           <CustomCrumbs
             heading="Staff Management"
-            description={`${staffLength
-              ? staffLength === 1
-                ? `${staffLength} Staff Member`
-                : `${staffLength} Staff Members`
-              : `${0} Staff Members`
-              }`}
+            description={`${
+              staffLength
+                ? staffLength === 1
+                  ? `${staffLength} Staff Member`
+                  : `${staffLength} Staff Members`
+                : `${0} Staff Members`
+            }`}
           />
         </Grid>
 
@@ -551,18 +557,10 @@ export default function StaffManagment() {
                                   </Typography>
 
                                   <Chip
-                                    label={
-                                      user?.user?.roles?.includes('ACCOUNTENT_ADMIN')
-                                        ? 'Admin'
-                                        : 'Owner'
-                                    }
+                                    label={user?.user?.roles && [...user.user.roles]}
                                     size="small"
                                     sx={{
-                                      backgroundColor: user?.user?.roles.includes(
-                                        'ACCOUNTENT_ADMIN'
-                                      )
-                                        ? '#F1D169'
-                                        : '#76FDD3',
+                                      backgroundColor: '#F1D169',
                                       color: '#0F1349',
                                       borderRadius: '16px',
                                     }}
@@ -595,7 +593,6 @@ export default function StaffManagment() {
                                       }}
                                       onClick={toggleDrawerCommon('new', user?.user?._id)}
                                     >
-
                                       <Box component="img" src="/raw/edit-pen.svg" width="13px" />
                                     </Box>
                                   )}
@@ -813,8 +810,10 @@ export default function StaffManagment() {
               Select Role
             </Typography>
             <RHFSelect
-              value={userData?.roles?.length > 0 && userData?.roles[0] || ''}
-              settingStateValue={(event: any) => setUserData({ ...userData, roles: [event.target.value as string] })}
+              value={(userData?.roles?.length > 0 && userData?.roles[0]) || ''}
+              settingStateValue={(event: any) =>
+                setUserData({ ...userData, roles: [event.target.value as string] })
+              }
               fullWidth
               variant="filled"
               name="roles"
