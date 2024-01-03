@@ -12,7 +12,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Card from '@mui/material/Card/Card';
-import { Box, Grid, Stack, Chip, Typography } from '@mui/material';
+import { Box, Grid, Stack, Chip, Typography, MenuItem } from '@mui/material';
 import TextField from '@mui/material/TextField';
 // components
 import { BottomActions } from 'src/components/bottom-actions';
@@ -26,7 +26,7 @@ import FormProvider from 'src/components/hook-form/form-provider';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
-import { RHFTextField } from 'src/components/hook-form';
+import { RHFSelect, RHFTextField } from 'src/components/hook-form';
 import { useDispatch } from 'react-redux';
 import {
   createStaffManagement,
@@ -36,11 +36,12 @@ import {
   fetchStaffManagementsList,
   fetchStaffManagementsWithParams,
 } from 'src/redux/store/thunks/staffManagement';
-import { AppDispatch } from 'src/redux/store/store';
+// import { AppDispatch } from 'src/redux/store/store';
 import { enqueueSnackbar } from 'notistack';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { useAuthContext } from 'src/auth/hooks';
 import NavigatorBar from 'src/components/NavigatorBar';
+import { fetchRolesList } from 'src/redux/store/thunks/roles';
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -58,7 +59,7 @@ export default function StaffManagment() {
   const settings = useSettingsContext();
   const dispatch = useDispatch<any>();
   // const [data] = useState(users);
-  const [usersData, setUsersData] = useState([]);
+  // const [usersData, setUsersData] = useState([]);
   const [editId, setEditId] = useState('');
   const [newUsersData, setNewUsersData] = useState<any>();
   // new order
@@ -117,6 +118,7 @@ export default function StaffManagment() {
     email: Yup.string().email().required('Email is required'),
     phoneNumber: Yup.string().required(),
     password: Yup.string().required('Password is required'),
+    roles: Yup.string().required('Field is required'),
   });
   const methods = useForm({
     resolver: yupResolver(StaffAdminSchema),
@@ -126,7 +128,7 @@ export default function StaffManagment() {
   const createAdmin = () => {
     const toPushData = {
       ...userData,
-      roles: ['ACCOUNTENT_ADMIN'],
+      // roles: ['ACCOUNTENT_ADMIN'],
       country: 'SY',
       gender: 'MALE',
       location: ['banias, tartus, syria'],
@@ -284,6 +286,10 @@ export default function StaffManagment() {
       await getPermission('remove', 'DELETE_STAFF_MANAGEMENT_BY_ID');
     };
     fetchData();
+  }, []);
+  const [permissions, setPermissions] = useState<any>([]);
+  useEffect(() => {
+    dispatch(fetchRolesList(Error)).then((response: any) => setPermissions(response.payload.data));
   }, []);
 
   return (
@@ -572,26 +578,27 @@ export default function StaffManagment() {
                                       width={24}
                                     />
                                   )}
-                                  <Box
-                                    sx={{
-                                      width: '36px',
-                                      height: '36px',
-                                      borderRadius: '20px',
-                                      background: 'rgb(134, 136, 163,0.09)',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      cursor: 'pointer',
-                                      '&:hover': {
-                                        background: 'rgb(134, 136, 163,0.2)',
-                                      },
-                                    }}
-                                    onClick={toggleDrawerCommon('new', user?.user?._id)}
-                                  >
-                                    {allowAction.edit && (
+                                  {allowAction.edit && (
+                                    <Box
+                                      sx={{
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '20px',
+                                        background: 'rgb(134, 136, 163,0.09)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        '&:hover': {
+                                          background: 'rgb(134, 136, 163,0.2)',
+                                        },
+                                      }}
+                                      onClick={toggleDrawerCommon('new', user?.user?._id)}
+                                    >
+
                                       <Box component="img" src="/raw/edit-pen.svg" width="13px" />
-                                    )}
-                                  </Box>
+                                    </Box>
+                                  )}
                                   {/* {order.role !== 'Owner' && (
                   <Iconify
                       style={{ cursor: 'pointer' }}
@@ -803,30 +810,23 @@ export default function StaffManagment() {
             )}
 
             <Typography variant="body1" color="#8688A3" sx={{ my: '5px', fontWeight: 900 }}>
-              Admin Powers
+              Select Role
             </Typography>
-            <Box>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="button">Edit Theme & Layout</Typography>
-                <Switch />
-              </Stack>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="button">Add/Edit Categories</Typography>
-                <Switch defaultChecked />
-              </Stack>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="button">Add/Edit Products</Typography>
-                <Switch defaultChecked />
-              </Stack>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="button">Manage Orders</Typography>
-                <Switch />
-              </Stack>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="button">Get Notifications</Typography>
-                <Switch defaultChecked />
-              </Stack>
-            </Box>
+            <RHFSelect
+              value={userData?.roles?.length > 0 && userData?.roles[0] || ''}
+              settingStateValue={(event: any) => setUserData({ ...userData, roles: [event.target.value as string] })}
+              fullWidth
+              variant="filled"
+              name="roles"
+            >
+              {permissions.length > 0 &&
+                permissions?.map((item: any, i: any) => (
+                  <MenuItem key={i} value={item.name}>
+                    {item?.name}
+                  </MenuItem>
+                ))}
+              {/* permissions?.map((item: any, i: any) => <p key={i}>{item?.name}</p>)} */}
+            </RHFSelect>
           </Box>
         </FormProvider>
       </DetailsNavBar>

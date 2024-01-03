@@ -180,6 +180,9 @@ export const paths = {
     vouchers: {
       root: `${ROOTS.DASHBOARD}/vouchers`,
     },
+    roles: {
+      root: `${ROOTS.DASHBOARD}/roles`,
+    },
     accountsettings: {
       root: `${ROOTS.DASHBOARD}/account-settings`,
       AccountDetails: `${ROOTS.DASHBOARD}/account-settings/account-details`,

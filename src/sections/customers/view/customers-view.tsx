@@ -437,7 +437,7 @@ export default function OrdersListView() {
       await getPermission('remove', 'DELETE_CUSTOMER_BY_ID');
     };
     fetchData();
-  }, [getPermission]);
+  }, []);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>

@@ -141,6 +141,11 @@ export function useNavData() {
             path: paths.dashboard.domain.root,
             icon: ICONS.domain,
           },
+          {
+            title: t('Roles'),
+            path: paths.dashboard.roles.root,
+            icon: ICONS.job,
+          },
           // {
           //   title: t('ecommerce'),
           //   path: paths.dashboard.general.ecommerce,

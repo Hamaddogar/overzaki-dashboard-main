@@ -151,6 +151,14 @@ export const endpoints = {
     list: '/vouchers',
     search: '/voucher/search',
   },
+  role: {
+    list: '/roles',
+    search: '/roles/search',
+  },
+  permission: {
+    list: '/permissions',
+    search: '/permissions/search',
+  },
   deliveryZone: {
     list: '/voucher',
     search: '/voucher/search',
