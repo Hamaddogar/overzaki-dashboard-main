@@ -77,6 +77,8 @@ import { useAuthContext } from 'src/auth/hooks';
 // import RolesFiltersResult from '../roles-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
 
+
+
 // .....
 // ----------------------------------------------------------------------
 const activeTab = {
@@ -148,7 +150,7 @@ export default function RolesView() {
 
   const [value, setValue] = useState('All');
 
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(list);
 
   // const [tableData] = useState(_orders);
 
@@ -202,10 +204,17 @@ export default function RolesView() {
   });
 
   useEffect(() => {
-    dispatch(fetchRolesList(error)).then((response: any) => {
-      setData(response.payload.data);
-    });
+    if (loadStatus === 'idle') {
+      dispatch(fetchRolesList(error)).then((response: any) => {
+        // setData(response.payload.data);
+        // setData(list);
+      });
+    }
   }, [loadStatus, dispatch, error, list]);
+
+  useEffect(() => {
+    setData(list || []);
+  }, [list]);
 
   // reseting removeData value
   useEffect(() => {
@@ -240,9 +249,10 @@ export default function RolesView() {
       if (response.meta.requestStatus === 'fulfilled') {
         setRoleName(null);
         setRolePermissions([]);
-        dispatch(fetchRolesList(error)).then((response: any) => {
-          setData(response.payload.data);
-        });
+        dispatch(fetchRolesList(error));
+        // .then((response: any) => {
+        //   setData(response.payload.data);
+        // });
         enqueueSnackbar('Successfully Created!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -257,9 +267,10 @@ export default function RolesView() {
     };
     dispatch(editRole({ roleId: editId, data: FormData })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
-        dispatch(fetchRolesList(error)).then((response: any) => {
-          setData(response.payload.data);
-        });
+        dispatch(fetchRolesList(error));
+        // .then((response: any) => {
+        //   setData(response.payload.data);
+        // });
         enqueueSnackbar('Successfully Updated!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -271,9 +282,10 @@ export default function RolesView() {
     if (removeData) {
       dispatch(deleteRole(removeData)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchRolesList(error)).then((response: any) => {
-            setData(response.payload.data);
-          });
+          dispatch(fetchRolesList(error));
+          // .then((response: any) => {
+          //   setData(response.payload.data);
+          // });
           enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
           confirm.onFalse();
         } else {
@@ -288,9 +300,10 @@ export default function RolesView() {
   const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
     if (newValue === 'All') {
-      dispatch(fetchRolesList(error)).then((response: any) => {
-        setData(response.payload.data);
-      });
+      dispatch(fetchRolesList(error))
+      // .then((response: any) => {
+      //   setData(response.payload.data);
+      // });
     } else {
       const newData = list.filter((order: any) =>
         newValue === 'Active' ? order.status : !order.status
@@ -306,20 +319,20 @@ export default function RolesView() {
 
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'new') {
-        setOpenCreateRole((pv) => !pv);
-        setEditId(id);
-        if (id) {
-          dispatch(fetchOneRole(id));
-        } else {
-          // setRoleData({});
-          dispatch(setRole({}));
-        }
-      } else if (state === 'delete') {
-        setOpenDelete((pv) => !pv);
-      } else if (state === 'details') setOpenDetails((pv) => !pv);
-    };
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'new') {
+          setOpenCreateRole((pv) => !pv);
+          setEditId(id);
+          if (id) {
+            dispatch(fetchOneRole(id));
+          } else {
+            // setRoleData({});
+            dispatch(setRole(null));
+          }
+        } else if (state === 'delete') {
+          setOpenDelete((pv) => !pv);
+        } else if (state === 'details') setOpenDetails((pv) => !pv);
+      };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {

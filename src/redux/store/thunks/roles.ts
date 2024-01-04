@@ -15,14 +15,14 @@ export const fetchRolesList = createAsyncThunk(
   async (params: IRequest, { rejectWithValue }) => {
     try {
       const response = await getRequest(`${endpoints.role.list}/all`, defaultConfig);
-      return response.data;
+      return response;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
   }
 );
 export const fetchPermissionsByGroupList = createAsyncThunk(
-  'role/fetchList',
+  'role/fetchListGroup',
   async (params: IRequest, { rejectWithValue }) => {
     try {
       const response = await getRequest(`${endpoints.permission.list}/group`, defaultConfig);
@@ -86,7 +86,7 @@ const roleSlice = createSlice({
       .addCase(fetchRolesList.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.loading = false;
-        state.list = action.payload.data;
+        state.list = action.payload?.data?.data;
       })
       .addCase(fetchRolesList.rejected, (state, action) => {
         state.status = 'failed';
