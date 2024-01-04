@@ -1325,13 +1325,24 @@ const ShowAddressDialog = ({ closeDialog, adressValues, setAddressValues }: any)
               >
                 Address Type
               </Typography>
-              <RHFTextField
+              {/* <RHFTextField
                 variant="filled"
                 name="addressType"
                 value={undefined}
                 placeholder="Address Type"
-              />
-
+              /> */}
+              <FormControl fullWidth >
+                <Select
+                  variant='filled'
+                  name='addressType'
+                  value={undefined}
+                  onChange={(event: SelectChangeEvent) => methods.setValue('addressType', event.target.value)}
+                >
+                  <MenuItem value="Home" >Home</MenuItem>
+                  <MenuItem value="Apartment" >Apartment</MenuItem>
+                  <MenuItem value="Office" >Office</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
             <Grid xs={6}>
               <Typography
