@@ -106,6 +106,10 @@ export const endpoints = {
     varient: '/varient',
     rows: '/rows',
   },
+  builder: {
+    list: '/builder',
+    search: '/builder/search',
+  },
   customer: {
     list: '/customers',
     search: '/customers/search',

@@ -141,6 +141,7 @@ export default function EcomDesignMain() {
 
   const handleThemeConfig = (key: string, newValue: string) => {
     setThemeConfig(pv => ({ ...pv, [key]: newValue }));
+    console.log(`{"msg" :"ok"}`);
   };
 
   // using Ressponsive view 

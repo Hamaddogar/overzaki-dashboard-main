@@ -75,11 +75,11 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
       num: 3,
     },
     {
-      name: 'burgerboutique',
-      image: rest1,
+      name: 'cafe',
+      image: Cafe,
       type: 'restaurant',
-      url: 'https://burgerboutique.vercel.app',
-      num: 4,
+      url: 'https://resturant-ui-mu.vercel.app',
+      num: 6,
     },
     {
       name: 'burgerboutique',
@@ -88,20 +88,7 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
       url: 'https://burgerboutique.vercel.app',
       num: 4,
     },
-    {
-      name: 'burgerboutique',
-      image: rest1,
-      type: 'restaurant',
-      url: 'https://burgerboutique.vercel.app',
-      num: 4,
-    },
-    {
-      name: 'fatayer',
-      image: rest2,
-      type: 'restaurant',
-      url: 'https://fatayeralaaltayer.vercel.app',
-      num: 5,
-    },
+
     {
       name: 'fatayer',
       image: rest2,
@@ -147,20 +134,10 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
               grabCursor
               centeredSlides
               breakpoints={{
-                0: {
-                  slidesPerView: 1.3,
-                },
-
-                768: {
-                  // width: 768,
-                  slidesPerView: 2,
-                },
-                820: {
-                  slidesPerView: 2,
-                },
-                1024: {
-                  slidesPerView: 3,
-                },
+                0: { slidesPerView: 1 },
+                540: { slidesPerView: 2 },
+                1040: { slidesPerView: 3 },
+                1280: { slidesPerView: 3 },
               }}
               coverflowEffect={{
                 rotate: 0,

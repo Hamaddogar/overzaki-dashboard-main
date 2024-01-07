@@ -14,14 +14,20 @@ export interface IBuilderForm extends IRequest {
   balance: number;
   // examples
 }
-export const editDesignBuilder = createAsyncThunk('builder/editDesignBuilder', async () => {
 
+export const createBuilder = createAsyncThunk('builder/create', async (data: any) => {
+  const response = await postRequest(endpoints.builder.list, data, defaultConfig);
+
+  return response.data;
+});
+
+export const editDesignBuilder = createAsyncThunk('builder/editDesignBuilder', async () => {
   const response = await getRequest(endpoints.analytic.customers, defaultConfig);
 
   return response;
 });
 
-export const builderActivateWebsite= createAsyncThunk(
+export const builderActivateWebsite = createAsyncThunk(
   'builder/builderActivateWebsite',
   async (builderId: number) => {
     const response = await getRequest(`${endpoints.analytic.summary}/${builderId}`, defaultConfig);
@@ -30,13 +36,14 @@ export const builderActivateWebsite= createAsyncThunk(
   }
 );
 
-export const builderActivateApplication= createAsyncThunk('builder/builderActivateApplication', async (data: IBuilderForm) => {
-  const response = await postRequest(endpoints.analytic.vouchers, data, defaultConfig);
+export const builderActivateApplication = createAsyncThunk(
+  'builder/builderActivateApplication',
+  async (data: IBuilderForm) => {
+    const response = await postRequest(endpoints.analytic.vouchers, data, defaultConfig);
 
-  return response.data;
-});
-
-
+    return response.data;
+  }
+);
 
 const builderSlice = createSlice({
   name: 'builder',
@@ -54,12 +61,23 @@ const builderSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
+      .addCase(createBuilder.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createBuilder.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(createBuilder.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message !== undefined ? action.error.message : null;
+      })
+
       .addCase(editDesignBuilder.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(editDesignBuilder.fulfilled, (state, action) => {
-
         state.loading = false;
         state.list = action.payload;
       })
@@ -91,9 +109,7 @@ const builderSlice = createSlice({
       .addCase(builderActivateApplication.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
-
-
+      });
   },
 });
 export const { setBuilder } = builderSlice.actions;

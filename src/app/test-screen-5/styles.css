@@ -1,0 +1,210 @@
+.swiper-slide-active {
+  border: 4px solid #1bfcb6;
+  max-width: 370px;
+  padding: 7px;
+}
+.swiper-slide {
+  border-radius: 20px;
+}
+.swiper-image {
+  border-radius: 10px;
+  object-fit: cover;
+}
+.rainbow {
+  position: relative;
+  z-index: 0;
+  /* width: inherit;
+            height: inherit; */
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 2rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -2;
+    left: -50%;
+    top: -50%;
+    width: 200%;
+    height: 200%;
+    background-color: #399953;
+    background-repeat: no-repeat;
+    background-size:
+      50% 50%,
+      50% 50%;
+    background-position:
+      0 0,
+      100% 0,
+      100% 100%,
+      0 100%;
+    background-image: linear-gradient(#399953, #399953), linear-gradient(#fbb300, #fbb300),
+      linear-gradient(#d53e33, #d53e33), linear-gradient(#377af5, #377af5);
+    animation: rotate 8s alternate-reverse infinite;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 6px;
+    top: 6px;
+    width: calc(100% - 12px);
+    height: calc(100% - 12px);
+    background: white;
+    border-radius: 5px;
+    /* animation: opacityChange 3s infinite alternate; */
+  }
+}
+
+@keyframes opacityChange {
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.5;
+  }
+}
+
+.theme-title,
+.theme-subtitle {
+  position: absolute;
+  visibility: hidden;
+  /* top: 50%; */
+  top: 60%;
+  width: 0%;
+  margin: auto;
+  /* padding: 15px 10px; */
+  padding: 10px 5px;
+  background-color: rgb(31, 31, 31, 0.6);
+  color: #1bfbb6;
+  font-size: clamp(18px, 22px, 25px);
+  text-align: center;
+  border-radius: 5px;
+  backdrop-filter: blur(10px);
+  transition: all 0.5s;
+  opacity: 0;
+}
+
+.theme-subtitle {
+  top: 75% !important;
+}
+
+.rainbow:hover .theme-title {
+  transition: all 0.5s;
+  visibility: visible;
+  width: 80%;
+  opacity: 1;
+}
+
+.rainbow:hover .theme-subtitle {
+  transition: all 0.5s;
+  visibility: visible;
+  width: 80%;
+  opacity: 1;
+}
+
+/* Swiper 
+         */
+.swiper-slide-shadow-left,
+.swiper-slide-shadow-right {
+  display: none;
+}
+
+.slider-controler {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  bottom: 350px;
+  width: 100%;
+  margin: auto;
+  z-index: 999;
+}
+
+/* 
+  .slider-controler .swiper-button-next {
+    left: 36% !important;
+    transform: translateX(-58%) !important;
+  }
+  .slider-controler .swiper-button-prev {
+    left: 10% !important;
+    transform: translateX(-1080%) !important;
+  } */
+/* 
+  @media (max-width: 990px) {
+    .slider-controler .swiper-button-next {
+      left: 33% !important;
+      transform: translateX(-70%) !important;
+    }
+  }
+  
+  @media (max-width: 450px) {
+    .slider-controler .swiper-button-next {
+      left: 15% !important;
+      transform: translateX(-80%) !important;
+    }
+  }
+  
+  @media (max-width: 990px) {
+    .slider-controler .swiper-button-prev {
+      right: 24% !important;
+      transform: translateX(-30%) !important;
+    }
+  }
+  
+  @media (max-width: 450px) {
+    .slider-controler .swiper-button-prev {
+      right: 8% !important;
+      transform: translateX(-20%) !important;
+    }
+  } */
+
+.slider-controler .slider-arrow {
+  background: var(--white);
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+
+  filter: drop-shadow(0px 8px 24px rgba(40, 40, 41, 0.1));
+}
+
+.slider-controler .slider-arrow ion-icon {
+  font-size: 2rem;
+  color: #222224;
+}
+
+.slider-controler .slider-arrow::after {
+  content: '';
+}
+
+.swiper-pagination {
+  position: relative;
+  width: 15rem !important;
+  bottom: 1rem;
+}
+
+.swiper-pagination .swiper-pagination-bullet {
+  filter: drop-shadow(0px 8px 24px rgba(42, 42, 42, 0.1));
+}
+
+.swiper-pagination .swiper-pagination-bullet-active {
+  background: var(--primary);
+}
+
+.text-block-heading {
+  text-align: center;
+}
+.text-block-heading h3 {
+  font-size: 32px;
+  line-height: 0;
+  font-weight: 900;
+}
+.text-block-heading p {
+  color: #b9b8b8;
+}
+.swiper-button-prev.slider-arrow::after {
+  display: none;
+}
+.swiper-button-next.slider-arrow::after {
+  display: none;
+}

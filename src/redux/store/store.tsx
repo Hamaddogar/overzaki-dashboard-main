@@ -7,6 +7,7 @@ import locationReducer from './thunks/location';
 import rolesReducer from './thunks/roles';
 import ordersReducer from './thunks/defaultOrders';
 import paymentMethodReducer from './thunks/paymentMethods';
+import builderReducer from './thunks/builder';
 
 
 const store = configureStore({
@@ -18,7 +19,8 @@ const store = configureStore({
     locations: locationReducer,
     orders: ordersReducer,
     paymentMethods: paymentMethodReducer,
-    roles: rolesReducer
+    roles: rolesReducer,
+    builder: builderReducer
   },
 });
 export type RootState = ReturnType<typeof store.getState>;
