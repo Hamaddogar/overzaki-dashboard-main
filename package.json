@@ -17,7 +17,6 @@
     "re-build": "rm -rf node_modules .next out dist build && yarn install && yarn build"
   },
   "dependencies": {
-    "3d-react-carousal": "^5.0.0",
     "@auth0/auth0-react": "^2.2.0",
     "@aws-amplify/auth": "^5.5.4",
     "@emotion/cache": "^11.10.5",
@@ -45,6 +44,8 @@
     "@types/mongoose": "^5.11.97",
     "@types/react-google-recaptcha": "^2.1.8",
     "@types/react-redux": "^7.1.27",
+    "@types/socket.io": "^3.0.2",
+    "3d-react-carousal": "^5.0.0",
     "apexcharts": "^3.41.0",
     "autosuggest-highlight": "^3.3.4",
     "axios": "^1.4.0",
@@ -89,6 +90,7 @@
     "remark-gfm": "^3.0.1",
     "simplebar-react": "^3.2.4",
     "slick-carousel": "^1.8.1",
+    "socket.io-client": "^4.7.3",
     "stylis": "^4.3.0",
     "stylis-plugin-rtl": "^2.1.1",
     "swiper": "^11.0.5",
@@ -110,6 +112,7 @@
     "@types/react": "^18.2.15",
     "@types/react-lazy-load-image-component": "^1.5.3",
     "@types/react-slick": "^0.23.10",
+    "@types/socket.io-client": "^3.0.0",
     "@types/stylis": "^4.2.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
