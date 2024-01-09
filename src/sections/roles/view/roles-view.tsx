@@ -33,6 +33,9 @@ import {
   Alert,
   FormControlLabel,
   Checkbox,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
@@ -390,6 +393,23 @@ export default function RolesView() {
     fetchData();
   }, []);
 
+
+  const handleAddPermissions = (permissions: any) => {
+    const rolePermissionsArray = rolePermissions.concat(permissions.map(({ action }: any) => action));
+    setRolePermissions(rolePermissionsArray);
+  }
+
+
+  const handleRemovePermissions = (permissions: any) => {
+    const toRemove = permissions.map(({ action }: any) => action);
+    const rolePermissionsArray = rolePermissions.filter(function (el: any) {
+      return toRemove.indexOf(el) < 0;
+    });
+    setRolePermissions(rolePermissionsArray);
+  }
+
+
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <RoleBasedGuard hasContent permission="GET_ROLES">
@@ -634,67 +654,73 @@ export default function RolesView() {
 
                     <RHFTextField
                       fullWidth
+                      sx={{ mb: 2 }}
                       variant="filled"
                       settingStateValue={(e: any) => setRoleName(e.target.value)}
                       value={roleName || ''}
                       name="name"
                     />
 
+
                     {defaultPermissionOption.map((permissionsObj: any, index: any) => (
-                      <Stack
-                        key={index}
-                        mt="20px"
-                        pb="5px"
-                        direction="column"
-                        alignItems="flex-start"
-                        justifyContent="flex-start"
-                      >
-                        <Typography component="p" variant="subtitle1">
-                          {permissionsObj?.subject}
-                        </Typography>
-                        <Divider />
-                        {permissionsObj?.permissions?.map((permissionObj: any, ind: any) => (
-                          <Stack
-                            key={ind}
-                            width="100%"
-                            mt="20px"
-                            pb="5px"
-                            direction="row"
-                            alignItems="center"
-                            justifyContent="space-between"
-                          >
-                            <Box>
-                              <Typography
-                                component="p"
-                                variant="subtitle2"
-                                sx={{ opacity: 0.7, fontSize: '.9rem' }}
-                              >
-                                {permissionObj?.function}
-                              </Typography>
-                            </Box>
-                            <RHFSwitch
-                              label=""
-                              checked={rolePermissions?.includes(permissionObj?.action) || false}
-                              onChange={(e: any) => {
-                                if (e.target.checked) {
-                                  const rolePermissionsArray = [
-                                    ...rolePermissions,
-                                    permissionObj?.action,
-                                  ];
-                                  setRolePermissions(rolePermissionsArray);
-                                } else {
-                                  const rolePermissionsArray = rolePermissions.filter(
-                                    (item: any) => item !== permissionObj?.action
-                                  );
-                                  setRolePermissions(rolePermissionsArray);
-                                }
-                              }}
-                              name="status"
-                              inputProps={{ 'aria-label': 'secondary checkbox' }}
-                            />
-                          </Stack>
-                        ))}
-                      </Stack>
+
+                      <Accordion>
+                        <Stack
+                          pb="5px"
+                          width="100%"
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                        >
+                          <AccordionSummary>
+                            <Typography component="p" variant="subtitle1">
+                              {permissionsObj?.subject}
+                            </Typography>
+                          </AccordionSummary>
+                          <RHFSwitch
+                            label=""
+                            checked={permissionsObj?.permissions.some((funPermission: any) => rolePermissions.includes(funPermission.action))}
+                            // checked={false}
+                            onChange={(e: any) => {
+                              if (e.target.checked) {
+
+                                handleAddPermissions(permissionsObj?.permissions)
+
+                              } else {
+                                handleRemovePermissions(permissionsObj?.permissions)
+
+                              }
+                            }}
+                            name="status"
+                            inputProps={{ 'aria-label': 'secondary checkbox' }}
+                          />
+                        </Stack>
+
+                        <AccordionDetails>
+                          <Divider />
+                          {permissionsObj?.permissions?.map((permissionObj: any, ind: any) => (
+                            <Stack
+                              key={ind}
+                              width="100%"
+                              mt="20px"
+                              pb="5px"
+                              direction="row"
+                              alignItems="center"
+                              justifyContent="space-between"
+                            >
+                              <Box>
+                                <Typography
+                                  component="p"
+                                  variant="subtitle2"
+                                  sx={{ opacity: 0.7, fontSize: '.9rem' }}
+                                >
+                                  {permissionObj?.function}
+                                </Typography>
+                              </Box>
+                            </Stack>
+                          ))}
+                        </AccordionDetails>
+                      </Accordion>
                     ))}
                   </Box>
                 </FormProvider>

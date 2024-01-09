@@ -42,6 +42,8 @@ import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { useAuthContext } from 'src/auth/hooks';
 import NavigatorBar from 'src/components/NavigatorBar';
 import { fetchRolesList } from 'src/redux/store/thunks/roles';
+import Link from 'next/link';
+import { paths } from 'src/routes/paths';
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -71,29 +73,29 @@ export default function StaffManagment() {
   const pageSize = 5;
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'new') {
-        setOpenCreateStaff((pv) => !pv);
-        setEditId(id);
-        if (id) {
-          dispatch(fetchOneStaffManagement(id)).then((response: any) => {
-            const { user, adminName } = response.payload;
-            const { gender, email, location, phoneNumber, preferedLanguage, roles } = user;
-            delete adminName.localized;
-            const userObj = {
-              adminName,
-              gender,
-              email,
-              location,
-              phoneNumber,
-              preferedLanguage,
-              roles,
-            };
-            setUserData(userObj);
-          });
-        }
-      } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
-    };
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'new') {
+          setOpenCreateStaff((pv) => !pv);
+          setEditId(id);
+          if (id) {
+            dispatch(fetchOneStaffManagement(id)).then((response: any) => {
+              const { user, adminName } = response.payload;
+              const { gender, email, location, phoneNumber, preferedLanguage, roles } = user;
+              delete adminName.localized;
+              const userObj = {
+                adminName,
+                gender,
+                email,
+                location,
+                phoneNumber,
+                preferedLanguage,
+                roles,
+              };
+              setUserData(userObj);
+            });
+          }
+        } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
+      };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -308,18 +310,27 @@ export default function StaffManagment() {
         <Grid item xs={12} md="auto">
           <CustomCrumbs
             heading="Staff Management"
-            description={`${
-              staffLength
-                ? staffLength === 1
-                  ? `${staffLength} Staff Member`
-                  : `${staffLength} Staff Members`
-                : `${0} Staff Members`
-            }`}
+            description={`${staffLength
+              ? staffLength === 1
+                ? `${staffLength} Staff Member`
+                : `${staffLength} Staff Members`
+              : `${0} Staff Members`
+              }`}
           />
         </Grid>
 
         <Grid item xs={12} md={5}>
           <BottomActions>
+            <Button
+              startIcon="+"
+              sx={{ borderRadius: '30px', color: '#0F1349', mr: 2 }}
+              component={Link}
+              href={paths.dashboard.roles.root}
+              variant="contained"
+              color="primary"
+            >
+              Add New Role
+            </Button>
             <Stack
               direction={{ xs: 'column', sm: 'row' }}
               alignItems="center"

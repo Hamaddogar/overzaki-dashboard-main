@@ -1,3 +1,5 @@
+/* eslint-disable import/no-extraneous-dependencies */
+
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import {
   getRequest,
@@ -15,6 +17,12 @@ export interface IBuilderForm extends IRequest {
   // examples
 }
 
+export const createSocketRequest = createAsyncThunk(
+  'builder/socket',
+  async (data: any) => data
+  // const response = await postRequest(endpoints.builder.list, data, defaultConfig);
+  // return response.data;
+);
 export const createBuilder = createAsyncThunk('builder/create', async (data: any) => {
   const response = await postRequest(endpoints.builder.list, data, defaultConfig);
 

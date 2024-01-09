@@ -15,12 +15,16 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Tooltip from '@mui/material/Tooltip';
 import Fade from '@mui/material/Fade';
 import Typography from '@mui/material/Typography';
+import { useDispatch } from 'react-redux';
+import { createSocketRequest } from 'src/redux/store/thunks/builder';
+
 import { Stack, Divider, Container } from '@mui/material';
 // components
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar/scrollbar';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { BottomActions } from 'src/components/bottom-actions';
+import io from 'socket.io-client';
 import OutPutView from './out-put/view/out-put-view';
 import Buttons from './out-put/Buttons-Design-selection';
 import HeaderSection from './out-put/header-section';
@@ -49,7 +53,6 @@ import UserViewDealer from './out-put/user-view-selection';
 import Actions from './Actions';
 import SaveSettings from '../../utils/save-settings';
 
-
 const dataPages = [
   { title: "Home Page", link: 'https://ecom-zaki.vercel.app/' },
   { title: "Products Page", link: 'https://ecom-zaki.vercel.app/products' },
@@ -68,6 +71,10 @@ interface ControllsState {
   // analytics: EventTarget & (Element | HTMLElement) | null;
 }
 
+const domain = 'https://www.overzaki.io';
+const token =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTcwOTgwMTI0MTUwZjQ3YzQwNGI2ODQiLCJkZXZpY2VOYW1lIjoidW5pcXVlIGRldmljZSBuYW1lIiwiaWF0IjoxNzA0MzU5MzY4LCJleHAiOjE3MDUyMjMzNjh9.wC0JtvEO3wrCG7qpLJbipZijZTt0Z3znEgCwuXafBBw';
+const socket = io(`${domain}/design?token=${token}`);
 
 
 export default function EcomDesignMain() {
@@ -139,10 +146,30 @@ export default function EcomDesignMain() {
   const url = searchParams.get('url')?.toString() || "";
 
 
+  const dispatch = useDispatch();
+
+
   const handleThemeConfig = (key: string, newValue: string) => {
     setThemeConfig(pv => ({ ...pv, [key]: newValue }));
-    console.log(`{"msg" :"ok"}`);
+
+
+
+
+    // console.log(`{"msg" :"ok"}`);
+    const data = {
+      builderId: "659676a66df6d491eedf922d",
+      key: "font-style",
+      value: "Sunsarif"
+    };
+    const responseData = socket.emit('website:cmd', data)
+
+
+    // dispatch(createSocketRequest(data)).then((response: any) => {
+    //   console.log("response", response);
+    // })
   };
+
+
 
   // using Ressponsive view 
   const smUp = useResponsive('up', 'sm');
