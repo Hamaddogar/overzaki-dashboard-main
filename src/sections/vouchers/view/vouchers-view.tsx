@@ -33,6 +33,7 @@ import {
   Alert,
   FormControlLabel,
   Checkbox,
+  Paper,
 } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
@@ -634,151 +635,151 @@ export default function OrdersListView() {
                                   item
                                   xs={12}
                                 >
-                                  {/* <Paper elevation={4} > */}
-                                  <Grid
-                                    container
-                                    item
-                                    alignItems="center"
-                                    justifyContent="space-between"
-                                    rowGap={3}
-                                    p={3}
-                                    minHeight="80px"
-                                    sx={voucher.status ? stylesActive : stylesDisabled}
-                                  >
+                                  <Paper elevation={4} >
                                     <Grid
+                                      container
                                       item
-                                      sx={{ display: 'flex', alignItems: 'end' }}
-                                      xs={6}
-                                      md="auto"
+                                      alignItems="center"
+                                      justifyContent="space-between"
+                                      rowGap={3}
+                                      p={3}
+                                      minHeight="80px"
+                                      sx={voucher.status ? stylesActive : stylesDisabled}
                                     >
-                                      <div {...provided.dragHandleProps}>
-                                        <Iconify icon="ci:drag-vertical" />
-                                      </div>
-                                      <Box sx={{ minWidth: { xs: 'auto', md: '140px' } }}>
-                                        <Typography
-                                          component="p"
-                                          color="#8688A3"
-                                          variant="subtitle2"
-                                          sx={{ fontSize: '.8rem' }}
-                                        >
-                                          {voucher?.name?.en || voucher?.name}
-                                        </Typography>
-                                        {voucher.status ? (
-                                          <Typography
-                                            component="p"
-                                            color="#0D6EFD"
-                                            variant="subtitle2"
-                                            sx={{
-                                              mt: '5px',
-                                              fontWeight: 900,
-                                              cursor: 'pointer',
-                                              fontSize: '.8rem',
-                                              display: 'flex',
-                                              alignItems: 'center',
-                                              gap: '8px',
-                                            }}
-                                            onClick={() => onCopy(voucher.code)}
-                                          >
-                                            {voucher.code} <Iconify icon="tabler:copy" />{' '}
-                                          </Typography>
-                                        ) : (
+                                      <Grid
+                                        item
+                                        sx={{ display: 'flex', alignItems: 'end' }}
+                                        xs={6}
+                                        md="auto"
+                                      >
+                                        <div {...provided.dragHandleProps}>
+                                          <Iconify icon="ci:drag-vertical" />
+                                        </div>
+                                        <Box sx={{ minWidth: { xs: 'auto', md: '140px' } }}>
                                           <Typography
                                             component="p"
                                             color="#8688A3"
                                             variant="subtitle2"
-                                            sx={{ mt: '5px', fontWeight: 900, fontSize: '.8rem' }}
+                                            sx={{ fontSize: '.8rem' }}
                                           >
-                                            {voucher.code}
+                                            {voucher?.name?.en || voucher?.name}
                                           </Typography>
-                                        )}
-                                      </Box>
-                                    </Grid>
-
-                                    <Grid item xs={6} md="auto">
-                                      <Typography
-                                        component="p"
-                                        color="#0F1349"
-                                        variant="subtitle2"
-                                        sx={{ fontSize: '.8rem' }}
-                                      >
-                                        {voucher.type === 'FIXED_AMOUNT'
-                                          ? `${voucher.discountAmount} KWD`
-                                          : `${voucher.discountPercentage}%`}{' '}
-                                        <span style={{ fontSize: '.7rem' }}>({voucher.type})</span>{' '}
-                                      </Typography>
-                                    </Grid>
-                                    <Grid item xs={6} md="auto">
-                                      <Typography
-                                        component="p"
-                                        color="#0F1349"
-                                        variant="subtitle2"
-                                        sx={{ fontSize: '.8rem' }}
-                                      >
-                                        {voucher.totalUses} Uses{' '}
-                                      </Typography>
-                                    </Grid>
-
-                                    <Grid item xs={6} md="auto">
-                                      <Box
-                                        sx={{ display: 'flex', alignItems: 'center', gap: '13px' }}
-                                      >
-                                        <Box
-                                          sx={{
-                                            width: '36px',
-                                            height: '36px',
-                                            borderRadius: '20px',
-                                            background: 'rgb(134, 136, 163,0.09)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            cursor: 'pointer',
-                                            '&:hover': {
-                                              background: 'rgb(134, 136, 163,0.2)',
-                                            },
-                                          }}
-                                          // onClick={toggleDrawerCommon("delete", voucher._id)}
-                                          onClick={() => {
-                                            setRemoveData(voucher._id);
-                                            confirm.onTrue();
-                                          }}
-                                        >
-                                          {allowAction.remove && (
-                                            <Box
-                                              component="img"
-                                              src="/raw/trash-can-solid.svg"
-                                              width="13px"
-                                            />
+                                          {voucher.status ? (
+                                            <Typography
+                                              component="p"
+                                              color="#0D6EFD"
+                                              variant="subtitle2"
+                                              sx={{
+                                                mt: '5px',
+                                                fontWeight: 900,
+                                                cursor: 'pointer',
+                                                fontSize: '.8rem',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                              }}
+                                              onClick={() => onCopy(voucher.code)}
+                                            >
+                                              {voucher.code} <Iconify icon="tabler:copy" />{' '}
+                                            </Typography>
+                                          ) : (
+                                            <Typography
+                                              component="p"
+                                              color="#8688A3"
+                                              variant="subtitle2"
+                                              sx={{ mt: '5px', fontWeight: 900, fontSize: '.8rem' }}
+                                            >
+                                              {voucher.code}
+                                            </Typography>
                                           )}
                                         </Box>
-                                        <Box
-                                          sx={{
-                                            width: '36px',
-                                            height: '36px',
-                                            borderRadius: '20px',
-                                            background: 'rgb(134, 136, 163,0.09)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            cursor: 'pointer',
-                                            '&:hover': {
-                                              background: 'rgb(134, 136, 163,0.2)',
-                                            },
-                                          }}
-                                          onClick={toggleDrawerCommon('new', voucher._id)}
+                                      </Grid>
+
+                                      <Grid item xs={6} md="auto">
+                                        <Typography
+                                          component="p"
+                                          color="#0F1349"
+                                          variant="subtitle2"
+                                          sx={{ fontSize: '.8rem' }}
                                         >
-                                          {allowAction.edit && (
-                                            <Box
-                                              component="img"
-                                              src="/raw/edit-pen.svg"
-                                              width="13px"
-                                            />
-                                          )}
+                                          {voucher.type === 'FIXED_AMOUNT'
+                                            ? `${voucher.discountAmount} KWD`
+                                            : `${voucher.discountPercentage}%`}{' '}
+                                          <span style={{ fontSize: '.7rem' }}>({voucher.type})</span>{' '}
+                                        </Typography>
+                                      </Grid>
+                                      <Grid item xs={6} md="auto">
+                                        <Typography
+                                          component="p"
+                                          color="#0F1349"
+                                          variant="subtitle2"
+                                          sx={{ fontSize: '.8rem' }}
+                                        >
+                                          {voucher.totalUses} Uses{' '}
+                                        </Typography>
+                                      </Grid>
+
+                                      <Grid item xs={6} md="auto">
+                                        <Box
+                                          sx={{ display: 'flex', alignItems: 'center', gap: '13px' }}
+                                        >
+                                          <Box
+                                            sx={{
+                                              width: '36px',
+                                              height: '36px',
+                                              borderRadius: '20px',
+                                              background: 'rgb(134, 136, 163,0.09)',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              cursor: 'pointer',
+                                              '&:hover': {
+                                                background: 'rgb(134, 136, 163,0.2)',
+                                              },
+                                            }}
+                                            // onClick={toggleDrawerCommon("delete", voucher._id)}
+                                            onClick={() => {
+                                              setRemoveData(voucher._id);
+                                              confirm.onTrue();
+                                            }}
+                                          >
+                                            {allowAction.remove && (
+                                              <Box
+                                                component="img"
+                                                src="/raw/trash-can-solid.svg"
+                                                width="13px"
+                                              />
+                                            )}
+                                          </Box>
+                                          <Box
+                                            sx={{
+                                              width: '36px',
+                                              height: '36px',
+                                              borderRadius: '20px',
+                                              background: 'rgb(134, 136, 163,0.09)',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              cursor: 'pointer',
+                                              '&:hover': {
+                                                background: 'rgb(134, 136, 163,0.2)',
+                                              },
+                                            }}
+                                            onClick={toggleDrawerCommon('new', voucher._id)}
+                                          >
+                                            {allowAction.edit && (
+                                              <Box
+                                                component="img"
+                                                src="/raw/edit-pen.svg"
+                                                width="13px"
+                                              />
+                                            )}
+                                          </Box>
+                                          {/* <Switch checked={voucher.status} /> */}
                                         </Box>
-                                        {/* <Switch checked={voucher.status} /> */}
-                                      </Box>
+                                      </Grid>
                                     </Grid>
-                                  </Grid>
-                                  {/* </Paper> */}
+                                  </Paper>
                                 </Grid>
                               )}
                             </Draggable>

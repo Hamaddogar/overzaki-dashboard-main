@@ -240,14 +240,17 @@ export const paths = {
     design: {
       root: `${ROOTS.DASHBOARD}/design`,
       themes: (theme_type: string) => `${ROOTS.DASHBOARD}/design/${theme_type}`,
-      theme: (theme_type: string, theme_name: string, theme_url: string) =>
-        `${ROOTS.DASHBOARD}/design/${theme_type}/${theme_name}?url=${theme_url}`,
+      theme: (theme_type: string, theme_name: string, theme_url: string, id: string) =>
+        `${ROOTS.DASHBOARD}/design/${theme_type}/${theme_name}?id=${id}&url=${theme_url}`,
       market: {
         root: `${ROOTS.DASHBOARD}/design/market`,
         preview: `${ROOTS.DASHBOARD}/design/market/preview`,
         edit: `${ROOTS.DASHBOARD}/design/market/edit`,
         theme: (theme_name: string) => `${ROOTS.DASHBOARD}/design/market/${theme_name}`,
       },
+    },
+    newDesign: {
+      root: `${ROOTS.DASHBOARD}/new-design`,
     },
   },
 };

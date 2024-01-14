@@ -2,7 +2,7 @@
 
 'use client';
 
-import { Box, Switch, Typography } from '@mui/material';
+import { Box, Switch, Typography, Button } from '@mui/material';
 import Link from 'next/link';
 import React, { useState } from 'react';
 import ArrowForwardIosOutlinedIcon from '@mui/icons-material/ArrowForwardIosOutlined';
@@ -11,15 +11,15 @@ import { paths } from 'src/routes/paths';
 
 const AppLang = (props: any) => {
     const [languages, setLanguages] = useState<any>({
-        eng: false,
+        en: false,
         ar: false,
     });
     // const [arDefault, setArDefault] = useState('set as default');
-    const [enDefault, setEnDefault] = useState('eng');
+    const [enDefault, setEnDefault] = useState('en');
 
     const handleNext = () => {
         const { setSteps, setAddData, addData } = props;
-        setAddData({ ...addData, appLanguage: { en: languages?.eng, ar: languages?.ar } });
+        setAddData({ ...addData, appLanguage: { en: languages?.en, ar: languages?.ar } });
         setSteps(6);
     }
     const handleBack = () => {
@@ -50,15 +50,15 @@ const AppLang = (props: any) => {
                 >
                     <Switch
                         color="primary"
-                        checked={languages.eng}
-                        onChange={() => setLanguages((prev: any) => ({ ...prev, eng: !prev.eng }))}
+                        checked={languages.en}
+                        onChange={() => setLanguages((prev: any) => ({ ...prev, en: !prev.en }))}
                     />
                     <Typography variant="button" sx={{ fontWeight: 900 }}>
                         English
                     </Typography>
                 </div>
-                <Box onClick={() => setEnDefault('eng')} sx={{ cursor: "pointer" }} >
-                    {enDefault === 'eng' ? 'Default' : 'Set as Default'}
+                <Box onClick={() => setEnDefault('en')} sx={{ cursor: "pointer" }} >
+                    {enDefault === 'en' ? 'Default' : 'Set as Default'}
                 </Box>
             </div>
             <div
@@ -120,14 +120,13 @@ const AppLang = (props: any) => {
                 </Box>
 
                 {(languages.en === true || languages.ar === true) && (
-                    <Linker
+                    <Box
                         // href="/test-screen-5"
-                        // onClick={handleNext}
-                        path={paths.dashboard.design.themes(props?.addData.BusinessType.toLowerCase())}
+                        onClick={handleNext}
+                        // path={paths.dashboard.design.themes(props?.addData.BusinessType.toLowerCase())}
                         sx={{
                             color: 'black',
                             width: '100%',
-                            display: (languages.en || languages.ar) ? 'flex' : 'none',
                             alignItems: 'center',
                             justifyContent: 'center',
                         }}
@@ -142,7 +141,7 @@ const AppLang = (props: any) => {
                                 bottom: '20px',
                             }}
                         />
-                    </Linker>
+                    </Box>
                 )}
             </Box>
         </div>

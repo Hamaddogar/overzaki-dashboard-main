@@ -6,7 +6,7 @@ import { Stack, Typography, Box, RadioGroup, FormControlLabel, Radio } from '@mu
 
 interface FontFamilyProps {
     themeConfig: {
-        font: string;
+        fontStyle: string;
         // Add other themeConfig properties as needed
     };
     handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
@@ -38,98 +38,98 @@ const dataFamlies = [
     },
 ];
 
-export default function FontFamilyDealer({ themeConfig, handleThemeConfig,mobile=false }: FontFamilyProps) {
+export default function FontFamilyDealer({ themeConfig, handleThemeConfig, mobile = false }: FontFamilyProps) {
 
     return (
         <Box>
             {
-                mobile ? 
-                <RadioGroup
-                aria-labelledby="radio-buttons-font-family-group-label"
-                defaultValue={themeConfig?.font}
-                name="radio-buttons-font-family-group"
-                onChange={(event) => handleThemeConfig('font', event.target.value)}
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  gap: '20px',
-                  alignItems: 'center',
-                  flexWrap: 'nowrap'
-                }}
-              >
-                {
-                  dataFamlies.map((family, indx) => (
-                    <FormControlLabel
-                    sx={{ fontFamily: family.familyName }} // Apply custom font here
-                    key={indx}
-                    value={family.familyName}
-                    control={<Radio checked={family.familyName === themeConfig.font} size='medium' sx={{display:'none'}} />}
-                     label={
-                      <Stack alignItems='center' spacing='10px'>
-                        <Stack alignItems='center' justifyContent='center' sx={{
-                          width: "60px",
-                          height: "60px",
-                          borderRadius: "12px",
-                          background: family.familyName === themeConfig.font ? "#1BFBB6" : '#F5F5F8',
-                        }}>
-                          <Typography sx={{ fontFamily: family.familyName, fontWeight: 900 }} variant='h6'>Aa</Typography>
-                        </Stack>
-                        <Typography variant='button' noWrap color={family.familyName === themeConfig.font ? '#0F1349' : '#8688A3'} >{family.name}</Typography>
-                      </Stack>
-                    } />
-                  ))
-                }
-
-
-              </RadioGroup>
-                :
-
-            <RadioGroup
-                aria-labelledby="radio-buttons-font-family-group-label"
-                defaultValue={themeConfig?.font}
-                name="radio-buttons-font-family-group"
-                onChange={(event) => handleThemeConfig('font', event.target.value)}
-                sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '20px',
-                }}
-            >
-                {dataFamlies.map((family, indx) => (
-                    <FormControlLabel
-                        sx={{ fontFamily: family.familyName }} // Apply custom font here
-                        key={indx}
-                        value={family.familyName}
-                        control={<Radio checked={family.familyName === themeConfig.font} size='medium' />}
-                        label={
-                            <Stack direction='row' alignItems='center' spacing='20px' ml='15px'>
-                                <Stack
-                                    alignItems='center'
-                                    justifyContent='center'
-                                    sx={{
-                                        width: "60px",
-                                        height: "60px",
-                                        borderRadius: "12px",
-                                        background: family.familyName === themeConfig.font ? "#1BFBB6" : '#F5F5F8',
-                                    }}
-                                >
-                                    <Typography
-                                        sx={{ fontFamily: family.familyName, fontWeight: 900 }} // Apply custom font here
-                                    >
-                                        Aa
-                                    </Typography>
-                                </Stack>
-                                <Typography
+                mobile ?
+                    <RadioGroup
+                        aria-labelledby="radio-buttons-font-family-group-label"
+                        value={themeConfig?.fontStyle || null}
+                        name="radio-buttons-font-family-group"
+                        onChange={(event) => handleThemeConfig('fontStyle', event.target.value)}
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            gap: '20px',
+                            alignItems: 'center',
+                            flexWrap: 'nowrap'
+                        }}
+                    >
+                        {
+                            dataFamlies.map((family, indx) => (
+                                <FormControlLabel
                                     sx={{ fontFamily: family.familyName }} // Apply custom font here
-                                    color={family.familyName === themeConfig.font ? '#0F1349' : '#8688A3'}
-                                >
-                                    {family.name}
-                                </Typography>
-                            </Stack>
+                                    key={indx}
+                                    value={family.familyName}
+                                    control={<Radio checked={family.familyName === themeConfig.fontStyle} size='medium' sx={{ display: 'none' }} />}
+                                    label={
+                                        <Stack alignItems='center' spacing='10px'>
+                                            <Stack alignItems='center' justifyContent='center' sx={{
+                                                width: "60px",
+                                                height: "60px",
+                                                borderRadius: "12px",
+                                                background: family.familyName === themeConfig.fontStyle ? "#1BFBB6" : '#F5F5F8',
+                                            }}>
+                                                <Typography sx={{ fontFamily: family.familyName, fontWeight: 900 }} variant='h6'>Aa</Typography>
+                                            </Stack>
+                                            <Typography variant='button' noWrap color={family.familyName === themeConfig.fontStyle ? '#0F1349' : '#8688A3'} >{family.name}</Typography>
+                                        </Stack>
+                                    } />
+                            ))
                         }
-                    />
-                ))}
-            </RadioGroup>
+
+
+                    </RadioGroup>
+                    :
+
+                    <RadioGroup
+                        aria-labelledby="radio-buttons-font-family-group-label"
+                        value={themeConfig?.fontStyle}
+                        name="radio-buttons-font-family-group"
+                        onChange={(event) => handleThemeConfig('fontStyle', event.target.value)}
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '20px',
+                        }}
+                    >
+                        {dataFamlies.map((family, indx) => (
+                            <FormControlLabel
+                                sx={{ fontFamily: family.familyName }} // Apply custom font here
+                                key={indx}
+                                value={family.familyName}
+                                control={<Radio checked={family.familyName === themeConfig.fontStyle} size='medium' />}
+                                label={
+                                    <Stack direction='row' alignItems='center' spacing='20px' ml='15px'>
+                                        <Stack
+                                            alignItems='center'
+                                            justifyContent='center'
+                                            sx={{
+                                                width: "60px",
+                                                height: "60px",
+                                                borderRadius: "12px",
+                                                background: family.familyName === themeConfig.fontStyle ? "#1BFBB6" : '#F5F5F8',
+                                            }}
+                                        >
+                                            <Typography
+                                                sx={{ fontFamily: family.familyName, fontWeight: 900 }} // Apply custom font here
+                                            >
+                                                Aa
+                                            </Typography>
+                                        </Stack>
+                                        <Typography
+                                            sx={{ fontFamily: family.familyName }} // Apply custom font here
+                                            color={family.familyName === themeConfig.fontStyle ? '#0F1349' : '#8688A3'}
+                                        >
+                                            {family.name}
+                                        </Typography>
+                                    </Stack>
+                                }
+                            />
+                        ))}
+                    </RadioGroup>
             }
 
         </Box>

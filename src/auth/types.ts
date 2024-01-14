@@ -19,6 +19,7 @@ export type AuthStateType = {
   status?: string;
   loading: boolean;
   user: AuthUserType;
+  socketURL?: any;
 };
 
 // ----------------------------------------------------------------------
@@ -50,6 +51,7 @@ type CanRemove = {
 
 export type JWTContextType = CanRemove & {
   user: AuthUserType;
+  socketURL: any;
   method: string;
   loading: boolean;
   authenticated: boolean;

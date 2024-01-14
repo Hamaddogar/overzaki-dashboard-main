@@ -1,5 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import {
   getRequest,
@@ -17,16 +15,29 @@ export interface IBuilderForm extends IRequest {
   // examples
 }
 
+export const fetchBuilderList = createAsyncThunk(
+  'builder/fetchList',
+  async (params: IRequest, { rejectWithValue }) => {
+    try {
+      const response = await getRequest(endpoints.builder.list, defaultConfig);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 export const createSocketRequest = createAsyncThunk(
   'builder/socket',
   async (data: any) => data
   // const response = await postRequest(endpoints.builder.list, data, defaultConfig);
   // return response.data;
 );
-export const createBuilder = createAsyncThunk('builder/create', async (data: any) => {
+export const createBuilderFun = createAsyncThunk('builder/create', async (data: any) => {
+  defaultConfig.headers['Content-Type'] = 'multipart/form-data';
   const response = await postRequest(endpoints.builder.list, data, defaultConfig);
 
-  return response.data;
+  return response;
 });
 
 export const editDesignBuilder = createAsyncThunk('builder/editDesignBuilder', async () => {
@@ -60,6 +71,7 @@ const builderSlice = createSlice({
     builder: null,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setBuilder: (state, action: PayloadAction<any>) => {
@@ -69,14 +81,30 @@ const builderSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
-      .addCase(createBuilder.pending, (state) => {
+      .addCase(fetchBuilderList.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.status = 'loading';
+      })
+      .addCase(fetchBuilderList.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = action.payload.data;
+        state.status = 'succeeded';
+      })
+      .addCase(fetchBuilderList.rejected, (state, action) => {
+        state.status = 'failed';
+        state.loading = false;
+        state.error = action.error.message !== undefined ? action.error.message : null;
+      })
+
+      .addCase(createBuilderFun.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(createBuilder.fulfilled, (state) => {
+      .addCase(createBuilderFun.fulfilled, (state) => {
         state.loading = false;
       })
-      .addCase(createBuilder.rejected, (state, action) => {
+      .addCase(createBuilderFun.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
       })

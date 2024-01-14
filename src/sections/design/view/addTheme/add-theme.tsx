@@ -14,11 +14,14 @@ import { Button } from '@mui/base';
 
 export default function AddTheme(props: any) {
 
+    console.log("weas");
+
+
     const [selectedItem, setSelectedItem] = useState<string>('');
     const data = [
         {
             icon: 'ic:baseline-laptop',
-            title: 'Websites',
+            title: 'Website',
         },
         {
             icon: 'clarity:mobile-solid',

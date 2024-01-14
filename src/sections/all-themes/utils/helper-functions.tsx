@@ -1,5 +1,37 @@
 import { ChangeEvent } from "react";
+import { useAuthContext } from "src/auth/hooks";
+import io from 'socket.io-client';
 
+
+
+export const socketClient = () => {
+  // const { socketURL } = useAuthContext();
+  // const socketURL = sessionStorage.getItem('socketURL');
+  const socketURL = process.env.NEXT_PUBLIC_SOCKET_URL;
+  if (socketURL) {
+    console.log("socketURL", socketURL);
+
+    const socket = io(socketURL, {
+      // autoConnect: false,
+      transports: ['websocket'],
+      upgrade: false,
+    });
+    socket.on("connect", () => {
+      // console.log("Connected")
+    })
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected")
+    })
+
+    socket.on("connect_error", async err => {
+      // console.log(`connect_error due to ${err.message}`)
+      await fetch("/api/socket")
+    })
+
+    return socket;
+  }
+}
 
 export const handleImageChange64 = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
   const file = event.target.files?.[0];

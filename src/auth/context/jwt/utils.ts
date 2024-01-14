@@ -73,3 +73,12 @@ export const setSession = (accessToken: string | null) => {
     delete axios.defaults.headers.common.Authorization;
   }
 };
+// ----------------------------------------------------------------------
+
+export const setSocketURL = (URL: string | null) => {
+  if (URL) {
+    sessionStorage.setItem('socketURL', URL);
+  } else {
+    sessionStorage.removeItem('socketURL');
+  }
+};

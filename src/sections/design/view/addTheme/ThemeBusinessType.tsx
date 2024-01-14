@@ -7,12 +7,13 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { Grid } from '@mui/material';
 import ArrowForwardIosOutlinedIcon from '@mui/icons-material/ArrowForwardIosOutlined';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 // components
 import { paths } from 'src/routes/paths';
 import Linker from 'src/sections/overview/subscription-plan/link';
 import { Icon } from '@iconify/react';
 import Link from 'next/link';
+import ThemesViewRoot from 'src/sections/all-themes/view/themes-view';
 
 
 const data = [
@@ -86,115 +87,194 @@ const data = [
     },
 ];
 
-const ThemeBusinessType = (props: any) => {
+const ThemeBusinessType = ({ steps, setSteps, setAddData, addData }: any) => {
 
-    const [selectedItem, setSelectedItem] = useState<string>();
+    const [selectedItem, setSelectedItem] = useState<string>("");
+    const [selectedTheme, setSelectedTheme] = useState<string>("")
+
+    useEffect(() => {
+        setSelectedTheme("");
+    }, [selectedItem])
+
 
     const handleNext = () => {
-        const { setSteps, setAddData, addData } = props;
-        setAddData({ ...addData, BusinessType: selectedItem })
+        setAddData({ ...addData, BusinessType: selectedItem, theme: selectedTheme })
         setSteps(3);
     }
     const handleBack = () => {
-        const { steps, setSteps, setAddData, addData } = props;
         setAddData({ ...addData, BusinessType: "" })
         setSteps(steps - 1);
     }
-    return (
-        <Box sx={{ transition: 'all .5', paddingBottom: '30px' }}>
-            <Typography variant="h3" sx={{ textAlign: 'center', padding: { xs: '5px', sm: '13px' } }}>
-                What is the type of your business?
-            </Typography>
-            <Typography variant="h6" sx={{ textAlign: 'center', padding: { xs: '5px', sm: '13px' } }}>
-                Select your story type
-            </Typography>
+    const resetTheme = () => {
+        setSelectedItem("");
+    }
 
-            <Grid container spacing={2} mt={2} px={2}>
-                {data.map((item, indx) => (
-                    <Grid onClick={() => setSelectedItem(item.title)} item key={indx} xs={6} sm={4} md={3}>
+    const handleSelectTheme = (e: any) => {
+        setSelectedTheme(e);
+        setAddData({ ...addData, theme: e });
+        setSteps(3);
+    }
+
+    return (
+        <>
+
+            {!selectedItem ? (
+                <Box sx={{ transition: 'all .5', paddingBottom: '30px' }}>
+                    <Typography variant="h3" sx={{ textAlign: 'center', padding: { xs: '5px', sm: '13px' } }}>
+                        What is the type of your business?
+                    </Typography>
+                    <Typography variant="h6" sx={{ textAlign: 'center', padding: { xs: '5px', sm: '13px' } }}>
+                        Select your story type
+                    </Typography>
+
+                    <Grid container spacing={2} mt={2} px={2}>
+                        {data.map((item, indx) => (
+                            <Grid onClick={() => setSelectedItem(item.title)} item key={indx} xs={6} sm={4} md={3}>
+                                <Box
+                                    sx={{
+                                        width: '100%',
+                                        height: '120px',
+                                        backgroundColor:
+                                            selectedItem === item.title ? 'rgb(27, 252, 182)' : 'rgb(134, 136, 163,.09)',
+                                        borderRadius: '16px',
+                                        textAlign: 'center',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '15px',
+                                        flexDirection: 'column',
+                                        transition: 'all .5s',
+                                        cursor: { xs: 'default', sm: 'pointer' },
+                                    }}
+                                >
+                                    <Icon width={24} icon={item.icon} />
+                                    <Typography
+                                        component="h5"
+                                        variant="subtitle2"
+                                        sx={{ whiteSpace: 'pre-line', fontSize: '14px', fontWeight: 700 }}
+                                    >
+                                        {item.title}{' '}
+                                    </Typography>
+                                </Box>
+                            </Grid>
+                        ))}
+                    </Grid>
+                    <Box sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "20px"
+                    }} >
                         <Box
-                            sx={{
+                            onClick={handleBack}
+                            style={{
+                                color: 'black',
                                 width: '100%',
-                                height: '120px',
-                                backgroundColor:
-                                    selectedItem === item.title ? 'rgb(27, 252, 182)' : 'rgb(134, 136, 163,.09)',
-                                borderRadius: '16px',
-                                textAlign: 'center',
-                                display: 'flex',
+                                display: selectedItem ? 'flex' : 'none',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '15px',
-                                flexDirection: 'column',
-                                transition: 'all .5s',
-                                cursor: { xs: 'default', sm: 'pointer' },
                             }}
                         >
-                            <Icon width={24} icon={item.icon} />
-                            <Typography
-                                component="h5"
-                                variant="subtitle2"
-                                sx={{ whiteSpace: 'pre-line', fontSize: '14px', fontWeight: 700 }}
-                            >
-                                {item.title}{' '}
-                            </Typography>
+                            <ArrowForwardIosOutlinedIcon
+                                sx={{
+                                    rotate: "180deg",
+                                    fontSize: 40,
+                                    backgroundColor: '#1BFDB7',
+                                    borderRadius: '50%',
+                                    padding: '7px',
+                                    // position: 'fixed',
+                                    bottom: '20px',
+                                }}
+                            />
                         </Box>
-                    </Grid>
-                ))}
-            </Grid>
-
-            <Box sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "20px"
-            }} >
-                <Box
-                    onClick={handleBack}
-                    style={{
-                        color: 'black',
-                        width: '100%',
-                        display: selectedItem ? 'flex' : 'none',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                >
-                    <ArrowForwardIosOutlinedIcon
-                        sx={{
-                            rotate: "180deg",
-                            fontSize: 40,
-                            backgroundColor: '#1BFDB7',
-                            borderRadius: '50%',
-                            padding: '7px',
-                            // position: 'fixed',
-                            bottom: '20px',
-                        }}
-                    />
-                </Box>
-                {selectedItem !== '' && (
-                    <Box
-                        onClick={handleNext}
-                        style={{
-                            color: 'black',
-                            width: '100%',
-                            display: selectedItem ? 'flex' : 'none',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <ArrowForwardIosOutlinedIcon
-                            sx={{
-                                fontSize: 40,
-                                backgroundColor: '#1BFDB7',
-                                borderRadius: '50%',
-                                padding: '7px',
-                                // position: 'fixed',
-                                bottom: '20px',
-                            }}
-                        />
+                        {selectedItem !== '' && selectedTheme !== "" && (
+                            <Box
+                                onClick={handleNext}
+                                style={{
+                                    color: 'black',
+                                    width: '100%',
+                                    display: selectedItem ? 'flex' : 'none',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <ArrowForwardIosOutlinedIcon
+                                    sx={{
+                                        fontSize: 40,
+                                        backgroundColor: '#1BFDB7',
+                                        borderRadius: '50%',
+                                        padding: '7px',
+                                        // position: 'fixed',
+                                        bottom: '20px',
+                                    }}
+                                />
+                            </Box>
+                        )}
                     </Box>
-                )}
-            </Box>
-        </Box>
+
+                </Box>
+
+            ) : (
+                <Box>
+                    <ThemesViewRoot theme_type={selectedItem} onSelectTheme={handleSelectTheme} />
+                    <Box sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "20px"
+                    }} >
+
+
+                        <Box
+                            onClick={resetTheme}
+                            style={{
+                                color: 'black',
+                                width: '100%',
+                                display: selectedItem ? 'flex' : 'none',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <ArrowForwardIosOutlinedIcon
+                                sx={{
+                                    rotate: "180deg",
+                                    fontSize: 40,
+                                    backgroundColor: '#1BFDB7',
+                                    borderRadius: '50%',
+                                    padding: '7px',
+                                    // position: 'fixed',
+                                    bottom: '20px',
+                                }}
+                            />
+                        </Box>
+                        {selectedItem !== '' && selectedTheme !== "" && (
+                            <Box
+                                onClick={handleNext}
+                                style={{
+                                    color: 'black',
+                                    width: '100%',
+                                    display: selectedItem ? 'flex' : 'none',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <ArrowForwardIosOutlinedIcon
+                                    sx={{
+                                        fontSize: 40,
+                                        backgroundColor: '#1BFDB7',
+                                        borderRadius: '50%',
+                                        padding: '7px',
+                                        // position: 'fixed',
+                                        bottom: '20px',
+                                    }}
+                                />
+                            </Box>
+                        )}
+                    </Box>
+                </Box>
+            )}
+
+        </>
     )
 }
 

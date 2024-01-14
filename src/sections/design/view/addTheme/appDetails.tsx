@@ -6,6 +6,8 @@ import React, { useState } from 'react';
 import Iconify from 'src/components/iconify';
 import { UploadBox } from 'src/components/upload';
 import ArrowForwardIosOutlinedIcon from '@mui/icons-material/ArrowForwardIosOutlined';
+import { MuiColorInput } from 'mui-color-input'
+
 
 const AppDetails = (props: any) => {
     const [primaryColor, setPrimaryColor] = useState<any>('');
@@ -123,14 +125,15 @@ const AppDetails = (props: any) => {
                 </div>
             </div>
             <Box sx={{ width: "100%", textAlign: "center" }} >
-                <TextField
+                {/* <TextField
                     id="outlined-basic"
                     // type='color'
                     sx={{ width: "50%", margin: "auto", }}
                     label="Primary Color"
                     onChange={(e) => setPrimaryColor(e.target.value)}
                     variant="outlined"
-                />
+                /> */}
+                <MuiColorInput sx={{ width: "50%", margin: "auto", }} variant="outlined" value={primaryColor} onChange={(e) => setPrimaryColor(e)} />
             </Box>
 
             <Box sx={{
@@ -144,8 +147,7 @@ const AppDetails = (props: any) => {
                     onClick={handleBack}
                     style={{
                         color: 'black',
-                        width: '100%',
-                        display: primaryColor ? 'flex' : 'none',
+                        // width: '100%',
                         alignItems: 'center',
                         justifyContent: 'center',
                     }}
@@ -169,7 +171,7 @@ const AppDetails = (props: any) => {
                         onClick={handleNext}
                         style={{
                             color: 'black',
-                            width: '100%',
+                            // width: '100%',
                             display: primaryColor ? 'flex' : 'none',
                             alignItems: 'center',
                             justifyContent: 'center',

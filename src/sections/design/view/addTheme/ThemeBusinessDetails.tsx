@@ -161,14 +161,13 @@ const ThemeBusinessDetails = (props: any) => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "20px"
+                gap: "20px",
             }} >
                 <Box
                     onClick={handleBack}
                     style={{
                         color: 'black',
                         width: '100%',
-                        display: names?.engName ? 'flex' : 'none',
                         alignItems: 'center',
                         justifyContent: 'center',
                     }}

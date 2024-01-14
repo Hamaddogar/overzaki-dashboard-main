@@ -8,7 +8,7 @@
 import 'react-multi-carousel/lib/styles.css';
 import './style.css';
 import Container from '@mui/material/Container';
-import { Box } from '@mui/material';
+import { Box, useMediaQuery } from '@mui/material';
 // components
 // import Linker from 'src/sections/overview/subscription-plan-checkout/link';
 // import { paths } from 'src/routes/paths';
@@ -27,12 +27,13 @@ import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import 'swiper/css/navigation';
 import { EffectCoverflow, Pagination, Navigation } from 'swiper/modules';
-import { useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import Link from 'next/link';
 import { paths } from 'src/routes/paths';
 // ----------------------------------------------------------------------
 interface PersonalProps {
   theme_type: string;
+  onSelectTheme?: any;
 }
 
 // const responsive = {
@@ -55,8 +56,17 @@ interface PersonalProps {
 //   },
 // };
 
-export default function ThemesViewRoot({ theme_type }: PersonalProps) {
+export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalProps) {
   const [centredTheme, setCentredTheme] = useState(0);
+
+  const [themeType, setThemeType] = useState<any>('');
+
+  useLayoutEffect(() => {
+    setThemeType(theme_type.toLowerCase());
+  }, [theme_type]);
+
+  // useEffect(() => {
+  // }, [theme_type])
 
   const data = [
     { name: 'ecom', image: ECom, type: 'market', url: 'https://ecom-zaki.vercel.app', num: 1 },
@@ -90,17 +100,18 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
     },
 
     {
-      name: 'fatayer',
+      name: 'fatayeralaaltayer',
       image: rest2,
-      type: 'restaurant',
+      type: 'market',
       url: 'https://fatayeralaaltayer.vercel.app',
       num: 5,
     },
   ];
-  const filteredData = data.filter((item) => item.type === theme_type);
-  // const notAvaliableThemes = ((allCategories.join(' ').toLowerCase()).includes(theme_type));
-  const notAvaliableThemes = data.filter((item) => item.type === theme_type).length === 0;
-  const theme = filteredData[centredTheme];
+  const filteredData = data.filter((item) => item.type === themeType);
+  // const notAvaliableThemes = ((allCategories.join(' ').toLowerCase()).includes(themeType));
+  const notAvaliableThemes = data.filter((item) => item.type === themeType).length === 0;
+  const [theme, setTheme] = useState(filteredData[centredTheme]);
+  const matches = useMediaQuery('(max-width:540px)');
 
   return (
     <Box sx={{ height: '100%' }}>
@@ -126,16 +137,20 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
             }}
           >
             <Swiper
+              onSlideChange={(e) => setTheme(filteredData[e.realIndex])}
               effect="coverflow"
               spaceBetween={80}
               slidesPerGroup={1}
               loop
-              dir="rtl"
               grabCursor
+              // allowSlideNext={false}
+              // allowSlidePrev={false}
+              // allowTouchMove={false}
+              dir="rtl"
               centeredSlides
               breakpoints={{
-                0: { slidesPerView: 1 },
-                540: { slidesPerView: 2 },
+                0: { slidesPerView: 1.3 },
+                540: { slidesPerView: 1.8 },
                 1040: { slidesPerView: 3 },
                 1280: { slidesPerView: 3 },
               }}
@@ -146,22 +161,22 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
                 modifier: 2,
                 slideShadows: true,
               }}
-              modules={[EffectCoverflow, Pagination, Navigation]}
+              modules={[EffectCoverflow, Navigation]}
               navigation={{
                 nextEl: '.swiper-button-next',
                 prevEl: '.swiper-button-prev',
               }}
             >
               {data
-                .filter((item) => item.type === theme_type)
+                .filter((item) => item.type === themeType)
                 .map((themeD: any, indx: any) => (
                   <SwiperSlide key={indx} className="swiper-slide">
                     <Image
                       style={{ borderRadius: '20px' }}
                       alt="sc"
                       className="swiper-image"
-                      width={350}
-                      height={550}
+                      width={!matches ? 360 : 270}
+                      height={!matches ? 520 : 460}
                       src={themeD.image}
                     />
                   </SwiperSlide>
@@ -204,50 +219,80 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
                   </div>
                 </div>
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginTop: '20px',
-                  gap: '8px',
-                }}
-              >
-                <button
-                  type="button"
+              {onSelectTheme ? (
+                <div
                   style={{
-                    backgroundColor: '#1bfcb6',
-                    color: '#10134a',
-                    border: 'none',
-                    paddingLeft: '50px',
-                    paddingRight: '50px',
-                    paddingTop: '10px',
-                    borderRadius: '9999px',
-                    paddingBottom: '10px',
-                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: '20px',
+                    gap: '8px',
                   }}
                 >
-                  Preview
-                </button>
-                <Link
-                  href={paths.dashboard.design.theme(theme_type, theme.name, theme.url)}
-                  type="button"
+                  <button
+                    onClick={() => onSelectTheme(theme.name)}
+                    type="button"
+                    style={{
+                      backgroundColor: '#1bfcb6',
+                      color: '#10134a',
+                      border: 'none',
+                      paddingLeft: '50px',
+                      paddingRight: '50px',
+                      paddingTop: '10px',
+                      borderRadius: '9999px',
+                      paddingBottom: '10px',
+                      fontWeight: 700,
+                    }}
+                  >
+                    Select
+                  </button>
+                </div>
+              ) : (
+                <div
                   style={{
-                    backgroundColor: '#10134a',
-                    color: 'white',
-                    border: 'none',
-                    paddingLeft: '50px',
-                    paddingTop: '10px',
-                    borderRadius: '9999px',
-                    paddingBottom: '10px',
-                    paddingRight: '50px',
-                    fontWeight: 700,
-                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: '20px',
+                    gap: '8px',
                   }}
                 >
-                  Edit
-                </Link>
-              </div>
+                  <button
+                    type="button"
+                    style={{
+                      backgroundColor: '#1bfcb6',
+                      color: '#10134a',
+                      border: 'none',
+                      paddingLeft: '50px',
+                      paddingRight: '50px',
+                      paddingTop: '10px',
+                      borderRadius: '9999px',
+                      paddingBottom: '10px',
+                      fontWeight: 700,
+                    }}
+                  >
+                    Preview
+                  </button>
+                  <Link
+                    href={paths.dashboard.design.theme(themeType, theme?.name, theme?.url, 'temporary')}
+                    type="button"
+                    style={{
+                      backgroundColor: '#10134a',
+                      color: 'white',
+                      border: 'none',
+                      paddingLeft: '50px',
+                      paddingTop: '10px',
+                      borderRadius: '9999px',
+                      paddingBottom: '10px',
+                      paddingRight: '50px',
+                      fontWeight: 700,
+                      textDecoration: 'none',
+                    }}
+                  >
+                    Edit
+                  </Link>
+                </div>
+              )}
             </Swiper>
           </Box>
         </Container>
