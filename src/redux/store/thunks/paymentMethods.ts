@@ -53,8 +53,10 @@ export const fetchOnePaymentMethods = createAsyncThunk(
 export const createPaymentMothod = createAsyncThunk(
   'paymentMethod/create',
   async (data: ICustomerForm) => {
-    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
-    const response = await postRequest(endpoints.paymentMethod.list, data, defaultConfig());
+    // defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    let headersObj = defaultConfig();
+    headersObj.headers['Content-Type'] = 'multipart/form-data';
+    const response = await postRequest(endpoints.paymentMethod.list, data, headersObj);
 
     return response.data;
   }
@@ -63,12 +65,14 @@ export const createPaymentMothod = createAsyncThunk(
 export const editPaymentMethods = createAsyncThunk(
   'paymentMethod/edit',
   async (payload: { paymentMethodId: any; data: ICustomerForm }) => {
-    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    // defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    let headersObj = defaultConfig();
+    headersObj.headers['Content-Type'] = 'multipart/form-data';
     const { paymentMethodId, data } = payload;
     const response = await putRequest(
       `${endpoints.paymentMethod.list}/${paymentMethodId}`,
       data,
-      defaultConfig()
+      headersObj
     );
 
     return response.data;

@@ -74,7 +74,8 @@ export default function JwtRegisterView() {
   } = methods;
 
   const onSubmit = handleSubmit(async (data: any) => {
-    if (captcha) {
+    // if (captcha) {
+    if (true) {
       try {
         // need to change this
         // await register?.(data.email, data.password, data.firstName, data.lastName);

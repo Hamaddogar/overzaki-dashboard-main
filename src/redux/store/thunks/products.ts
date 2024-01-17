@@ -48,8 +48,10 @@ export const fetchOneProduct = createAsyncThunk('products/fetchOne', async (prod
 });
 
 export const createProduct = createAsyncThunk('products/create', async (data: any) => {
-  defaultConfig().headers['Content-Type'] = 'multipart/form-data';
-  const response = await postRequest(endpoints.product.list, data, defaultConfig());
+  // defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+  let headersObj = defaultConfig();
+  headersObj.headers['Content-Type'] = 'multipart/form-data';
+  const response = await postRequest(endpoints.product.list, data, headersObj);
 
   return response.data;
 });
@@ -57,13 +59,11 @@ export const createProduct = createAsyncThunk('products/create', async (data: an
 export const editProduct = createAsyncThunk(
   'products/edit',
   async (payload: { productId: any; data: any }) => {
-    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    // defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    let headersObj = defaultConfig();
+    headersObj.headers['Content-Type'] = 'multipart/form-data';
     const { productId, data } = payload;
-    const response = await putRequest(
-      `${endpoints.product.list}/${productId}`,
-      data,
-      defaultConfig()
-    );
+    const response = await putRequest(`${endpoints.product.list}/${productId}`, data, headersObj);
 
     return response.data;
   }
@@ -96,11 +96,13 @@ export const fetchOneVariant = createAsyncThunk(
 export const createVariant = createAsyncThunk(
   'products/createVariant',
   async ({ productId, data }: any) => {
-    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    // defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    let headersObj = defaultConfig();
+    headersObj.headers['Content-Type'] = 'multipart/form-data';
     const response = await postRequest(
       `${endpoints.product.varient}/${productId}`,
       data,
-      defaultConfig()
+      headersObj
     );
 
     return response.data;
@@ -112,11 +114,13 @@ export const editVariant = createAsyncThunk(
   'products/editVariant',
   async (payload: { variantId: any; data: any }) => {
     // defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    let headersObj = defaultConfig();
+    headersObj.headers['Content-Type'] = 'multipart/form-data';
     const { variantId, data } = payload;
     const response = await putRequest(
       `${endpoints.product.varient}/${variantId}`,
       data,
-      defaultConfig()
+      headersObj
     );
 
     return response.data;
@@ -125,9 +129,11 @@ export const editVariant = createAsyncThunk(
 export const editVariantRow = createAsyncThunk(
   'products/editVariantRow',
   async (payload: { rowId: any; data: any }) => {
-    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    // defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    let headersObj = defaultConfig();
+    headersObj.headers['Content-Type'] = 'multipart/form-data';
     const { rowId, data } = payload;
-    const response = await putRequest(`${endpoints.product.rows}/${rowId}`, data, defaultConfig());
+    const response = await putRequest(`${endpoints.product.rows}/${rowId}`, data, headersObj);
 
     return response.data;
   }

@@ -43,8 +43,10 @@ export const fetchOneCustomer = createAsyncThunk('customers/fetchOne', async (cu
 });
 
 export const createCustomer = createAsyncThunk('customers/create', async (data: ICustomerForm) => {
-  defaultConfig().headers['Content-Type'] = 'multipart/form-data';
-  const response = await postRequest(endpoints.customer.list, data, defaultConfig());
+  // defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+  let headersObj = defaultConfig();
+  headersObj.headers['Content-Type'] = 'multipart/form-data';
+  const response = await postRequest(endpoints.customer.list, data, headersObj);
 
   return response.data;
 });
@@ -52,13 +54,11 @@ export const createCustomer = createAsyncThunk('customers/create', async (data: 
 export const editCustomer = createAsyncThunk(
   'customers/edit',
   async (payload: { customerId: any; data: ICustomerForm }) => {
-    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    // defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    let headersObj = defaultConfig();
+    headersObj.headers['Content-Type'] = 'multipart/form-data';
     const { customerId, data } = payload;
-    const response = await putRequest(
-      `${endpoints.customer.list}/${customerId}`,
-      data,
-      defaultConfig()
-    );
+    const response = await putRequest(`${endpoints.customer.list}/${customerId}`, data, headersObj);
 
     return response.data;
   }

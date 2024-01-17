@@ -141,7 +141,7 @@ const AddNewTheme: React.FC<DesignMainProps> = () => {
 
         // setStep(7)
         // delete formData.type;
-        dispatch(createBuilderFun(formData) as unknown as AnyAction).then((response: any) => {
+        dispatch(createBuilderFun(formData)).then((response: any) => {
             if (response.meta.requestStatus === 'fulfilled') {
                 console.log('Successfully Created!', { variant: 'success' });
                 enqueueSnackbar('Successfully Created!', { variant: 'success' });

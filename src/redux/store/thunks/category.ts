@@ -67,8 +67,10 @@ export const fetchOneSubCategory = createAsyncThunk(
 );
 
 export const createCategory = createAsyncThunk('category/create', async (data: ICategoryForm) => {
-  defaultConfig().headers['Content-Type'] = 'multipart/form-data';
-  const response = await postRequest(endpoints.category.create, data, defaultConfig());
+  // defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+  let headersObj = defaultConfig();
+  headersObj.headers['Content-Type'] = 'multipart/form-data';
+  const response = await postRequest(endpoints.category.create, data, headersObj);
 
   return response.data;
 });
@@ -76,8 +78,10 @@ export const createCategory = createAsyncThunk('category/create', async (data: I
 export const createSubCategory = createAsyncThunk(
   'category/createSubCat',
   async (data: ICategoryForm) => {
-    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
-    const response = await postRequest(endpoints.subCategory.create, data, defaultConfig());
+    // defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    let headersObj = defaultConfig();
+    headersObj.headers['Content-Type'] = 'multipart/form-data';
+    const response = await postRequest(endpoints.subCategory.create, data, headersObj);
 
     return response.data;
   }
@@ -86,13 +90,15 @@ export const createSubCategory = createAsyncThunk(
 export const editCategory = createAsyncThunk(
   'category/edit',
   async (payload: { categoryId: number; data: ICategoryForm }) => {
-    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    // defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    let headersObj = defaultConfig();
+    headersObj.headers['Content-Type'] = 'multipart/form-data';
 
     const { categoryId, data } = payload;
     const response = await putRequest(
       `${endpoints.category._list}/${categoryId}`,
       data,
-      defaultConfig()
+      headersObj
     );
 
     return response.data;
@@ -101,13 +107,15 @@ export const editCategory = createAsyncThunk(
 export const editSubCategory = createAsyncThunk(
   'category/editSubcat',
   async (payload: { subcategoryId: number; data: ICategoryForm }) => {
-    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    // defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    let headersObj = defaultConfig();
+    headersObj.headers['Content-Type'] = 'multipart/form-data';
 
     const { subcategoryId, data } = payload;
     const response = await putRequest(
       `${endpoints.subCategory._list}/${subcategoryId}`,
       data,
-      defaultConfig()
+      headersObj
     );
 
     return response.data;

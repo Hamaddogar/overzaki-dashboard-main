@@ -35,8 +35,10 @@ export const createSocketRequest = createAsyncThunk(
   // return response.data;
 );
 export const createBuilderFun = createAsyncThunk('builder/create', async (data: any) => {
-  defaultConfig().headers['Content-Type'] = 'multipart/form-data';
-  const response = await postRequest(endpoints.builder.list, data, defaultConfig());
+  let headersObj = defaultConfig();
+  headersObj.headers['Content-Type'] = 'multipart/form-data';
+  const response = await postRequest(endpoints.builder.list, data, headersObj);
+  console.log('response', response);
 
   return response;
 });

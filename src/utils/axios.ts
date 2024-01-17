@@ -219,11 +219,17 @@ export const endpoints = {
 
 export const defaultConfig = () => {
   const tanentId = getBuilderDomain() || '';
-  return {
-    headers: {
-      'Content-Type': 'application/json',
+  let headersObj: any = {
+    'Content-Type': 'application/json',
+  };
+  if (tanentId) {
+    headersObj = {
+      ...headersObj,
       'x-tenant-id': tanentId,
-    },
+    };
+  }
+  return {
+    headers: headersObj,
   };
 };
 
