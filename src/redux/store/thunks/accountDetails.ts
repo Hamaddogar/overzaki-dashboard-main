@@ -1,4 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
+
 // import { IAccountDetailsRequest } from 'src/types/request/accountDetails';
 import {
   getRequest,
@@ -10,7 +12,7 @@ import {
 } from 'src/utils/axios';
 
 export const fetchAccountDetailssList = createAsyncThunk('accountDetails/fetchList', async () => {
-  const response = await getRequest(`${endpoints.accountDetails.list}`, defaultConfig);
+  const response = await getRequest(`${endpoints.accountDetails.list}`, defaultConfig());
 
   return response;
 });
@@ -20,7 +22,7 @@ export const fetchOneAccountDetails = createAsyncThunk(
   async (accountDetailsId: number) => {
     const response = await getRequest(
       `${endpoints.accountDetails.list}/${accountDetailsId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -28,7 +30,7 @@ export const fetchOneAccountDetails = createAsyncThunk(
 );
 
 export const createAccountDetails = createAsyncThunk('accountDetails/create', async (data: any) => {
-  const response = await postRequest(endpoints.accountDetails.list, data, defaultConfig);
+  const response = await postRequest(endpoints.accountDetails.list, data, defaultConfig());
 
   return response.data;
 });
@@ -40,7 +42,7 @@ export const editAccountDetails = createAsyncThunk(
     const response = await putRequest(
       `${endpoints.accountDetails.list}/${accountDetailsId}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -52,7 +54,7 @@ export const deleteAccountDetails = createAsyncThunk(
   async (accountDetailsId: number) => {
     const response = await deleteRequest(
       `${endpoints.accountDetails.list}/${accountDetailsId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -66,6 +68,7 @@ const accountDetailsSlice = createSlice({
     accountDetails: null,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setAccountDetails: (state, action: PayloadAction<any>) => {
@@ -74,6 +77,11 @@ const accountDetailsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+
+      .addCase(resetAllReducers, (state) => {
+        state.status = 'idle';
+        state.list = [];
+      })
 
       .addCase(fetchAccountDetailssList.pending, (state) => {
         state.loading = true;

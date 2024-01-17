@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 import {
   getRequest,
   endpoints,
@@ -15,8 +16,7 @@ export interface IAnalyticsForm extends IRequest {
   // examples
 }
 export const fetchAnalyticssCustomer = createAsyncThunk('analytics/fetchCustomer', async () => {
-
-  const response = await getRequest(endpoints.analytic.customers, defaultConfig);
+  const response = await getRequest(endpoints.analytic.customers, defaultConfig());
 
   return response;
 });
@@ -24,19 +24,23 @@ export const fetchAnalyticssCustomer = createAsyncThunk('analytics/fetchCustomer
 export const fetchAnalyticsSummary = createAsyncThunk(
   'analytics/fetchSummary',
   async (analyticsId: number) => {
-    const response = await getRequest(`${endpoints.analytic.summary}/${analyticsId}`, defaultConfig);
+    const response = await getRequest(
+      `${endpoints.analytic.summary}/${analyticsId}`,
+      defaultConfig()
+    );
 
     return response.data;
   }
 );
 
-export const fetchAnalyticsVouchers= createAsyncThunk('analytics/fetchVouchers', async (data: IAnalyticsForm) => {
-  const response = await postRequest(endpoints.analytic.vouchers, data, defaultConfig);
+export const fetchAnalyticsVouchers = createAsyncThunk(
+  'analytics/fetchVouchers',
+  async (data: IAnalyticsForm) => {
+    const response = await postRequest(endpoints.analytic.vouchers, data, defaultConfig());
 
-  return response.data;
-});
-
-
+    return response.data;
+  }
+);
 
 const analyticsSlice = createSlice({
   name: 'analytics',
@@ -45,6 +49,7 @@ const analyticsSlice = createSlice({
     analytics: null,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setAnalytics: (state, action: PayloadAction<any>) => {
@@ -54,12 +59,16 @@ const analyticsSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
       .addCase(fetchAnalyticssCustomer.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchAnalyticssCustomer.fulfilled, (state, action) => {
-
         state.loading = false;
         state.list = action.payload;
       })
@@ -91,9 +100,7 @@ const analyticsSlice = createSlice({
       .addCase(fetchAnalyticsVouchers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
-
-
+      });
   },
 });
 export const { setAnalytics } = analyticsSlice.actions;

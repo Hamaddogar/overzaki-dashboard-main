@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 import {
   getRequest,
   endpoints,
@@ -18,7 +19,7 @@ export const fetchProductsList = createAsyncThunk(
   'products/fetchList',
   async (params: IRequest, { rejectWithValue }) => {
     try {
-      const response = await getRequest(endpoints.product.list, defaultConfig);
+      const response = await getRequest(endpoints.product.list, defaultConfig());
       return response;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -31,7 +32,7 @@ export const fetchProductsWithParams = createAsyncThunk(
     try {
       const response = await getRequest(
         `${endpoints.product.list}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
-        defaultConfig
+        defaultConfig()
       );
       return response;
     } catch (error) {
@@ -41,14 +42,14 @@ export const fetchProductsWithParams = createAsyncThunk(
 );
 
 export const fetchOneProduct = createAsyncThunk('products/fetchOne', async (productId: number) => {
-  const response = await getRequest(`${endpoints.product.list}/${productId}`, defaultConfig);
+  const response = await getRequest(`${endpoints.product.list}/${productId}`, defaultConfig());
 
   return response.data;
 });
 
 export const createProduct = createAsyncThunk('products/create', async (data: any) => {
-  defaultConfig.headers['Content-Type'] = 'multipart/form-data';
-  const response = await postRequest(endpoints.product.list, data, defaultConfig);
+  defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+  const response = await postRequest(endpoints.product.list, data, defaultConfig());
 
   return response.data;
 });
@@ -56,12 +57,12 @@ export const createProduct = createAsyncThunk('products/create', async (data: an
 export const editProduct = createAsyncThunk(
   'products/edit',
   async (payload: { productId: any; data: any }) => {
-    defaultConfig.headers['Content-Type'] = 'multipart/form-data';
+    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
     const { productId, data } = payload;
     const response = await putRequest(
       `${endpoints.product.list}/${productId}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -69,7 +70,7 @@ export const editProduct = createAsyncThunk(
 );
 
 export const deleteProduct = createAsyncThunk('products/delete', async (productId: number) => {
-  const response = await deleteRequest(`${endpoints.product.list}/${productId}`, defaultConfig);
+  const response = await deleteRequest(`${endpoints.product.list}/${productId}`, defaultConfig());
 
   return response.data;
 });
@@ -77,7 +78,7 @@ export const deleteProduct = createAsyncThunk('products/delete', async (productI
 export const fetchAllVariant = createAsyncThunk(
   'products/fetchAllVariant',
   async (productId: number) => {
-    const response = await getRequest(`${endpoints.product.varient}/${productId}`, defaultConfig);
+    const response = await getRequest(`${endpoints.product.varient}/${productId}`, defaultConfig());
 
     return response.data;
   }
@@ -85,7 +86,7 @@ export const fetchAllVariant = createAsyncThunk(
 export const fetchOneVariant = createAsyncThunk(
   'products/fetchOneVariant',
   async (productId: number) => {
-    const response = await getRequest(`${endpoints.product.varient}/${productId}`, defaultConfig);
+    const response = await getRequest(`${endpoints.product.varient}/${productId}`, defaultConfig());
 
     return response.data;
   }
@@ -95,11 +96,11 @@ export const fetchOneVariant = createAsyncThunk(
 export const createVariant = createAsyncThunk(
   'products/createVariant',
   async ({ productId, data }: any) => {
-    defaultConfig.headers['Content-Type'] = 'multipart/form-data';
+    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
     const response = await postRequest(
       `${endpoints.product.varient}/${productId}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -110,12 +111,12 @@ export const createVariant = createAsyncThunk(
 export const editVariant = createAsyncThunk(
   'products/editVariant',
   async (payload: { variantId: any; data: any }) => {
-    // defaultConfig.headers['Content-Type'] = 'multipart/form-data';
+    // defaultConfig().headers['Content-Type'] = 'multipart/form-data';
     const { variantId, data } = payload;
     const response = await putRequest(
       `${endpoints.product.varient}/${variantId}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -124,23 +125,26 @@ export const editVariant = createAsyncThunk(
 export const editVariantRow = createAsyncThunk(
   'products/editVariantRow',
   async (payload: { rowId: any; data: any }) => {
-    defaultConfig.headers['Content-Type'] = 'multipart/form-data';
+    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
     const { rowId, data } = payload;
-    const response = await putRequest(`${endpoints.product.rows}/${rowId}`, data, defaultConfig);
+    const response = await putRequest(`${endpoints.product.rows}/${rowId}`, data, defaultConfig());
 
     return response.data;
   }
 );
 
 export const deleteVariant = createAsyncThunk('products/deleteVariant', async (productId: any) => {
-  const response = await deleteRequest(`${endpoints.product.varient}/${productId}`, defaultConfig);
+  const response = await deleteRequest(
+    `${endpoints.product.varient}/${productId}`,
+    defaultConfig()
+  );
 
   return response.data;
 });
 export const deleteVariantRow = createAsyncThunk(
   'products/deleteVariantRow',
   async (rowId: any) => {
-    const response = await deleteRequest(`${endpoints.product.rows}/${rowId}`, defaultConfig);
+    const response = await deleteRequest(`${endpoints.product.rows}/${rowId}`, defaultConfig());
 
     return response.data;
   }
@@ -166,6 +170,11 @@ const productsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
 
       .addCase(fetchProductsList.pending, (state) => {
         state.loading = true;

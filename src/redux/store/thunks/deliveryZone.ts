@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 // import { IDeliveryZoneRequest } from 'src/types/request/deliveryZone';
 import {
   getRequest,
@@ -10,7 +11,7 @@ import {
 } from 'src/utils/axios';
 
 export const fetchDeliveryZonesList = createAsyncThunk('deliveryZone/fetchList', async () => {
-  const response = await getRequest(`${endpoints.deliveryZone.list}`, defaultConfig);
+  const response = await getRequest(`${endpoints.deliveryZone.list}`, defaultConfig());
 
   return response;
 });
@@ -20,7 +21,7 @@ export const fetchDeliveryZonesForBranch = createAsyncThunk(
   async (locationId: any) => {
     const response = await getRequest(
       `${endpoints.deliveryPickup.deliveryZones}/branch/${locationId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -32,7 +33,7 @@ export const fetchOneDeliveryZone = createAsyncThunk(
   async (deliveryZoneId: number) => {
     const response = await getRequest(
       `${endpoints.deliveryPickup.deliveryZones}/${deliveryZoneId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -45,7 +46,7 @@ export const createDeliveryZone = createAsyncThunk(
     const response = await postRequest(
       `${endpoints.deliveryPickup.deliveryZones}/${id}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -59,7 +60,7 @@ export const editDeliveryZone = createAsyncThunk(
     const response = await putRequest(
       `${endpoints.deliveryPickup.deliveryZones}/${deliveryZoneId}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -71,7 +72,7 @@ export const deleteDeliveryZone = createAsyncThunk(
   async (deliveryZoneId: any) => {
     const response = await deleteRequest(
       `${endpoints.deliveryPickup.deliveryZones}/${deliveryZoneId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -94,6 +95,11 @@ const deliveryZoneSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
 
       .addCase(fetchDeliveryZonesList.pending, (state) => {
         state.loading = true;

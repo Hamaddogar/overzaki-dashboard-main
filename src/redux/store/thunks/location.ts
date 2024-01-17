@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 // import { ILocationRequest } from 'src/types/request/locations';
 import {
   getRequest,
@@ -14,7 +15,7 @@ export const fetchLocationsList = createAsyncThunk(
   'location/fetchList',
   async (params: IRequest, { rejectWithValue }) => {
     try {
-      const response = await getRequest(`${endpoints.deliveryPickup.branches}`, defaultConfig);
+      const response = await getRequest(`${endpoints.deliveryPickup.branches}`, defaultConfig());
       return response;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -25,7 +26,7 @@ export const fetchLocationsList = createAsyncThunk(
 export const fetchOneLocation = createAsyncThunk('location/fetchOne', async (locationId: any) => {
   const response = await getRequest(
     `${endpoints.deliveryPickup.branches}/${locationId}`,
-    defaultConfig
+    defaultConfig()
   );
 
   return response.data;
@@ -35,14 +36,14 @@ export const fetchWorkingHoursForBranch = createAsyncThunk(
   async (locationId: any) => {
     const response = await getRequest(
       `${endpoints.deliveryPickup.workingHours}/branch/${locationId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
   }
 );
 export const createLocation = createAsyncThunk('location/create', async (data: any) => {
-  const response = await postRequest(endpoints.deliveryPickup.branches, data, defaultConfig);
+  const response = await postRequest(endpoints.deliveryPickup.branches, data, defaultConfig());
 
   return response.data;
 });
@@ -52,7 +53,7 @@ export const createWorkingHours = createAsyncThunk(
     const response = await postRequest(
       `${endpoints.deliveryPickup.workingHours}/${id}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -66,7 +67,7 @@ export const editLocation = createAsyncThunk(
     const response = await putRequest(
       `${endpoints.deliveryPickup.branches}/${branchId}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -79,7 +80,7 @@ export const editWorkingHours = createAsyncThunk(
     const response = await putRequest(
       `${endpoints.deliveryPickup.workingHours}/${id}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -89,7 +90,7 @@ export const editWorkingHours = createAsyncThunk(
 export const deleteLocation = createAsyncThunk('location/delete', async (branchId: any) => {
   const response = await deleteRequest(
     `${endpoints.deliveryPickup.branches}/${branchId}`,
-    defaultConfig
+    defaultConfig()
   );
 
   return response.data;
@@ -100,7 +101,7 @@ export const deleteWorkingHours = createAsyncThunk(
   async (id: any) => {
     const response = await deleteRequest(
       `${endpoints.deliveryPickup.workingHours}/${id}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -123,7 +124,11 @@ const locationSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
       .addCase(fetchLocationsList.pending, (state) => {
         state.loading = true;
         state.error = null;

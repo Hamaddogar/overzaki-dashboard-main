@@ -5,8 +5,7 @@ import io from 'socket.io-client';
 
 
 export const socketClient = () => {
-  // const { socketURL } = useAuthContext();
-  // const socketURL = sessionStorage.getItem('socketURL');
+
   const socketURL = process.env.NEXT_PUBLIC_SOCKET_URL;
   if (socketURL) {
     console.log("socketURL", socketURL);

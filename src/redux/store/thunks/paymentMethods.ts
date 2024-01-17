@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 import {
   getRequest,
   endpoints,
@@ -23,13 +24,13 @@ export const fetchPaymentMethodsList = createAsyncThunk(
         const { pageNumber, pageSize } = paramsData;
         const response = await getRequestWithParams(
           `${endpoints.paymentMethod.list}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
-          defaultConfig
+          defaultConfig()
         );
         return response.data;
       }
       const response = await getRequestWithParams(
         `${endpoints.paymentMethod.list}/all`,
-        defaultConfig
+        defaultConfig()
       );
       return response.data;
     } catch (error) {
@@ -43,7 +44,7 @@ export const fetchOnePaymentMethods = createAsyncThunk(
   async (paymentMethodId: any) => {
     const response = await getRequest(
       `${endpoints.paymentMethod.list}/${paymentMethodId}`,
-      defaultConfig
+      defaultConfig()
     );
     return response.data || {};
   }
@@ -52,8 +53,8 @@ export const fetchOnePaymentMethods = createAsyncThunk(
 export const createPaymentMothod = createAsyncThunk(
   'paymentMethod/create',
   async (data: ICustomerForm) => {
-    defaultConfig.headers['Content-Type'] = 'multipart/form-data';
-    const response = await postRequest(endpoints.paymentMethod.list, data, defaultConfig);
+    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+    const response = await postRequest(endpoints.paymentMethod.list, data, defaultConfig());
 
     return response.data;
   }
@@ -62,12 +63,12 @@ export const createPaymentMothod = createAsyncThunk(
 export const editPaymentMethods = createAsyncThunk(
   'paymentMethod/edit',
   async (payload: { paymentMethodId: any; data: ICustomerForm }) => {
-    defaultConfig.headers['Content-Type'] = 'multipart/form-data';
+    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
     const { paymentMethodId, data } = payload;
     const response = await putRequest(
       `${endpoints.paymentMethod.list}/${paymentMethodId}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -79,7 +80,7 @@ export const deletePaymentMethods = createAsyncThunk(
   async (paymentMethodId: any) => {
     const response = await deleteRequest(
       `${endpoints.paymentMethod.list}/${paymentMethodId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -102,7 +103,11 @@ const paymentMethodsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
       .addCase(fetchPaymentMethodsList.pending, (state) => {
         state.loading = true;
         state.error = null;

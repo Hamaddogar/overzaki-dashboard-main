@@ -31,7 +31,7 @@ export function SettingsProvider({ children, defaultSettings }: SettingsProvider
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isArabic]);
 
-  const onUpdate = useCallback(
+  const onUpdate: any = useCallback(
     (name: string, value: string | boolean) => {
       setSettings((prevState: SettingsValueProps) => ({
         ...prevState,

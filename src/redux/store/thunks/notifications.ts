@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 import {
   getRequest,
   endpoints,
@@ -8,10 +9,8 @@ import {
   deleteRequest,
 } from 'src/utils/axios';
 
-
 export const fetchUsersNotifications = createAsyncThunk('notification/fetchUsers', async () => {
-
-  const response = await getRequest(`${endpoints.notification.users}`, defaultConfig);
+  const response = await getRequest(`${endpoints.notification.users}`, defaultConfig());
 
   return response;
 });
@@ -19,7 +18,10 @@ export const fetchUsersNotifications = createAsyncThunk('notification/fetchUsers
 export const fetchUserNotification = createAsyncThunk(
   'notification/fetchUser',
   async (notificationId: number) => {
-    const response = await getRequest(`${endpoints.notification.user}/${notificationId}`, defaultConfig);
+    const response = await getRequest(
+      `${endpoints.notification.user}/${notificationId}`,
+      defaultConfig()
+    );
 
     return response.data;
   }
@@ -27,19 +29,25 @@ export const fetchUserNotification = createAsyncThunk(
 export const fetchGroupNotification = createAsyncThunk(
   'notification/fetchGroup',
   async (notificationId: number) => {
-    const response = await getRequest(`${endpoints.notification.group}/${notificationId}`, defaultConfig);
-
-    return response.data;
-  }
-);export const fetchMyNotification = createAsyncThunk(
-  'notification/fetchMyNotification',
-  async (notificationId: number) => {
-    const response = await getRequest(`${endpoints.notification.myNotification}/${notificationId}`, defaultConfig);
+    const response = await getRequest(
+      `${endpoints.notification.group}/${notificationId}`,
+      defaultConfig()
+    );
 
     return response.data;
   }
 );
+export const fetchMyNotification = createAsyncThunk(
+  'notification/fetchMyNotification',
+  async (notificationId: number) => {
+    const response = await getRequest(
+      `${endpoints.notification.myNotification}/${notificationId}`,
+      defaultConfig()
+    );
 
+    return response.data;
+  }
+);
 
 const notificationSlice = createSlice({
   name: 'notification',
@@ -48,6 +56,7 @@ const notificationSlice = createSlice({
     notification: null,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setNotification: (state, action: PayloadAction<any>) => {
@@ -56,7 +65,11 @@ const notificationSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
       .addCase(fetchUsersNotifications.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -93,9 +106,7 @@ const notificationSlice = createSlice({
       .addCase(fetchMyNotification.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
-
-
+      });
   },
 });
 export const { setNotification } = notificationSlice.actions;

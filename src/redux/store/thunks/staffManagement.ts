@@ -1,5 +1,6 @@
 /* eslint-disable consistent-return */
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 // import { IStaffMangmentRequest } from 'src/types/request/staffManagement';
 import {
   getRequest,
@@ -12,7 +13,7 @@ import {
 
 export const fetchStaffManagementsList = createAsyncThunk('staffManagement/fetchList', async () => {
   try {
-    const response = await getRequest(`${endpoints.staffManagement.list}`, defaultConfig);
+    const response = await getRequest(`${endpoints.staffManagement.list}`, defaultConfig());
     return response.data;
   } catch (error) {
     console.log(error);
@@ -24,7 +25,7 @@ export const fetchStaffManagementsWithParams = createAsyncThunk(
     try {
       const response = await getRequest(
         `${endpoints.staffManagement.list}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
-        defaultConfig
+        defaultConfig()
       );
       return response.data;
     } catch (error) {
@@ -38,7 +39,7 @@ export const fetchOneStaffManagement = createAsyncThunk(
   async (staffManagementId: number) => {
     const response = await getRequest(
       `${endpoints.staffManagement.list}/${staffManagementId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -48,7 +49,7 @@ export const fetchOneStaffManagement = createAsyncThunk(
 export const createStaffManagement = createAsyncThunk(
   'staffManagement/create',
   async (data: any) => {
-    const response = await postRequest(endpoints.staffManagement.list, data, defaultConfig);
+    const response = await postRequest(endpoints.staffManagement.list, data, defaultConfig());
     return response.data;
   }
 );
@@ -60,7 +61,7 @@ export const editStaffManagement = createAsyncThunk(
     const response = await putRequest(
       `${endpoints.staffManagement.list}/${staffManagementId}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -72,7 +73,7 @@ export const deleteStaffManagement = createAsyncThunk(
   async (staffManagementId: any) => {
     const response = await deleteRequest(
       `${endpoints.staffManagement.list}/${staffManagementId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -86,6 +87,7 @@ const staffManagementSlice = createSlice({
     staffManagement: null,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setStaffManagement: (state, action: PayloadAction<any>) => {
@@ -94,7 +96,11 @@ const staffManagementSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
       .addCase(fetchStaffManagementsList.pending, (state) => {
         state.loading = true;
         state.error = null;

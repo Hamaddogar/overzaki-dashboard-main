@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import customersReducer from './thunks/customers';
 import categoryReducer from './thunks/category';
 import productReducer from './thunks/products';
@@ -10,19 +10,25 @@ import paymentMethodReducer from './thunks/paymentMethods';
 import builderReducer from './thunks/builder';
 
 
-const store = configureStore({
-  reducer: {
-    customers: customersReducer,
-    category: categoryReducer,
-    products: productReducer,
-    vouchers: voucherReducer,
-    locations: locationReducer,
-    orders: ordersReducer,
-    paymentMethods: paymentMethodReducer,
-    roles: rolesReducer,
-    builder: builderReducer
-  },
+
+const rootReducer = combineReducers({
+  customers: customersReducer,
+  category: categoryReducer,
+  products: productReducer,
+  vouchers: voucherReducer,
+  locations: locationReducer,
+  orders: ordersReducer,
+  paymentMethods: paymentMethodReducer,
+  roles: rolesReducer,
+  builder: builderReducer,
 });
+
+const store = configureStore({
+  reducer: rootReducer,
+});
+
+
+
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 

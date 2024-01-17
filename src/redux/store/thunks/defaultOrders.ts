@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 // import { IOrdersRequest } from 'src/types/request/orders';
 import {
   getRequest,
@@ -18,13 +19,13 @@ export const fetchOrderssList = createAsyncThunk(
         const { pageNumber, pageSize } = paramsData;
         const response = await getRequestWithParams(
           `${endpoints.orders.list}/all?pageSize=${pageSize}&pageNumber=${pageNumber}`,
-          defaultConfig
+          defaultConfig()
         );
         return response.data;
       }
-      // const response = await getRequest(`${endpoints.orders.myOrders}`, defaultConfig);
+      // const response = await getRequest(`${endpoints.orders.myOrders}`, defaultConfig());
       // return response.data;
-      const response = await getRequest(`${endpoints.orders.list}/all`, defaultConfig);
+      const response = await getRequest(`${endpoints.orders.list}/all`, defaultConfig());
       console.log(response?.data);
 
       return response?.data?.data;
@@ -35,13 +36,13 @@ export const fetchOrderssList = createAsyncThunk(
 );
 
 export const fetchOneOrders = createAsyncThunk('orders/fetchOne', async (ordersId: number) => {
-  const response = await getRequest(`${endpoints.orders.list}/${ordersId}`, defaultConfig);
+  const response = await getRequest(`${endpoints.orders.list}/${ordersId}`, defaultConfig());
 
   return response.data;
 });
 
 export const createOrders = createAsyncThunk('orders/create', async (data: any) => {
-  const response = await postRequest(endpoints.orders.viaAdmin, data, defaultConfig);
+  const response = await postRequest(endpoints.orders.viaAdmin, data, defaultConfig());
 
   return response.data;
 });
@@ -50,20 +51,24 @@ export const editOrders = createAsyncThunk(
   'orders/edit',
   async (payload: { ordersId: number; data: any }) => {
     const { ordersId, data } = payload;
-    const response = await putRequest(`${endpoints.orders.list}/${ordersId}`, data, defaultConfig);
+    const response = await putRequest(
+      `${endpoints.orders.list}/${ordersId}`,
+      data,
+      defaultConfig()
+    );
 
     return response.data;
   }
 );
 
 export const deleteOrders = createAsyncThunk('orders/delete', async (ordersId: number) => {
-  const response = await deleteRequest(`${endpoints.orders.list}/${ordersId}`, defaultConfig);
+  const response = await deleteRequest(`${endpoints.orders.list}/${ordersId}`, defaultConfig());
 
   return response.data;
 });
 
 export const cancellOrder = createAsyncThunk('orders/cancell', async (ordersId: number) => {
-  const response = await putRequest(`${endpoints.orders.cancel}/${ordersId}`, {}, defaultConfig);
+  const response = await putRequest(`${endpoints.orders.cancel}/${ordersId}`, {}, defaultConfig());
 
   return response.data;
 });
@@ -74,7 +79,7 @@ export const changeOrderStatus = createAsyncThunk(
     const response = await putRequest(
       `${endpoints.orders.status}/${ordersId}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -97,7 +102,11 @@ const ordersSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
       .addCase(fetchOrderssList.pending, (state) => {
         state.loading = true;
         state.error = null;

@@ -53,6 +53,7 @@ import Actions from './Actions';
 import SaveSettings from '../../utils/save-settings';
 import { socketClient } from '../../utils/helper-functions';
 import { useSnackbar } from 'notistack';
+import { useSettingsContext } from 'src/components/settings';
 
 const dataPages = [
   { title: "Home Page", link: 'https://ecom-zaki.vercel.app/' },
@@ -148,20 +149,29 @@ export default function EcomDesignMain() {
   const builder_Id = searchParams.get('id')?.toString() || "";
 
 
+  let timeoutId: string | number | NodeJS.Timeout | undefined;
+
+  const debounce = (callback: any, delay: any) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(callback, delay);
+  }
+
+
   const handleThemeConfig = (key: string, newValue: string) => {
 
     setThemeConfig(pv => ({ ...pv, [key]: newValue }));
 
-    const data = {
-      // builderId: "65a16dbec44dcc5b7e514a58",
-      // key: key.toString(),
-      builderId: builder_Id,
-      key: "foneStyle.en",
-      value: newValue,
-    };
-    if (socket) {
-      socket.emit('website:cmd', data)
-    }
+    debounce(() => {
+      const data = {
+        builderId: builder_Id,
+        key: "foneStyle.en",
+        value: newValue,
+      };
+      if (socket) {
+        socket.emit('website:cmd', data)
+      }
+
+    }, 300);
   };
 
 

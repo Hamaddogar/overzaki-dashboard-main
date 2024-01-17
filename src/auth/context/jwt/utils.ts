@@ -82,3 +82,14 @@ export const setSocketURL = (URL: string | null) => {
     sessionStorage.removeItem('socketURL');
   }
 };
+
+export const setBuilderDomain = (domainURL: string | null) => {
+  if (domainURL) {
+    sessionStorage.setItem('builder', domainURL);
+  } else {
+    sessionStorage.removeItem('builder');
+  }
+};
+export const getBuilderDomain = () => {
+  return sessionStorage.getItem('builder');
+};

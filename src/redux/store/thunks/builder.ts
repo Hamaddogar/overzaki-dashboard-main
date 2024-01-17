@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 import {
   getRequest,
   endpoints,
@@ -19,7 +20,7 @@ export const fetchBuilderList = createAsyncThunk(
   'builder/fetchList',
   async (params: IRequest, { rejectWithValue }) => {
     try {
-      const response = await getRequest(endpoints.builder.list, defaultConfig);
+      const response = await getRequest(endpoints.builder.list, defaultConfig());
       return response;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -30,18 +31,18 @@ export const fetchBuilderList = createAsyncThunk(
 export const createSocketRequest = createAsyncThunk(
   'builder/socket',
   async (data: any) => data
-  // const response = await postRequest(endpoints.builder.list, data, defaultConfig);
+  // const response = await postRequest(endpoints.builder.list, data, defaultConfig());
   // return response.data;
 );
 export const createBuilderFun = createAsyncThunk('builder/create', async (data: any) => {
-  defaultConfig.headers['Content-Type'] = 'multipart/form-data';
-  const response = await postRequest(endpoints.builder.list, data, defaultConfig);
+  defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+  const response = await postRequest(endpoints.builder.list, data, defaultConfig());
 
   return response;
 });
 
 export const editDesignBuilder = createAsyncThunk('builder/editDesignBuilder', async () => {
-  const response = await getRequest(endpoints.analytic.customers, defaultConfig);
+  const response = await getRequest(endpoints.analytic.customers, defaultConfig());
 
   return response;
 });
@@ -49,7 +50,10 @@ export const editDesignBuilder = createAsyncThunk('builder/editDesignBuilder', a
 export const builderActivateWebsite = createAsyncThunk(
   'builder/builderActivateWebsite',
   async (builderId: number) => {
-    const response = await getRequest(`${endpoints.analytic.summary}/${builderId}`, defaultConfig);
+    const response = await getRequest(
+      `${endpoints.analytic.summary}/${builderId}`,
+      defaultConfig()
+    );
 
     return response.data;
   }
@@ -58,7 +62,7 @@ export const builderActivateWebsite = createAsyncThunk(
 export const builderActivateApplication = createAsyncThunk(
   'builder/builderActivateApplication',
   async (data: IBuilderForm) => {
-    const response = await postRequest(endpoints.analytic.vouchers, data, defaultConfig);
+    const response = await postRequest(endpoints.analytic.vouchers, data, defaultConfig());
 
     return response.data;
   }

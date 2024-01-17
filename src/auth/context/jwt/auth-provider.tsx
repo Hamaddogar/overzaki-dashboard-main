@@ -5,7 +5,7 @@ import { useEffect, useReducer, useCallback, useMemo } from 'react';
 import axios, { endpoints } from 'src/utils/axios';
 //
 import { AuthContext } from './auth-context';
-import { isValidToken, setSession, setSocketURL } from './utils';
+import { getBuilderDomain, isValidToken, setBuilderDomain, setSession, setSocketURL } from './utils';
 import { ActionMapType, AuthStateType, AuthUserType } from '../../types';
 
 // ----------------------------------------------------------------------
@@ -189,7 +189,7 @@ export function AuthProvider({ children }: Props) {
 
     sessionStorage.setItem(REFRESH_KEY, refreshToken);
     setSession(accessToken);
-
+    setBuilderDomain(null);
     dispatch({
       type: Types.LOGIN,
       payload: {
@@ -223,7 +223,7 @@ export function AuthProvider({ children }: Props) {
       const newSocketURL = getSocketURL(accessToken);
       setSession(accessToken);
       sessionStorage.setItem(REFRESH_KEY, refreshToken);
-
+      setBuilderDomain(null);
       dispatch({
         type: Types.REGISTER,
         payload: {
@@ -307,9 +307,31 @@ export function AuthProvider({ children }: Props) {
     await axios.get(endpoints.auth.loutout);
     setSession(null);
     sessionStorage.removeItem(REFRESH_KEY)
+    setBuilderDomain(null);
     dispatch({
       type: Types.LOGOUT,
     });
+  }, []);
+
+
+
+  // Get Builder
+  const getBuilders = useCallback(async () => {
+    const alreadyExistDomain = getBuilderDomain();
+    if (alreadyExistDomain) {
+      return true;
+    } else {
+      const response = await axios.get(endpoints.builder.list);
+      const { data } = response.data;
+      if (data?.length > 0) {
+        let builderDomain = data[0].domain
+        setBuilderDomain(builderDomain);
+        return true;
+      } else {
+        setBuilderDomain(null);
+        return false;
+      }
+    }
   }, []);
 
   // ----------------------------------------------------------------------
@@ -334,9 +356,10 @@ export function AuthProvider({ children }: Props) {
       verifyOtp,
       forgotPassword,
       newPassword,
-      verifyPermission
+      verifyPermission,
+      getBuilders,
     }),
-    [login, logout, register, sendOtp, verifyOtp, forgotPassword, newPassword, verifyPermission, state.user, status]
+    [login, logout, register, sendOtp, verifyOtp, forgotPassword, newPassword, verifyPermission, state.user, status, getBuilders]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

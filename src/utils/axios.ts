@@ -1,10 +1,16 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { getBuilderDomain } from 'src/auth/context/jwt/utils';
 // config
 import { HOST_API } from 'src/config-global';
 
 // ----------------------------------------------------------------------
 
-const axiosInstance = axios.create({ baseURL: HOST_API });
+const axiosInstance = axios.create({
+  baseURL: HOST_API,
+  // headers: {
+  //   'x-tenant-id': 'stuffystallion2635.overzaki.info',
+  // },
+});
 
 axiosInstance.interceptors.response.use(
   (res) => res,
@@ -211,11 +217,14 @@ export const endpoints = {
   },
 };
 
-export const defaultConfig = {
-  headers: {
-    'Content-Type': 'application/json',
-    // 'x-tenant-id': 'tenant-1',
-  },
+export const defaultConfig = () => {
+  const tanentId = getBuilderDomain() || '';
+  return {
+    headers: {
+      'Content-Type': 'application/json',
+      'x-tenant-id': tanentId,
+    },
+  };
 };
 
 export interface IRequest {}

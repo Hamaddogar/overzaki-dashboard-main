@@ -20,12 +20,18 @@ import AppProducts from '../app-products';
 // import AppPlan from '../app-plan';
 // import AppEdit from '../app-edit';
 import AppPlanandEdit from '../app-plan-edit';
+import { SplashScreen } from 'src/components/loading-screen';
 // ----------------------------------------------------------------------
 
 export default function OverviewAppView() {
   // const { user } = useMockedUser();
   // const theme = useTheme();
   const settings = useSettingsContext();
+
+  // return (
+  //   <SplashScreen />
+  // )
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
       <Grid container spacing={3}>

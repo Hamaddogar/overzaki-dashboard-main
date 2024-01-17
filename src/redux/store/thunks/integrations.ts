@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 // import { IIntegrationsRequest } from 'src/types/request/integrations';
 import {
   getRequest,
@@ -10,7 +11,7 @@ import {
 } from 'src/utils/axios';
 
 export const fetchIntegrationsList = createAsyncThunk('integrations/fetchList', async () => {
-  const response = await getRequest(`${endpoints.integrations.list}`, defaultConfig);
+  const response = await getRequest(`${endpoints.integrations.list}`, defaultConfig());
 
   return response;
 });
@@ -20,7 +21,7 @@ export const fetchOneIntegrations = createAsyncThunk(
   async (integrationsId: number) => {
     const response = await getRequest(
       `${endpoints.integrations.list}/${integrationsId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -28,7 +29,7 @@ export const fetchOneIntegrations = createAsyncThunk(
 );
 
 export const createIntegrations = createAsyncThunk('integrations/create', async (data: any) => {
-  const response = await postRequest(endpoints.integrations.list, data, defaultConfig);
+  const response = await postRequest(endpoints.integrations.list, data, defaultConfig());
 
   return response.data;
 });
@@ -40,7 +41,7 @@ export const editIntegrations = createAsyncThunk(
     const response = await putRequest(
       `${endpoints.integrations.list}/${integrationsId}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -52,7 +53,7 @@ export const deleteIntegrations = createAsyncThunk(
   async (integrationsId: number) => {
     const response = await deleteRequest(
       `${endpoints.integrations.list}/${integrationsId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -66,6 +67,7 @@ const integrationsSlice = createSlice({
     integrations: null,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setIntegrations: (state, action: PayloadAction<any>) => {
@@ -74,7 +76,11 @@ const integrationsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
       .addCase(fetchIntegrationsList.pending, (state) => {
         state.loading = true;
         state.error = null;

@@ -47,6 +47,7 @@ type CanRemove = {
   resendCodeRegister?: (email: string) => Promise<void>;
   newPassword?: (email: string, code: string, password: string) => Promise<void>;
   verifyPermission?: (data: any) => any;
+  getBuilders: () => any;
 };
 
 export type JWTContextType = CanRemove & {
@@ -64,6 +65,7 @@ export type JWTContextType = CanRemove & {
   logout: () => Promise<void>;
   newPassword?: (email: string, code: string, password: string) => Promise<void>;
   verifyPermission?: (data: any) => any;
+  getBuilders: () => any;
 };
 
 export type FirebaseContextType = CanRemove & {

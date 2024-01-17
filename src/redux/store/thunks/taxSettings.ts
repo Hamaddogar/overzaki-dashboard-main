@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 // import { ITaxSettingsRequest } from 'src/types/request/taxSettings';
 import {
   getRequest,
@@ -10,7 +11,7 @@ import {
 } from 'src/utils/axios';
 
 export const fetchTaxSettingssList = createAsyncThunk('taxSettingss/fetchList', async () => {
-  const response = await getRequest(endpoints.taxSettings.list, defaultConfig);
+  const response = await getRequest(endpoints.taxSettings.list, defaultConfig());
 
   return response.data;
 });
@@ -20,7 +21,7 @@ export const fetchOneTaxSettings = createAsyncThunk(
   async (taxSettingsId: number) => {
     const response = await getRequest(
       `${endpoints.taxSettings.list}/${taxSettingsId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -28,13 +29,13 @@ export const fetchOneTaxSettings = createAsyncThunk(
 );
 
 export const createTaxSettings = createAsyncThunk('taxSettingss/create', async (data: any) => {
-  const response = await postRequest(endpoints.taxSettings.list, data, defaultConfig);
+  const response = await postRequest(endpoints.taxSettings.list, data, defaultConfig());
 
   return response.data;
 });
 
 export const editTaxSettings = createAsyncThunk('taxSettingss/edit', async (data: any) => {
-  const response = await putRequest(endpoints.taxSettings.list, data, defaultConfig);
+  const response = await putRequest(endpoints.taxSettings.list, data, defaultConfig());
 
   return response.data;
 });
@@ -44,7 +45,7 @@ export const deleteTaxSettings = createAsyncThunk(
   async (taxSettingsId: number) => {
     const response = await deleteRequest(
       `${endpoints.taxSettings.list}/${taxSettingsId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -58,6 +59,7 @@ const taxSettingssSlice = createSlice({
     taxSettings: null,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setTaxSettings: (state, action: PayloadAction<any>) => {
@@ -66,7 +68,11 @@ const taxSettingssSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
       .addCase(fetchTaxSettingssList.pending, (state) => {
         state.loading = true;
         state.error = null;

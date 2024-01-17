@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import {
+import { resetAllReducers } from './resetSlice';
+import axiosInstance, {
   getRequest,
   endpoints,
   defaultConfig,
@@ -15,8 +16,7 @@ export interface ICategoryForm extends IRequest {
   // examples
 }
 export const fetchCategorysList = createAsyncThunk('category/fetchList', async () => {
-
-  const response = await getRequest(`${endpoints.category.list}`, defaultConfig);
+  const response = await getRequest(`${endpoints.category.list}`, defaultConfig());
 
   return response;
 });
@@ -24,26 +24,26 @@ export const fetchCategorysList = createAsyncThunk('category/fetchList', async (
 export const fetchOneCategory = createAsyncThunk(
   'category/fetchOne',
   async (categoryId: number) => {
-    const response = await getRequest(`${endpoints.category.list}/${categoryId}`, defaultConfig);
+    const response = await getRequest(`${endpoints.category.list}/${categoryId}`, defaultConfig());
 
     return response.data;
   }
 );
 
 export const createCategory = createAsyncThunk('category/create', async (data: ICategoryForm) => {
-  const response = await postRequest(endpoints.category.list, data, defaultConfig);
+  const response = await postRequest(endpoints.category.list, data, defaultConfig());
 
   return response.data;
 });
 
 export const editCategory = createAsyncThunk(
   'category/edit',
-  async (payload : {categoryId: number, data: ICategoryForm}) => {
-    const { categoryId, data} = payload
+  async (payload: { categoryId: number; data: ICategoryForm }) => {
+    const { categoryId, data } = payload;
     const response = await putRequest(
       `${endpoints.category.list}/${categoryId}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -51,7 +51,7 @@ export const editCategory = createAsyncThunk(
 );
 
 export const deleteCategory = createAsyncThunk('category/delete', async (categoryId: number) => {
-  const response = await deleteRequest(`${endpoints.category.list}/${categoryId}`, defaultConfig);
+  const response = await deleteRequest(`${endpoints.category.list}/${categoryId}`, defaultConfig());
 
   return response.data;
 });
@@ -63,6 +63,7 @@ const categorySlice = createSlice({
     category: null,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setCategory: (state, action: PayloadAction<any>) => {
@@ -71,13 +72,17 @@ const categorySlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
 
       .addCase(fetchCategorysList.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchCategorysList.fulfilled, (state, action) => {
-
         state.loading = false;
         state.list = action.payload;
       })
@@ -133,7 +138,7 @@ const categorySlice = createSlice({
       .addCase(deleteCategory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
+      });
   },
 });
 export const { setCategory } = categorySlice.actions;

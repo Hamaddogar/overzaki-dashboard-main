@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 // import { IInvoiceSettingsRequest } from 'src/types/request/invoiceSettings';
 import {
   getRequest,
@@ -10,7 +11,7 @@ import {
 } from 'src/utils/axios';
 
 export const fetchInvoiceSettingsList = createAsyncThunk('invoiceSettings/fetchList', async () => {
-  const response = await getRequest(`${endpoints.invoiceSettings.list}`, defaultConfig);
+  const response = await getRequest(`${endpoints.invoiceSettings.list}`, defaultConfig());
 
   return response;
 });
@@ -20,7 +21,7 @@ export const fetchOneInvoiceSettings = createAsyncThunk(
   async (invoiceSettingsId: number) => {
     const response = await getRequest(
       `${endpoints.invoiceSettings.list}/${invoiceSettingsId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -30,7 +31,7 @@ export const fetchOneInvoiceSettings = createAsyncThunk(
 export const createInvoiceSettings = createAsyncThunk(
   'invoiceSettings/create',
   async (data: any) => {
-    const response = await postRequest(endpoints.invoiceSettings.list, data, defaultConfig);
+    const response = await postRequest(endpoints.invoiceSettings.list, data, defaultConfig());
 
     return response.data;
   }
@@ -39,7 +40,11 @@ export const createInvoiceSettings = createAsyncThunk(
 export const editInvoiceSettings = createAsyncThunk(
   'invoiceSettings/edit',
   async (payload: any) => {
-    const response = await putRequest(`${endpoints.invoiceSettings.list}`, payload, defaultConfig);
+    const response = await putRequest(
+      `${endpoints.invoiceSettings.list}`,
+      payload,
+      defaultConfig()
+    );
 
     return response.data;
   }
@@ -50,7 +55,7 @@ export const deleteInvoiceSettings = createAsyncThunk(
   async (invoiceSettingsId: number) => {
     const response = await deleteRequest(
       `${endpoints.invoiceSettings.list}/${invoiceSettingsId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -64,6 +69,7 @@ const invoiceSettingsSlice = createSlice({
     invoiceSettings: null,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setInvoiceSettings: (state, action: PayloadAction<any>) => {
@@ -72,7 +78,11 @@ const invoiceSettingsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
       .addCase(fetchInvoiceSettingsList.pending, (state) => {
         state.loading = true;
         state.error = null;

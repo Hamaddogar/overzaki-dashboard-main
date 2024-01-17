@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 import {
   getRequest,
   endpoints,
@@ -23,11 +24,11 @@ export const fetchCustomersList = createAsyncThunk(
         const { pageNumber, pageSize } = paramsData;
         const response = await getRequestWithParams(
           `${endpoints.customer.list}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
-          defaultConfig
+          defaultConfig()
         );
         return response.data;
       }
-      const response = await getRequestWithParams(`${endpoints.customer.list}`, defaultConfig);
+      const response = await getRequestWithParams(`${endpoints.customer.list}`, defaultConfig());
       return response.data;
     } catch (error) {
       return error;
@@ -36,14 +37,14 @@ export const fetchCustomersList = createAsyncThunk(
 );
 
 export const fetchOneCustomer = createAsyncThunk('customers/fetchOne', async (customerId: any) => {
-  const response = await getRequest(`${endpoints.customer.list}/${customerId}`, defaultConfig);
+  const response = await getRequest(`${endpoints.customer.list}/${customerId}`, defaultConfig());
   console.log('customerId....', customerId);
   return response.data?.user || {};
 });
 
 export const createCustomer = createAsyncThunk('customers/create', async (data: ICustomerForm) => {
-  defaultConfig.headers['Content-Type'] = 'multipart/form-data';
-  const response = await postRequest(endpoints.customer.list, data, defaultConfig);
+  defaultConfig().headers['Content-Type'] = 'multipart/form-data';
+  const response = await postRequest(endpoints.customer.list, data, defaultConfig());
 
   return response.data;
 });
@@ -51,12 +52,12 @@ export const createCustomer = createAsyncThunk('customers/create', async (data: 
 export const editCustomer = createAsyncThunk(
   'customers/edit',
   async (payload: { customerId: any; data: ICustomerForm }) => {
-    defaultConfig.headers['Content-Type'] = 'multipart/form-data';
+    defaultConfig().headers['Content-Type'] = 'multipart/form-data';
     const { customerId, data } = payload;
     const response = await putRequest(
       `${endpoints.customer.list}/${customerId}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -64,7 +65,7 @@ export const editCustomer = createAsyncThunk(
 );
 
 export const deleteCustomer = createAsyncThunk('customers/delete', async (customerId: number) => {
-  const response = await deleteRequest(`${endpoints.customer.list}/${customerId}`, defaultConfig);
+  const response = await deleteRequest(`${endpoints.customer.list}/${customerId}`, defaultConfig());
 
   return response.data;
 });
@@ -85,6 +86,11 @@ const customersSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
 
       .addCase(fetchCustomersList.pending, (state) => {
         state.loading = true;

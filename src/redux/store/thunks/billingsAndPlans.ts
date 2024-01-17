@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 // import { IBillingsAndPlansRequest } from 'src/types/request/billingsAndPlans';
 import {
   getRequest,
@@ -12,7 +13,7 @@ import {
 export const fetchBillingsAndPlanssList = createAsyncThunk(
   'billingsAndPlans/fetchList',
   async () => {
-    const response = await getRequest(`${endpoints.billingsAndPlans.list}`, defaultConfig);
+    const response = await getRequest(`${endpoints.billingsAndPlans.list}`, defaultConfig());
 
     return response;
   }
@@ -23,7 +24,7 @@ export const fetchOneBillingsAndPlans = createAsyncThunk(
   async (billingsAndPlansId: number) => {
     const response = await getRequest(
       `${endpoints.billingsAndPlans.list}/${billingsAndPlansId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -33,7 +34,7 @@ export const fetchOneBillingsAndPlans = createAsyncThunk(
 export const createBillingsAndPlans = createAsyncThunk(
   'billingsAndPlans/create',
   async (data: any) => {
-    const response = await postRequest(endpoints.billingsAndPlans.list, data, defaultConfig);
+    const response = await postRequest(endpoints.billingsAndPlans.list, data, defaultConfig());
 
     return response.data;
   }
@@ -46,7 +47,7 @@ export const editBillingsAndPlans = createAsyncThunk(
     const response = await putRequest(
       `${endpoints.billingsAndPlans.list}/${billingsAndPlansId}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -58,7 +59,7 @@ export const deleteBillingsAndPlans = createAsyncThunk(
   async (billingsAndPlansId: number) => {
     const response = await deleteRequest(
       `${endpoints.billingsAndPlans.list}/${billingsAndPlansId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -72,6 +73,7 @@ const billingsAndPlansSlice = createSlice({
     billingsAndPlans: null,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setBillingsAndPlans: (state, action: PayloadAction<any>) => {
@@ -81,6 +83,11 @@ const billingsAndPlansSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
       .addCase(fetchBillingsAndPlanssList.pending, (state) => {
         state.loading = true;
         state.error = null;

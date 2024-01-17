@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { resetAllReducers } from './resetSlice';
 // import { IWebSiteInformationRequest } from 'src/types/request/websiteInformation';
 import {
   getRequest,
@@ -12,7 +13,7 @@ import {
 export const fetchWebSiteInformationsList = createAsyncThunk(
   'webSiteInformations/fetchList',
   async () => {
-    const response = await getRequest(endpoints.webSiteInformation.list, defaultConfig);
+    const response = await getRequest(endpoints.webSiteInformation.list, defaultConfig());
 
     return response.data;
   }
@@ -23,7 +24,7 @@ export const fetchOneWebSiteInformation = createAsyncThunk(
   async (webSiteInformationId: number) => {
     const response = await getRequest(
       `${endpoints.webSiteInformation.list}/${webSiteInformationId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -33,7 +34,7 @@ export const fetchOneWebSiteInformation = createAsyncThunk(
 export const createWebSiteInformation = createAsyncThunk(
   'webSiteInformations/create',
   async (data: any) => {
-    const response = await postRequest(endpoints.webSiteInformation.list, data, defaultConfig);
+    const response = await postRequest(endpoints.webSiteInformation.list, data, defaultConfig());
 
     return response.data;
   }
@@ -46,7 +47,7 @@ export const editWebSiteInformation = createAsyncThunk(
     const response = await putRequest(
       `${endpoints.webSiteInformation.list}/${webSiteInformationId}`,
       data,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -58,7 +59,7 @@ export const deleteWebSiteInformation = createAsyncThunk(
   async (webSiteInformationId: number) => {
     const response = await deleteRequest(
       `${endpoints.webSiteInformation.list}/${webSiteInformationId}`,
-      defaultConfig
+      defaultConfig()
     );
 
     return response.data;
@@ -72,6 +73,7 @@ const webSiteInformationsSlice = createSlice({
     webSiteInformation: null,
     loading: false,
     error: null as string | null,
+    status: 'idle',
   },
   reducers: {
     setWebSiteInformation: (state, action: PayloadAction<any>) => {
@@ -80,6 +82,11 @@ const webSiteInformationsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(resetAllReducers, (state) => {
+        // Reset the state for the customers reducer
+        state.status = 'idle';
+        state.list = []; // Replace with your initial state
+      })
 
       .addCase(fetchWebSiteInformationsList.pending, (state) => {
         state.loading = true;

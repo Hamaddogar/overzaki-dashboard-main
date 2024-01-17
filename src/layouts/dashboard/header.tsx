@@ -35,6 +35,8 @@ import { AppDispatch } from 'src/redux/store/store';
 import { useDispatch } from 'react-redux';
 import { fetchBuilderList, setBuilder } from 'src/redux/store/thunks/builder';
 import { useSelector } from 'react-redux';
+import { getBuilderDomain, setBuilderDomain } from 'src/auth/context/jwt/utils';
+import { resetAllReducers } from 'src/redux/store/thunks/resetSlice';
 
 // ----------------------------------------------------------------------
 
@@ -74,12 +76,9 @@ export default function Header({ onOpenNav }: Props) {
 
     setDomain(pv => ({ ...pv, open: null }));
     if (service !== "all") {
-      setSelectedDomain(service);
-      //   setDomain(pv => ({ ...pv, open: null }));
+      // setSelectedDomain(service);
+      setBuilderObjects(service)
     }
-    // else {
-    //   setDomain({ service, open: null });
-    // }
 
   }, []);
 
@@ -107,11 +106,27 @@ export default function Header({ onOpenNav }: Props) {
 
   useEffect(() => {
     if (list?.length > 0) {
-      dispatch(setBuilder(list[0]));
-      setSelectedDomain(list[0])
+      const tanentDomain = getBuilderDomain()
+      if (tanentDomain) {
+        const builder = list.find((obj: any) => obj.domain === tanentDomain);
+        if (builder) {
+          setBuilderObjects(builder);
+        } else {
+          setBuilderObjects(list[0]);
+        }
+      } else {
+        setBuilderObjects(list[0]);
+
+      }
     }
   }, [list]);
 
+  const setBuilderObjects = (builder: any) => {
+    dispatch(setBuilder(builder));
+    setSelectedDomain(builder);
+    setBuilderDomain(builder?.domain)
+    dispatch(resetAllReducers());
+  }
 
 
   // ----------------------------------------------------
