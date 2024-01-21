@@ -168,6 +168,7 @@ const categorySlice = createSlice({
         // Reset the state for the customers reducer
         state.status = 'idle';
         state.list = []; // Replace with your initial state
+        state.subCatList = []; // Replace with your initial state
       })
 
       .addCase(fetchCategorysList.pending, (state) => {

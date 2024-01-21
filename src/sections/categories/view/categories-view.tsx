@@ -419,12 +419,15 @@ export default function CategoriesView() {
 
   const [listItems, setListItems] = useState([]);
   useEffect(() => {
-    dispatch(fetchCategorysList({ pageNumber, pageSize })).then((response: any) => {
-      setCategoriesLength(response.payload.data.count);
-      setListItems(response.payload.data.data);
-      // dispatch(fetchSubCategorysList(error));
-    });
-  }, [pageNumber]);
+    if (loadStatus === 'idle') {
+      dispatch(fetchCategorysList({ pageNumber, pageSize })).then((response: any) => {
+        setCategoriesLength(response.payload.data.count);
+        setListItems(response.payload.data.data);
+        // dispatch(fetchSubCategorysList(error));
+      });
+    }
+  }, [loadStatus, dispatch, pageNumber]);
+
 
   const handleOnDragEnd = (result: any) => {
     if (!result.destination) return;

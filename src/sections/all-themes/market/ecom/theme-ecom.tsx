@@ -54,6 +54,7 @@ import SaveSettings from '../../utils/save-settings';
 import { socketClient } from '../../utils/helper-functions';
 import { useSnackbar } from 'notistack';
 import { useSettingsContext } from 'src/components/settings';
+import { useThrottledCallback } from 'use-debounce';
 
 const dataPages = [
   { title: "Home Page", link: 'https://ecom-zaki.vercel.app/' },
@@ -91,7 +92,7 @@ export default function EcomDesignMain() {
 
   const [themeConfig, setThemeConfig] = useState({
     fontStyle: 'Avernir',
-    btns_Radius: 10,
+    buttonRadius: 10,
     primaryColor: '#0D6EFD',
     secondaryColor: '#8688A3',
     logo: '',
@@ -149,32 +150,64 @@ export default function EcomDesignMain() {
   const builder_Id = searchParams.get('id')?.toString() || "";
 
 
-  let timeoutId: string | number | NodeJS.Timeout | undefined;
 
-  const debounce = (callback: any, delay: any) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(callback, delay);
-  }
+  const handleThemeConfig = (key: string, newValue: string, parentClass: string | null = "") => {
 
-
-  const handleThemeConfig = (key: string, newValue: string) => {
 
     setThemeConfig(pv => ({ ...pv, [key]: newValue }));
 
-    debounce(() => {
+
+    const _socketKey = parentClass ? (parentClass + "." + key) : key;
+
+
+
+    let timeoutId: NodeJS.Timeout | undefined;
+    let debouncedFunctionExecuted = false;
+
+
+    let valueToShare = newValue;
+    if (typeof newValue === 'number') {
+      valueToShare = `${newValue}px`
+    }
+
+
+
+    const debounceFunction = () => {
       const data = {
         builderId: builder_Id,
-        key: "foneStyle.en",
-        value: newValue,
+        key: _socketKey,
+        value: valueToShare,
       };
       if (socket) {
-        socket.emit('website:cmd', data)
+        socket.emit('website:cmd', data);
       }
+    }
 
-    }, 300);
+    useThrottledCallback(debounceFunction, 500, { 'trailing': false })
+
+    // const debouncedFunction = debounce(() => {
+    // }, 300);
+    // debouncedFunction();
+
+
+
   };
 
-
+  const debounce = (callback: () => void, delay: number) => {
+    let timeoutId: NodeJS.Timeout | undefined;
+    let isPending = false; // Flag to track whether the function is pending execution
+    const executeCallback = () => {
+      isPending = false;
+      callback();
+    };
+    return () => {
+      if (isPending) {
+        clearTimeout(timeoutId);
+      }
+      timeoutId = setTimeout(executeCallback, delay);
+      isPending = true;
+    };
+  };
 
   // using Ressponsive view 
   const smUp = useResponsive('up', 'sm');
@@ -362,7 +395,7 @@ export default function EcomDesignMain() {
                   <HeaderSection
                     name='Button Style'
                     description='Control the border radius of your button'
-                    cancel={{ key: 'btns_Radius', value: 10 }}
+                    cancel={{ key: 'buttonRadius', value: 10 }}
                     handleThemeConfig={handleThemeConfig}
                   />
                   <Buttons themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
@@ -1115,7 +1148,7 @@ export default function EcomDesignMain() {
               {/* View and Dsiplay Section */}
               <Box sx={{ pb: '20px' }}>
                 {/* <OutPutView deviceView={deviceView} page={linker(controlls.page)} /> */}
-                <OutPutView deviceView={deviceView} page={`${url}??builder_id=${builder_Id}`} />
+                <OutPutView deviceView={deviceView} page={`${url}?builder_id=${builder_Id}`} />
               </Box>
             </Grid>
 
@@ -1617,7 +1650,7 @@ export default function EcomDesignMain() {
                   <HeaderSection
                     name='Button Style'
                     description='Control the border radius of your button'
-                    cancel={{ key: 'btns_Radius', value: 10 }}
+                    cancel={{ key: 'buttonRadius', value: 10 }}
                     handleThemeConfig={handleThemeConfig}
                   // closer={handleButton('')}
                   />

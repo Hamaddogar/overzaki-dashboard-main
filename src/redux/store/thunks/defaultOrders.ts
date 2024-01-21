@@ -17,7 +17,7 @@ export const fetchOrderssList = createAsyncThunk(
     try {
       if (paramsData !== undefined) {
         const { pageNumber, pageSize } = paramsData;
-        const response = await getRequestWithParams(
+        const response = await getRequest(
           `${endpoints.orders.list}/all?pageSize=${pageSize}&pageNumber=${pageNumber}`,
           defaultConfig()
         );

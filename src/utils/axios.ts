@@ -114,6 +114,7 @@ export const endpoints = {
   },
   builder: {
     list: '/builder',
+    get: '/builder?type=website',
     search: '/builder/search',
   },
   customer: {

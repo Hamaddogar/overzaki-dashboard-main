@@ -321,7 +321,7 @@ export function AuthProvider({ children }: Props) {
     if (alreadyExistDomain) {
       return true;
     } else {
-      const response = await axios.get(endpoints.builder.list);
+      const response = await axios.get(endpoints.builder.get);
       const { data } = response.data;
       if (data?.length > 0) {
         let builderDomain = data[0].domain

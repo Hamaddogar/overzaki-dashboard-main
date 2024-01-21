@@ -9,7 +9,7 @@ interface FontFamilyProps {
         fontStyle: string;
         // Add other themeConfig properties as needed
     };
-    handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
+    handleThemeConfig: (key: string, value: any, parentClass: any) => void; // Adjust 'value' type as needed
     mobile?: boolean;
 }
 
@@ -48,7 +48,7 @@ export default function FontFamilyDealer({ themeConfig, handleThemeConfig, mobil
                         aria-labelledby="radio-buttons-font-family-group-label"
                         value={themeConfig?.fontStyle || null}
                         name="radio-buttons-font-family-group"
-                        onChange={(event) => handleThemeConfig('fontStyle', event.target.value)}
+                        onChange={(event) => handleThemeConfig('fontStyle', event.target.value, 'css')}
                         sx={{
                             display: 'flex',
                             flexDirection: 'row',
@@ -88,7 +88,7 @@ export default function FontFamilyDealer({ themeConfig, handleThemeConfig, mobil
                         aria-labelledby="radio-buttons-font-family-group-label"
                         value={themeConfig?.fontStyle}
                         name="radio-buttons-font-family-group"
-                        onChange={(event) => handleThemeConfig('fontStyle', event.target.value)}
+                        onChange={(event) => handleThemeConfig('fontStyle', event.target.value, 'css')}
                         sx={{
                             display: 'flex',
                             flexDirection: 'column',

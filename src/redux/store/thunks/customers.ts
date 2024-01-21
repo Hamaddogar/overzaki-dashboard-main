@@ -22,13 +22,13 @@ export const fetchCustomersList = createAsyncThunk(
     try {
       if (paramsData) {
         const { pageNumber, pageSize } = paramsData;
-        const response = await getRequestWithParams(
+        const response = await getRequest(
           `${endpoints.customer.list}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
           defaultConfig()
         );
         return response.data;
       }
-      const response = await getRequestWithParams(`${endpoints.customer.list}`, defaultConfig());
+      const response = await getRequest(`${endpoints.customer.list}`, defaultConfig());
       return response.data;
     } catch (error) {
       return error;

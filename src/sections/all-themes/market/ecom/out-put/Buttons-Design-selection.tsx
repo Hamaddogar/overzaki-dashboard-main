@@ -8,10 +8,10 @@ import { Stack, Typography, Button, Box, Slider } from '@mui/material';
 
 interface ButtonsProps {
     themeConfig: {
-        btns_Radius: number;
+        buttonRadius: number;
         // Add other themeConfig properties as needed
     };
-    handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
+    handleThemeConfig: (key: string, value: any, parentClass?: any) => void; // Adjust 'value' type as needed
 }
 
 
@@ -20,7 +20,7 @@ export default function ButtonsDealer({ themeConfig, handleThemeConfig }: Button
     return (
         <div>
             <Box mt='50px'>
-                <PrettoSlider max={30} step={1} size='medium' value={themeConfig?.btns_Radius} onChange={(event, newValue) => handleThemeConfig('btns_Radius', newValue)} aria-labelledby="continuous-slider" />
+                <PrettoSlider max={30} step={1} size='medium' value={themeConfig?.buttonRadius} onChange={(event, newValue) => handleThemeConfig('buttonRadius', newValue, 'css')} aria-labelledby="continuous-slider" />
                 <Stack mt='-10px' direction='row' justifyContent='space-between'>
                     <Typography color='#8688A3' variant='caption'>Sharp</Typography>
                     <Typography color='#8688A3' variant='caption'>Rounded</Typography>
@@ -31,7 +31,7 @@ export default function ButtonsDealer({ themeConfig, handleThemeConfig }: Button
                 <Button fullWidth variant='contained'
                     size='large'
                     sx={{
-                        borderRadius: `${themeConfig.btns_Radius}px`,
+                        borderRadius: `${themeConfig.buttonRadius}px`,
                         background: '#8688A3'
                     }}
                 >

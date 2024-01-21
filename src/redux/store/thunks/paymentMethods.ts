@@ -22,16 +22,13 @@ export const fetchPaymentMethodsList = createAsyncThunk(
     try {
       if (paramsData) {
         const { pageNumber, pageSize } = paramsData;
-        const response = await getRequestWithParams(
+        const response = await getRequest(
           `${endpoints.paymentMethod.list}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
           defaultConfig()
         );
         return response.data;
       }
-      const response = await getRequestWithParams(
-        `${endpoints.paymentMethod.list}/all`,
-        defaultConfig()
-      );
+      const response = await getRequest(`${endpoints.paymentMethod.list}/all`, defaultConfig());
       return response.data;
     } catch (error) {
       return error;

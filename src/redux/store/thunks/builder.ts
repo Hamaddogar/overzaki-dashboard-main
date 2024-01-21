@@ -20,7 +20,7 @@ export const fetchBuilderList = createAsyncThunk(
   'builder/fetchList',
   async (params: IRequest, { rejectWithValue }) => {
     try {
-      const response = await getRequest(endpoints.builder.list, defaultConfig());
+      const response = await getRequest(endpoints.builder.get, defaultConfig());
       return response;
     } catch (error) {
       return rejectWithValue(error.response.data);

@@ -11,7 +11,7 @@ interface ColorsProps {
         secondaryColor: string;
         // Add other themeConfig properties as needed
     };
-    handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
+    handleThemeConfig: (key: string, value: any, parentClass?: any) => void; // Adjust 'value' type as needed
 }
 
 
@@ -27,7 +27,7 @@ export default function ColorsDealer({ themeConfig, handleThemeConfig }: ColorsP
                 <Typography variant='caption' color='#8688A3'>Primary Color</Typography>
                 <Stack direction='row' alignItems='center' spacing='18px'>
                     <TextField variant='filled' defaultValue={themeConfig.primaryColor}
-                        onChange={event => isColorValid(event.target.value) ? handleThemeConfig("primaryColor", event.target.value) : null}
+                        onChange={event => isColorValid(event.target.value) ? handleThemeConfig("primaryColor", event.target.value, 'css') : null}
                     />
                     <Box sx={{
                         width: "48px",
@@ -43,7 +43,7 @@ export default function ColorsDealer({ themeConfig, handleThemeConfig }: ColorsP
                 <Typography variant='caption' color='#8688A3'>Secondary Color</Typography>
                 <Stack direction='row' alignItems='center' spacing='18px'>
                     <TextField variant='filled' defaultValue={themeConfig.secondaryColor}
-                        onChange={event => isColorValid(event.target.value) ? handleThemeConfig("secondaryColor", event.target.value) : null}
+                        onChange={event => isColorValid(event.target.value) ? handleThemeConfig("secondaryColor", event.target.value, 'css') : null}
                     />
                     <Box sx={{
                         width: "48px",

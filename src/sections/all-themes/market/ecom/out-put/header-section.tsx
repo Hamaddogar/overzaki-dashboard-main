@@ -15,7 +15,7 @@ interface HeaderSectionProps {
         key: string,
         value: string | number
     },
-    handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
+    handleThemeConfig: (key: string, value: any, parentClass?: any) => void; // Adjust 'value' type as needed
 }
 
 
@@ -23,8 +23,10 @@ export default function HeaderSection({ children, name, description, cancel, clo
     const handleNoAction = () => { };
     const handleCancle = () => {
         if (cancel.key === 'colors') {
-            handleThemeConfig('primaryColor', '#0D6EFD');
-            handleThemeConfig('secondaryColor', '#8688A3');
+            // handleThemeConfig('primaryColor', '#0D6EFD');
+            // handleThemeConfig('secondaryColor', '#8688A3');
+            handleThemeConfig('primaryColor', '', 'css');
+            handleThemeConfig('secondaryColor', '', 'css');
         } else handleThemeConfig(cancel.key, cancel.value)
     };
     return (
