@@ -96,7 +96,8 @@ export default function EcomDesignMain() {
     primaryColor: '#0D6EFD',
     secondaryColor: '#8688A3',
     logo: '',
-    cart: '/raw/cart1.svg',
+    cart: '1',
+    categoryShow: '1',
     navLogoPosition: 'center',
 
     // 
@@ -112,6 +113,37 @@ export default function EcomDesignMain() {
     // 
     productViewShow: true,
     productView: 'grid',
+
+    layout: {
+      homePage: {
+        navbar: {
+          sort: 1,
+          logoPosition: "empty value"
+        },
+        banner: {
+          sort: 2,
+          image: "empty value"
+        },
+        header: {
+          showInApp: true,
+          sort: 3,
+          image: "",
+          slogan: "empty value"
+        },
+        category: {
+          showInApp: true,
+          sort: 4,
+          rowType: "empty value"
+        },
+        product: {
+          showInApp: true,
+          sort: 5,
+          rowType: "1"
+        }
+      }
+    },
+
+
     // listViewGrid
     listViewGrid: '6',
     // cardStyle
@@ -153,22 +185,46 @@ export default function EcomDesignMain() {
   let timeoutId: NodeJS.Timeout | undefined;
   let debouncedFunctionExecuted = false;
 
-  const handleThemeConfig = (key: string, newValue: string, parentClass: string | null = "") => {
+  const handleThemeConfig = (key: string, newValue: any, parentClass: string | null = "") => {
 
 
-    setThemeConfig(pv => ({ ...pv, [key]: newValue }));
+    let _socketKey = "";
+    let valueToShare = "";
 
 
-    const _socketKey = parentClass ? (parentClass + "." + key) : key;
+    if (!parentClass?.startsWith('layout')) {
 
+      setThemeConfig(pv => ({ ...pv, [key]: newValue }));
+      _socketKey = parentClass ? (parentClass + "." + key) : key;
+      valueToShare = newValue;
+      if (typeof newValue === 'number') {
+        valueToShare = `${newValue}px`
+      }
 
+    } else {
+      // setThemeConfig(pv => ({ ...pv, ...newValue }));
+      // _socketKey = parentClass ? (parentClass + "." + key) : key;
+      // Split the path into an array of keys
+      const pathKeys = key.split('.');
+      let newState = { ...themeConfig };
 
+      let currentLevel: any = newState;
+      for (let i = 0; i < pathKeys.length - 1; i++) {
+        const key = pathKeys[i];
+        currentLevel[key] = currentLevel[key] ? { ...currentLevel[key] } : {};
+        currentLevel = currentLevel[key];
+      }
 
-    let valueToShare = newValue;
-    if (typeof newValue === 'number') {
-      valueToShare = `${newValue}px`
+      // Set the final value at the last key in the path
+      currentLevel[pathKeys[pathKeys.length - 1]] = newValue;
+
+      console.log("newState", newState);
+      setThemeConfig(newState);
+
+      _socketKey = key;
+      valueToShare = newValue;
+
     }
-
 
 
     const debounceFunction = () => {
@@ -422,7 +478,7 @@ export default function EcomDesignMain() {
                   <HeaderSection
                     name='Cart Icon Style'
                     description='Select the style of cart icon'
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
+                    cancel={{ key: 'cart', value: '1' }}
                     handleThemeConfig={handleThemeConfig}
                   />
                   <CartsDealer themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
@@ -431,7 +487,7 @@ export default function EcomDesignMain() {
                   <HeaderSection
                     name='Categories Card'
                     description='Select the style of category card'
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
+                    cancel={{ key: 'cart', value: '1' }}
                     handleThemeConfig={handleThemeConfig}
                   />
                   <StyleCategoriesDealer themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
@@ -478,7 +534,7 @@ export default function EcomDesignMain() {
                 {buttonSection === 'Products' && <Box>
                   <HeaderSection
                     name='Show Products Section'
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
+                    cancel={{ key: 'cart', value: '1' }}
                     handleThemeConfig={handleThemeConfig}
                   />
 

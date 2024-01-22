@@ -7,10 +7,11 @@ import { Stack, Typography, Box, RadioGroup, FormControlLabel, Radio } from '@mu
 
 interface StyleCategoriesProps {
     themeConfig: {
+        categoryShow: string
         // cart: string;
         // Add other themeConfig properties as needed
     };
-    handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
+    handleThemeConfig: (key: string, value: any, parentClass: any) => void; // Adjust 'value' type as needed
     mobile?: boolean;
 }
 
@@ -23,7 +24,8 @@ export default function StyleCategoriesDealer({ themeConfig, handleThemeConfig, 
                 <Box pt='20px'>
                     <RadioGroup
                         aria-labelledby="demo-radio-buttons-group-label"
-                        defaultValue="c1"
+                        defaultValue={themeConfig.categoryShow}
+                        onChange={event => handleThemeConfig('categoryShow', event.target.value, 'css')}
                         name="radio-buttons-group"
                         sx={{
                             display: 'flex',
@@ -32,7 +34,7 @@ export default function StyleCategoriesDealer({ themeConfig, handleThemeConfig, 
                             flexWrap: 'nowrap'
                         }}
                     >
-                        <FormControlLabel value="c1" control={<Radio size='medium' />} labelPlacement='bottom' label={
+                        <FormControlLabel value={"1"} control={<Radio size='medium' checked={"1" === themeConfig.categoryShow} />} labelPlacement='bottom' label={
                             <Stack alignItems='center' spacing='5px' ml='15px'>
                                 <Stack alignItems='center' justifyContent='center' sx={{
                                     width: "100px",
@@ -48,7 +50,7 @@ export default function StyleCategoriesDealer({ themeConfig, handleThemeConfig, 
                         } />
 
 
-                        <FormControlLabel value="c2" control={<Radio size='medium' />} labelPlacement='bottom' label={
+                        <FormControlLabel value="2" control={<Radio size='medium' checked={"2" === themeConfig.categoryShow} />} labelPlacement='bottom' label={
                             <Stack alignItems='center' spacing='5px' ml='15px'>
                                 <Box sx={{
                                     backgroundImage: 'url(/raw/cm.jpg)',
@@ -67,7 +69,7 @@ export default function StyleCategoriesDealer({ themeConfig, handleThemeConfig, 
                             </Stack>
                         } />
 
-                        <FormControlLabel value="c3" control={<Radio size='medium' />} labelPlacement='bottom' label={
+                        <FormControlLabel value="2" control={<Radio size='medium' checked={"3" === themeConfig.categoryShow} />} labelPlacement='bottom' label={
                             <Stack alignItems='center' spacing='5px' ml='15px'>
                                 <Box sx={{
                                     backgroundImage: 'url(/raw/cm.jpg)',
@@ -92,7 +94,8 @@ export default function StyleCategoriesDealer({ themeConfig, handleThemeConfig, 
                     <Box pt='20px'>
                         <RadioGroup
                             aria-labelledby="demo-radio-buttons-group-label"
-                            defaultValue="c1"
+                            defaultValue={themeConfig.categoryShow}
+                            onChange={event => handleThemeConfig('categoryShow', event.target.value, 'css')}
                             name="radio-buttons-group"
                             sx={{
                                 display: 'flex',
@@ -100,7 +103,7 @@ export default function StyleCategoriesDealer({ themeConfig, handleThemeConfig, 
                                 gap: '20px',
                             }}
                         >
-                            <FormControlLabel value="c1" control={<Radio size='medium' />} label={
+                            <FormControlLabel value="1" control={<Radio size='medium' checked={"1" === themeConfig.categoryShow} />} label={
                                 <Stack alignItems='center' spacing='5px' ml='15px'>
                                     <Stack alignItems='center' justifyContent='center' sx={{
                                         width: "100px",
@@ -116,7 +119,7 @@ export default function StyleCategoriesDealer({ themeConfig, handleThemeConfig, 
                             } />
 
 
-                            <FormControlLabel value="c2" control={<Radio size='medium' />} label={
+                            <FormControlLabel value="2" control={<Radio size='medium' checked={"2" === themeConfig.categoryShow} />} label={
                                 <Stack alignItems='center' spacing='5px' ml='15px'>
                                     <Box sx={{
                                         backgroundImage: 'url(/raw/cm.jpg)',
@@ -135,7 +138,7 @@ export default function StyleCategoriesDealer({ themeConfig, handleThemeConfig, 
                                 </Stack>
                             } />
 
-                            <FormControlLabel value="c3" control={<Radio size='medium' />} label={
+                            <FormControlLabel value="3" control={<Radio size='medium' checked={"3" === themeConfig.categoryShow} />} label={
                                 <Stack alignItems='center' spacing='5px' ml='15px'>
                                     <Box sx={{
                                         backgroundImage: 'url(/raw/cm.jpg)',

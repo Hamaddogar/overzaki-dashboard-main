@@ -18,19 +18,24 @@ const dataCart = [
     {
         name: 'Cart 1',
         checked: false,
-        icon: '/raw/cart3.svg'
+        icon: '/raw/cart3.svg',
+        value: "1",
     }, {
         name: 'Cart 2',
         checked: true,
-        icon: '/raw/cart1.svg'
+        icon: '/raw/cart1.svg',
+        value: "2",
     }, {
         name: 'Cart 3',
         checked: false,
-        icon: '/raw/cart2.svg'
+        icon: '/raw/cart2.svg',
+        value: "3",
+
     }, {
         name: 'Cart 4',
         checked: false,
-        icon: '/raw/cart4.svg'
+        icon: '/raw/cart4.svg',
+        value: "4",
     },
 ];
 
@@ -54,18 +59,18 @@ export default function CartsDealer({ themeConfig, handleThemeConfig, mobile = f
                     >
                         {
                             dataCart.map((cart, indx) => (
-                                <FormControlLabel key={indx} value={cart.icon} control={<Radio checked={cart.icon === themeConfig.cart} sx={{ display: 'none' }} size='medium' />} label={
+                                <FormControlLabel key={indx} value={cart.value} control={<Radio checked={cart.value === themeConfig.cart} sx={{ display: 'none' }} size='medium' />} label={
                                     <Stack alignItems='center' spacing='10px'>
                                         <Stack alignItems='center' justifyContent='center' sx={{
                                             width: "60px",
                                             height: "60px",
                                             borderRadius: "12px",
-                                            background: cart.icon === themeConfig.cart ? "#1BFBB6" : '#F5F5F8',
+                                            background: cart.value === themeConfig.cart ? "#1BFBB6" : '#F5F5F8',
                                             fontFamily: 'cursive'
                                         }}>
                                             <Box component='img' src={cart.icon} />
                                         </Stack>
-                                        <Typography variant='button' noWrap color={cart.icon === themeConfig.cart ? '#0F1349' : '#8688A3'} >{cart.name}</Typography>
+                                        <Typography variant='button' noWrap color={cart.value === themeConfig.cart ? '#0F1349' : '#8688A3'} >{cart.name}</Typography>
                                     </Stack>
                                 } />
                             ))
@@ -89,17 +94,17 @@ export default function CartsDealer({ themeConfig, handleThemeConfig, mobile = f
                     >
                         {
                             dataCart.map((cart, indx) => (
-                                <FormControlLabel key={indx} value={cart.icon} control={<Radio checked={cart.icon === themeConfig.cart} size='medium' />} label={
+                                <FormControlLabel key={indx} value={cart.value} control={<Radio checked={cart.value === themeConfig.cart} size='medium' />} label={
                                     <Stack direction='row' alignItems='center' spacing='20px' ml='15px'>
                                         <Stack alignItems='center' justifyContent='center' sx={{
                                             width: "60px",
                                             height: "60px",
                                             borderRadius: "12px",
-                                            background: cart.icon === themeConfig.cart ? "#1BFBB6" : '#F5F5F8',
+                                            background: cart.value === themeConfig.cart ? "#1BFBB6" : '#F5F5F8',
                                         }}>
                                             <Box component='img' src={cart.icon} />
                                         </Stack>
-                                        <Typography variant='button' color={cart.icon === themeConfig.cart ? '#0F1349' : '#8688A3'} >{cart.name}</Typography>
+                                        <Typography variant='button' color={cart.value === themeConfig.cart ? '#0F1349' : '#8688A3'} >{cart.name}</Typography>
                                     </Stack>
                                 } />
                             ))

@@ -6,18 +6,18 @@ import { Stack, Typography, Box, RadioGroup, FormControlLabel, Radio, TextField,
 // ----------------------------------------------------------------------
 
 interface ProductViewProps {
-    themeConfig: {
-        productViewShow: boolean,
-        productView: string,
-        // Add other themeConfig properties as needed
-    };
-    handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
+    themeConfig: any;
+    handleThemeConfig: (key: string, value: any, parentClass: any) => void; // Adjust 'value' type as needed
     mobile?: boolean;
 }
 
 
 export default function ProductViewDealer({ themeConfig, handleThemeConfig, mobile = false }: ProductViewProps) {
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => handleThemeConfig('productViewShow', event.target.checked);
+
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        handleThemeConfig('layout.homePage.product.showInApp', event.target.checked, 'layout')
+    };
 
     return (
         <div>
@@ -25,7 +25,7 @@ export default function ProductViewDealer({ themeConfig, handleThemeConfig, mobi
                 <Stack direction='row' justifyContent='space-between' alignItems='center'>
                     <Typography variant='caption' sx={{ fontWeight: 900 }}>Show Products Section</Typography>
                     <Switch
-                        checked={themeConfig.productViewShow}
+                        checked={themeConfig.layout.homePage.product.showInApp}
                         onChange={handleChange}
                         inputProps={{ 'aria-label': 'controlled' }}
                     />
@@ -37,16 +37,17 @@ export default function ProductViewDealer({ themeConfig, handleThemeConfig, mobi
                 <Box pt='20px'>
                     <RadioGroup
                         aria-labelledby="layout-CategorieRow-group"
-                        defaultValue={themeConfig?.productView}
+                        // defaultValue={themeConfig?.productView}
+                        defaultValue={themeConfig.layout.homePage.product.rowType}
                         name="layout-CategorieRow-group"
-                        onChange={(event) => handleThemeConfig('productView', event.target.value)}
+                        onChange={(event) => handleThemeConfig('layout.homePage.product.rowType', event.target.value, 'layout')}
                         sx={{
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '20px',
                         }}
                     >
-                        <FormControlLabel value='list' control={<Radio checked={themeConfig?.productView === "list"} size='medium' />} label={
+                        <FormControlLabel value='1' control={<Radio checked={themeConfig.layout.homePage.product.rowType === "1"} size='medium' />} label={
                             <Stack direction='row' alignItems='center' spacing='12px' ml='15px'>
                                 <Box component='img' src='/raws/v1.png' />
                                 <Box>
@@ -56,7 +57,7 @@ export default function ProductViewDealer({ themeConfig, handleThemeConfig, mobi
                             </Stack>
                         } />
 
-                        <FormControlLabel value='grid' control={<Radio checked={themeConfig?.productView === "grid"} size='medium' />} label={
+                        <FormControlLabel value='2' control={<Radio checked={themeConfig.layout.homePage.product.rowType === "2"} size='medium' />} label={
                             <Stack direction='row' alignItems='center' spacing='12px' ml='15px'>
                                 <Box component='img' src='/raws/v2.png' />
                                 <Box>
@@ -66,7 +67,7 @@ export default function ProductViewDealer({ themeConfig, handleThemeConfig, mobi
                             </Stack>
                         } />
 
-                        <FormControlLabel value='scroll' control={<Radio checked={themeConfig?.productView === "scroll"} size='medium' />} label={
+                        <FormControlLabel value='3' control={<Radio checked={themeConfig.layout.homePage.product.rowType === "3"} size='medium' />} label={
                             <Stack direction='row' alignItems='center' spacing='12px' ml='15px'>
                                 <Box component='img' src='/raws/v3.png' />
                                 <Box>

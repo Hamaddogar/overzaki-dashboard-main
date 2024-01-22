@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Stack, Typography, Box, TextField } from '@mui/material';
+import { MuiColorInput } from 'mui-color-input';
 
 
 // ----------------------------------------------------------------------
@@ -26,7 +27,7 @@ export default function ColorsDealer({ themeConfig, handleThemeConfig }: ColorsP
             <Box>
                 <Typography variant='caption' color='#8688A3'>Primary Color</Typography>
                 <Stack direction='row' alignItems='center' spacing='18px'>
-                    <TextField variant='filled' defaultValue={themeConfig.primaryColor}
+                    {/* <TextField variant='filled' defaultValue={themeConfig.primaryColor}
                         onChange={event => isColorValid(event.target.value) ? handleThemeConfig("primaryColor", event.target.value, 'css') : null}
                     />
                     <Box sx={{
@@ -35,14 +36,17 @@ export default function ColorsDealer({ themeConfig, handleThemeConfig }: ColorsP
                         background: `${themeConfig.primaryColor} 0% 0% no-repeat padding-box`,
                         boxShadow: "0px 6px 20px #00000033",
                         borderRadius: '16px'
-                    }} />
+                    }} /> */}
+                    <MuiColorInput sx={{ width: "100%", margin: "auto", }} variant="outlined" value={themeConfig.primaryColor}
+                        onChange={event => isColorValid(event) ? handleThemeConfig("primaryColor", event, 'css') : null}
+                    />
                 </Stack>
             </Box>
 
             <Box mt='10px'>
                 <Typography variant='caption' color='#8688A3'>Secondary Color</Typography>
                 <Stack direction='row' alignItems='center' spacing='18px'>
-                    <TextField variant='filled' defaultValue={themeConfig.secondaryColor}
+                    {/* <TextField variant='filled' defaultValue={themeConfig.secondaryColor}
                         onChange={event => isColorValid(event.target.value) ? handleThemeConfig("secondaryColor", event.target.value, 'css') : null}
                     />
                     <Box sx={{
@@ -51,7 +55,10 @@ export default function ColorsDealer({ themeConfig, handleThemeConfig }: ColorsP
                         background: `${themeConfig.secondaryColor} 0% 0% no-repeat padding-box`,
                         boxShadow: "0px 6px 20px #00000033",
                         borderRadius: '16px'
-                    }} />
+                    }} /> */}
+                    <MuiColorInput sx={{ width: "100%", margin: "auto", }} variant="outlined" value={themeConfig.secondaryColor}
+                        onChange={event => isColorValid(event) ? handleThemeConfig("secondaryColor", event, 'css') : null}
+                    />
                 </Stack>
             </Box>
         </Box>
