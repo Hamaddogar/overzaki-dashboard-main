@@ -7,31 +7,31 @@ import axios from 'axios';
 // ----------------------------------------------------------------------
 
 export function useSearchLayout(query: string | undefined) {
-    const body = {
-        id: query
-    }
-    const { data, error } = useSWR({ url: endpoints.layout, body }, postFetcher);
+  const body = {
+    id: query,
+  };
+  const { data, error } = useSWR({ url: endpoints.layout, body }, postFetcher);
 
-    const memoizedValue = useMemo(
-        () => ({
-            data: data || {},
-            error,
-        }),
-        [data, error]
-    );
+  const memoizedValue = useMemo(
+    () => ({
+      data: data || {},
+      error,
+    }),
+    [data, error]
+  );
 
-    return memoizedValue
+  return memoizedValue;
 }
-
 
 // ----------------------------------------------------------------------
 
 export async function AddLayout(settings: any) {
-    const body = {
-        ...settings
-    }
+  const body = {
+    ...settings,
+  };
 
-    return axios.post(endpoints.layout, body)
-        .then(res => res.data).catch(error => error)
-
+  return axios
+    .post(endpoints?.builder?.save, body)
+    .then((res) => res.data)
+    .catch((error) => error);
 }

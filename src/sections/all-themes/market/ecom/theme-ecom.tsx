@@ -150,6 +150,8 @@ export default function EcomDesignMain() {
   const builder_Id = searchParams.get('id')?.toString() || "";
 
 
+  let timeoutId: NodeJS.Timeout | undefined;
+  let debouncedFunctionExecuted = false;
 
   const handleThemeConfig = (key: string, newValue: string, parentClass: string | null = "") => {
 
@@ -160,9 +162,6 @@ export default function EcomDesignMain() {
     const _socketKey = parentClass ? (parentClass + "." + key) : key;
 
 
-
-    let timeoutId: NodeJS.Timeout | undefined;
-    let debouncedFunctionExecuted = false;
 
 
     let valueToShare = newValue;
@@ -183,11 +182,12 @@ export default function EcomDesignMain() {
       }
     }
 
-    useThrottledCallback(debounceFunction, 500, { 'trailing': false })
+    // useThrottledCallback(debounceFunction, 500, { 'trailing': false })
 
-    // const debouncedFunction = debounce(() => {
-    // }, 300);
-    // debouncedFunction();
+    const debouncedFunctionCalled = debounce(() => {
+      debounceFunction()
+    }, 300);
+    debouncedFunctionCalled();
 
 
 
@@ -282,7 +282,7 @@ export default function EcomDesignMain() {
     <Box sx={{ height: '100%', transition: 'all .5' }}>
 
       {smUp && <Box>
-        <SaveSettings settings={themeConfig} smUp={smUp} />
+        <SaveSettings builderId={builder_Id} smUp={smUp} />
 
 
         <Grid container sx={{ height: '100%' }}>
@@ -1072,7 +1072,7 @@ export default function EcomDesignMain() {
 
           <Grid container rowGap='10px'>
             <Grid xs={12}>
-              <SaveSettings settings={themeConfig} smUp={false} />
+              <SaveSettings builderId={builder_Id} smUp={false} />
             </Grid>
 
             <Grid xs={12}>

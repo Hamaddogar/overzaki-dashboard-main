@@ -5,12 +5,16 @@ import { paths } from "src/routes/paths";
 import { useRouter } from 'src/routes/hooks';
 import Iconify from "src/components/iconify";
 import CircularProgress from '@mui/material/CircularProgress';
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "src/redux/store/store";
+import { saveBuilderSettings } from "src/redux/store/thunks/builder";
+import { useSnackbar } from "notistack";
 
 
 
 
 interface PersonalProps {
-    settings: any;
+    builderId: any;
     smUp: boolean;
 }
 
@@ -18,8 +22,12 @@ interface PersonalProps {
 
 
 
-export default function SaveSettings({ settings, smUp }: PersonalProps) {
+export default function SaveSettings({ builderId, smUp }: PersonalProps) {
     const router = useRouter();
+
+    const dispatch = useDispatch<AppDispatch>();
+    const { enqueueSnackbar } = useSnackbar();
+
 
     const [loading, setloading] = useState(false);
 
@@ -31,15 +39,22 @@ export default function SaveSettings({ settings, smUp }: PersonalProps) {
 
     const handleSaveSettings = async () => {
         setloading(true);
-        const res = await AddLayout({
-            add: true,
-            data: settings
-        });
 
-        setshowNotice({
-            show: true,
-            link: res.link
-        });
+        const formData = {
+            builderId: builderId
+        }
+        dispatch(saveBuilderSettings(formData)).then((response: any) => {
+            console.log("response", response);
+            if (response.meta.requestStatus === 'fulfilled') {
+                setshowNotice({
+                    show: true,
+                    link: `https://${response.payload.domain}`
+                });
+                enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+            } else {
+                enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+            }
+        })
         setloading(false);
     }
 
@@ -48,6 +63,8 @@ export default function SaveSettings({ settings, smUp }: PersonalProps) {
     };
 
     const openLinkInNewTab = () => {
+        console.log("showNotice", showNotice);
+
         window.open(showNotice?.link, '_blank');
         setshowNotice({
             show: false,

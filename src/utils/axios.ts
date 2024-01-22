@@ -114,6 +114,7 @@ export const endpoints = {
   },
   builder: {
     list: '/builder',
+    save: '/design/save',
     get: '/builder?type=website',
     search: '/builder/search',
   },

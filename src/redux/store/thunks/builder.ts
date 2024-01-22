@@ -61,6 +61,14 @@ export const builderActivateWebsite = createAsyncThunk(
   }
 );
 
+export const saveBuilderSettings = createAsyncThunk(
+  'builder/saveBuilderSettings',
+  async (data: any) => {
+    const response = await putRequest(endpoints?.builder?.save, data, defaultConfig());
+
+    return response.data;
+  }
+);
 export const builderActivateApplication = createAsyncThunk(
   'builder/builderActivateApplication',
   async (data: IBuilderForm) => {
@@ -102,6 +110,11 @@ const builderSlice = createSlice({
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
       })
+      .addCase(saveBuilderSettings.pending, (state) => {})
+      .addCase(saveBuilderSettings.fulfilled, (state, action) => {
+        state.builder = action.payload;
+      })
+      .addCase(saveBuilderSettings.rejected, (state, action) => {})
 
       .addCase(createBuilderFun.pending, (state) => {
         state.loading = true;
