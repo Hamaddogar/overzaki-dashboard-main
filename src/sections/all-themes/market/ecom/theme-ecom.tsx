@@ -463,7 +463,7 @@ export default function EcomDesignMain() {
                     cancel={{ key: 'logo', value: '' }}
                     handleThemeConfig={handleThemeConfig}
                   />
-                  <LogoDealer themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
+                  <LogoDealer themeConfig={themeConfig} builderId={builder_Id} handleThemeConfig={handleThemeConfig} />
                 </Box>}
                 {buttonSection === 'Color' && <Box>
                   <HeaderSection
@@ -519,7 +519,7 @@ export default function EcomDesignMain() {
                     cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
                     handleThemeConfig={handleThemeConfig}
                   />
-                  <HeaderDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+                  <HeaderDealer builderId={builder_Id} handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
                 </Box>}
                 {buttonSection === 'CategoriesLayout' && <Box>
 
@@ -744,7 +744,7 @@ export default function EcomDesignMain() {
 
                     {controlls.page === "Home Page" && <Stack alignItems='center' sx={{ height: '100%', textAlign: 'center', transition: 'all .5s' }} spacing='20px' >
 
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
+                      {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
                         <Button sx={{
                           padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Nav" ? "#1BFBB6" : '#F5F5F8',
                           '&:hover': { background: buttonSection === "Nav" ? "#22C55E" : '#DEE1E6' }
@@ -755,9 +755,9 @@ export default function EcomDesignMain() {
                           <Box component='img' src='/raws/bars.svg' sx={{ width: '20px', height: '20px' }} />
                         </Button>
                         <Typography variant='caption' color='#0F1349'>Nav</Typography>
-                      </Stack>
+                      </Stack> */}
 
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
+                      {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
                         <Button sx={{
                           padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Banners" ? "#1BFBB6" : '#F5F5F8',
                           '&:hover': { background: buttonSection === "Banners" ? "#22C55E" : '#DEE1E6' }
@@ -768,7 +768,7 @@ export default function EcomDesignMain() {
                           <Box component='img' src='/raws/Banners.svg' sx={{ width: '20px', height: '20px' }} />
                         </Button>
                         <Typography variant='caption' color='#0F1349'>Banners</Typography>
-                      </Stack>
+                      </Stack> */}
 
                       <Stack spacing='3px' alignItems='center' justifyContent='center'>
                         <Button sx={{
@@ -811,7 +811,7 @@ export default function EcomDesignMain() {
                       </Stack>
 
 
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
+                      {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
                         <Button sx={{
                           padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Mobiles" ? "#1BFBB6" : '#F5F5F8',
                           '&:hover': { background: buttonSection === "Mobiles" ? "#22C55E" : '#DEE1E6' }
@@ -822,11 +822,11 @@ export default function EcomDesignMain() {
                           <Box component='img' src='/raws/Mobiles.svg' sx={{ width: '20px', height: '20px' }} />
                         </Button>
                         <Typography variant='caption' color='#0F1349'>Mobiles</Typography>
-                      </Stack>
+                      </Stack> */}
 
 
 
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
+                      {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
                         <Button sx={{
                           padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Trending" ? "#1BFBB6" : '#F5F5F8',
                           '&:hover': { background: buttonSection === "Trending" ? "#22C55E" : '#DEE1E6' }
@@ -837,7 +837,7 @@ export default function EcomDesignMain() {
                           <Box component='img' src='/raws/Trending.svg' sx={{ width: '20px', height: '20px' }} />
                         </Button>
                         <Typography variant='caption' color='#0F1349'>Trending</Typography>
-                      </Stack>
+                      </Stack> */}
 
 
                     </Stack>}
@@ -1310,7 +1310,7 @@ export default function EcomDesignMain() {
 
                       {controlls.page === "Home Page" && <Stack direction='row' alignItems='center' sx={{ width: '100%', flexGrow: 1, height: '100%', textAlign: 'center', transition: 'all .5s' }} spacing='20px' >
 
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
+                        {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
                           <Button sx={{
                             padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Nav" ? "#1BFBB6" : '#F5F5F8',
                             '&:hover': { background: buttonSection === "Nav" ? "#22C55E" : '#DEE1E6' }
@@ -1321,9 +1321,9 @@ export default function EcomDesignMain() {
                             <Box component='img' src='/raws/bars.svg' sx={{ width: '20px', height: '20px' }} />
                           </Button>
                           <Typography variant='caption' color='#0F1349'>Nav</Typography>
-                        </Stack>
+                        </Stack> */}
 
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
+                        {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
                           <Button sx={{
                             padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Banners" ? "#1BFBB6" : '#F5F5F8',
                             '&:hover': { background: buttonSection === "Banners" ? "#22C55E" : '#DEE1E6' }
@@ -1334,7 +1334,7 @@ export default function EcomDesignMain() {
                             <Box component='img' src='/raws/Banners.svg' sx={{ width: '20px', height: '20px' }} />
                           </Button>
                           <Typography variant='caption' color='#0F1349'>Banners</Typography>
-                        </Stack>
+                        </Stack> */}
 
                         <Stack spacing='3px' alignItems='center' justifyContent='center'>
                           <Button sx={{
@@ -1377,7 +1377,7 @@ export default function EcomDesignMain() {
                         </Stack>
 
 
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
+                        {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
                           <Button sx={{
                             padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Mobiles" ? "#1BFBB6" : '#F5F5F8',
                             '&:hover': { background: buttonSection === "Mobiles" ? "#22C55E" : '#DEE1E6' }
@@ -1388,11 +1388,11 @@ export default function EcomDesignMain() {
                             <Box component='img' src='/raws/Mobiles.svg' sx={{ width: '20px', height: '20px' }} />
                           </Button>
                           <Typography variant='caption' color='#0F1349'>Mobiles</Typography>
-                        </Stack>
+                        </Stack> */}
 
 
 
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
+                        {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
                           <Button sx={{
                             padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Trending" ? "#1BFBB6" : '#F5F5F8',
                             '&:hover': { background: buttonSection === "Trending" ? "#22C55E" : '#DEE1E6' }
@@ -1403,7 +1403,7 @@ export default function EcomDesignMain() {
                             <Box component='img' src='/raws/Trending.svg' sx={{ width: '20px', height: '20px' }} />
                           </Button>
                           <Typography variant='caption' color='#0F1349'>Trending</Typography>
-                        </Stack>
+                        </Stack> */}
 
 
                       </Stack>}
@@ -1728,7 +1728,7 @@ export default function EcomDesignMain() {
                     </Stack>
                   </Stack>
                   <Box mt='40px'>
-                    <LogoDealer themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
+                    <LogoDealer builderId={builder_Id} themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
                   </Box>
                 </Actions>
                 <Actions condition={buttonSection === 'Color'}>
@@ -1817,7 +1817,7 @@ export default function EcomDesignMain() {
                       <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
                     </Stack>
                   </Stack>
-                  <HeaderDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+                  <HeaderDealer builderId={builder_Id} handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
                 </Actions>
                 <Actions condition={buttonSection === 'CategoriesLayout'}>
                   <Stack direction='row' justifyContent='space-between'>

@@ -69,6 +69,27 @@ export const saveBuilderSettings = createAsyncThunk(
     return response.data;
   }
 );
+
+export const saveLogo = createAsyncThunk('builder/saveLogo', async ({ builderId, data }: any) => {
+  let headersObj = defaultConfig();
+  headersObj.headers['Content-Type'] = 'multipart/form-data';
+  const response = await putRequest(`${endpoints?.builder?.logo}/${builderId}`, data, headersObj);
+  return response.data;
+});
+export const saveHeaderImage = createAsyncThunk(
+  'builder/saveHeaderImage',
+  async ({ builderId, data }: any) => {
+    let headersObj = defaultConfig();
+    headersObj.headers['Content-Type'] = 'multipart/form-data';
+    const response = await putRequest(
+      `${endpoints?.builder?.headerImage}/${builderId}`,
+      data,
+      headersObj
+    );
+    return response.data;
+  }
+);
+
 export const builderActivateApplication = createAsyncThunk(
   'builder/builderActivateApplication',
   async (data: IBuilderForm) => {

@@ -115,6 +115,8 @@ export const endpoints = {
   builder: {
     list: '/builder',
     save: '/design/save',
+    logo: '/design/logo_image',
+    headerImage: '/design/header_image',
     get: '/builder?type=website',
     search: '/builder/search',
   },

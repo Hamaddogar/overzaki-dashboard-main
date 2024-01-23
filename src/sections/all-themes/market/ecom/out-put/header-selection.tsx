@@ -4,6 +4,9 @@ import { TextField, Typography, Box, Stack, Switch, Divider } from '@mui/materia
 import Iconify from 'src/components/iconify';
 import { useDebounce } from 'src/hooks/use-debounce';
 import { VisuallyHiddenInput } from './logo-part';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from 'src/redux/store/store';
+import { saveHeaderImage } from 'src/redux/store/thunks/builder';
 
 
 // ----------------------------------------------------------------------
@@ -15,12 +18,14 @@ interface HeaderProps {
         headerTitle: string;
         // Add other themeConfig properties as needed
     };
+    builderId: string;
     handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
     mobile?: boolean;
 }
 
-export default function HeaderDealer({ themeConfig, handleThemeConfig, mobile = false }: HeaderProps) {
+export default function HeaderDealer({ themeConfig, handleThemeConfig, mobile = false, builderId }: HeaderProps) {
     // debounce
+    const dispatch = useDispatch<AppDispatch>();
 
     const [inputValue, setInputValue] = React.useState(themeConfig.headerTitle);
     const debouncedInputValue = useDebounce(inputValue, 500); // Debounce the input value with a 500ms delay
@@ -36,6 +41,7 @@ export default function HeaderDealer({ themeConfig, handleThemeConfig, mobile = 
         switch (action) {
             case 'delete':
                 handleThemeConfig('headerImages', '');
+                saveTempData(null)
                 break;
 
             case 'title':
@@ -57,7 +63,9 @@ export default function HeaderDealer({ themeConfig, handleThemeConfig, mobile = 
             const reader = new FileReader();
 
             reader.onload = () => {
-                handleThemeConfig(key, reader.result?.toString())
+                handleThemeConfig(key, reader.result?.toString());
+
+                saveTempData(file);
             };
 
             reader.readAsDataURL(file); // Read the file as data URL
@@ -65,6 +73,15 @@ export default function HeaderDealer({ themeConfig, handleThemeConfig, mobile = 
             alert('Please select a valid image file.');
         }
     };
+
+    const saveTempData = (file: any) => {
+        const formDataToSend = new FormData();
+        formDataToSend.append('image', file);
+
+        dispatch(saveHeaderImage({ builderId: builderId, data: formDataToSend })).then((response: any) => {
+            console.log("response", response);
+        });
+    }
 
     return (
         <Box pt='20px'>
@@ -103,7 +120,7 @@ export default function HeaderDealer({ themeConfig, handleThemeConfig, mobile = 
                     }}>
 
                         <Stack justifyContent='flex-end' px='10px' maxWidth='300px' direction='row' alignItems='center' spacing='15px' className='actions' sx={{ boxShadow: 'none', visibility: 'hidden', opacity: 0, background: 'transparent', position: 'absolute', top: '11px', right: 0, height: '35px', }}>
-                            <Iconify icon='gg:link' style={{ color: '#B2B3C5', boxShadow: '0 0 0 4px #FFFFFF', cursor: 'pointer', background: '#FFFFFF', borderRadius: '15px' }} />
+                            {/* <Iconify icon='gg:link' style={{ color: '#B2B3C5', boxShadow: '0 0 0 4px #FFFFFF', cursor: 'pointer', background: '#FFFFFF', borderRadius: '15px' }} /> */}
                             {/* <Iconify icon='mdi:edit' style={{ color: '#B2B3C5', boxShadow: '0 0 0 4px #FFFFFF', cursor: 'pointer', background: '#FFFFFF', borderRadius: '15px' }} /> */}
                             <Iconify onClick={handleActionsHeader('delete')} icon='ic:round-delete' style={{ color: '#B2B3C5', boxShadow: '0 0 0 4px #FFFFFF', cursor: 'pointer', background: '#FFFFFF', borderRadius: '15px' }} />
                         </Stack>
