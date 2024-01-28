@@ -36,7 +36,12 @@ import { BottomActions } from 'src/components/bottom-actions';
 import { useSettingsContext } from 'src/components/settings';
 import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
 import { useTable, getComparator } from 'src/components/table';
-import { cancellOrder, changeOrderStatus, fetchOneOrders, fetchOrderssList } from 'src/redux/store/thunks/defaultOrders';
+import {
+  cancellOrder,
+  changeOrderStatus,
+  fetchOneOrders,
+  fetchOrderssList,
+} from 'src/redux/store/thunks/defaultOrders';
 // types
 import { IOrderItem, IOrderTableFilters, IOrderTableFilterValue } from 'src/types/order';
 //
@@ -48,9 +53,7 @@ import OrderTableToolbar from '../orders-table-toolbar';
 import OrderTableFiltersResult from '../orders-table-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
 import StepsNewOrders from '../Steps-New-Order';
-
-
-
+import { fetchAnalyticsGlobal, fetchAnalyticsOrder } from 'src/redux/store/thunks/analytics';
 
 // ----------------------------------------------------------------------
 
@@ -84,11 +87,8 @@ export default function OrdersListView() {
     if (status === 'idle') {
       dispatch(fetchOrderssList(undefined));
     }
-    setData(list)
+    setData(list);
   }, [status, dispatch, list]);
-
-
-
 
   const table = useTable({ defaultOrderBy: 'orderNumber' });
 
@@ -98,10 +98,7 @@ export default function OrdersListView() {
 
   const theme = useTheme();
 
-
-
   const [filters, setFilters] = useState(defaultFilters);
-
 
   const canReset =
     !!filters.name || filters.status !== 'all' || (!!filters.startDate && !!filters.endDate);
@@ -184,8 +181,8 @@ export default function OrdersListView() {
   useEffect(() => {
     const sortedList = sort
       ? [...listStuff].sort((a: any, b: any) =>
-        b?.name.toLowerCase().localeCompare(a?.name.toLowerCase())
-      )
+          b?.name.toLowerCase().localeCompare(a?.name.toLowerCase())
+        )
       : listStuff;
     setListItems(sortedList);
   }, [listStuff, sort]);
@@ -221,13 +218,24 @@ export default function OrdersListView() {
           enqueueSnackbar(`Error! ${response?.error?.message}`, { variant: 'error' });
         }
       });
-
     }
-  }
+  };
+  // Analytics Here
+
+  const [analyticsGlobalData, setAnalyticsGlobalData] = useState<any>();
+  const [analyticsOrderData, setAnalyticsOrderData] = useState<any>();
+  useEffect(() => {
+    dispatch(fetchAnalyticsGlobal()).then((response: any) =>
+      setAnalyticsGlobalData(response?.payload?.data)
+    );
+    dispatch(fetchAnalyticsOrder()).then((response: any) =>
+      setAnalyticsOrderData(response?.payload?.data)
+    );
+  }, []);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <RoleBasedGuard hasContent permission='GET_ORDERS' sx={{ pt: 3 }} >
+      <RoleBasedGuard hasContent permission="GET_ORDERS" sx={{ pt: 3 }}>
         <Grid
           container
           justifyContent="space-between"
@@ -259,7 +267,7 @@ export default function OrdersListView() {
                   {' '}
                   Analytics{' '}
                 </Button>
-                <RoleBasedGuard permission='CREATE_ORDER' sx={{ pt: 3 }} >
+                <RoleBasedGuard permission="CREATE_ORDER" sx={{ pt: 3 }}>
                   <Button
                     startIcon="+"
                     fullWidth
@@ -339,17 +347,23 @@ export default function OrdersListView() {
                           >
                             {tab.value === 'All' && list.length}
                             {tab.value === 'Completed' &&
-                              list && list?.filter((order: any) => order.status === 'Completed').length}
+                              list &&
+                              list?.filter((order: any) => order.status === 'Completed').length}
                             {tab.value === 'Pending' &&
-                              list && list?.filter((order: any) => order.status === 'Pending').length}
+                              list &&
+                              list?.filter((order: any) => order.status === 'Pending').length}
                             {tab.value === 'Cancelled' &&
-                              list && list?.filter((order: any) => order.status === 'Cancelled').length}
+                              list &&
+                              list?.filter((order: any) => order.status === 'Cancelled').length}
                             {tab.value === 'refunded' &&
-                              list && list?.filter((order: any) => order.status === 'refunded').length}
+                              list &&
+                              list?.filter((order: any) => order.status === 'refunded').length}
                             {tab.value === 'Ready' &&
-                              list && list?.filter((order: any) => order.status === 'Ready').length}
+                              list &&
+                              list?.filter((order: any) => order.status === 'Ready').length}
                             {tab.value === 'Accepted' &&
-                              list && list?.filter((order: any) => order.status === 'Accepted').length}
+                              list &&
+                              list?.filter((order: any) => order.status === 'Accepted').length}
                           </Label>
                         }
                       />
@@ -555,7 +569,7 @@ export default function OrdersListView() {
                               </Typography>
                             </Grid>
 
-                            <Grid item xs={6} md="auto" sx={{ minWidth: "120px", flex: 1 }} >
+                            <Grid item xs={6} md="auto" sx={{ minWidth: '120px', flex: 1 }}>
                               {order?.userId && (
                                 <Box
                                   sx={{
@@ -564,7 +578,12 @@ export default function OrdersListView() {
                                     gap: '8px',
                                   }}
                                 >
-                                  <Box component="img" src={order.userId?.avatar} alt=" " width="22px" />
+                                  <Box
+                                    component="img"
+                                    src={order.userId?.avatar}
+                                    alt=" "
+                                    width="22px"
+                                  />
                                   <Box display="flex" gap="0px" flexDirection="column">
                                     <Typography
                                       component="p"
@@ -572,7 +591,7 @@ export default function OrdersListView() {
                                       sx={{ fontSize: '.8rem', fontWeight: 800 }}
                                     >
                                       {' '}
-                                      {order?.userId?.firstName}{' '} {order?.userId?.lastName}
+                                      {order?.userId?.firstName} {order?.userId?.lastName}
                                     </Typography>
                                     <Typography
                                       component="p"
@@ -588,7 +607,6 @@ export default function OrdersListView() {
                                     </Typography>
                                   </Box>
                                 </Box>
-
                               )}
                             </Grid>
 
@@ -626,7 +644,7 @@ export default function OrdersListView() {
                               <Chip
                                 label={order?.status}
                                 size="small"
-                              // sx={{ backgroundColor: order?.color }}
+                                // sx={{ backgroundColor: order?.color }}
                               />
                             </Grid>
                           </Grid>
@@ -635,7 +653,6 @@ export default function OrdersListView() {
                     ))}
                   </Grid>
                 </TabPanel>
-
               </TabContext>
 
               <DetailsNavBar
@@ -691,7 +708,11 @@ export default function OrdersListView() {
                     <Typography
                       component="p"
                       variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.8rem', maxWidth: { xs: '120px', md: '180px' } }}
+                      sx={{
+                        opacity: 0.7,
+                        fontSize: '.8rem',
+                        maxWidth: { xs: '120px', md: '180px' },
+                      }}
                       noWrap
                     >
                       {order?.createdAt}
@@ -706,7 +727,12 @@ export default function OrdersListView() {
 
                 {/* infor */}
                 <Box
-                  sx={{ width: '100%', bgcolor: 'background.neutral', borderRadius: '16px', p: 2.5 }}
+                  sx={{
+                    width: '100%',
+                    bgcolor: 'background.neutral',
+                    borderRadius: '16px',
+                    p: 2.5,
+                  }}
                 >
                   <Typography
                     component="p"
@@ -718,42 +744,43 @@ export default function OrdersListView() {
                     {order?.totalCount} Items is added{' '}
                   </Typography>
 
-                  {order?.items && order?.items.map((item: any, ind: any) => (
-                    <Stack
-                      key={ind}
-                      spacing="20px"
-                      direction="row"
-                      alignItems="center"
-                      justifyContent="flex-start"
-                    >
-                      <Typography
-                        component="p"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '14px', color: '#8688A3', fontWeight: 800 }}
+                  {order?.items &&
+                    order?.items.map((item: any, ind: any) => (
+                      <Stack
+                        key={ind}
+                        spacing="20px"
+                        direction="row"
+                        alignItems="center"
+                        justifyContent="flex-start"
                       >
-                        {item?.count}x
-                      </Typography>
-                      <Box component="img" src="/raw/s4.png" sx={{ width: '40px' }} />
+                        <Typography
+                          component="p"
+                          variant="subtitle2"
+                          sx={{ opacity: 0.7, fontSize: '14px', color: '#8688A3', fontWeight: 800 }}
+                        >
+                          {item?.count}x
+                        </Typography>
+                        <Box component="img" src="/raw/s4.png" sx={{ width: '40px' }} />
 
-                      <Box>
-                        <Typography
-                          component="p"
-                          variant="subtitle2"
-                          sx={{ fontSize: '.8rem', fontWeight: 800 }}
-                        >
-                          {' '}
-                          iPhone 13 Pro Max{' '}
-                        </Typography>
-                        <Typography
-                          component="p"
-                          variant="subtitle2"
-                          sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                        >
-                          {item?.unitPrice} KWD
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  ))}
+                        <Box>
+                          <Typography
+                            component="p"
+                            variant="subtitle2"
+                            sx={{ fontSize: '.8rem', fontWeight: 800 }}
+                          >
+                            {' '}
+                            iPhone 13 Pro Max{' '}
+                          </Typography>
+                          <Typography
+                            component="p"
+                            variant="subtitle2"
+                            sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                          >
+                            {item?.unitPrice} KWD
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    ))}
                 </Box>
 
                 {/* payment summary */}
@@ -1040,14 +1067,12 @@ export default function OrdersListView() {
                           sx={{ fontSize: '.9rem', fontWeight: 700 }}
                         >
                           {order?.userId?.firstName} {order?.userId?.lastName}
-
                         </Typography>
                         <Typography
                           component="p"
                           variant="subtitle2"
                           sx={{ opacity: 0.7, fontSize: '.85rem' }}
                         >
-
                           {order?.userId?.email}
                         </Typography>
                         <Typography
@@ -1081,7 +1106,8 @@ export default function OrdersListView() {
                       sx={{ opacity: 0.7, fontSize: '.85rem' }}
                     >
                       {' '}
-                      {order?.addressId?.buildingName} {order?.addressId?.avenue} {order?.addressId?.PACI}
+                      {order?.addressId?.buildingName} {order?.addressId?.avenue}{' '}
+                      {order?.addressId?.PACI}
                     </Typography>
                     <Typography
                       component="p"
@@ -1107,11 +1133,21 @@ export default function OrdersListView() {
                       {' '}
                       House: {order?.addressId?.house}
                     </Typography>
-                    <Stack mb="16px" direction="row" alignItems="center" justifyContent="space-between">
+                    <Stack
+                      mb="16px"
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                    >
                       <Typography
                         component="p"
                         variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.85rem', display: 'flex', alognItems: 'center' }}
+                        sx={{
+                          opacity: 0.7,
+                          fontSize: '.85rem',
+                          display: 'flex',
+                          alognItems: 'center',
+                        }}
                       >
                         {' '}
                         <Iconify icon="mdi:content-copy" /> Copy Address{' '}
@@ -1119,7 +1155,12 @@ export default function OrdersListView() {
                       <Typography
                         component="p"
                         variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.85rem', display: 'flex', alognItems: 'center' }}
+                        sx={{
+                          opacity: 0.7,
+                          fontSize: '.85rem',
+                          display: 'flex',
+                          alognItems: 'center',
+                        }}
                       >
                         {' '}
                         <Iconify icon="mdi:map-marker-outline" /> Show On Map{' '}
@@ -1250,35 +1291,35 @@ export default function OrdersListView() {
                         crums={false}
                       />
                     </Grid>
-
+                    {/* Analytics here */}
                     {[
                       {
-                        count: '1,136',
+                        count: analyticsGlobalData?.totalOrders,
                         color: '134, 136, 163',
                         title: 'Total Orders',
                       },
                       {
-                        count: '56',
+                        count: analyticsOrderData?.totalPendingNumber,
                         color: '241, 209, 105',
                         title: 'Pending',
                       },
                       {
-                        count: '136',
+                        count: analyticsOrderData?.totalReadyNumber,
                         color: '203, 194, 255',
                         title: 'Ready',
                       },
                       {
-                        count: '56',
+                        count: analyticsOrderData?.totalCompletedNumber,
                         color: '111, 198, 255',
                         title: 'Completed',
                       },
                       {
-                        count: '56',
+                        count: analyticsOrderData?.totalCancelledNumber,
                         color: '27, 252, 182',
                         title: 'Canceled',
                       },
                       {
-                        count: '136',
+                        count: analyticsOrderData?.totalAcceptedNumber,
                         color: '255, 133, 171',
                         title: 'Accepted',
                       },

@@ -36,31 +36,61 @@ const chipColor = (status: string): string => {
   }
 };
 
-
-export default function AppOrders({ elevation, idNo, datetime, name, status, amount, itemCount, country, ...rest }: Props) {
-
+export default function AppOrders({
+  elevation,
+  idNo,
+  datetime,
+  name,
+  status,
+  amount,
+  itemCount,
+  country,
+  ...rest
+}: Props) {
   return (
     <Paper elevation={elevation}>
-      <Card sx={{
-        display: 'flex', alignItems: 'center',
-        justifyContent: 'space-between',
-        minWidth: '340px',
-        maxWidth: '340px',
-        width: '100%',
-        height: '130px',
-        padding: '16px 20px'
-      }} {...rest}  >
-        <Box display='flex' gap='7px' flexDirection='column' >
-          <Typography variant="body2" sx={{ opacity: 0.8, fontWeight: 700 }} >{idNo}</Typography>
-          <Typography variant="body2" sx={{ opacity: 0.8, }} >{datetime}</Typography>
-          <Typography variant="h6" sx={{ fontSize: '.9rem !important' }} display='flex' alignItems='center'>
-            <Box component='img' src='/raw/flag.png' alt='flag' /> &nbsp; &nbsp; <span>{name}</span>
+      <Card
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          minWidth: '340px',
+          maxWidth: '340px',
+          width: '100%',
+          height: '130px',
+          padding: '16px 20px',
+        }}
+        {...rest}
+      >
+        <Box display="flex" gap="7px" flexDirection="column">
+          <Typography variant="body2" sx={{ opacity: 0.8, fontWeight: 700 }}>
+            {idNo}
+          </Typography>
+          <Typography variant="body2" sx={{ opacity: 0.8 }}>
+            {datetime}
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{ fontSize: '.9rem !important' }}
+            display="flex"
+            alignItems="center"
+          >
+            <Box component="img" src="/raw/flag.png" alt="flag" /> &nbsp; &nbsp; <span>{name}</span>
           </Typography>
         </Box>
-        <Box display='flex' gap='7px' flexDirection='column' sx={{ textAlign: 'right' }} >
-          <Chip size='small' sx={{ backgroundColor: chipColor(status) }} label={status} />
-          <Typography variant="body2" sx={{ opacity: 0.8, }} >{itemCount} items</Typography>
-          <Typography component="div" variant="h6" sx={{ fontSize: '.9rem !important' }} display='flex' alignItems='center' justifyContent='flex-end'>
+        <Box display="flex" gap="7px" flexDirection="column" sx={{ textAlign: 'right' }}>
+          <Chip size="small" sx={{ backgroundColor: chipColor(status) }} label={status} />
+          <Typography variant="body2" sx={{ opacity: 0.8 }}>
+            {itemCount} items
+          </Typography>
+          <Typography
+            component="div"
+            variant="h6"
+            sx={{ fontSize: '.9rem !important' }}
+            display="flex"
+            alignItems="center"
+            justifyContent="flex-end"
+          >
             <span>{amount}</span>
             <span>KWD</span>
           </Typography>

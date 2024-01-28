@@ -100,8 +100,14 @@ export function useNavData() {
           },
           {
             title: t('analytics'),
-            path: paths.dashboard.general.analytics,
+
             icon: ICONS.analytics,
+            path: '',
+            children: [
+              { title: t('Sales Analytics'), path: paths.dashboard.general.analytics },
+              { title: t('Best Selling'), path: paths.dashboard.general.bestSelling },
+              { title: t('Branch'), path: paths.dashboard.user.list },
+            ],
             permissions: ['GET_ORDERS'],
           },
           {

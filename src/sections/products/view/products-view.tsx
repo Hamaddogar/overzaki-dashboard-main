@@ -180,7 +180,7 @@ export default function OrdersListView() {
 
   useEffect(() => {
     if (categoryState.status === 'idle') {
-      dispatch(fetchCategorysList(categoryState.error)).then((response: any) => {
+      dispatch(fetchCategorysList({})).then((response: any) => {
         // console.log("response", response);
         dispatch(fetchSubCategorysList(categoryState.error));
       });

@@ -21,13 +21,17 @@ import AppProducts from '../app-products';
 // import AppEdit from '../app-edit';
 import AppPlanandEdit from '../app-plan-edit';
 import { SplashScreen } from 'src/components/loading-screen';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import type { AppDispatch } from '../../../../redux/store/store';
+import { fetchBestSellingItems } from 'src/redux/store/thunks/analytics';
 // ----------------------------------------------------------------------
 
 export default function OverviewAppView() {
   // const { user } = useMockedUser();
   // const theme = useTheme();
   const settings = useSettingsContext();
-
+  const dispatch = useDispatch<AppDispatch>();
   // return (
   //   <SplashScreen />
   // )
@@ -43,7 +47,7 @@ export default function OverviewAppView() {
             img={<SeoIllustration />}
             action={
               <FormControlLabel
-                control={<Switch color='primary' defaultChecked />}
+                control={<Switch color="primary" defaultChecked />}
                 label="Published now"
               />
             }
@@ -60,79 +64,91 @@ export default function OverviewAppView() {
         </Grid> */}
 
         <Grid xs={12}>
-          <AppHolder title="Tools" subtitle='All Tools' path={paths.dashboard.general.apptools} >
+          <AppHolder title="Tools" subtitle="All Tools" path={paths.dashboard.general.apptools}>
             {[
               {
                 icon: '/raw/orders.svg',
-                title: "Orders",
-                color: 'rgb(255, 93, 143,.12)'
-              }, {
-                icon: '/raw/Customers0.svg',
-                title: "Customers",
-                color: 'rgb(251, 133, 0,.12)'
-              }, {
-                icon: '/raw/Categories.svg',
-                title: "Categories",
-                color: 'rgb(181, 131, 141,.12)'
-              }, {
-                icon: '/raw/Products.svg',
-                title: "Products",
-                color: 'rgb(234, 132, 201,.12)'
-              }, {
-                icon: '/raw/Analytics.svg',
-                title: "Analytics",
-                color: 'rgb(4, 102, 200,.12)'
-              }, {
-                icon: '/raw/Delivery-Pickup.svg',
-                title: "Delivery and Pickup",
-                color: 'rgb(33, 150, 243,.12)'
-              }, {
-                icon: '/raw/Vouchers.svg',
-                title: "Vouchers",
-                color: 'rgb(213, 76, 255,.12)'
-              }, {
-                icon: '/raw/Payment.svg',
-                title: "Payment Methods",
-                color: 'rgb(2, 195, 154,.12)'
-              }, {
-                icon: '/raw/Settings.svg',
-                title: "Account Settings",
-                color: 'rgb(134, 136, 163,.12)'
-              }, {
-                icon: '/raw/Integrations.svg',
-                title: "Integrations",
-                color: 'rgb(141, 199, 63,.12)'
-              }, {
-                icon: '/raw/domain.svg',
-                title: "Domain Settings",
-                color: 'rgb(87, 202, 239,.12)'
-              }, {
-                icon: '/raw/design.svg',
-                title: "Website Design",
-                color: 'rgb(239, 202, 8,.12)'
+                title: 'Orders',
+                color: 'rgb(255, 93, 143,.12)',
               },
-            ].map((item, indx) =>
+
+              {
+                icon: '/raw/Customers0.svg',
+                title: 'Customers',
+                color: 'rgb(251, 133, 0,.12)',
+              },
+              {
+                icon: '/raw/Categories.svg',
+                title: 'Categories',
+                color: 'rgb(181, 131, 141,.12)',
+              },
+              {
+                icon: '/raw/Products.svg',
+                title: 'Products',
+                color: 'rgb(234, 132, 201,.12)',
+              },
+              {
+                icon: '/raw/Analytics.svg',
+                title: 'Analytics',
+                color: 'rgb(4, 102, 200,.12)',
+              },
+              {
+                icon: '/raw/Delivery-Pickup.svg',
+                title: 'Delivery and Pickup',
+                color: 'rgb(33, 150, 243,.12)',
+              },
+              {
+                icon: '/raw/Vouchers.svg',
+                title: 'Vouchers',
+                color: 'rgb(213, 76, 255,.12)',
+              },
+              {
+                icon: '/raw/Payment.svg',
+                title: 'Payment Methods',
+                color: 'rgb(2, 195, 154,.12)',
+              },
+              {
+                icon: '/raw/Settings.svg',
+                title: 'Account Settings',
+                color: 'rgb(134, 136, 163,.12)',
+              },
+              {
+                icon: '/raw/Integrations.svg',
+                title: 'Integrations',
+                color: 'rgb(141, 199, 63,.12)',
+              },
+              {
+                icon: '/raw/domain.svg',
+                title: 'Domain Settings',
+                color: 'rgb(87, 202, 239,.12)',
+              },
+              {
+                icon: '/raw/design.svg',
+                title: 'Website Design',
+                color: 'rgb(239, 202, 8,.12)',
+              },
+            ].map((item, indx) => (
               <Box
                 key={indx}
                 sx={{
-                  width: "100%",
-                  maxnWidth: "100px",
-                  minWidth: "100px",
-                  height: "120px",
+                  width: '100%',
+                  maxnWidth: '100px',
+                  minWidth: '100px',
+                  height: '120px',
                   backgroundColor: item.color,
-                  borderRadius: "16px",
+                  borderRadius: '16px',
                   textAlign: 'center',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '15px',
-                  flexDirection: 'column'
+                  flexDirection: 'column',
                 }}
               >
-                <Box component='img' src={item.icon} sx={{ width: '29px' }} />
+                <Box component="img" src={item.icon} sx={{ width: '29px' }} />
                 <Typography variant="subtitle2">{item.title} </Typography>
               </Box>
-            )}
+            ))}
           </AppHolder>
         </Grid>
 
@@ -140,45 +156,44 @@ export default function OverviewAppView() {
           <AppHolder title="Quick Summary">
             {[
               {
-                title: "Live Visitors",
-                icon: "/raw/VisitorsN.svg",
-                count: "78"
+                title: 'Live Visitors',
+                icon: '/raw/VisitorsN.svg',
+                count: '78',
               },
               {
-                title: "Customers",
-                icon: "/raw/CustomersN.svg",
-                count: '6.8k'
+                title: 'Customers',
+                icon: '/raw/CustomersN.svg',
+                count: '6.8k',
               },
               {
-                title: "Total Orders",
-                icon: "/raw/OrdersN.svg",
-                count: "324"
+                title: 'Total Orders',
+                icon: '/raw/OrdersN.svg',
+                count: '324',
               },
               {
-                title: "Categories",
-                icon: "/raw/CategoriesN.svg",
-                count: "8"
+                title: 'Categories',
+                icon: '/raw/CategoriesN.svg',
+                count: '8',
               },
               {
-                title: "Products",
-                icon: "/raw/ProductsN.svg",
-                count: "81"
+                title: 'Products',
+                icon: '/raw/ProductsN.svg',
+                count: '81',
               },
               {
-                title: "Total Earning",
-                icon: "/raw/EarningN.svg",
-                count: '8,520 KWD'
+                title: 'Total Earning',
+                icon: '/raw/EarningN.svg',
+                count: '8,520 KWD',
               },
-            ].map((item, indx) =>
+            ].map((item, indx) => (
               <AppSummary
                 elevation={7}
                 key={indx}
                 title={item.title}
                 count={item.count}
-                icon={<Box component='img' src={item.icon} />}
+                icon={<Box component="img" src={item.icon} />}
               />
-            )}
-
+            ))}
           </AppHolder>
         </Grid>
 
@@ -186,58 +201,63 @@ export default function OverviewAppView() {
           <AppHolder title="Latest Orders" subtitle="All Orders">
             {[
               {
-                idNo: "#425453697",
-                datetime: "22/03/2022, 3:54 PM",
-                name: "Zain Abdallah",
-                status: "Completed",
+                idNo: '#425453697',
+                datetime: '22/03/2022, 3:54 PM',
+                name: 'Zain Abdallah',
+                status: 'Completed',
                 amount: 120,
                 itemCount: 2,
-                country: "default",
+                country: 'default',
               },
               {
-                idNo: "#425453697",
-                datetime: "22/03/2022, 3:54 PM",
-                name: "Zain Abdallah",
-                status: "Pending",
+                idNo: '#425453697',
+                datetime: '22/03/2022, 3:54 PM',
+                name: 'Zain Abdallah',
+                status: 'Pending',
                 amount: 120,
                 itemCount: 2,
-                country: "default",
+                country: 'default',
               },
               {
-                idNo: "#425453697",
-                datetime: "22/03/2022, 3:54 PM",
-                name: "Zain Abdallah",
-                status: "Accepted",
+                idNo: '#425453697',
+                datetime: '22/03/2022, 3:54 PM',
+                name: 'Zain Abdallah',
+                status: 'Accepted',
                 amount: 120,
                 itemCount: 2,
-                country: "default",
+                country: 'default',
               },
               {
-                idNo: "#425453697",
-                datetime: "22/03/2022, 3:54 PM",
-                name: "Zain Abdallah",
-                status: "Rejected",
+                idNo: '#425453697',
+                datetime: '22/03/2022, 3:54 PM',
+                name: 'Zain Abdallah',
+                status: 'Rejected',
                 amount: 120,
                 itemCount: 2,
-                country: "default",
-              }
-            ].map((item, indx) => <AppOrders
-              elevation={7}
-              key={indx}
-              idNo={item.idNo}
-              datetime={item.datetime}
-              name={item.name}
-              status={item.status}
-              amount={item.amount}
-              itemCount={item.itemCount}
-              country={item.country}
-            />
-            )}
+                country: 'default',
+              },
+            ].map((item, indx) => (
+              <AppOrders
+                elevation={7}
+                key={indx}
+                idNo={item.idNo}
+                datetime={item.datetime}
+                name={item.name}
+                status={item.status}
+                amount={item.amount}
+                itemCount={item.itemCount}
+                country={item.country}
+              />
+            ))}
           </AppHolder>
         </Grid>
 
         <Grid xs={12}>
-          <AppHolder title="Revenue Chart" subtitle="View Reports" path={paths.dashboard.general.analytics}>
+          <AppHolder
+            title="Revenue Chart"
+            subtitle="View Reports"
+            path={paths.dashboard.general.analytics}
+          >
             <Paper elevation={7} sx={{ width: '100%' }}>
               <AppAreaInstalled
                 title="Total"
@@ -294,102 +314,118 @@ export default function OverviewAppView() {
         <Grid xs={12}>
           <AppHolder
             path={paths.dashboard.general.trending}
-            icon='/raw/hot.svg' title="Trending" subtitle="View All" description='Most trending items and products'>
+            icon="/raw/hot.svg"
+            title="Trending"
+            subtitle="View All"
+            description="Most trending items and products"
+          >
             {[
               {
-                idNo: "#1",
-                name: "iPhone 13 Pro Max",
-                description: "Mobiles - 142 KWD",
+                idNo: '#1',
+                name: 'iPhone 13 Pro Max',
+                description: 'Mobiles - 142 KWD',
                 sales: 254,
-                img: '/raw/ti1.png'
-              }, {
-                idNo: "#2",
-                name: "Smart Watch GXT",
-                description: "Watches - 48 KWD",
-                sales: 832,
-                img: '/raw/ti2.png'
-              }, {
-                idNo: "#3",
-                name: "Apple AirPods Pro White",
-                description: "Mobiles - 142 KWD",
-                sales: 254,
-                img: '/raw/ti3.png'
-              }, {
-                idNo: "#1",
-                name: "iPhone 13 Pro Max",
-                description: "Mobiles - 142 KWD",
-                sales: 254,
-                img: '/raw/ti1.png'
-              }, {
-                idNo: "#2",
-                name: "Smart Watch GXT",
-                description: "Watches - 48 KWD",
-                sales: 832,
-                img: '/raw/ti2.png'
+                img: '/raw/ti1.png',
               },
-
-            ].map((item, indx) => <AppProducts
-              elevation={7}
-              key={indx}
-              idNo={item.idNo}
-              name={item.name}
-              description={item.description}
-              sales={item.sales}
-              img={item.img}
-            />
-            )}
+              {
+                idNo: '#2',
+                name: 'Smart Watch GXT',
+                description: 'Watches - 48 KWD',
+                sales: 832,
+                img: '/raw/ti2.png',
+              },
+              {
+                idNo: '#3',
+                name: 'Apple AirPods Pro White',
+                description: 'Mobiles - 142 KWD',
+                sales: 254,
+                img: '/raw/ti3.png',
+              },
+              {
+                idNo: '#1',
+                name: 'iPhone 13 Pro Max',
+                description: 'Mobiles - 142 KWD',
+                sales: 254,
+                img: '/raw/ti1.png',
+              },
+              {
+                idNo: '#2',
+                name: 'Smart Watch GXT',
+                description: 'Watches - 48 KWD',
+                sales: 832,
+                img: '/raw/ti2.png',
+              },
+            ].map((item, indx) => (
+              <AppProducts
+                elevation={7}
+                key={indx}
+                idNo={item.idNo}
+                name={item.name}
+                description={item.description}
+                sales={item.sales}
+                img={item.img}
+              />
+            ))}
           </AppHolder>
         </Grid>
 
         <Grid xs={12}>
-          <AppHolder path={paths.dashboard.general.mostselling} title="Most Selling" subtitle="View All" description="Most selling items and products">
+          <AppHolder
+            path={paths.dashboard.general.mostselling}
+            title="Most Selling"
+            subtitle="View All"
+            description="Most selling items and products"
+          >
             {[
               {
-                idNo: "#1",
-                name: "ASUS Laptop - Core i7",
-                description: "Laptops - 489 KWD",
+                idNo: '#1',
+                name: 'ASUS Laptop - Core i7',
+                description: 'Laptops - 489 KWD',
                 sales: 832,
-                img: '/raw/si1.png'
-              }, {
-                idNo: "#2",
-                name: "iPhone 8 Gold",
-                description: "Mobiles - 142 KWD",
-                sales: 254,
-                img: '/raw/si2.png'
-              }, {
-                idNo: "#3",
-                name: "Sony Wireless Headphones",
-                description: "Mobiles - 142 KWD",
-                sales: 254,
-                img: '/raw/si3.png'
-              }, {
-                idNo: "#1",
-                name: "ASUS Laptop - Core i7",
-                description: "Laptops - 489 KWD",
-                sales: 832,
-                img: '/raw/si1.png'
-              }, {
-                idNo: "#2",
-                name: "iPhone 8 Gold",
-                description: "Mobiles - 142 KWD",
-                sales: 254,
-                img: '/raw/si2.png'
+                img: '/raw/si1.png',
               },
-
-            ].map((item, indx) => <AppProducts
-              elevation={7}
-              key={indx}
-              idNo={item.idNo}
-              name={item.name}
-              description={item.description}
-              sales={item.sales}
-              img={item.img}
-            />
-            )}
+              {
+                idNo: '#2',
+                name: 'iPhone 8 Gold',
+                description: 'Mobiles - 142 KWD',
+                sales: 254,
+                img: '/raw/si2.png',
+              },
+              {
+                idNo: '#3',
+                name: 'Sony Wireless Headphones',
+                description: 'Mobiles - 142 KWD',
+                sales: 254,
+                img: '/raw/si3.png',
+              },
+              {
+                idNo: '#1',
+                name: 'ASUS Laptop - Core i7',
+                description: 'Laptops - 489 KWD',
+                sales: 832,
+                img: '/raw/si1.png',
+              },
+              {
+                idNo: '#2',
+                name: 'iPhone 8 Gold',
+                description: 'Mobiles - 142 KWD',
+                sales: 254,
+                img: '/raw/si2.png',
+              },
+            ].map((item, indx) => (
+              <AppProducts
+                elevation={7}
+                key={indx}
+                idNo={item.idNo}
+                name={item.name}
+                description={item.description}
+                sales={item.sales}
+                img={item.img}
+              />
+            ))}
           </AppHolder>
         </Grid>
-
       </Grid>
-    </Container >
+    </Container>
   );
 }

@@ -185,11 +185,11 @@ export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalPr
               <div style={{ backgroundColor: 'red' }} className="slider-controler">
                 <div className="slide-inside">
                   <div
-                    onClick={() =>
-                      setCentredTheme((prev) =>
-                        prev === 0 ? filteredData.length - 1 : (prev -= 1)
-                      )
-                    }
+                    // onClick={() =>
+                    //   setCentredTheme((prev) =>
+                    //     prev === 0 ? filteredData.length - 1 : (prev -= 1)
+                    //   )
+                    // }
                     className="swiper-button-prev slider-arrow"
                   >
                     <ArrowBackOutlinedIcon
@@ -202,11 +202,11 @@ export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalPr
                     />
                   </div>
                   <div
-                    onClick={() =>
-                      setCentredTheme((prev) =>
-                        prev === filteredData.length - 1 ? 0 : (prev += 1)
-                      )
-                    }
+                    // onClick={() =>
+                    //   setCentredTheme((prev) =>
+                    //     prev === filteredData.length - 1 ? 0 : (prev += 1)
+                    //   )
+                    // }
                     className="swiper-button-next slider-arrow"
                   >
                     <ArrowForwardOutlinedIcon
@@ -297,17 +297,6 @@ export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalPr
           </Box>
         </Container>
       )}
-
-      {/* {notAvaliableThemes && (
-        <Stack sx={{ height: '100%' }} alignItems="center" justifyContent="center">
-          <Typography variant="h4">Comming Soon ...</Typography>
-          <Linker path={paths.dashboard.design.root}>
-            <Button variant="outlined" size="small">
-              Back to Selection
-            </Button>
-          </Linker>
-        </Stack>
-      )} */}
     </Box>
   );
 }

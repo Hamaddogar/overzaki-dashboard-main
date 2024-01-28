@@ -8,8 +8,7 @@ import rolesReducer from './thunks/roles';
 import ordersReducer from './thunks/defaultOrders';
 import paymentMethodReducer from './thunks/paymentMethods';
 import builderReducer from './thunks/builder';
-
-
+import analyticsReducer from './thunks/analytics';
 
 const rootReducer = combineReducers({
   customers: customersReducer,
@@ -21,13 +20,12 @@ const rootReducer = combineReducers({
   paymentMethods: paymentMethodReducer,
   roles: rolesReducer,
   builder: builderReducer,
+  analytics: analyticsReducer,
 });
 
 const store = configureStore({
   reducer: rootReducer,
 });
-
-
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

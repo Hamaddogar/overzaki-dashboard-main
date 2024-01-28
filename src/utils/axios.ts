@@ -129,9 +129,12 @@ export const endpoints = {
     search: '/payment-methods/search',
   },
   analytic: {
-    customers: '/analytics/customers',
-    summary: '/analytics/summary',
-    vouchers: '/analytics/vouchers',
+    chart: '/analytics/chart_data?type=monthly&filter=last-month&withpervious=0&withperviousYear=1',
+    global: '/analytics/global-analytics?filter=last-week',
+    order: '/analytics/order-analytics?filter=last-week',
+    bestSellingItems: '/analytics/best-selling-items?filter=last-month',
+    bestSellingCategories: '/analytics/best-selling-categories?filter=last-week',
+    bestSellingBranches: '/analytics/best-selling-branches?filter=last-month',
   },
   deliveryPickup: {
     branches: '/delivery-pickup/branches',
