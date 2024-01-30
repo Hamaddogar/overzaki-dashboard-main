@@ -18,10 +18,14 @@ export interface ICategoryForm extends IRequest {
 
 export const fetchCategorysList = createAsyncThunk(
   'category/fetchList',
-  async ({ pageNumber, pageSize }: { pageNumber: any; pageSize: any }) => {
+  async ({ pageNumber, pageSize }: { pageNumber?: any; pageSize?: any }) => {
     try {
+      let searchQuery = '';
+      if (pageSize && pageNumber) {
+        searchQuery = `?pageSize=${pageSize}&pageNumber=${pageNumber}`;
+      }
       const response = await getRequest(
-        `${endpoints.category.list}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+        `${endpoints.category.list}${searchQuery}`,
         defaultConfig()
       );
       return response;

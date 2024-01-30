@@ -8,9 +8,7 @@ import rolesReducer from './thunks/roles';
 import ordersReducer from './thunks/defaultOrders';
 import paymentMethodReducer from './thunks/paymentMethods';
 import builderReducer from './thunks/builder';
-import { api } from './services/api';
-
-
+import analyticsReducer from './thunks/analytics';
 
 const rootReducer = combineReducers({
   customers: customersReducer,
@@ -22,17 +20,12 @@ const rootReducer = combineReducers({
   paymentMethods: paymentMethodReducer,
   roles: rolesReducer,
   builder: builderReducer,
-  [api.reducerPath]: api.reducer,
-
+  analytics: analyticsReducer,
 });
 
 const store = configureStore({
   reducer: rootReducer,
-  middleware: (getDefaultMiddleware) =>
-  getDefaultMiddleware().concat(api.middleware),
 });
-
-
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
