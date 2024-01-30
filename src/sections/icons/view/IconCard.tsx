@@ -2,6 +2,8 @@ import React from 'react';
 import { Card, CardContent, CardMedia, Typography, IconButton, Switch, Box } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import ColorLensIcon from '@mui/icons-material/ColorLens';
+import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import { useRouter } from 'next/navigation';
 import { useDeleteIconMutation, useDeleteStyleMutation } from 'src/redux/store/services/api';
 import { paths } from 'src/routes/paths';
@@ -16,14 +18,14 @@ const IconCard = ({ title, type, image, id }: any) => {
     return (
         <Card sx={{
             display: 'flex',
-            maxWidth: 345,
+            maxWidth: 500,
             m: 2,
             boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.06)',
             borderRadius: '20px',
         }}>
             <CardMedia
                 component="img"
-                sx={{ width: 150, height:150 , borderRadius: '10px', margin: '20px' }}
+                sx={{ width: 150, height: 150, borderRadius: '10px', margin: '20px' }}
                 image={image}
                 alt={`${title}`}
             />
@@ -42,7 +44,8 @@ const IconCard = ({ title, type, image, id }: any) => {
                     justifyContent: 'space-between',
                     paddingRight: '16px',
                     paddingBottom: '16px',
-                    marginLeft: 'auto'
+                    marginLeft: 'auto',
+                    flexWrap: 'wrap'
                 }}>
                     <Switch checked={true} />
                     <IconButton aria-label="edit" size="large" onClick={() => router.push(`${paths.dashboard.icon}/${id}`)}>
@@ -50,6 +53,12 @@ const IconCard = ({ title, type, image, id }: any) => {
                     </IconButton>
                     <IconButton aria-label="delete" size="large" onClick={deleteIcon}>
                         <DeleteIcon />
+                    </IconButton>
+                    <IconButton aria-label="delete" size="large">
+                        <ColorLensIcon />
+                    </IconButton>
+                    <IconButton aria-label="delete" size="large">
+                        <InsertEmoticonIcon />
                     </IconButton>
                 </Box>
             </Box>
