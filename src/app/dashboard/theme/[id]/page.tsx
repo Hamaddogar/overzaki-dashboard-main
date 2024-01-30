@@ -1,15 +1,16 @@
 'use client'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { Box, Typography } from '@mui/material'
+import { Box, MenuItem, Typography } from '@mui/material'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { RHFTextField } from 'src/components/hook-form'
+import { RHFSelect, RHFTextField } from 'src/components/hook-form'
 import FormProvider from 'src/components/hook-form/form-provider'
 import { useGetThemeByIdQuery, useUpdateThemeMutation } from 'src/redux/store/services/api'
 import { isValidJSON } from 'src/utils/functions'
 import * as Yup from 'yup';
 import Button from '@mui/material/Button'
+import { types } from 'src/sections/themes/catigories/theme-types'
 
 
 
@@ -93,14 +94,20 @@ const page = () => {
                         type
                     </Typography>
 
-                    <RHFTextField
+                    <RHFSelect
                         fullWidth
                         variant="filled"
-                        settingStateValue={handleTheme}
                         name="type"
-                        value={themeData?.type || ''}
-
-                    />
+                        id="demo-simple-select2"
+                        value={themeData?.type || types[0]}
+                        settingStateValue={handleTheme}
+                    >
+                        {types.map((type: string, index: any) => (
+                            <MenuItem key={index} value={type}>
+                                {type}
+                            </MenuItem>
+                        ))}
+                    </RHFSelect>
                     <Typography
                         component="p"
                         noWrap

@@ -24,8 +24,9 @@ import ThemeCard from 'src/sections/themes/view/themeCard'
 
 
 const page = () => {
+    const [selectedType, setSelectedType] = useState<any>(null)
     const [addTheme] = useAddNewThemeMutation()
-    const { data: allThemes } = useGetAllThemesQuery('')
+    const { data: allThemes } = useGetAllThemesQuery(selectedType)
     const [openDetails, setOpenDetails] = useState(false)
     const [themeData, setThemeData] = useState<any>(null)
     const ProductSchema = Yup.object().shape({
@@ -122,6 +123,16 @@ const page = () => {
                     </BottomActions>
                 </Box>
             </RoleBasedGuard>
+            <Grid container spacing={2} sx={{ padding: '16px' }} gap={2} >
+                <LoadingButton variant='soft' onClick={() => setSelectedType(null)} color={null === selectedType ? 'success' : 'inherit'}>
+                    All
+                </LoadingButton>
+                {types.map((type: string, index: any) => (
+                    <LoadingButton key={index} variant='soft' onClick={() => setSelectedType(type)} color={type === selectedType ? 'success' : 'inherit'}>
+                        {type.toUpperCase()}
+                    </LoadingButton>
+                ))}
+            </Grid>
             <DetailsNavBar
                 open={openDetails}
                 onClose={handleCloseDetails}

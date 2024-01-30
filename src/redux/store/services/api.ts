@@ -25,7 +25,7 @@ export const api = createApi({
             invalidatesTags: ['Theme'],
         }),
         getAllThemes: builder.query({
-            query: () => '/app-theme/all',
+            query: (type) => type ? `/app-theme/all?filter=${type}` : `/app-theme/all`,
             providesTags: ['Theme'],
         }),
         updateTheme: builder.mutation({
@@ -57,7 +57,7 @@ export const api = createApi({
             invalidatesTags: ['Style'],
         }),
         getAllStyles: builder.query({
-            query: () => '/app-style/all',
+            query: (type) => type ? `/app-style/all?filter=${type}` : `/app-style/all`,
             providesTags: ['Style'],
         }),
         updateStyle: builder.mutation({
@@ -89,7 +89,7 @@ export const api = createApi({
             invalidatesTags: ['Icon'],
         }),
         getAllIcons: builder.query({
-            query: () => '/app-icon/all',
+            query: (type) => type ? `/app-icon/all?filter=${type}` : '/app-icon/all',
             providesTags: ['Icon'],
         }),
         updateIcon: builder.mutation({
@@ -113,7 +113,7 @@ export const api = createApi({
 export type Api = typeof api;
 
 
-export const { 
+export const {
     useAddNewThemeMutation,
     useGetAllThemesQuery,
     useDeleteThemeMutation,

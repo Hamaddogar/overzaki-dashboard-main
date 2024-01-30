@@ -22,8 +22,9 @@ import { types } from 'src/sections/icons/catigories/Icon-types'
 
 
 const page = () => {
+    const [selectedType, setSelectedType] = useState<any>(null)
     const [addIcon] = useAddNewIconMutation()
-    const { data: allIcons } = useGetAllIconsQuery('')
+    const { data: allIcons } = useGetAllIconsQuery(selectedType)
     const [openDetails, setOpenDetails] = useState(false)
     const [iconData, seticonData] = useState<any>(null)
     const ProductSchema = Yup.object().shape({
@@ -55,7 +56,12 @@ const page = () => {
 
     const onSubmit = handleSubmit(async (data) => {
         try {
-            await addIcon(data).unwrap()
+            const formData = new FormData()
+            formData.append('title', data.title)
+            formData.append('type', data.type)
+            formData.append('url', data.url)
+            formData.append('image', iconData.image)
+            await addIcon(formData).unwrap()
         } catch (error) {
             reset()
         }
@@ -110,6 +116,16 @@ const page = () => {
                     </BottomActions>
                 </Box>
             </RoleBasedGuard>
+            <Grid container spacing={2} sx={{ padding: '16px' }} gap={2} >
+                <LoadingButton variant='soft' onClick={() => setSelectedType(null)} color={null === selectedType ? 'success' : 'inherit'}>
+                    All
+                </LoadingButton>
+                {types.map((type: string, index: any) => (
+                    <LoadingButton key={index} variant='soft' onClick={() => setSelectedType(type)} color={type === selectedType ? 'success' : 'inherit'}>
+                        {type.toUpperCase()}
+                    </LoadingButton>
+                ))}
+            </Grid>
             <DetailsNavBar
                 open={openDetails}
                 onClose={handleCloseDetails}
@@ -280,7 +296,9 @@ const page = () => {
                     </Box>
                 </FormProvider>
             </DetailsNavBar>
-            {allIcons?.data?.data?.map((el: any) => <IconCard key={el._id} id={el._id} image={el.image} title={el.title} type={el.type} />)}
+            <Grid container spacing={2} sx={{ padding: '16px' }}>
+                {allIcons?.data?.data?.map((el: any) => <IconCard key={el._id} id={el._id} image={el.image} title={el.title} type={el.type} />)}
+            </Grid>
         </Container>
     )
 }
