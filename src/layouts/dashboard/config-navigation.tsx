@@ -8,6 +8,7 @@ import { useLocales } from 'src/locales';
 // import Label from 'src/components/label';
 // import Iconify from 'src/components/iconify';
 import SvgColor from 'src/components/svg-color';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -439,3 +440,4 @@ export function useNavData() {
   }, [t, user, isSuperMember]); // Add any other dependencies as needed
 
   return navData;
+}
