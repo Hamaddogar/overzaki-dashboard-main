@@ -90,7 +90,7 @@ export default function StyleCategoriesDealer({ themeConfig, handleThemeConfig, 
                     </RadioGroup>
                 </Box>
                 :
-                <Box >
+                <Box>
                     <Box pt='20px'>
                         <RadioGroup
                             aria-labelledby="demo-radio-buttons-group-label"

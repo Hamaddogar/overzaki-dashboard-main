@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useEffect, useMemo, useState } from 'react';
 // routes
 import { paths } from 'src/routes/paths';
@@ -61,11 +61,10 @@ const ICONS = {
 
 // ----------------------------------------------------------------------
 
-
 export function useNavData() {
   const { t } = useLocales();
   const { user } = useAuthContext();
-  const isSuperMember = user?.permissions?.includes("CREATE_APP_THEME");
+  const isSuperMember = user?.permissions?.includes('CREATE_APP_THEME');
 
   // Initialize state with the initial value for navData
   const [navData, setNavData] = useState([
@@ -84,6 +83,12 @@ export function useNavData() {
           path: paths.dashboard.orders.root,
           icon: ICONS.order,
           permissions: ['GET_ORDERS'],
+        },
+        {
+          title: t('Brands'),
+          path: paths.dashboard.brands.root,
+          icon: ICONS.integrations,
+          permissions: ['GET_BRANDS'],
         },
         {
           title: t('Categories'),
@@ -409,24 +414,24 @@ export function useNavData() {
       {
         title: t('theme'),
         path: paths.dashboard.theme,
-        icon: ICONS.blog
+        icon: ICONS.blog,
       },
       {
         title: t('style'),
         path: paths.dashboard.style,
-        icon: ICONS.blog
+        icon: ICONS.blog,
       },
       {
         title: t('icons'),
         path: paths.dashboard.icon,
-        icon: ICONS.blog
-      }
+        icon: ICONS.blog,
+      },
     ];
 
     if (isSuperMember) {
-      additionalItems.forEach(item => {
+      additionalItems.forEach((item) => {
         // Check if the item already exists based on the title
-        if (!updatedItems.some(navItem => item.title === navItem.title)) {
+        if (!updatedItems.some((navItem) => item.title === navItem.title)) {
           updatedItems.push(item);
         }
       });

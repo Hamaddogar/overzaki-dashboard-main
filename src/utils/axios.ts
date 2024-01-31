@@ -128,6 +128,10 @@ export const endpoints = {
     list: '/payment-methods',
     search: '/payment-methods/search',
   },
+  brand: {
+    list: '/brand/all',
+    search: '/brand',
+  },
   analytic: {
     chart: '/analytics/chart_data?type=monthly&filter=last-month&withpervious=0&withperviousYear=1',
     global: '/analytics/global-analytics?filter=last-week',

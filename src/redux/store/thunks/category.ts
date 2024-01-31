@@ -51,7 +51,7 @@ export const fetchOneCategory = createAsyncThunk(
   'category/fetchOne',
   async (categoryId: number) => {
     const response = await getRequest(
-      `${endpoints.category._list}/${categoryId}?lang=fr`,
+      `${endpoints.category._list}/${categoryId}?lang=en`,
       defaultConfig()
     );
 

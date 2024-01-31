@@ -182,17 +182,17 @@ const productsSlice = createSlice({
         state.list = []; // Replace with your initial state
       })
 
-      .addCase(fetchProductsList.pending, (state) => {
+      .addCase(fetchProductsWithParams.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.status = 'loading';
       })
-      .addCase(fetchProductsList.fulfilled, (state, action) => {
+      .addCase(fetchProductsWithParams.fulfilled, (state, action) => {
         state.loading = false;
         state.list = action.payload.data.data;
         state.status = 'succeeded';
       })
-      .addCase(fetchProductsList.rejected, (state, action) => {
+      .addCase(fetchProductsWithParams.rejected, (state, action) => {
         state.status = 'failed';
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;

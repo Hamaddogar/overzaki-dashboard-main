@@ -221,6 +221,9 @@ export const paths = {
     categories: {
       root: `${ROOTS.DASHBOARD}/categories`,
     },
+    brands: {
+      root: `${ROOTS.DASHBOARD}/brand`,
+    },
     job: {
       root: `${ROOTS.DASHBOARD}/job`,
       new: `${ROOTS.DASHBOARD}/job/new`,

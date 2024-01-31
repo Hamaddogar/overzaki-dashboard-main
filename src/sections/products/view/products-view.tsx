@@ -67,6 +67,16 @@ import Link from 'next/link';
 import DetailsNavBar from '../DetailsNavBar';
 import ProductTableToolbar from '../product-table-toolbar';
 
+const activeTab = {
+  color: '#0F1349',
+  background: 'rgb(209, 255, 240)',
+  border: '2px solid #1AF9B3',
+};
+const nonActiveTab = {
+  color: '#8688A3',
+  background: 'rgb(245, 245, 248)',
+};
+
 // ----------------------------------------------------------------------
 
 export default function OrdersListView() {
@@ -86,8 +96,8 @@ export default function OrdersListView() {
 
   const [value, setValue] = useState<any>('All');
   const confirm = useBoolean();
-  const [data, setData] = useState([]);
-  const [productsLength, setProductsLength] = useState<number>(0);
+  const [data, setData] = useState(list);
+  const [productsLength, setProductsLength] = useState<number>(list.length);
   const [errorMsg, setErrorMsg] = useState('');
 
   const ProductSchema = Yup.object().shape({
@@ -97,7 +107,7 @@ export default function OrdersListView() {
     }),
 
     categoryId: Yup.string().required('Category is required'),
-    subCategory: Yup.string().required('Sub Category is required'),
+    // subCategory: Yup.string().required('Sub Category is required'),
 
     price: Yup.number().required('Field is required'),
     description: Yup.object().shape({
@@ -117,9 +127,10 @@ export default function OrdersListView() {
     formState: { isSubmitting },
   } = methods;
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (data: any) => {
     try {
       console.log('data', data);
+      setProductData({ ...productData, discount_type: data?.discount_type || "percentage" })
       if (editProductId) {
         await editProductFun();
       } else {
@@ -156,6 +167,13 @@ export default function OrdersListView() {
         },
         quantity: product.quantity,
         publish_app: product.publish_app,
+        brand: product?.brand || "",
+        discount: product?.discount || "",
+        discount_type: product?.discount_type || "percentage",
+        discount_start: product?.discount_start || "",
+        discount_end: product?.discount_end || "",
+        max_quantity: product?.max_quantity || "",
+
       };
       setProductData(newProduct);
       // Use setValue to update each field separately
@@ -289,25 +307,27 @@ export default function OrdersListView() {
     Object.entries(state).forEach(([key, value]: any) => {
       // this is only for the products and sending single image.
       // && key !== 'images'
-      if (typeof value === 'object' && !Array.isArray(value) && key !== 'images') {
-        Object.entries(value).forEach(([nestedKey, nestedValue]: any) => {
-          formData.append(`${key}[${nestedKey}]`, nestedValue);
-        });
-      } else if (Array.isArray(value)) {
-        if (key === 'images') {
-          const newImages = value.filter((file) => typeof file !== 'string');
-          newImages.forEach((file: any, index: any) => {
-            formData.append(`${key}`, file);
+      if (value) {
+        if (typeof value === 'object' && !Array.isArray(value) && key !== 'images') {
+          Object.entries(value).forEach(([nestedKey, nestedValue]: any) => {
+            formData.append(`${key}[${nestedKey}]`, nestedValue);
           });
+        } else if (Array.isArray(value)) {
+          if (key === 'images') {
+            const newImages = value.filter((file) => typeof file !== 'string');
+            newImages.forEach((file: any, index: any) => {
+              formData.append(`${key}`, file);
+            });
+          } else {
+            // If the value is an array, assume it's a file input
+            value.forEach((file: any, index: any) => {
+              formData.append(`${key}[${index}]`, file);
+            });
+          }
         } else {
-          // If the value is an array, assume it's a file input
-          value.forEach((file: any, index: any) => {
-            formData.append(`${key}[${index}]`, file);
-          });
+          // For other types of values
+          formData.append(key, value);
         }
-      } else {
-        // For other types of values
-        formData.append(key, value);
       }
     });
 
@@ -321,6 +341,8 @@ export default function OrdersListView() {
     if (newValue === 'All') {
       setData(list);
     } else {
+      console.log(list, newValue);
+
       const newData = list.filter((order: any) => order?.categoryId === newValue);
       setData(newData);
     }
@@ -541,15 +563,22 @@ export default function OrdersListView() {
   // }
   useEffect(() => {
     dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
-      setProductsLength(response.payload.data.count);
-      setData(response.payload.data.data);
     });
   }, [dispatch, pageNumber]);
+
+  useEffect(() => {
+    setProductsLength(list.length);
+    setData(list);
+  }, [list])
+
+
+
   const listStuff = data;
   const [listItems, setListItems] = useState([]);
   useEffect(() => {
-    setListItems(listStuff);
-  }, [listStuff]);
+    setListItems(data);
+  }, [data]);
+
   const handleOnDragEnd = (result: any) => {
     if (!result.destination) return;
     const items = Array.from(listItems);
@@ -1113,6 +1142,24 @@ export default function OrdersListView() {
                 variant="subtitle2"
                 sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
               >
+                Brand
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                settingStateValue={handleProductData}
+                value={productData?.brand || ''}
+                name="brand"
+              />
+
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
                 Price
               </Typography>
 
@@ -1124,6 +1171,109 @@ export default function OrdersListView() {
                 value={productData?.price || ''}
                 name="price"
               />
+
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Discount
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                settingStateValue={handleProductData}
+                value={productData?.discount || ''}
+                name="discount"
+              />
+
+              <Grid
+                container
+                mt="20px"
+                columnSpacing="20px"
+                pb="5px"
+                alignItems="flex-end"
+                rowGap="20px"
+                justifyContent="space-between"
+              >
+                <Grid item xs={6}>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: '56px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '.9rem',
+                      borderRadius: '16px',
+                      fontWeight: 800,
+                      cursor: "pointer",
+                      ...(productData?.discount_type === 'amount' ? activeTab : nonActiveTab),
+                    }}
+                    onClick={() => setProductData({ ...productData, discount_type: 'amount' })}
+                  >
+                    Fixed Amount
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: '56px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '.9rem',
+                      borderRadius: '16px',
+                      fontWeight: 800,
+                      cursor: "pointer",
+                      ...(productData?.discount_type === 'amount' ? nonActiveTab : activeTab),
+                    }}
+                    onClick={() => setProductData({ ...productData, discount_type: 'percentage' })}
+                  >
+                    Percentage
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography
+                    component="p"
+                    mb="5px"
+                    variant="subtitle2"
+                    sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                  >
+                    Start Date
+                  </Typography>
+                  <RHFTextField
+                    fullWidth type="date" variant="filled"
+                    name="discount_start"
+                    value={productData?.discount_start || ''}
+                    settingStateValue={handleProductData}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography
+                    component="p"
+                    mb="5px"
+                    variant="subtitle2"
+                    sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                  >
+                    End Date
+                  </Typography>
+                  <RHFTextField
+                    fullWidth
+                    type="date"
+                    variant="filled"
+                    name="discount_end"
+                    value={productData?.discount_end || ''}
+                    settingStateValue={handleProductData}
+                  />
+                </Grid>
+
+
+              </Grid>
 
               {/* <FormControl fullWidth>
             <Select
@@ -1237,6 +1387,24 @@ export default function OrdersListView() {
                 name="quantity"
               />
 
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Max Quantity
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                settingStateValue={handleProductData}
+                value={productData?.max_quantity || ''}
+                name="max_quantity"
+              />
+
               {/* <FormControl fullWidth>
             <Select
               variant='filled'
@@ -1266,7 +1434,7 @@ export default function OrdersListView() {
                 sx={{
                   borderRadius: '16px',
                   padding: '7px 14px',
-                  backgroundColor: '#F5F6F8',
+                  // backgroundColor: '#F5F6F8',
                 }}
               >
                 <Typography

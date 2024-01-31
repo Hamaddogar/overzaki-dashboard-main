@@ -7,10 +7,11 @@ import { Stack, Typography, Box, RadioGroup, FormControlLabel, Radio } from '@mu
 
 interface CardStyleProps {
     themeConfig: {
-        cardStyle: string,
+        cardStyle?: string,
+        categoryShow?: string
         // Add other themeConfig properties as needed
     };
-    handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
+    handleThemeConfig: (key: string, value: any, parentClass: any) => void; // Adjust 'value' type as needed
     mobile?: boolean;
 }
 
@@ -22,16 +23,18 @@ export default function CardStyleDealer({ themeConfig, handleThemeConfig, mobile
             <Box pt='20px'>
                 <RadioGroup
                     aria-labelledby="controlled-card-Style-grid-group"
-                    value={themeConfig?.cardStyle}
                     name="card-Style-grid-group"
-                    onChange={(event) => handleThemeConfig('cardStyle', event.target.value)}
+                    // value={themeConfig?.cardStyle}
+                    value={themeConfig.categoryShow}
+                    onChange={event => handleThemeConfig('categoryShow', event.target.value, 'css')}
+                    // onChange={(event) => handleThemeConfig('cardStyle', event.target.value)}
                     sx={{
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '20px',
                     }}
                 >
-                    <FormControlLabel value='style-1' control={<Radio checked={themeConfig?.cardStyle === "style-1"} size='medium' />} label={
+                    <FormControlLabel value='1' control={<Radio checked={themeConfig?.categoryShow === "1"} size='medium' />} label={
                         <Stack alignItems='center' spacing='5px' ml='15px'>
                             <Stack alignItems='center' justifyContent='center' sx={{
                                 width: "100px",
@@ -46,7 +49,7 @@ export default function CardStyleDealer({ themeConfig, handleThemeConfig, mobile
                         </Stack>
                     } />
 
-                    <FormControlLabel value='style-2' control={<Radio checked={themeConfig?.cardStyle === "style-2"} size='medium' />} label={
+                    <FormControlLabel value='2' control={<Radio checked={themeConfig?.categoryShow === "2"} size='medium' />} label={
                         <Stack alignItems='center' spacing='5px' ml='15px'>
                             <Box sx={{
                                 backgroundImage: 'url(/raw/cm.jpg)',
@@ -65,7 +68,7 @@ export default function CardStyleDealer({ themeConfig, handleThemeConfig, mobile
                         </Stack>
                     } />
 
-                    <FormControlLabel value='style-3' control={<Radio checked={themeConfig?.cardStyle === "style-3"} size='medium' />} label={
+                    <FormControlLabel value='3' control={<Radio checked={themeConfig?.categoryShow === "3"} size='medium' />} label={
                         <Stack alignItems='center' spacing='5px' ml='15px'>
                             <Box sx={{
                                 backgroundImage: 'url(/raw/cm.jpg)',

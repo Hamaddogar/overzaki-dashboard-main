@@ -345,28 +345,52 @@ export default function CategoriesView() {
       return rest;
     });
   };
+  const removeSubCatLogo = () => {
+    setSubCategoriesData((current: any) => {
+      const { logo, ...rest } = current;
+      return rest;
+    });
+  };
 
   // ------------------------------------------------------------------------------------------
   const handleCategoryData = (e: any) => {
     const { name, value } = e.target;
-    const language = name.split('.')[1];
+    const language = name.includes('.') ? name.split('.')[1] : undefined;
 
     setCategoriesData((prevData: any) => ({
       ...prevData,
       name: {
         ...prevData?.name,
-        [language]: value,
+        ...(language === 'en' || language === 'ar' ? { [language]: value } : {}),
       },
+      ...(name === 'bgColor' ? { [name]: value } : {}),
     }));
   };
+
   const handleCategoryImage = (files: any) => {
     if (files.length > 0) {
       setCategoriesData({ ...categoriesData, image: files[0] });
     }
   };
+  const handleCategoryLogo = (files: any) => {
+    if (files.length > 0) {
+      setCategoriesData({ ...categoriesData, logo: files[0] });
+    }
+  };
+  const handleSubCategoryLogo = (files: any) => {
+    if (files.length > 0) {
+      setSubCategoriesData({ ...subCategoriesData, logo: files[0] });
+    }
+  };
   const removeImage = () => {
     setCategoriesData((current: any) => {
       const { image, ...rest } = current;
+      return rest;
+    });
+  };
+  const removeLogo = () => {
+    setCategoriesData((current: any) => {
+      const { logo, ...rest } = current;
       return rest;
     });
   };
@@ -423,11 +447,10 @@ export default function CategoriesView() {
       dispatch(fetchCategorysList({ pageNumber, pageSize })).then((response: any) => {
         setCategoriesLength(response.payload.data.count);
         setListItems(response.payload.data.data);
-        // dispatch(fetchSubCategorysList(error));
+        dispatch(fetchSubCategorysList(error));
       });
     }
   }, [loadStatus, dispatch, pageNumber]);
-
 
   const handleOnDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -931,6 +954,22 @@ export default function CategoriesView() {
                 settingStateValue={handleCategoryData}
                 name="name.ar"
               />
+              <Typography
+                mt="20px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Background Color (optional)
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                value={categoriesData?.bgColor || ''}
+                settingStateValue={handleCategoryData}
+                name="bgColor"
+              />
 
               <Typography
                 mt="20px"
@@ -939,8 +978,82 @@ export default function CategoriesView() {
                 variant="subtitle2"
                 sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
               >
-                Category Image
+                Logo
               </Typography>
+              <Stack direction="row" spacing="10px">
+                {categoriesData?.logo ? (
+                  <Box width={'100%'} display={'flex'}>
+                    <Box
+                      display={'flex'}
+                      m={1}
+                      justifyContent={'center'}
+                      alignItems={'center'}
+                      width={'80px'}
+                      height={'80px'}
+                    >
+                      <Box
+                        component="img"
+                        borderRadius={'5px'}
+                        src={
+                          typeof categoriesData.logo === 'string'
+                            ? categoriesData.logo
+                            : URL.createObjectURL(categoriesData.logo)
+                        }
+                        alt=""
+                      />
+                    </Box>
+                    <Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Box
+                          onClick={removeLogo}
+                          sx={{
+                            backgroundColor: 'rgb(134, 136, 163,.09)',
+                            padding: '10px 11px 7px 11px',
+                            borderRadius: '36px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
+                        </Box>
+                      </Box>
+                      <Typography
+                        mt="0px"
+                        component="p"
+                        variant="subtitle2"
+                        sx={{ opacity: 0.7, fontSize: '.9rem' }}
+                      >
+                        Maximum size is 5mb
+                      </Typography>
+
+                      <Typography
+                        mt="0px"
+                        component="p"
+                        variant="subtitle2"
+                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                      >
+                        You can use these extensions PNG or JPG
+                      </Typography>
+                    </Box>
+                  </Box>
+                ) : (
+                  <UploadBox
+                    onDrop={handleCategoryLogo}
+                    maxFiles={1}
+                    maxSize={5242880}
+                    accept={{
+                      'image/jpeg': [],
+                      'image/png': [],
+                    }}
+                    placeholder={
+                      <Stack spacing={0.5} alignItems="center">
+                        <Iconify icon="eva:cloud-upload-fill" width={40} />
+                        <Typography variant="body2">Upload Logo</Typography>
+                      </Stack>
+                    }
+                    sx={{ flexGrow: 1, height: 'auto', py: 2.5, mb: 3 }}
+                  />
+                )}
+              </Stack>
 
               <Stack direction="row" spacing="10px">
                 {categoriesData?.image ? (
@@ -1115,6 +1228,100 @@ export default function CategoriesView() {
                     </MenuItem>
                   ))}
               </RHFSelect>
+              <Typography
+                mt="20px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Background Color (optional)
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                value={categoriesData?.bgColor || ''}
+                settingStateValue={handleCategoryData}
+                name="bgColor"
+              />
+
+              <Typography
+                mt="20px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Logo
+              </Typography>
+              <Stack direction="row" spacing="10px">
+                {subCategoriesData?.logo ? (
+                  <Box
+                    sx={{
+                      width: '140px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '10px',
+                      flexDirection: 'column',
+                      position: 'relative',
+                      border: '2px dashed rgb(134, 136, 163,.5)',
+                      borderRadius: '10px',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      borderRadius={'5px'}
+                      src={
+                        typeof subCategoriesData.logo === 'string'
+                          ? subCategoriesData.logo
+                          : URL.createObjectURL(subCategoriesData.logo)
+                      }
+                      alt="subCategory"
+                    />
+                    <Box
+                      onClick={removeSubCatLogo}
+                      sx={{
+                        backgroundColor: 'rgb(134, 136, 163,.09)',
+                        padding: '10px 11px 7px 11px',
+                        borderRadius: '36px',
+                        cursor: 'pointer',
+                        position: 'absolute',
+                        top: '0px',
+                        right: '0px',
+                      }}
+                    >
+                      <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
+                    </Box>
+                  </Box>
+                ) : (
+                  <UploadBox
+                    onDrop={handleSubCategoryLogo}
+                    maxFiles={1}
+                    maxSize={5242880}
+                    accept={{
+                      'image/jpeg': [],
+                      'image/png': [],
+                    }}
+                    placeholder={
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '10px',
+                          flexDirection: 'column',
+                        }}
+                      >
+                        <Iconify icon="uil:upload" style={{ color: '#8688A3' }} />
+                        <span style={{ color: '#8688A3', fontSize: '.7rem' }}>Upload Image</span>
+                      </Box>
+                    }
+                    sx={{ flexGrow: 1, height: 'auto', py: 2.5, mb: 3 }}
+                  />
+                )}
+              </Stack>
 
               <Typography
                 my="20px"
