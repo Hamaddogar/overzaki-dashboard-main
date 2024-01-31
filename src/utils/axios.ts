@@ -139,6 +139,9 @@ export const endpoints = {
     bestSellingItems: '/analytics/best-selling-items?filter=last-month',
     bestSellingCategories: '/analytics/best-selling-categories?filter=last-week',
     bestSellingBranches: '/analytics/best-selling-branches?filter=last-month',
+    customers: '',
+    vouchers: '',
+    summary: '',
   },
   deliveryPickup: {
     branches: '/delivery-pickup/branches',
