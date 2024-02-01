@@ -66,6 +66,7 @@ import { useAuthContext } from 'src/auth/hooks';
 import Link from 'next/link';
 import DetailsNavBar from '../DetailsNavBar';
 import ProductTableToolbar from '../product-table-toolbar';
+import { fetchAllBrands } from 'src/redux/store/thunks/brand';
 
 const activeTab = {
   color: '#0F1349',
@@ -87,7 +88,13 @@ export default function OrdersListView() {
   const categoryState = useSelector((state: any) => state.category);
   const { verifyPermission } = useAuthContext();
   // const loadStatus = useSelector((state: any) => state.products.status);
-  const { list, error, product, variant } = useSelector((state: any) => state.products);
+  const { list, error, status, product, variant } = useSelector((state: any) => state.products);
+
+
+  const brandState = useSelector((state: any) => state.brands);
+
+
+
   const [productData, setProductData] = useState<any>(null);
   const [editProductId, setEditProductId] = useState<any>(null);
   const [removeData, setRemoveData] = useState<any>(null);
@@ -99,6 +106,27 @@ export default function OrdersListView() {
   const [data, setData] = useState(list);
   const [productsLength, setProductsLength] = useState<number>(list.length);
   const [errorMsg, setErrorMsg] = useState('');
+
+
+
+
+  // brands
+  useEffect(() => {
+    if (brandState.status === 'idle') {
+      dispatch(fetchAllBrands());
+    }
+  }, [brandState, dispatch]);
+
+
+
+
+
+
+
+
+
+
+
 
   const ProductSchema = Yup.object().shape({
     name: Yup.object().shape({
@@ -152,13 +180,15 @@ export default function OrdersListView() {
 
   useEffect(() => {
     if (product && Object.entries(product).length > 0) {
+      console.log(product);
+
       const newProduct = {
         name: {
           en: product.name.en,
           ar: product.name.ar,
         },
-        categoryId: product.categoryId,
-        subCategory: product.subCategory,
+        categoryId: product.categoryId?._id,
+        subCategory: product?.subCategory?._id,
         price: product.price,
         images: product.images,
         description: {
@@ -167,7 +197,7 @@ export default function OrdersListView() {
         },
         quantity: product.quantity,
         publish_app: product.publish_app,
-        brand: product?.brand || "",
+        brand: product?.brand?._id || "",
         discount: product?.discount || "",
         discount_type: product?.discount_type || "percentage",
         discount_start: product?.discount_start || "",
@@ -562,9 +592,11 @@ export default function OrdersListView() {
   //   }
   // }
   useEffect(() => {
-    dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
-    });
-  }, [dispatch, pageNumber]);
+    if (status === 'idle') {
+      dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
+      });
+    }
+  }, [dispatch, pageNumber, status]);
 
   useEffect(() => {
     setProductsLength(list.length);
@@ -1144,13 +1176,28 @@ export default function OrdersListView() {
               >
                 Brand
               </Typography>
-              <RHFTextField
+              {/* <RHFTextField
                 fullWidth
                 variant="filled"
                 settingStateValue={handleProductData}
                 value={productData?.brand || ''}
                 name="brand"
-              />
+              /> */}
+              {/* {console.log(brandState)} */}
+              <RHFSelect
+                fullWidth
+                variant="filled"
+                name="brand"
+                id="demo-simple-brand"
+                value={productData?.brand || null}
+                settingStateValue={handleProductData}
+              >
+                {brandState?.list && brandState.list?.map((brandObj: any) => (
+                  <MenuItem key={brandObj._id} value={brandObj._id}>{brandObj.name.localized}</MenuItem>
+                ))}
+              </RHFSelect>
+
+
 
               <Typography
                 mt="20px"

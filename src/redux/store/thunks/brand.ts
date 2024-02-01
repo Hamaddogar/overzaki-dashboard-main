@@ -82,7 +82,7 @@ const analyticsSlice = createSlice({
       .addCase(fetchAllBrands.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.loading = false;
-        state.list = action.payload;
+        state.list = action.payload.data.data;
       })
       .addCase(fetchAllBrands.rejected, (state, action) => {
         state.status = 'failed';
