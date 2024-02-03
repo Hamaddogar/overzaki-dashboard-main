@@ -117,6 +117,7 @@ const page = () => {
       image: null,
     });
   };
+  console.log(themeData);
 
   return (
     <Container>
@@ -307,7 +308,7 @@ const page = () => {
               variant="subtitle2"
               sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
             >
-              type
+              Category
             </Typography>
 
             <RHFSelect

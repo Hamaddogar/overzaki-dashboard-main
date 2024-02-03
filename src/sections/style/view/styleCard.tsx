@@ -69,12 +69,12 @@ const StyleCard = ({ title, type, image, id, toggleDrawerCommon }: any) => {
           <IconButton aria-label="delete" size="large" onClick={deleteStyle}>
             <DeleteIcon />
           </IconButton>
-          <IconButton aria-label="delete" size="large">
+          {/* <IconButton aria-label="delete" size="large">
             <ColorLensIcon />
           </IconButton>
           <IconButton aria-label="delete" size="large">
             <InsertEmoticonIcon />
-          </IconButton>
+          </IconButton> */}
         </Box>
       </Box>
     </Card>
