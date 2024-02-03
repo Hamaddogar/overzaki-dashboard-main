@@ -193,7 +193,7 @@ export default function CustomDomainControls() {
           </Box>
         </Stack>
       </Paper>
-      <Card sx={{ borderRadius: '16px', display: 'flex', justifyContent: 'space-between' , my:'16px' }}>
+      <Card sx={{ borderRadius: '16px', display: 'flex', justifyContent: 'space-between' , my:'16px' , flexWrap:'wrap'}}>
         <CardContent>
           <Typography variant="h5" component="div">
             {selectedDomain?.domain}
