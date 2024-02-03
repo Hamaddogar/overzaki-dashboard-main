@@ -54,6 +54,10 @@ export const fetchStyleList = createAsyncThunk('styles/fetchStyleList', async ()
     console.log(error);
   }
 });
+export const fetchStyleById = createAsyncThunk('styles/fetchById', async (id: string) => {
+  const response = await getRequest(`${endpoints.style.app}/${id}`, defaultConfig());
+  return response.data;
+});
 export const editStyleCategory = createAsyncThunk(
   'styles/edit',
   async (payload: { id: string; data: any }) => {
@@ -73,6 +77,16 @@ export const editStyle = createAsyncThunk(
     return response.data;
   }
 );
+// export const deleteStyle = createAsyncThunk(
+//   'style/edit',
+//   async (payload: { id: string; data: any }) => {
+//     const { id, data } = payload;
+//     let headersObj = defaultConfig();
+//     headersObj.headers['Content-Type'] = 'multipart/form-data';
+//     const response = await putRequest(`${endpoints.style.app}/${id}`, data, headersObj);
+//     return response.data;
+//   }
+// );
 
 const stylesSlice = createSlice({
   name: 'style',

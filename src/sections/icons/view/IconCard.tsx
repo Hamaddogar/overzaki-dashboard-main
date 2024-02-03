@@ -12,9 +12,25 @@ import {
 } from 'src/redux/store/services/api';
 import { paths } from 'src/routes/paths';
 
-const IconCard = ({ title, type, image, id, toggleDrawerCommon, setIconData }: any) => {
+const IconCard = ({
+  title,
+  type,
+  image,
+  id,
+  toggleDrawerCommon,
+  setIconData,
+
+  setToDeleteId,
+}: any) => {
   const router = useRouter();
-  const [deleteIconWithId] = useDeleteIconMutation();
+  const [deleteIcon] = useDeleteIconMutation();
+  const delIcon = async () => {
+    await deleteIcon(id).unwrap();
+  };
+  // const handleDelete = async () => {
+  //   setToDeleteId(id);
+  //   await delIcon();
+  // };
 
   const handleEdit = (id: any) => {
     toggleDrawerCommon(id);
@@ -66,15 +82,15 @@ const IconCard = ({ title, type, image, id, toggleDrawerCommon, setIconData }: a
           <IconButton aria-label="edit" size="large" onClick={() => handleEdit(id)}>
             <EditIcon />
           </IconButton>
-          {/* <IconButton aria-label="delete" size="large" onClick={deleteIcon}>
-                        <DeleteIcon />
-                    </IconButton> */}
-          <IconButton aria-label="delete" size="large">
+          <IconButton aria-label="delete" size="large" onClick={delIcon}>
+            <DeleteIcon />
+          </IconButton>
+          {/* <IconButton aria-label="delete" size="large">
             <ColorLensIcon />
           </IconButton>
           <IconButton aria-label="delete" size="large">
             <InsertEmoticonIcon />
-          </IconButton>
+          </IconButton> */}
         </Box>
       </Box>
     </Card>
