@@ -107,6 +107,21 @@ export const api = createApi({
             }),
             invalidatesTags: ['Icon'],
         }),
+        // DNS management
+        setDomain: builder.mutation({
+            query: (data) => ({
+                url: `/zone/set_new_domain`,
+                method: 'POST',
+                body : data
+            }),
+        }),
+        domainChecker: builder.mutation({
+            query: (data) => ({
+                url: `/zone/domain_checker`,
+                method: 'POST',
+                body : data
+            }),
+        }),
     }),
 });
 
@@ -128,5 +143,7 @@ export const {
     useGetAllIconsQuery,
     useDeleteIconMutation,
     useGetIconByIdQuery,
-    useUpdateIconMutation
+    useUpdateIconMutation,
+    useSetDomainMutation,
+    useDomainCheckerMutation
 } = api;

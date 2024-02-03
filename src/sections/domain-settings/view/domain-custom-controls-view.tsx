@@ -10,15 +10,26 @@ import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 // theme
-import { FormControlLabel, Paper, Switch } from '@mui/material';
+import { Button, Card, CardActions, CardContent, FormControlLabel, Paper, Switch } from '@mui/material';
 import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/redux/store/store';
+import Link from '@mui/material/Link';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { useDomainCheckerMutation } from 'src/redux/store/services/api';
+
 
 // ----------------------------------------------------------------------
 
 export default function CustomDomainControls() {
-
+  const selectedDomain = useSelector((state: RootState) => state.selectedDomain.data)
   const settings = useSettingsContext();
-
+  const [checkDomain , response] = useDomainCheckerMutation()
+  const handleRefresh = async () => {
+    await checkDomain({
+      builderId: selectedDomain._id
+    }).unwrap()
+  }
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'} sx={{ pt: 2 }}>
 
@@ -182,6 +193,30 @@ export default function CustomDomainControls() {
           </Box>
         </Stack>
       </Paper>
+      <Card sx={{ borderRadius: '16px', display: 'flex', justifyContent: 'space-between' , my:'16px' }}>
+        <CardContent>
+          <Typography variant="h5" component="div">
+            {selectedDomain?.domain}
+          </Typography>
+          <Typography sx={{ mb: 1.5 }} color="text.secondary">
+            <Link href="" underline="hover">
+              Production
+            </Link>
+          </Typography>
+          <Typography variant="body2">
+            Good news! Your DNS records are set up correctly, but it can take some time for them to propagate globally.
+            <Link href="" underline="hover">
+              Learn More
+            </Link>
+          </Typography>
+        </CardContent>
+        <CardActions disableSpacing>
+          <Button size="medium" onClick={handleRefresh} startIcon={<RefreshIcon />}>
+            Refresh
+          </Button>
+          <Button size="medium">Edit</Button>
+        </CardActions>
+      </Card>
     </Container >
   );
 }

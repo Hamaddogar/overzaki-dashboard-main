@@ -11,6 +11,7 @@ import builderReducer from './thunks/builder';
 import analyticsReducer from './thunks/analytics';
 import brandsReducer from './thunks/brand';
 import { api } from './services/api';
+import selectedDomainReducer from './thunks/selectedDomain';
 
 const rootReducer = combineReducers({
   customers: customersReducer,
@@ -24,6 +25,7 @@ const rootReducer = combineReducers({
   builder: builderReducer,
   analytics: analyticsReducer,
   brands: brandsReducer,
+  selectedDomain: selectedDomainReducer,
   [api.reducerPath]: api.reducer,
 });
 
