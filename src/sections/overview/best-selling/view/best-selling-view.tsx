@@ -22,7 +22,7 @@ const BestSellingView = () => {
       setBestSellingCategories(resp?.payload?.data)
     );
   }, []);
-  console.log(bestSellingItems);
+  // console.log(bestSellingItems);
   return (
     <Grid xs={12}>
       <AppHolder title="Best Selling Items">

@@ -139,9 +139,6 @@ export const endpoints = {
     bestSellingItems: '/analytics/best-selling-items?filter=last-month',
     bestSellingCategories: '/analytics/best-selling-categories?filter=last-week',
     bestSellingBranches: '/analytics/best-selling-branches?filter=last-month',
-    customers: '',
-    vouchers: '',
-    summary: '',
   },
   deliveryPickup: {
     branches: '/delivery-pickup/branches',
@@ -170,6 +167,14 @@ export const endpoints = {
     create: '/sub-categories',
     _list: '/sub-categories',
     list: '/sub-categories/all',
+  },
+  icon: {
+    create: '/icon-category',
+    app: '/app-icon',
+  },
+  style: {
+    create: '/style-category',
+    app: '/app-style',
   },
   voucher: {
     list: '/vouchers',

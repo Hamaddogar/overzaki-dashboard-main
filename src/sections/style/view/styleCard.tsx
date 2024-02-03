@@ -21,6 +21,7 @@ const StyleCard = ({ title, type, image, id, toggleDrawerCommon }: any) => {
   return (
     <Card
       sx={{
+        zIndex: 50,
         display: 'flex',
         maxWidth: 500,
         m: 2,

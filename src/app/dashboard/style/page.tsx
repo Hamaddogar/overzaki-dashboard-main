@@ -1,6 +1,7 @@
 'use client';
 import Button from '@mui/material/Button';
-import { Box, Grid, MenuItem, Typography } from '@mui/material';
+import MoreVertOutlinedIcon from '@mui/icons-material/MoreVertOutlined';
+import { Box, ClickAwayListener, Grid, MenuItem, Typography } from '@mui/material';
 import { Stack } from '@mui/system';
 import React, { useEffect, useState } from 'react';
 import { RoleBasedGuard } from 'src/auth/guard';
@@ -27,9 +28,28 @@ import StyleCard from 'src/sections/style/view/styleCard';
 import { types } from 'src/sections/style/catigouries/style-types';
 import Iconify from 'src/components/iconify/iconify';
 import { UploadBox } from 'src/components/upload';
+import {
+  createStyle,
+  createStyleCategory,
+  deleteStyleCategory,
+  editStyle,
+  editStyleCategory,
+  fetchStyleCategoryList,
+  fetchStyleList,
+  getStyleCategoryById,
+} from 'src/redux/store/thunks/style';
+import { enqueueSnackbar } from 'notistack';
+import { useDispatch } from 'react-redux';
 
 const page = () => {
-  const [selectedType, setSelectedType] = useState<any>(null);
+  const [editCategoryId, setEditCategoryId] = useState();
+  const [optionModal, setOptionModal] = useState(false);
+  const [allStylesData, setAllStylesData] = useState();
+  const dispatch = useDispatch();
+  const [styleCategoryData, setStyleCategoryData] = useState({ name: '' });
+  const [selectedType, setSelectedType] = useState<any>('');
+  const [stylesCategories, setStylesCategories] = useState<any>([]);
+  const [styleCategoryDrawer, setStyleCategoryDrawer] = useState(false);
   const [addStyle] = useAddNewStyleMutation();
   const { data: allStyles } = useGetAllStylesQuery(selectedType);
   const [openDetails, setOpenDetails] = useState(false);
@@ -41,8 +61,15 @@ const page = () => {
       .test('is-json', 'json must be a valid JSON string', (value) => isValidJSON(value))
       .required(),
   });
+  const CategorySchema = Yup.object().shape({
+    name: Yup.string().required(),
+  });
   const methods = useForm({
     resolver: yupResolver(ProductSchema),
+  });
+
+  const categoryMethods = useForm({
+    resolver: yupResolver(CategorySchema),
   });
   const [styleDrawer, setStyleDrawer] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -94,10 +121,21 @@ const page = () => {
       try {
         const newData = new FormData();
         newData.append('title', data.title);
-        newData.append('type', data.type);
+        newData.append('category', data.category);
         newData.append('json', data.json);
         newData.append('image', styleData?.image);
-        await addStyle(newData).unwrap();
+        await dispatch(createStyle(newData)).then((response: any) => {
+          if (response.meta.requestStatus === 'fulfilled') {
+            // setStyleCategoryData({ name: '' });
+            enqueueSnackbar('Successfully Created!', { variant: 'success' });
+            // dispatch(fetchStyleCategoryList()).then((res) =>
+            //   setStylesCategories(res?.payload?.data)
+            // );
+            handleDrawerClose();
+          } else {
+            enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+          }
+        });
       } catch (error) {
         reset();
       }
@@ -126,7 +164,117 @@ const page = () => {
     setStyleDrawer(false);
     setstyleData(null);
   };
-  console.log(styleData);
+  const handleCategoryData = (e: any) => {
+    const { name, value } = e.target;
+    setStyleCategoryData((prev: any) => {
+      return { ...prev, [name]: value };
+    });
+  };
+
+  const handleCategoryDrawerClose = () => {
+    setStyleCategoryDrawer(false);
+  };
+  const handleCreateCategory = (data: any) => {
+    dispatch(createStyleCategory(data)).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        setStyleCategoryData({ name: '' });
+        enqueueSnackbar('Successfully Created!', { variant: 'success' });
+        dispatch(fetchStyleCategoryList()).then((res) => setStylesCategories(res?.payload?.data));
+        handleCategoryDrawerClose();
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  };
+  useEffect(() => {
+    dispatch(fetchStyleCategoryList()).then((res) => setStylesCategories(res?.payload?.data));
+  }, []);
+  const handleCategoryDelete = (id: any) => {
+    dispatch(deleteStyleCategory(id)).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        dispatch(fetchStyleCategoryList()).then((response: any) =>
+          setStylesCategories(response?.payload?.data)
+        );
+        enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  };
+  const handleEdit = (id: any) => {
+    setOptionModal(false);
+    setStyleCategoryDrawer(true);
+    setEditCategoryId(id);
+    dispatch(getStyleCategoryById(id)).then((res) =>
+      setStyleCategoryData({ name: res?.payload.name })
+    );
+  };
+  const handleEditPost = () => {
+    let style = new FormData();
+    style.append('title', styleCategoryData.title);
+    style.append('type', styleCategoryData.type);
+    style.append('json', styleCategoryData.json);
+    style.append('image', styleCategoryData.image);
+
+    dispatch(editStyleCategory({ id: editCategoryId, data: style })).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        dispatch(fetchStyleCategoryList()).then((response: any) =>
+          setStylesCategories(response?.payload?.data)
+        );
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  };
+
+  // Creating Icon
+  const handleCreateStyle = () => {
+    try {
+      const formData = new FormData();
+
+      // Append each field to FormData
+      formData.append('category', styleData.category);
+      formData.append('title', styleData.title);
+      formData.append('json', styleData.json);
+
+      // Append the image file
+      formData.append('image', styleData.image);
+
+      dispatch(createStyle(formData)).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          enqueueSnackbar('Successfully Created!', { variant: 'success' });
+          dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
+          handleDrawerClose();
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    } catch (error) {
+      reset();
+    }
+  };
+  const handleStyleEdit = () => {
+    const dataToPush = {
+      category: styleData?.category,
+      // image: styleData?.image,
+      title: styleData?.title,
+      json: styleData?.json,
+    };
+    dispatch(editStyle({ id: editId, data: dataToPush })).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+        dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
+        handleDrawerClose();
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  };
+  useEffect(() => {
+    dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
+  }, []);
+
   return (
     <Container>
       <RoleBasedGuard permission="CREATE_PRODUCT">
@@ -142,45 +290,112 @@ const page = () => {
           <Grid xs={12} md="auto">
             <CustomCrumbs heading="Styles" crums={false} />
           </Grid>
-          <BottomActions>
-            <Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              alignItems="center"
-              justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
-              spacing="20px"
-              sx={{ width: '100%', maxWidth: { xs: '100%', md: '250px' } }}
-            >
-              <Button
-                startIcon="+"
-                fullWidth
-                sx={{ borderRadius: '30px', color: '#0F1349' }}
-                component="button"
-                variant="contained"
-                color="primary"
-                onClick={() => setStyleDrawer(true)}
+          <Grid sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <BottomActions>
+              <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                alignItems="center"
+                justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
+                spacing="20px"
+                sx={{ width: '100%', maxWidth: { xs: '100%', md: '250px' } }}
               >
-                Add New Style
-              </Button>
-            </Stack>
-          </BottomActions>
+                <Button
+                  startIcon="+"
+                  fullWidth
+                  sx={{ borderRadius: '30px', color: '#0F1349' }}
+                  component="button"
+                  variant="contained"
+                  color="primary"
+                  onClick={() => setStyleDrawer(true)}
+                >
+                  Add New Style
+                </Button>
+              </Stack>
+            </BottomActions>
+            <BottomActions>
+              <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                alignItems="center"
+                justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
+                spacing="20px"
+                sx={{ width: '100%', maxWidth: { xs: '100%', md: '250px' } }}
+              >
+                <Button
+                  startIcon="+"
+                  fullWidth
+                  sx={{ borderRadius: '30px', color: '#0F1349' }}
+                  component="button"
+                  variant="contained"
+                  color="primary"
+                  onClick={() => setStyleCategoryDrawer(true)}
+                >
+                  Add New Category
+                </Button>
+              </Stack>
+            </BottomActions>
+          </Grid>
         </Box>
       </RoleBasedGuard>
       <Grid container spacing={2} sx={{ padding: '16px' }} gap={2}>
         <LoadingButton
           variant="soft"
-          onClick={() => setSelectedType(null)}
+          onClick={() => setSelectedType('')}
           color={null === selectedType ? 'success' : 'inherit'}
         >
           All
         </LoadingButton>
-        {types.map((type: string, index: any) => (
+
+        {stylesCategories.map((type: string, index: any) => (
           <LoadingButton
             key={index}
             variant="soft"
-            onClick={() => setSelectedType(type)}
+            onClick={() => setSelectedType(type?.id)}
             color={type === selectedType ? 'success' : 'inherit'}
           >
-            {type.toUpperCase()}
+            {type?.name?.toUpperCase()}
+            <Stack sx={{ position: 'relative', zIndex: 999, backgroundColor: '' }}>
+              <MoreVertOutlinedIcon onClick={() => setOptionModal(type?.id)} />
+              {optionModal === type?.id && (
+                <ClickAwayListener onClickAway={() => setOptionModal(null)}>
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 30,
+                      backgroundColor: 'red',
+                      borderRadius: '12px',
+                      padding: '8px',
+                    }}
+                  >
+                    <Typography
+                      onClick={() => handleCategoryDelete(type?.id)}
+                      component="p"
+                      noWrap
+                      variant="subtitle2"
+                      sx={{
+                        opacity: 0.7,
+                        fontSize: '.9rem',
+                        maxWidth: { xs: '120px', md: '218px' },
+                      }}
+                    >
+                      Delete
+                    </Typography>
+                    <Typography
+                      component="p"
+                      noWrap
+                      onClick={() => handleEdit(type?.id)}
+                      variant="subtitle2"
+                      sx={{
+                        opacity: 0.7,
+                        fontSize: '.9rem',
+                        maxWidth: { xs: '120px', md: '218px' },
+                      }}
+                    >
+                      Edit
+                    </Typography>
+                  </Box>
+                </ClickAwayListener>
+              )}
+            </Stack>
           </LoadingButton>
         ))}
       </Grid>
@@ -197,9 +412,7 @@ const page = () => {
               size="large"
               // onClick={editProductId ? editProductFun : createProductFun}
               loading={isSubmitting}
-              onClick={() => {
-                methods.handleSubmit(onSubmit as any)();
-              }}
+              onClick={editId ? () => handleStyleEdit() : () => handleCreateStyle()}
               sx={{ borderRadius: '30px' }}
             >
               {editId ? 'Update' : 'Add'}
@@ -207,7 +420,7 @@ const page = () => {
           </Stack>
         }
       >
-        <FormProvider methods={methods} onSubmit={onSubmit}>
+        <FormProvider methods={methods} onSubmit={editId ? handleStyleEdit : handleCreateStyle}>
           <Box width="100%">
             <Typography
               component="p"
@@ -316,20 +529,20 @@ const page = () => {
               variant="subtitle2"
               sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
             >
-              type
+              Category
             </Typography>
 
             <RHFSelect
               fullWidth
               variant="filled"
-              name="type"
+              name="category"
               id="demo-simple-select2"
-              value={styleData?.type || types[0]}
+              value={styleData?.category || types[0]}
               settingStateValue={handleTheme}
             >
-              {types.map((type: string, index: any) => (
-                <MenuItem key={index} value={type}>
-                  {type}
+              {stylesCategories?.map((type: string, index: any) => (
+                <MenuItem key={index} value={type?.id}>
+                  {type?.name}
                 </MenuItem>
               ))}
             </RHFSelect>
@@ -355,17 +568,64 @@ const page = () => {
           </Box>
         </FormProvider>
       </DetailsNavBar>
+      <DetailsNavBar
+        open={styleCategoryDrawer}
+        onClose={handleCategoryDrawerClose}
+        title={'Add Icon Category'}
+        actions={
+          <Stack alignItems="center" justifyContent="center" spacing="10px">
+            <LoadingButton
+              fullWidth
+              variant="soft"
+              color="success"
+              size="large"
+              loading={isSubmitting}
+              onClick={
+                editCategoryId
+                  ? () => handleEditPost()
+                  : () => handleCreateCategory(styleCategoryData)
+              }
+              sx={{ borderRadius: '30px' }}
+            >
+              {editCategoryId ? 'Update' : 'Add'}
+            </LoadingButton>
+          </Stack>
+        }
+      >
+        <FormProvider methods={categoryMethods}>
+          <Box width="100%">
+            <Typography
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            >
+              Name
+            </Typography>
+
+            <RHFTextField
+              fullWidth
+              variant="filled"
+              settingStateValue={handleCategoryData}
+              name="name"
+              value={styleCategoryData?.name || ''}
+            />
+          </Box>
+        </FormProvider>
+      </DetailsNavBar>
       <Grid container spacing={2} sx={{ padding: '16px' }}>
-        {allStyles?.data?.data?.map((el: any) => (
-          <StyleCard
-            toggleDrawerCommon={toggleDrawerCommon}
-            id={el._id}
-            title={el.title}
-            key={el._id}
-            type={el.type}
-            image={el.image}
-          />
-        ))}
+        {allStylesData
+          ?.filter((item) => item.category['_id'].includes(selectedType))
+          ?.map((el: any) => (
+            <StyleCard
+              toggleDrawerCommon={toggleDrawerCommon}
+              id={el._id}
+              title={el.title}
+              key={el._id}
+              type={el?.category?.name}
+              image={el.image}
+            />
+          ))}
       </Grid>
     </Container>
   );

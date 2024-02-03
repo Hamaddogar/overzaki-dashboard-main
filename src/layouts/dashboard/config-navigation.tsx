@@ -85,12 +85,6 @@ export function useNavData() {
           permissions: ['GET_ORDERS'],
         },
         {
-          title: t('Brands'),
-          path: paths.dashboard.brands.root,
-          icon: ICONS.integrations,
-          permissions: ['GET_BRANDS'],
-        },
-        {
           title: t('Categories'),
           path: paths.dashboard.categories.root,
           icon: ICONS.categorie,
@@ -110,8 +104,14 @@ export function useNavData() {
         },
         {
           title: t('analytics'),
-          path: paths.dashboard.general.analytics,
+
           icon: ICONS.analytics,
+          path: '',
+          children: [
+            { title: t('Sales Analytics'), path: paths.dashboard.general.analytics },
+            { title: t('Best Selling'), path: paths.dashboard.general.bestSelling },
+            { title: t('Branch'), path: paths.dashboard.user.list },
+          ],
           permissions: ['GET_ORDERS'],
         },
         {
