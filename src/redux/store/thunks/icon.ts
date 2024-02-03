@@ -57,10 +57,21 @@ export const getIconCategoryById = createAsyncThunk('icon/delete', async (id: an
 export const editIconCategory = createAsyncThunk(
   'icon/edit',
   async (payload: { id: string; data: any }) => {
+    // let headersObj = defaultConfig();
+    // headersObj.headers['Content-Type'] = 'multipart/form-data';
+    const { id, data } = payload;
+    const response = await putRequest(`${endpoints.icon.create}/${id}`, data, defaultConfig());
+
+    return response.data;
+  }
+);
+export const editIcon = createAsyncThunk(
+  'icon/edit',
+  async (payload: { id: string; data: any }) => {
     let headersObj = defaultConfig();
     headersObj.headers['Content-Type'] = 'multipart/form-data';
     const { id, data } = payload;
-    const response = await putRequest(`${endpoints.icon.create}/${id}`, data, headersObj);
+    const response = await putRequest(`${endpoints.icon.app}/${id}`, data, headersObj);
 
     return response.data;
   }

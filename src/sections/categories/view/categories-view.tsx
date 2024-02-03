@@ -273,7 +273,7 @@ export default function CategoriesView() {
       dispatch(deleteSubCategory(removeData.id)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
           // dispatch(fetchSubCategorysList(error));
-          dispatch(fetchSubCategorysList()).then((res) =>
+          dispatch(fetchSubCategorysList(error)).then((res) =>
             setSubCategoriesData(res?.payload?.data?.data)
           );
           enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
@@ -302,7 +302,7 @@ export default function CategoriesView() {
       if (response.meta.requestStatus === 'fulfilled') {
         setSubCategoriesData(null);
         // dispatch(fetchSubCategorysList(error));
-        dispatch(fetchSubCategorysList()).then((res) =>
+        dispatch(fetchSubCategorysList(error)).then((res) =>
           setSubCategoriesData(res?.payload?.data?.data)
         );
         enqueueSnackbar('Successfully Created!', { variant: 'success' });
@@ -326,7 +326,7 @@ export default function CategoriesView() {
     dispatch(editSubCategory({ subcategoryId: editSubCatId, data: FormValues })).then(
       (response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchSubCategorysList()).then((res) =>
+          dispatch(fetchSubCategorysList(error)).then((res) =>
             setSubCategoriesData(res?.payload?.data?.data)
           );
           enqueueSnackbar('Successfully Updated!', { variant: 'success' });
@@ -423,27 +423,27 @@ export default function CategoriesView() {
   // common
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'cat') {
-        setCategoryDrawer((pv) => !pv);
-        setEditCatId(id);
-        if (id) {
-          dispatch(fetchOneCategory(id));
-        } else {
-          setCategoriesData({});
-          dispatch(setCategory({}));
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'cat') {
+          setCategoryDrawer((pv) => !pv);
+          setEditCatId(id);
+          if (id) {
+            dispatch(fetchOneCategory(id));
+          } else {
+            setCategoriesData({});
+            dispatch(setCategory({}));
+          }
+        } else if (state === 'sub') {
+          setSubCategoryDrawer((pv) => !pv);
+          setEditSubCatId(id);
+          if (id) {
+            dispatch(fetchOneSubCategory(id));
+          } else {
+            setSubCategoriesData({});
+            dispatch(setSubCategory({}));
+          }
         }
-      } else if (state === 'sub') {
-        setSubCategoryDrawer((pv) => !pv);
-        setEditSubCatId(id);
-        if (id) {
-          dispatch(fetchOneSubCategory(id));
-        } else {
-          setSubCategoriesData({});
-          dispatch(setSubCategory({}));
-        }
-      }
-    };
+      };
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
       if (
@@ -515,7 +515,7 @@ export default function CategoriesView() {
     fetchData();
   }, []);
   useEffect(() => {
-    dispatch(fetchSubCategorysList()).then((res) => setSubCategoriesData(res?.payload?.data?.data));
+    dispatch(fetchSubCategorysList(error)).then((res) => setSubCategoriesData(res?.payload?.data?.data));
   }, []);
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -548,18 +548,18 @@ export default function CategoriesView() {
                 sx={
                   activeCategory === 'main'
                     ? {
-                        borderRadius: '12px',
-                        color: '#0F1349',
-                        backgroundColor: '#FFFFFF',
-                        boxShadow: '0px 6px 20px #00000033',
-                        '&:hover': { backgroundColor: '#FFFFFF' },
-                      }
+                      borderRadius: '12px',
+                      color: '#0F1349',
+                      backgroundColor: '#FFFFFF',
+                      boxShadow: '0px 6px 20px #00000033',
+                      '&:hover': { backgroundColor: '#FFFFFF' },
+                    }
                     : {
-                        borderRadius: '12px',
-                        color: '#8688A3',
-                        backgroundColor: 'background.neutral',
-                        '&:hover': { backgroundColor: 'background.neutral' },
-                      }
+                      borderRadius: '12px',
+                      color: '#8688A3',
+                      backgroundColor: 'background.neutral',
+                      '&:hover': { backgroundColor: 'background.neutral' },
+                    }
                 }
               >
                 {' '}
@@ -572,18 +572,18 @@ export default function CategoriesView() {
                 sx={
                   activeCategory === 'sub'
                     ? {
-                        borderRadius: '12px',
-                        color: '#0F1349',
-                        backgroundColor: '#FFFFFF',
-                        boxShadow: '0px 6px 20px #00000033',
-                        '&:hover': { backgroundColor: '#FFFFFF' },
-                      }
+                      borderRadius: '12px',
+                      color: '#0F1349',
+                      backgroundColor: '#FFFFFF',
+                      boxShadow: '0px 6px 20px #00000033',
+                      '&:hover': { backgroundColor: '#FFFFFF' },
+                    }
                     : {
-                        borderRadius: '12px',
-                        color: '#8688A3',
-                        backgroundColor: 'background.neutral',
-                        '&:hover': { backgroundColor: '#FFFFFF' },
-                      }
+                      borderRadius: '12px',
+                      color: '#8688A3',
+                      backgroundColor: 'background.neutral',
+                      '&:hover': { backgroundColor: '#FFFFFF' },
+                    }
                 }
               >
                 {' '}

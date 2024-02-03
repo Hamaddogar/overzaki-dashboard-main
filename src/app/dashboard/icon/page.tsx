@@ -28,12 +28,11 @@ import { types } from 'src/sections/icons/catigories/Icon-types';
 import {
   createIcon,
   createIconCategory,
-  deleteIcon,
   deleteIconCategory,
   editIcon,
+  editIconCategory,
   fetchIconCategoryList,
   fetchIconsList,
-  getIconById,
   getIconCategoryById,
 } from 'src/redux/store/thunks/icon';
 import { useDispatch } from 'react-redux';
@@ -95,7 +94,7 @@ const page = () => {
   } = methods;
 
   const [updateIcon, { isSuccess }] = useUpdateIconMutation();
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (data: any) => {
     console.log(data);
     if (editId) {
       try {
@@ -107,7 +106,7 @@ const page = () => {
       try {
         const formData = new FormData();
         formData.append('title', data.title);
-        formData.append('category', data.category);
+        formData.append('category', data?.category);
         // formData.append('url', data.url);
         formData.append('image', iconData.image);
 
@@ -196,17 +195,22 @@ const page = () => {
     );
   };
   const handleEditPost = () => {
-    dispatch(editIcon({ id: editCategoryId, data: iconCategoryData })).then((response: any) => {
-      if (response.meta.requestStatus === 'fulfilled') {
-        dispatch(fetchIconCategoryList()).then((response: any) =>
-          setIconCategories(response?.payload?.data)
-        );
-        setIconCategoryDrawer(false);
-        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
-      } else {
-        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
-      }
-    });
+    const formData = new FormData();
+    formData.append('name', iconCategoryData.name);
+
+    if (editCategoryId) {
+      dispatch(editIconCategory({ id: editCategoryId, data: formData })).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          dispatch(fetchIconCategoryList()).then((response: any) =>
+            setIconCategories(response?.payload?.data)
+          );
+          setIconCategoryDrawer(false);
+          enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    }
   };
   const handleCreateIcon = () => {
     try {
@@ -232,7 +236,26 @@ const page = () => {
       reset();
     }
   };
-
+  const handleIconEdit = () => {
+    const dataToPush = new FormData();
+    // Appending fields in formData
+    dataToPush.append('category', iconData.category);
+    dataToPush.append('title', iconData.title);
+    if (typeof iconData.image !== 'string') {
+      dataToPush.append('image', iconData.image);
+    }
+    if (editId) {
+      dispatch(editIcon({ id: editId, data: dataToPush })).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+          dispatch(fetchIconsList()).then((resp) => setIconsData(resp?.payload?.data));
+          handleDrawerClose();
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    }
+  };
   return (
     <Container>
       <RoleBasedGuard permission="CREATE_PRODUCT">
@@ -302,7 +325,7 @@ const page = () => {
         >
           All
         </LoadingButton>
-        {iconCategories?.map((type: string, index: any) => (
+        {iconCategories?.map((type: any, index: any) => (
           <LoadingButton
             key={index}
             variant="soft"
@@ -312,7 +335,7 @@ const page = () => {
             {type?.name?.toUpperCase()}
             <MoreVertOutlinedIcon onClick={() => setOptionModal(type?.id)} />
             {optionModal === type?.id && (
-              <ClickAwayListener onClickAway={() => setOptionModal(null)}>
+              <ClickAwayListener onClickAway={() => setOptionModal(false)}>
                 <Box
                   sx={{
                     position: 'absolute',
@@ -359,7 +382,7 @@ const page = () => {
               color="success"
               size="large"
               loading={isSubmitting}
-              onClick={() => handleCreateIcon()}
+              onClick={editId ? () => handleIconEdit() : () => handleCreateIcon()}
               sx={{ borderRadius: '30px' }}
             >
               {editId ? 'Update' : 'Add'}
@@ -487,7 +510,7 @@ const page = () => {
               value={iconData?.category || types[0]}
               settingStateValue={handleTheme}
             >
-              {iconCategories?.map((type: string, index: any) => (
+              {iconCategories?.map((type: any, index: any) => (
                 <MenuItem key={index} value={type?.id}>
                   {type?.name}
                 </MenuItem>
@@ -560,7 +583,7 @@ const page = () => {
       </DetailsNavBar>
       <Grid container spacing={2} sx={{ padding: '16px' }}>
         {iconsData
-          ?.filter((item) => item?.category?.['_id'].includes(selectedType))
+          ?.filter((item: any) => item?.category?.['_id'].includes(selectedType))
           .map((el: any) => (
             <IconCard
               setIconData={seticonData}
