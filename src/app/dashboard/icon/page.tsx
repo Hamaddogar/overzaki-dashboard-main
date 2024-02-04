@@ -296,6 +296,11 @@ const page = () => {
   useEffect(() => {
     dispatch(fetchIconById(editId)).then((resp) => seticonData(resp?.payload));
   }, [editId]);
+  useEffect(() => {
+    dispatch(getIconCategoryById(editCategoryId)).then((res: any) =>
+      setIconCategoryData({ name: res?.payload?.name })
+    );
+  }, [editCategoryId]);
   return (
     <Container>
       <RoleBasedGuard permission="CREATE_PRODUCT">
