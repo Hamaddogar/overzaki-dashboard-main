@@ -671,7 +671,7 @@ const page = () => {
       </DetailsNavBar>
       <Grid container spacing={2} sx={{ padding: '16px' }}>
         {allStylesData
-          ?.filter((item: any) => item.category['_id'].includes(selectedType))
+          ?.filter((item: any) => item?.category?.['_id'].includes(selectedType))
           ?.map((el: any) => (
             <StyleCard
               toggleDrawerCommon={toggleDrawerCommon}
