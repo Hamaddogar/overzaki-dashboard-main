@@ -10,7 +10,7 @@ export const api = createApi({
             return headers;
         }
     }),
-    tagTypes: ['Theme', 'Style', 'Icon'],
+    tagTypes: ['Theme', 'Style', 'Icon', 'StyleCat', 'IconCat'],
     endpoints: (builder) => ({
         getThemeById: builder.query({
             query: (themeId) => `/app-theme/${themeId}`,
@@ -75,6 +75,34 @@ export const api = createApi({
             }),
             invalidatesTags: ['Style'],
         }),
+        // style categoury
+        addNewStyleCategoury: builder.mutation({
+            query: (style) => ({
+                url: '/style-category',
+                body: style,
+                method: "POST"
+            }),
+            invalidatesTags: ['StyleCat'],
+        }),
+        getAllStyleCategoury: builder.query({
+            query: () => `style-category/all`,
+            providesTags: ['StyleCat'],
+        }),
+        deleteStyleCategoury: builder.mutation({
+            query: (id) => ({
+                url: `style-category/${id}`,
+                method: "DELETE"
+            }),
+            invalidatesTags: ['StyleCat'],
+        }),
+        updateStyleCategoury: builder.mutation({
+            query: (data) => ({
+                url: `style-category/${data.id}`,
+                method: "PUT",
+                body: data.data
+            }),
+            invalidatesTags: ['StyleCat'],
+        }),
         // Icon Endpoints
         getIconById: builder.query({
             query: (iconId) => `/app-icon/${iconId}`,
@@ -107,6 +135,34 @@ export const api = createApi({
             }),
             invalidatesTags: ['Icon'],
         }),
+        // icons categoury
+        addNewIconCategoury: builder.mutation({
+            query: (style) => ({
+                url: '/icon-category',
+                body: style,
+                method: "POST"
+            }),
+            invalidatesTags: ['IconCat'],
+        }),
+        getAllIconCategoury: builder.query({
+            query: () => `icon-category/all`,
+            providesTags: ['IconCat'],
+        }),
+        deleteIconCategoury: builder.mutation({
+            query: (id) => ({
+                url: `icon-category/${id}`,
+                method: "DELETE"
+            }),
+            invalidatesTags: ['IconCat'],
+        }),
+        updateIconCategoury: builder.mutation({
+            query: (data) => ({
+                url: `icon-category/${data.id}`,
+                method: "PUT",
+                body: data.data
+            }),
+            invalidatesTags: ['IconCat'],
+        }),
         // DNS management
         setDomain: builder.mutation({
             query: (data) => ({
@@ -125,7 +181,7 @@ export const api = createApi({
         // customer management
         getCustomerAnalytics: builder.query({
             query: (data) => ({
-                url : `/customers/anyltic`,
+                url: `/customers/anyltic`,
                 headers: {
                     'x-tenant-id': data
                 }
@@ -138,22 +194,37 @@ export type Api = typeof api;
 
 
 export const {
+    // themes
     useAddNewThemeMutation,
     useGetAllThemesQuery,
     useDeleteThemeMutation,
     useGetThemeByIdQuery,
     useUpdateThemeMutation,
+    // style
     useAddNewStyleMutation,
     useGetAllStylesQuery,
     useDeleteStyleMutation,
     useGetStyleByIdQuery,
     useUpdateStyleMutation,
+    // style categoury
+    useAddNewStyleCategouryMutation,
+    useGetAllStyleCategouryQuery,
+    useDeleteStyleCategouryMutation,
+    useUpdateStyleCategouryMutation,
+    // icons
     useAddNewIconMutation,
     useGetAllIconsQuery,
     useDeleteIconMutation,
     useGetIconByIdQuery,
     useUpdateIconMutation,
+    // icons categoury
+    useAddNewIconCategouryMutation,
+    useGetAllIconCategouryQuery,
+    useDeleteIconCategouryMutation,
+    useUpdateIconCategouryMutation,
+    // DNS management
     useSetDomainMutation,
     useDomainCheckerMutation,
+    // customer management
     useGetCustomerAnalyticsQuery
 } = api;

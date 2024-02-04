@@ -426,6 +426,16 @@ export function useNavData() {
         path: paths.dashboard.icon,
         icon: ICONS.blog,
       },
+      {
+        title: t('icons categoury'),
+        path: paths.dashboard.iconCategoury,
+        icon: ICONS.blog,
+      },
+      {
+        title: t('styles categoury'),
+        path: paths.dashboard.styleCategoury,
+        icon: ICONS.blog,
+      },
     ];
 
     if (isSuperMember) {
