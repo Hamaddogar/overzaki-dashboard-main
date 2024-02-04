@@ -112,16 +112,25 @@ export const api = createApi({
             query: (data) => ({
                 url: `/zone/set_new_domain`,
                 method: 'POST',
-                body : data
+                body: data
             }),
         }),
         domainChecker: builder.mutation({
             query: (data) => ({
                 url: `/zone/domain_checker`,
                 method: 'POST',
-                body : data
+                body: data
             }),
         }),
+        // customer management
+        getCustomerAnalytics: builder.query({
+            query: (data) => ({
+                url : `/customers/anyltic`,
+                headers: {
+                    'x-tenant-id': data
+                }
+            }),
+        })
     }),
 });
 
@@ -145,5 +154,6 @@ export const {
     useGetIconByIdQuery,
     useUpdateIconMutation,
     useSetDomainMutation,
-    useDomainCheckerMutation
+    useDomainCheckerMutation,
+    useGetCustomerAnalyticsQuery
 } = api;

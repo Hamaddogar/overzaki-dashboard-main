@@ -53,7 +53,7 @@ import { useTable, getComparator } from 'src/components/table';
 import { IOrderItem, IOrderTableFilters, IOrderTableFilterValue } from 'src/types/order';
 //
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch } from 'src/redux/store/store';
+import { AppDispatch, RootState } from 'src/redux/store/store';
 
 import Label from 'src/components/label/label';
 import Iconify from 'src/components/iconify/iconify';
@@ -73,6 +73,7 @@ import {
   fetchOneCustomer,
   setCustomers,
 } from '../../../redux/store/thunks/customers';
+import { useGetCustomerAnalyticsQuery } from 'src/redux/store/services/api';
 
 
 // ----------------------------------------------------------------------
@@ -95,6 +96,9 @@ const defaultFilters: IOrderTableFilters = {
 // ----------------------------------------------------------------------
 
 export default function OrdersListView() {
+  const domain = useSelector((state: RootState) => state.selectedDomain)
+  // console.log(domain)
+  const response = useGetCustomerAnalyticsQuery(domain?.data?.domain)
   const dispatch = useDispatch<AppDispatch>();
   const pageSize = 5;
   const { enqueueSnackbar } = useSnackbar();
@@ -192,29 +196,27 @@ export default function OrdersListView() {
   // Edit customer
   useEffect(() => {
     if (customer) {
-      if (customer) {
-        const updatedData = {
-          avatar: customer.avatar,
-          firstName: customer.firstName,
-          lastName: customer.lastName,
-          email: customer.email,
-          phoneNumber: customer.phoneNumber,
-          gender: customer.gender,
-          country: customer.country,
-          location: customer.location && customer.location.length > 0 ? customer.location[0] : null,
-          preferedLanguage:
-            customer.preferedLanguage && customer.preferedLanguage.length > 0
-              ? customer.preferedLanguage[0]
-              : null,
-        };
+      const updatedData = {
+        avatar: customer.avatar,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phoneNumber: customer.phoneNumber,
+        gender: customer.gender,
+        country: customer.country,
+        location: customer.location && customer.location.length > 0 ? customer.location[0] : null,
+        preferedLanguage:
+          customer.preferedLanguage && customer.preferedLanguage.length > 0
+            ? customer.preferedLanguage[0]
+            : null,
+      };
 
-        setCustomerData(updatedData);
+      setCustomerData(updatedData);
 
-        // Use setValue to update each field separately
-        Object.entries(updatedData).forEach(([fieldName, value]: any) => {
-          methods.setValue(fieldName, value);
-        });
-      }
+      // Use setValue to update each field separately
+      Object.entries(updatedData).forEach(([fieldName, value]: any) => {
+        methods.setValue(fieldName, value);
+      });
     } else {
       setCustomerData(null);
       reset();
@@ -1344,7 +1346,6 @@ export default function OrdersListView() {
                       <Box
                         sx={{
                           minHeight: '160px',
-                          backgroundColor: `rgb(245, 245, 248)`,
                           borderRadius: '16px',
                           padding: '32px',
                           backgroundImage: 'url(/raw/added.svg)',
@@ -1360,7 +1361,7 @@ export default function OrdersListView() {
                           Total Customers
                         </Typography>
                         <Typography component="h4" variant="h2">
-                          1,136
+                          {response?.data?.data?.totalUserCount}
                         </Typography>
                         <Typography
                           component="p"
@@ -1376,7 +1377,6 @@ export default function OrdersListView() {
                       <Box
                         sx={{
                           minHeight: '160px',
-                          backgroundColor: `rgb(245, 245, 248)`,
                           borderRadius: '16px',
                           padding: '32px',
                           backgroundImage: 'url(/raw/addedd.svg)',
@@ -1413,7 +1413,6 @@ export default function OrdersListView() {
                           alignItems: 'center',
                           justifyContent: 'space-between',
                           minHeight: '160px',
-                          backgroundColor: `rgb(252, 246, 225)`,
                           borderRadius: '16px',
                           padding: '32px',
                           textAlign: 'center',
@@ -1426,7 +1425,7 @@ export default function OrdersListView() {
                             variant="subtitle2"
                             sx={{ fontSize: '1rem', fontWeight: 800 }}
                           >
-                            136
+                            {response?.data?.data?.Super}
                           </Typography>
                           <Typography
                             component="p"
@@ -1457,7 +1456,6 @@ export default function OrdersListView() {
                           alignItems: 'center',
                           justifyContent: 'space-between',
                           minHeight: '160px',
-                          backgroundColor: `rgb(245, 243, 255)`,
                           borderRadius: '16px',
                           padding: '32px',
                           textAlign: 'center',
@@ -1470,7 +1468,7 @@ export default function OrdersListView() {
                             variant="subtitle2"
                             sx={{ fontSize: '1rem', fontWeight: 800 }}
                           >
-                            56
+                            {response?.data?.data?.Loyal}
                           </Typography>
                           <Typography
                             component="p"
@@ -1501,7 +1499,6 @@ export default function OrdersListView() {
                           alignItems: 'center',
                           justifyContent: 'space-between',
                           minHeight: '160px',
-                          backgroundColor: `rgb(255, 231, 238)`,
                           borderRadius: '16px',
                           padding: '32px',
                           textAlign: 'center',
@@ -1514,7 +1511,8 @@ export default function OrdersListView() {
                             variant="subtitle2"
                             sx={{ fontSize: '1rem', fontWeight: 800 }}
                           >
-                            136
+                            {response?.data?.data?.NotActive}
+
                           </Typography>
                           <Typography
                             component="p"
@@ -1545,7 +1543,6 @@ export default function OrdersListView() {
                           alignItems: 'center',
                           justifyContent: 'space-between',
                           minHeight: '160px',
-                          backgroundColor: `rgb(209, 254, 240)`,
                           borderRadius: '16px',
                           padding: '32px',
                           textAlign: 'center',
@@ -1558,7 +1555,7 @@ export default function OrdersListView() {
                             variant="subtitle2"
                             sx={{ fontSize: '1rem', fontWeight: 800 }}
                           >
-                            56
+                            {response?.data?.data?.New}
                           </Typography>
                           <Typography
                             component="p"
