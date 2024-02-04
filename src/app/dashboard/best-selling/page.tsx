@@ -10,7 +10,6 @@ import BestSellingView from 'src/sections/overview/best-selling/view/best-sellin
 
 const page = () => {
   const dispatch = useDispatch<AppDispatch>();
-
   return <BestSellingView />;
 };
 

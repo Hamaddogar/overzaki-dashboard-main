@@ -179,6 +179,8 @@ const page = () => {
 
   const handleCategoryDrawerClose = () => {
     setStyleCategoryDrawer(false);
+    setEditCategoryId('');
+    setStyleCategoryData({});
   };
   const handleCreateCategory = (data: any) => {
     dispatch(createStyleCategory(data)).then((response: any) => {
@@ -232,6 +234,11 @@ const page = () => {
       });
     }
   };
+  async function convertImageUrlToFile(imageUrl: any) {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    return new File([blob], 'image.jpg', { type: blob.type });
+  }
 
   // Creating Icon
   const handleCreateStyle = () => {
@@ -259,14 +266,23 @@ const page = () => {
       reset();
     }
   };
+
   const handleStyleEdit = () => {
     const formData = new FormData();
     formData.append('category', styleData.category.id);
     formData.append('title', styleData.title);
     formData.append('json', styleData.json);
 
-    // Append the image file
-    formData.append('image', styleData.image);
+    if (typeof styleData.image === 'string') {
+      // Convert image URL to File object
+      const imageUrl = styleData?.image;
+      const file = convertImageUrlToFile(imageUrl).then((resp) => formData.append('image', resp));
+
+      // Append the File object to FormData
+    } else {
+      formData.append('image', styleData?.image);
+    }
+
     if (editId) {
       dispatch(editStyle({ id: editId, data: formData })).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
@@ -295,8 +311,13 @@ const page = () => {
     dispatch(fetchStyleList()).then((resp: any) => setAllStylesData(resp?.payload?.data));
   }, [allStylesData]);
   useEffect(() => {
-    dispatch(fetchStyleById(editId)).then((resp) => setstyleData(resp?.payload));
+    dispatch(fetchStyleById(editId)).then((resp: any) => setstyleData(resp?.payload));
   }, [editId]);
+  useEffect(() => {
+    dispatch(getStyleCategoryById(editCategoryId)).then((res: any) =>
+      setStyleCategoryData({ name: res?.payload?.name })
+    );
+  }, [editCategoryId]);
 
   return (
     <Container>
@@ -332,6 +353,7 @@ const page = () => {
                   onClick={() => {
                     setStyleDrawer(true);
                     setstyleData(null);
+                    setEditId('');
                   }}
                 >
                   Add New Style
@@ -353,7 +375,10 @@ const page = () => {
                   component="button"
                   variant="contained"
                   color="primary"
-                  onClick={() => setStyleCategoryDrawer(true)}
+                  onClick={() => {
+                    setStyleCategoryDrawer(true);
+                    setEditId('');
+                  }}
                 >
                   Add New Category
                 </Button>
@@ -389,6 +414,8 @@ const page = () => {
                       backgroundColor: 'black',
                       borderRadius: '12px',
                       padding: '8px',
+                      zIndex: 999,
+                      display: 'flex',
                     }}
                   >
                     <IconButton

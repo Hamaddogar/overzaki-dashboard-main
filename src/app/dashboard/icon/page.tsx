@@ -223,6 +223,12 @@ const page = () => {
       });
     }
   };
+
+  async function convertImageUrlToFile(imageUrl: any) {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    return new File([blob], 'image.jpg', { type: blob.type });
+  }
   const handleCreateIcon = () => {
     try {
       const formData = new FormData();
@@ -252,8 +258,16 @@ const page = () => {
     // Appending fields in formData
     dataToPush.append('category', iconData.category.id);
     dataToPush.append('title', iconData.title);
-    if (typeof iconData.image !== 'string') {
-      dataToPush.append('image', iconData.image);
+    if (typeof iconData?.image === 'string') {
+      // Convert image URL to File object
+      const imageUrl = iconData?.image;
+      const file = convertImageUrlToFile(imageUrl).then((resp: any) =>
+        dataToPush.append('image', resp)
+      );
+
+      // Append the File object to FormData
+    } else {
+      dataToPush.append('image', iconData?.image);
     }
     if (editId) {
       dispatch(editIcon({ id: editId, data: dataToPush })).then((response: any) => {
@@ -337,7 +351,10 @@ const page = () => {
                   component="button"
                   variant="contained"
                   color="primary"
-                  onClick={() => setIconCategoryDrawer(true)}
+                  onClick={() => {
+                    setIconCategoryDrawer(true);
+                    setIconCategoryData({ name: '' });
+                  }}
                 >
                   Add New Category
                 </Button>
@@ -372,15 +389,9 @@ const page = () => {
                     borderRadius: '12px',
                     padding: '8px',
                     zIndex: 999,
+                    display: 'flex',
                   }}
                 >
-                  {/* <Typography
-                    onClick={() => handleCategoryDelete(type?.id)}
-                    component="p"
-                    noWrap
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                  > */}
                   <IconButton
                     onClick={() => handleCategoryDelete(type?.id)}
                     aria-label="delete"
@@ -389,18 +400,9 @@ const page = () => {
                     <DeleteIcon />
                   </IconButton>
 
-                  {/* <Typography
-                    component="p"
-                    noWrap
-                    onClick={() => handleEdit(type?.id)}
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                  >
-                    Edit */}
                   <IconButton aria-label="edit" size="large" onClick={() => handleEdit(type?.id)}>
                     <EditIcon />
                   </IconButton>
-                  {/* </Typography> */}
                 </Box>
               </ClickAwayListener>
             )}
