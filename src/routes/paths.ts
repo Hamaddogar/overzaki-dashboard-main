@@ -103,6 +103,7 @@ export const paths = {
     fileManager: `${ROOTS.DASHBOARD}/file-manager`,
     permission: `${ROOTS.DASHBOARD}/permission`,
     theme: `${ROOTS.DASHBOARD}/theme`,
+    brand: `${ROOTS.DASHBOARD}/brand`,
     icon: `${ROOTS.DASHBOARD}/icon`,
     style: `${ROOTS.DASHBOARD}/style`,
     general: {

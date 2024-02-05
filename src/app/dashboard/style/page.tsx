@@ -33,6 +33,7 @@ import { UploadBox } from 'src/components/upload';
 import {
   createStyle,
   createStyleCategory,
+  deleteStyleById,
   deleteStyleCategory,
   editStyle,
   editStyleCategory,
@@ -235,9 +236,16 @@ const page = () => {
     }
   };
   async function convertImageUrlToFile(imageUrl: any) {
-    const response = await fetch(imageUrl);
-    const blob = await response.blob();
-    return new File([blob], 'image.jpg', { type: blob.type });
+    // Create a Blob from the image URL
+    const blob = await fetch(imageUrl).then((response) => response.blob());
+
+    // Extract the filename from the URL or use a default name
+    const filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1) || 'image.jpg';
+
+    // Create a File object from the Blob
+    const file = new File([blob], filename, { type: blob.type });
+
+    return file;
   }
 
   // Creating Icon
@@ -297,6 +305,18 @@ const page = () => {
       });
     }
   };
+  const handleStyleDelete = (id: any) => {
+    dispatch(deleteStyleById(id)).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        dispatch(fetchStyleList()).then((response: any) =>
+          setAllStylesData(response?.payload?.data)
+        );
+        enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  };
   useEffect(() => {
     dispatch(fetchStyleList()).then((resp: any) => setAllStylesData(resp?.payload?.data));
   }, []);
@@ -307,9 +327,9 @@ const page = () => {
       setEditId('');
     }
   }, [styleDrawer]);
-  useEffect(() => {
-    dispatch(fetchStyleList()).then((resp: any) => setAllStylesData(resp?.payload?.data));
-  }, [allStylesData]);
+  // useEffect(() => {
+  //   dispatch(fetchStyleList()).then((resp: any) => setAllStylesData(resp?.payload?.data));
+  // }, [allStylesData]);
   useEffect(() => {
     dispatch(fetchStyleById(editId)).then((resp: any) => setstyleData(resp?.payload));
   }, [editId]);
@@ -671,9 +691,10 @@ const page = () => {
       </DetailsNavBar>
       <Grid container spacing={2} sx={{ padding: '16px' }}>
         {allStylesData
-          ?.filter((item: any) => item.category['_id'].includes(selectedType))
+          ?.filter((item: any) => item?.category?.['_id']?.includes(selectedType))
           ?.map((el: any) => (
             <StyleCard
+              handleStyleDelete={handleStyleDelete}
               toggleDrawerCommon={toggleDrawerCommon}
               id={el._id}
               title={el.title}

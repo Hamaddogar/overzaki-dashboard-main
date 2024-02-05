@@ -8,13 +8,10 @@ import { useRouter } from 'next/navigation';
 import { useDeleteStyleMutation } from 'src/redux/store/services/api';
 import { paths } from 'src/routes/paths';
 
-const StyleCard = ({ title, type, image, id, toggleDrawerCommon }: any) => {
+const StyleCard = ({ title, type, image, id, toggleDrawerCommon, handleStyleDelete }: any) => {
   const router = useRouter();
   const [deleteStyleWithId] = useDeleteStyleMutation();
 
-  const deleteStyle = async () => {
-    await deleteStyleWithId(id).unwrap();
-  };
   const handleEdit = (id: any) => {
     toggleDrawerCommon(id);
   };
@@ -66,7 +63,7 @@ const StyleCard = ({ title, type, image, id, toggleDrawerCommon }: any) => {
           <IconButton aria-label="edit" size="large" onClick={() => handleEdit(id)}>
             <EditIcon />
           </IconButton>
-          <IconButton aria-label="delete" size="large" onClick={deleteStyle}>
+          <IconButton aria-label="delete" size="large" onClick={() => handleStyleDelete(id)}>
             <DeleteIcon />
           </IconButton>
           {/* <IconButton aria-label="delete" size="large">

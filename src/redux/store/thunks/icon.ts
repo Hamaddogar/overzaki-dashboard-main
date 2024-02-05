@@ -80,6 +80,10 @@ export const fetchIconById = createAsyncThunk('icon/fetchbyid', async (id: any) 
   const response = await getRequest(`${endpoints.icon.app}/${id}`, defaultConfig());
   return response.data;
 });
+export const deleteIconById = createAsyncThunk('icon/delete', async (id: any) => {
+  const response = await deleteRequest(`${endpoints.icon.app}/${id}`, defaultConfig());
+  return response.data;
+});
 
 const iconsSlice = createSlice({
   name: 'icons',

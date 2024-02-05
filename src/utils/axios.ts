@@ -179,6 +179,9 @@ export const endpoints = {
     create: '/style-category',
     app: '/app-style',
   },
+  theme: {
+    app: '/app-theme',
+  },
   voucher: {
     list: '/vouchers',
     search: '/voucher/search',

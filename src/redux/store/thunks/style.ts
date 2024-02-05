@@ -77,6 +77,10 @@ export const editStyle = createAsyncThunk(
     return response.data;
   }
 );
+export const deleteStyleById = createAsyncThunk('styles/delete', async (id: any) => {
+  const response = await deleteRequest(`${endpoints.style.app}/${id}`, defaultConfig());
+  return response.data;
+});
 // export const deleteStyle = createAsyncThunk(
 //   'style/edit',
 //   async (payload: { id: string; data: any }) => {

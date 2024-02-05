@@ -32,6 +32,7 @@ import { types } from 'src/sections/icons/catigories/Icon-types';
 import {
   createIcon,
   createIconCategory,
+  deleteIconById,
   deleteIconCategory,
   editIcon,
   editIconCategory,
@@ -59,6 +60,7 @@ const page = () => {
   const [iconCategories, setIconCategories] = useState([]);
   const [iconCategoryData, setIconCategoryData] = useState({ name: '' });
   const [iconsData, setIconsData] = useState([{}]);
+  const [toDeleteId, setToDeleteId] = useState('');
   const ProductSchema = Yup.object().shape({
     title: Yup.string().required(),
     type: Yup.string().required(),
@@ -225,9 +227,17 @@ const page = () => {
   };
 
   async function convertImageUrlToFile(imageUrl: any) {
-    const response = await fetch(imageUrl);
-    const blob = await response.blob();
-    return new File([blob], 'image.jpg', { type: blob.type });
+    try {
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image. Status: ${response.status}`);
+      }
+      const blob = await response.blob();
+      return new File([blob], 'image.jpg', { type: blob.type });
+    } catch (error) {
+      console.error('Error fetching image:', error.message);
+      throw error; // Re-throw the error to be handled where the function is called
+    }
   }
   const handleCreateIcon = () => {
     try {
@@ -283,19 +293,35 @@ const page = () => {
       });
     }
   };
+  // Delete Icon
+  const handleIconDelete = (id: any) => {
+    dispatch(deleteIconById(id)).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        dispatch(fetchIconsList()).then((response: any) => setIconsData(response?.payload?.data));
+        enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  };
 
   // Delete Icon
-  const [toDeleteId, setToDeleteId] = useState('');
+
   // console.log(iconsData);
   // const delIcon = () => {
   //   deleteIcon(toDeleteId).unwrap();
   // };
-  useEffect(() => {
-    dispatch(fetchIconsList()).then((resp) => setIconsData(resp?.payload?.data));
-  }, [iconsData]);
+  // useEffect(() => {
+  //   dispatch(fetchIconsList()).then((resp) => setIconsData(resp?.payload?.data));
+  // }, []);
   useEffect(() => {
     dispatch(fetchIconById(editId)).then((resp) => seticonData(resp?.payload));
   }, [editId]);
+  useEffect(() => {
+    dispatch(getIconCategoryById(editCategoryId)).then((res: any) =>
+      setIconCategoryData({ name: res?.payload?.name })
+    );
+  }, [editCategoryId]);
   return (
     <Container>
       <RoleBasedGuard permission="CREATE_PRODUCT">
@@ -552,7 +578,7 @@ const page = () => {
                 seticonData((prev: any) => ({
                   ...prev,
                   category: {
-                    ...prev.category,
+                    ...prev?.category,
                     id: selectedCategoryId,
                   },
                 }));
@@ -633,13 +659,11 @@ const page = () => {
       </DetailsNavBar>
       <Grid container spacing={2} sx={{ padding: '16px' }}>
         {iconsData
-          ?.filter((item: any) => item?.category?.['_id'].includes(selectedType))
+          ?.filter((item: any) => item?.category?.['_id']?.includes(selectedType))
           .map((el: any) => (
             <IconCard
-              // delIcon={delIcon}
               setIconData={seticonData}
-              setToDeleteId={setToDeleteId}
-              // setEditId={setEditId}
+              handleIconDelete={handleIconDelete}
               toggleDrawerCommon={toggleDrawerCommon}
               key={el._id}
               id={el._id}

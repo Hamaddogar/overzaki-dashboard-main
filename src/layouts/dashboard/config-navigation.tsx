@@ -97,6 +97,11 @@ export function useNavData() {
           permissions: ['GET_PRODUCTS'],
         },
         {
+          title: t('Brand'),
+          path: paths.dashboard.brand,
+          icon: ICONS.job,
+        },
+        {
           title: t('Customers'),
           path: paths.dashboard.customers.root,
           icon: ICONS.customers,
@@ -136,6 +141,7 @@ export function useNavData() {
           path: paths.dashboard.deliveryPickup.root,
           icon: ICONS.deliverypickup,
         },
+
         {
           title: t('Integrations'),
           path: paths.dashboard.integrations.root,
@@ -156,6 +162,7 @@ export function useNavData() {
           path: paths.dashboard.roles.root,
           icon: ICONS.job,
         },
+
         // {
         //   title: t('ecommerce'),
         //   path: paths.dashboard.general.ecommerce,
@@ -412,19 +419,52 @@ export function useNavData() {
 
     const additionalItems = [
       {
-        title: t('theme'),
-        path: paths.dashboard.theme,
-        icon: ICONS.blog,
+        title: t('Web Theme'),
+
+        icon: ICONS.analytics,
+        path: '',
+        children: [
+          {
+            title: t('theme'),
+            path: paths.dashboard.theme,
+            icon: ICONS.blog,
+          },
+          {
+            title: t('style'),
+            path: paths.dashboard.style,
+            icon: ICONS.blog,
+          },
+          {
+            title: t('icons'),
+            path: paths.dashboard.icon,
+            icon: ICONS.blog,
+          },
+        ],
+        permissions: ['GET_ORDERS'],
       },
       {
-        title: t('style'),
-        path: paths.dashboard.style,
-        icon: ICONS.blog,
-      },
-      {
-        title: t('icons'),
-        path: paths.dashboard.icon,
-        icon: ICONS.blog,
+        title: t('Mobile Theme'),
+
+        icon: ICONS.analytics,
+        path: '',
+        children: [
+          {
+            title: t('theme'),
+            path: paths.dashboard.theme,
+            icon: ICONS.blog,
+          },
+          {
+            title: t('style'),
+            path: paths.dashboard.style,
+            icon: ICONS.blog,
+          },
+          {
+            title: t('icons'),
+            path: paths.dashboard.icon,
+            icon: ICONS.blog,
+          },
+        ],
+        permissions: ['GET_ORDERS'],
       },
     ];
 
