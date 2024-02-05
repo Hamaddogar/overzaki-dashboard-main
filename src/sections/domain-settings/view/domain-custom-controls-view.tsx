@@ -17,6 +17,7 @@ import { RootState } from 'src/redux/store/store';
 import Link from '@mui/material/Link';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useDomainCheckerMutation } from 'src/redux/store/services/api';
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
 
 // ----------------------------------------------------------------------
@@ -24,7 +25,7 @@ import { useDomainCheckerMutation } from 'src/redux/store/services/api';
 export default function CustomDomainControls() {
   const selectedDomain = useSelector((state: RootState) => state.selectedDomain.data)
   const settings = useSettingsContext();
-  const [checkDomain , response] = useDomainCheckerMutation()
+  const [checkDomain, response] = useDomainCheckerMutation<any>()
   const handleRefresh = async () => {
     await checkDomain({
       builderId: selectedDomain._id
@@ -193,7 +194,15 @@ export default function CustomDomainControls() {
           </Box>
         </Stack>
       </Paper>
-      <Card sx={{ borderRadius: '16px', display: 'flex', justifyContent: 'space-between' , my:'16px' , flexWrap:'wrap'}}>
+      <Card sx={{
+        border: '1px solid',
+        borderColor: response.isError ? 'red' : (response.isSuccess ? 'green' : 'transparent'),
+        borderRadius: '16px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        my: '16px',
+        flexWrap: 'wrap'
+      }}>
         <CardContent>
           <Typography variant="h5" component="div">
             {selectedDomain?.domain}
@@ -208,6 +217,9 @@ export default function CustomDomainControls() {
             <Link href="" underline="hover">
               Learn More
             </Link>
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 1.5 }}>
+            {response.isError && response?.error?.data?.message as any}
           </Typography>
         </CardContent>
         <CardActions disableSpacing>

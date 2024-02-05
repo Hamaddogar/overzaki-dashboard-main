@@ -26,11 +26,13 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import FormProvider from 'src/components/hook-form/form-provider';
 import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
+import { useRouter } from 'next/navigation';
 
 
 // ----------------------------------------------------------------------
 
 export default function CustomDomainView() {
+  const router = useRouter()
   const [addDomain, response] = useSetDomainMutation()
   const settings = useSettingsContext();
   const [open, setOpen] = React.useState(false);
@@ -39,7 +41,7 @@ export default function CustomDomainView() {
   const { copy } = useCopyToClipboard();
 
   React.useEffect(() => {
-    response.isError && setOpen(true)
+    response.isSuccess && setOpen(true)
   }, [response])
 
   const domainSchema = Yup.object().shape({
@@ -165,36 +167,27 @@ export default function CustomDomainView() {
             {/* New Paragraphs and Buttons */}
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: '20px' }}>
               {/* First Paragraph and Button */}
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: '10px' }}>
-                <Typography component='p' variant="body1" sx={{ mr: '10px' }}>
-                  Your first paragraph text.
-                </Typography>
-                <Button variant='outlined' size='small' onClick={()=> copy('hello world')}>
-                  Copy
-                </Button>
-              </Box>
 
               {/* Second Paragraph and Button */}
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: '10px' }}>
+              {response.data?.data?.nameservers?.map((el:string) => <Box sx={{ display: 'flex', alignItems: 'center', mb: '10px' }}>
                 <Typography component='p' variant="body1" sx={{ mr: '10px' }}>
-                  Your second paragraph text.
+                  {el}
                 </Typography>
-                <Button variant='outlined' size='small' onClick={()=> copy('hello world')}>
+                <Button variant='outlined' size='small' onClick={() => copy(el)}>
                   Copy
                 </Button>
-              </Box>
+              </Box>)}
             </Box>
 
             <Box mt="20px">
-              <Linker path={paths.dashboard.domain.custom_controls} width="100%">
                 <Button variant='contained' size='large' color='primary' fullWidth sx={{
                   color: '#0F1349',
                   borderRadius: '30px',
-                  boxShadow: '0px 6px 20px #1BFCB633'
-                }} onClick={handleToggle}>
+                  boxShadow: '0px 6px 20px #1BFCB633',
+                  width: '100%'
+                }} onClick={()=> router.push(paths.dashboard.domain.custom_controls)}>
                   Go To Check Your domain
                 </Button>
-              </Linker>
             </Box>
           </Box>
         }
