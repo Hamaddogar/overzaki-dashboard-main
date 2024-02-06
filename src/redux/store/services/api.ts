@@ -178,6 +178,30 @@ export const api = createApi({
                 body: data
             }),
         }),
+        checkDomainValidation: builder.mutation({
+            query: (data) => ({
+                url: `/domain-managment/check_availability`,
+                method: 'POST',
+                headers : {
+                    'x-tenant-id': data.tanant_id
+                },
+                body: {
+                    domain: data.domain
+                }
+            }),
+        }),
+        payDomain: builder.mutation({
+            query: (data) => ({
+                url: `/zone/init_purchase_domain`,
+                method: 'POST',
+                body: data
+            }),
+        }),
+        getLastDomain: builder.query({
+            query: (builderId) => ({
+                url: `/zone/builder/${builderId}`,
+            }),
+        }),
         // customer management
         getCustomerAnalytics: builder.query({
             query: (data) => ({
@@ -225,6 +249,9 @@ export const {
     // DNS management
     useSetDomainMutation,
     useDomainCheckerMutation,
+    useGetLastDomainQuery,
+    useCheckDomainValidationMutation,
+    usePayDomainMutation,
     // customer management
     useGetCustomerAnalyticsQuery
 } = api;

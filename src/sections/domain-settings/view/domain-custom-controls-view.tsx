@@ -16,8 +16,10 @@ import { useSelector } from 'react-redux';
 import { RootState } from 'src/redux/store/store';
 import Link from '@mui/material/Link';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { useDomainCheckerMutation } from 'src/redux/store/services/api';
+import { useDomainCheckerMutation, useGetLastDomainQuery } from 'src/redux/store/services/api';
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import { useEffect } from 'react';
+import { useSnackbar } from 'notistack';
 
 
 // ----------------------------------------------------------------------
@@ -26,6 +28,17 @@ export default function CustomDomainControls() {
   const selectedDomain = useSelector((state: RootState) => state.selectedDomain.data)
   const settings = useSettingsContext();
   const [checkDomain, response] = useDomainCheckerMutation<any>()
+  const lastDomain = useGetLastDomainQuery(selectedDomain?._id)
+  const { enqueueSnackbar } = useSnackbar();
+  useEffect(() => {
+    if (response.isSuccess) {
+      enqueueSnackbar('successfullay Refreshed', { variant: 'success' })
+    }
+    if (response.isError) {
+      enqueueSnackbar('This domain is not a valid domain or not registered yet.', { variant: 'error' })
+    }
+  }, [response])
+
   const handleRefresh = async () => {
     await checkDomain({
       builderId: selectedDomain._id
@@ -195,8 +208,6 @@ export default function CustomDomainControls() {
         </Stack>
       </Paper>
       <Card sx={{
-        border: '1px solid',
-        borderColor: response.isError ? 'red' : (response.isSuccess ? 'green' : 'transparent'),
         borderRadius: '16px',
         display: 'flex',
         justifyContent: 'space-between',
@@ -205,7 +216,7 @@ export default function CustomDomainControls() {
       }}>
         <CardContent>
           <Typography variant="h5" component="div">
-            {selectedDomain?.domain}
+            {lastDomain?.data?.data.newDomain}
           </Typography>
           <Typography sx={{ mb: 1.5 }} color="text.secondary">
             <Link href="" underline="hover">
@@ -217,9 +228,6 @@ export default function CustomDomainControls() {
             <Link href="" underline="hover">
               Learn More
             </Link>
-          </Typography>
-          <Typography variant="body2" sx={{ mt: 1.5 }}>
-            {response.isError && response?.error?.data?.message as any}
           </Typography>
         </CardContent>
         <CardActions disableSpacing>

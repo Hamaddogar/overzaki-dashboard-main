@@ -27,6 +27,7 @@ import * as Yup from 'yup';
 import FormProvider from 'src/components/hook-form/form-provider';
 import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
 import { useRouter } from 'next/navigation';
+import { useSnackbar } from 'notistack';
 
 
 // ----------------------------------------------------------------------
@@ -39,9 +40,16 @@ export default function CustomDomainView() {
   const [domain, setDomain] = React.useState('');
   const selectedDomain = useSelector((state: RootState) => state.selectedDomain)
   const { copy } = useCopyToClipboard();
+  const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {
-    response.isSuccess && setOpen(true)
+    if(response.isSuccess){
+      setOpen(true)
+      enqueueSnackbar('successfullay created' , {variant: 'success'})
+    }
+    if(response.isError){
+      enqueueSnackbar('please enter a valid domain' , {variant: 'error'})
+    }
   }, [response])
 
   const domainSchema = Yup.object().shape({
@@ -104,11 +112,6 @@ export default function CustomDomainView() {
               startAdornment: (
                 <InputAdornment position="start">
                   <Typography>www.</Typography>
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <Typography>.com</Typography>
                 </InputAdornment>
               ),
             }}

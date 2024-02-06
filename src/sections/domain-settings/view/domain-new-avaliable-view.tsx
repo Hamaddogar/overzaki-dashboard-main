@@ -15,17 +15,17 @@ import Typography from '@mui/material/Typography';
 import Iconify from 'src/components/iconify/iconify';
 import Linker from 'src/sections/overview/subscription-plan/link';
 import { Stack } from '@mui/system';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import { useSelector } from 'react-redux';
+import { useCheckDomainValidationMutation, usePayDomainMutation } from 'src/redux/store/services/api';
+import { useSnackbar } from 'notistack';
+import { RootState } from 'src/redux/store/store';
+import { useSearchParams } from 'next/navigation';
 // import ProductNewEditForm from '../product-new-edit-form';
 
 // ----------------------------------------------------------------------
-const avaliableDomains = [
-  "shoppiii.com",
-  "shoppi4me.net",
-  "shoppishoppi.net",
-  "onlineshoppi.com"
-]
+
 // const handleSelect = (domain: string) => (event: any) => ;
 const selectedStyle = {
   width: "400px",
@@ -55,10 +55,44 @@ const normalStyle = {
 }
 
 export default function NewDomainAvaliable() {
-  const settings = useSettingsContext();
-
-  const [selected, setSelected] = React.useState("");
+  const [selected, setSelected] = React.useState<any>(null);
   const [open, setOpen] = React.useState(false);
+  const settings = useSettingsContext();
+  const selectedDomain = useSelector((state: RootState) => state.selectedDomain.data)
+  const [checkDomainValidate, response] = useCheckDomainValidationMutation()
+  const { enqueueSnackbar } = useSnackbar();
+  const searchParams = useSearchParams()
+  const domain = searchParams.get('domain')
+  const [payDomain , payDomainResponse] = usePayDomainMutation()
+
+  useEffect(() => {
+    async function getData() {
+      await checkDomainValidate(
+        {
+          domain: domain,
+          tanant_id: selectedDomain?.domain
+        }
+      ).unwrap()
+    }
+    getData()
+  }, [selectedDomain])
+  useEffect(() => {
+    if(payDomainResponse.isError){
+      enqueueSnackbar('Cannot pay this domain right now' , {variant: "error"})
+    }
+    if(payDomainResponse.isSuccess){
+      enqueueSnackbar('Go to checkout your domain' , {variant: "success"})
+      window.location.assign(payDomainResponse.data.data.paymentId.epayUrl)
+    }
+  }, [payDomainResponse])
+
+  const handlePayDomain = async () => {
+    await payDomain({
+      "builderId": selectedDomain?._id,
+      "domain": selected.domainName,
+      "price":  selected.price,
+  }).unwrap()
+  }
 
   const handleToggle = () => {
     setOpen(pv => !pv)
@@ -77,18 +111,18 @@ export default function NewDomainAvaliable() {
 
       <Box sx={{ maxWidth: '400px', mt: '30px' }}>
         {
-          avaliableDomains.map((domain, indx) => (
+          response?.data?.data?.recommendations.map((domain:any, indx:any) => (
             <Stack direction='row' alignItems='center' justifyContent='space-between'
               key={indx}
-              sx={domain === selected ?
+              sx={domain.domainName === selected?.domainName ?
                 selectedStyle
                 :
                 normalStyle
               }
               onClick={() => setSelected(domain)}
             >
-              <Typography>{domain}</Typography>
-              {domain === selected && <Iconify style={{ transition: "all .4s" }} icon="subway:tick" color="#1BFCB6" />}
+              <Typography>{domain.domainName}</Typography>
+              {domain?.domainName === selected?.domainName && <Iconify style={{ transition: "all .4s" }} icon="subway:tick" color="#1BFCB6" />}
             </Stack>
           ))
         }
@@ -123,7 +157,7 @@ export default function NewDomainAvaliable() {
           <Linker path={paths.dashboard.domain.root} width='100%'>
             <Button fullWidth variant='contained' size='large' sx={{ bgcolor: '#F0F0F4', color: '#8688A3', borderRadius: '30px' }}>Cancel</Button>
           </Linker>
-          <Button onClick={handleToggle} fullWidth variant='contained' color='primary' size='large' sx={{ color: '#0F1349', borderRadius: '30px' }}>Confirm</Button>
+          <Button onClick={handlePayDomain} fullWidth variant='contained' color='primary' disabled={!selected} size='large' sx={{ color: '#0F1349', borderRadius: '30px' }}>Confirm</Button>
         </Box>
       </Box>
 
