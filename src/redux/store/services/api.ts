@@ -166,7 +166,7 @@ export const api = createApi({
         // DNS management
         setDomain: builder.mutation({
             query: (data) => ({
-                url: `http://143.244.149.197/api/zone/set_new_domain`,
+                url: `/zone/set_new_domain`,
                 method: 'POST',
                 body: data
             }),
