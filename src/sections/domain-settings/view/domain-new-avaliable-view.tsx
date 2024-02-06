@@ -63,7 +63,7 @@ export default function NewDomainAvaliable() {
   const { enqueueSnackbar } = useSnackbar();
   const searchParams = useSearchParams()
   const domain = searchParams.get('domain')
-  const [payDomain , payDomainResponse] = usePayDomainMutation()
+  const [payDomain, payDomainResponse] = usePayDomainMutation()
 
   useEffect(() => {
     async function getData() {
@@ -77,11 +77,11 @@ export default function NewDomainAvaliable() {
     getData()
   }, [selectedDomain])
   useEffect(() => {
-    if(payDomainResponse.isError){
-      enqueueSnackbar('Cannot pay this domain right now' , {variant: "error"})
+    if (payDomainResponse.isError) {
+      enqueueSnackbar('Cannot pay this domain right now', { variant: "error" })
     }
-    if(payDomainResponse.isSuccess){
-      enqueueSnackbar('Go to checkout your domain' , {variant: "success"})
+    if (payDomainResponse.isSuccess) {
+      enqueueSnackbar('Go to checkout your domain', { variant: "success" })
       window.location.assign(payDomainResponse.data.data.paymentId.epayUrl)
     }
   }, [payDomainResponse])
@@ -90,8 +90,8 @@ export default function NewDomainAvaliable() {
     await payDomain({
       "builderId": selectedDomain?._id,
       "domain": selected.domainName,
-      "price":  selected.price,
-  }).unwrap()
+      "price": selected.price || selected.purchasePrice,
+    }).unwrap()
   }
 
   const handleToggle = () => {
@@ -110,8 +110,8 @@ export default function NewDomainAvaliable() {
       </Box>
 
       <Box sx={{ maxWidth: '400px', mt: '30px' }}>
-        {
-          response?.data?.data?.recommendations.map((domain:any, indx:any) => (
+        {response?.data?.data?.recommendations ?
+          response?.data?.data?.recommendations.map((domain: any, indx: any) => (
             <Stack direction='row' alignItems='center' justifyContent='space-between'
               key={indx}
               sx={domain.domainName === selected?.domainName ?
@@ -124,7 +124,19 @@ export default function NewDomainAvaliable() {
               <Typography>{domain.domainName}</Typography>
               {domain?.domainName === selected?.domainName && <Iconify style={{ transition: "all .4s" }} icon="subway:tick" color="#1BFCB6" />}
             </Stack>
-          ))
+          )) :
+          <Stack direction='row' alignItems='center' justifyContent='space-between'
+            key={1}
+            sx={response?.data?.data.domainName === selected?.domainName ?
+              selectedStyle
+              :
+              normalStyle
+            }
+            onClick={() => setSelected(response?.data?.data)}
+          >
+            <Typography>{response?.data?.data.domainName}</Typography>
+            {response.data?.data?.domainName === selected?.domainName && <Iconify style={{ transition: "all .4s" }} icon="subway:tick" color="#1BFCB6" />}
+          </Stack>
         }
 
         <Typography sx={{
