@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useDeleteThemeMutation } from 'src/redux/store/services/api';
 import { paths } from 'src/routes/paths';
 
-const ThemeCard = ({ title, type, image, id, toggleDrawerCommon }: any) => {
+const ThemeCard = ({ title, type, image, id, toggleDrawerCommon, handleThemeDelete }: any) => {
   const router = useRouter();
   const [deleteThemeWithID] = useDeleteThemeMutation();
 
@@ -62,15 +62,15 @@ const ThemeCard = ({ title, type, image, id, toggleDrawerCommon }: any) => {
           <IconButton aria-label="edit" size="large" onClick={() => toggleDrawerCommon(id)}>
             <EditIcon />
           </IconButton>
-          <IconButton aria-label="delete" size="large" onClick={deleteTheme}>
+          <IconButton aria-label="delete" size="large" onClick={() => handleThemeDelete(id)}>
             <DeleteIcon />
           </IconButton>
-          <IconButton aria-label="delete" size="large">
+          {/* <IconButton aria-label="delete" size="large">
             <ColorLensIcon />
           </IconButton>
           <IconButton aria-label="delete" size="large">
             <InsertEmoticonIcon />
-          </IconButton>
+          </IconButton> */}
         </Box>
       </Box>
     </Card>

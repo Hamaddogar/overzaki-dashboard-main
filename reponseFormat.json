@@ -1,0 +1,78 @@
+{
+        "series": [
+            {
+                "data": [
+                    {
+                        "name": {
+                            "en": "clothes",
+                            "ar": "البسة",
+                            "fr": "clothes",
+                            "tr": "clothes",
+                            "es": "clothes"
+                        },
+                        "sellPrice": [
+                            {
+                                "month": 7,
+                                "sellPrice": 200
+                            }
+                        ]
+                    },
+                    {
+                        "name": {
+                            "en": "Games",
+                            "ar": "العاب",
+                            "fr": "games",
+                            "tr": "game in tr",
+                            "es": "game in es"
+                        },
+                        "sellPrice": [
+                            {
+                                "month": 12,
+                                "sellPrice": 100
+                            }
+                        ]
+                    }
+                ],
+                "year": 2023
+            },
+            {
+                "data": [
+                    {
+                        "name": {
+                            "en": "Games",
+                            "ar": "العاب",
+                            "fr": "games",
+                            "tr": "game in tr",
+                            "es": "game in es"
+                        },
+                        "sellPrice": [
+                            {
+                                "month": 1,
+                                "sellPrice": 200
+                            },
+                            {
+                                "month": 2,
+                                "sellPrice": 100
+                            }
+                        ]
+                    },
+                    {
+                        "name": {
+                            "en": "clothes",
+                            "ar": "البسة",
+                            "fr": "clothes",
+                            "tr": "clothes",
+                            "es": "clothes"
+                        },
+                        "sellPrice": [
+                            {
+                                "month": 1,
+                                "sellPrice": 800
+                            }
+                        ]
+                    }
+                ],
+                "year": 2024
+            }
+        ]
+    }

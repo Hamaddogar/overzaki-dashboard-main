@@ -12,9 +12,25 @@ import {
 } from 'src/redux/store/services/api';
 import { paths } from 'src/routes/paths';
 
-const IconCard = ({ title, type, image, id, toggleDrawerCommon, setIconData }: any) => {
+const IconCard = ({
+  title,
+  type,
+  image,
+  id,
+  toggleDrawerCommon,
+  setIconData,
+
+  handleIconDelete,
+}: any) => {
   const router = useRouter();
-  const [deleteIconWithId] = useDeleteIconMutation();
+  const [deleteIcon] = useDeleteIconMutation();
+  const delIcon = async () => {
+    await deleteIcon(id).unwrap();
+  };
+  // const handleDelete = async () => {
+  //   setToDeleteId(id);
+  //   await delIcon();
+  // };
 
   const handleEdit = (id: any) => {
     toggleDrawerCommon(id);
@@ -23,15 +39,16 @@ const IconCard = ({ title, type, image, id, toggleDrawerCommon, setIconData }: a
     <Card
       sx={{
         display: 'flex',
-        maxWidth: 500,
-        m: 2,
+        maxWidth: 400,
+        m: 1,
+        alignItems: 'center',
         boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.06)',
         borderRadius: '20px',
       }}
     >
       <CardMedia
         component="img"
-        sx={{ width: 150, height: 150, borderRadius: '10px', margin: '20px' }}
+        sx={{ width: 60, height: 60, borderRadius: '10px', margin: '10px' }}
         image={image}
         alt={`${title}`}
       />
@@ -39,12 +56,12 @@ const IconCard = ({ title, type, image, id, toggleDrawerCommon, setIconData }: a
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'space-between',
+
           width: '100%',
         }}
       >
         <CardContent>
-          <Typography gutterBottom variant="h6" component="div">
+          <Typography gutterBottom component="div">
             {title}
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -56,25 +73,25 @@ const IconCard = ({ title, type, image, id, toggleDrawerCommon, setIconData }: a
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            paddingRight: '16px',
-            paddingBottom: '16px',
+            paddingRight: '8px',
+            paddingBottom: '8px',
             marginLeft: 'auto',
             flexWrap: 'wrap',
           }}
         >
           <Switch checked={true} />
-          <IconButton aria-label="edit" size="large" onClick={() => handleEdit(id)}>
+          <IconButton aria-label="edit" size="small" onClick={() => handleEdit(id)}>
             <EditIcon />
           </IconButton>
-          {/* <IconButton aria-label="delete" size="large" onClick={deleteIcon}>
-                        <DeleteIcon />
-                    </IconButton> */}
-          <IconButton aria-label="delete" size="large">
+          <IconButton aria-label="delete" size="small" onClick={() => handleIconDelete(id)}>
+            <DeleteIcon />
+          </IconButton>
+          {/* <IconButton aria-label="delete" size="large">
             <ColorLensIcon />
           </IconButton>
           <IconButton aria-label="delete" size="large">
             <InsertEmoticonIcon />
-          </IconButton>
+          </IconButton> */}
         </Box>
       </Box>
     </Card>

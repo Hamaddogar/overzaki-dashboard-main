@@ -26,13 +26,27 @@ import Iconify from 'src/components/iconify/iconify';
 import { UploadBox } from 'src/components/upload';
 import { types } from 'src/sections/themes/catigories/theme-types';
 import ThemeCard from 'src/sections/themes/view/themeCard';
+import { useDispatch } from 'react-redux';
+import {
+  createTheme,
+  deleteThemeById,
+  editTheme,
+  fetchThemeById,
+  fetchThemeList,
+} from 'src/redux/store/thunks/theme';
+import { AppDispatch } from 'src/redux/store/store';
+import { enqueueSnackbar } from 'notistack';
 
 const page = () => {
-  const [selectedType, setSelectedType] = useState<any>(null);
+  const [selectedType, setSelectedType] = useState<any>('');
+  const [allThemesData, setAllThemesData] = useState<any>();
   const [addTheme] = useAddNewThemeMutation();
   const { data: allThemes } = useGetAllThemesQuery(selectedType);
   const [openDetails, setOpenDetails] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
   const [themeData, setThemeData] = useState<any>(null);
+  const [themeDrawer, setThemeDrawer] = useState(false);
+  const [editId, setEditId] = useState('');
   const ProductSchema = Yup.object().shape({
     title: Yup.string().required(),
     type: Yup.string().required(),
@@ -55,8 +69,7 @@ const page = () => {
     setOpenDetails(false);
     setThemeData(null);
   };
-  const [themeDrawer, setThemeDrawer] = useState(false);
-  const [editId, setEditId] = useState(null);
+
   const toggleDrawerCommon = (id: any) => {
     setThemeDrawer(true);
     if (id) {
@@ -79,32 +92,32 @@ const page = () => {
     formState: { isSubmitting },
   } = methods;
   const [updateTheme, { isSuccess }] = useUpdateThemeMutation();
-  const onSubmit = handleSubmit(async (data) => {
-    if (editId) {
-      try {
-        let theme = new FormData();
-        theme.append('title', data.title);
-        theme.append('type', data.type);
-        theme.append('json', data.json);
-        await updateTheme({ id: editId, theme }).unwrap();
-      } catch (error) {
-        reset();
-      }
-    } else {
-      try {
-        const newData = new FormData();
-        newData.append('title', data.title);
-        newData.append('type', data.type);
-        newData.append('json', data.json);
-        newData.append('image', themeData?.image);
-        await addTheme(newData).unwrap();
-      } catch (error) {
-        reset();
-      }
-    }
-    setThemeDrawer(false);
-    setThemeData(null);
-  });
+  // const onSubmit = handleSubmit(async (data) => {
+  //   if (editId) {
+  //     try {
+  //       let theme = new FormData();
+  //       theme.append('title', data.title);
+  //       theme.append('type', data.type);
+  //       theme.append('json', data.json);
+  //       await updateTheme({ id: editId, theme }).unwrap();
+  //     } catch (error) {
+  //       reset();
+  //     }
+  //   } else {
+  //     try {
+  //       const newData = new FormData();
+  //       newData.append('title', data.title);
+  //       newData.append('type', data.type);
+  //       newData.append('json', data.json);
+  //       newData.append('image', themeData?.image);
+  //       await addTheme(newData).unwrap();
+  //     } catch (error) {
+  //       reset();
+  //     }
+  //   }
+  //   setThemeDrawer(false);
+  //   setThemeData(null);
+  // });
   const handleAddImage = (files: any) => {
     setThemeData({
       ...themeData,
@@ -117,6 +130,112 @@ const page = () => {
       image: null,
     });
   };
+  useEffect(() => {
+    dispatch(fetchThemeList()).then((res: any) => setAllThemesData(res?.payload?.data));
+  }, []);
+  // Image string to File
+  async function convertImageUrlToFile(imageUrl: any) {
+    try {
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image. Status: ${response.status}`);
+      }
+      const blob = await response.blob();
+      return new File([blob], 'image.jpg', { type: blob.type });
+    } catch (error) {
+      console.error('Error fetching image:', error.message);
+      throw error; // Re-throw the error to be handled where the function is called
+    }
+  }
+  // Create Theme
+  const handleCreateTheme = () => {
+    try {
+      const formData = new FormData();
+      // Appending fields in formData
+      formData.append('type', themeData.type);
+      formData.append('title', themeData.title);
+      formData.append('json', themeData.json);
+      if (typeof themeData.image !== 'string') {
+        formData.append('image', themeData.image);
+      }
+      // Pushing form data to createIcon
+      dispatch(createTheme(formData)).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          // once pushing is done fetching the icons
+          dispatch(fetchThemeList()).then((res) => setAllThemesData(res?.payload?.data));
+          enqueueSnackbar('Successfully Created!', { variant: 'success' });
+          handleDrawerClose();
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    } catch (error) {
+      reset();
+    }
+  };
+  // Edit Theme
+  const handleThemeEdit = () => {
+    const dataToPush = new FormData();
+    // Appending fields in formData
+    dataToPush.append('type', themeData.type);
+    dataToPush.append('title', themeData.title);
+    dataToPush.append('json', themeData.json);
+    if (typeof themeData?.image === 'string') {
+      // Convert image URL to File object
+      const imageUrl = themeData?.image;
+      const file = convertImageUrlToFile(imageUrl).then((resp: any) =>
+        dataToPush.append('image', resp)
+      );
+
+      // Append the File object to FormData
+    } else {
+      dataToPush.append('image', themeData?.image);
+    }
+    if (editId) {
+      dispatch(editTheme({ id: editId, data: dataToPush })).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+          setThemeData({});
+          setEditId('');
+          dispatch(fetchThemeList()).then((resp) => setAllThemesData(resp?.payload?.data));
+          handleDrawerClose();
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    }
+  };
+  // Delete Theme
+  const handleThemeDelete = (id: any) => {
+    dispatch(deleteThemeById(id)).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        dispatch(fetchThemeList()).then((response: any) =>
+          setAllThemesData(response?.payload?.data)
+        );
+        enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  };
+  const onSubmit = handleSubmit(async (data) => {
+    if (editId) {
+      try {
+        handleThemeEdit();
+      } catch (error) {
+        reset();
+      }
+    } else {
+      try {
+        handleCreateTheme();
+      } catch (error) {
+        reset();
+      }
+    }
+  });
+  useEffect(() => {
+    dispatch(fetchThemeById(editId)).then((resp) => setThemeData(resp?.payload));
+  }, [editId]);
 
   return (
     <Container>
@@ -159,7 +278,7 @@ const page = () => {
       <Grid container spacing={2} sx={{ padding: '16px' }} gap={2}>
         <LoadingButton
           variant="soft"
-          onClick={() => setSelectedType(null)}
+          onClick={() => setSelectedType('')}
           color={null === selectedType ? 'success' : 'inherit'}
         >
           All
@@ -307,7 +426,7 @@ const page = () => {
               variant="subtitle2"
               sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
             >
-              type
+              Category
             </Typography>
 
             <RHFSelect
@@ -315,7 +434,7 @@ const page = () => {
               variant="filled"
               name="type"
               id="demo-simple-select2"
-              value={themeData?.type || types[0]}
+              value={themeData?.type || ''}
               settingStateValue={handleTheme}
             >
               {types.map((type: string, index: any) => (
@@ -347,15 +466,18 @@ const page = () => {
         </FormProvider>
       </DetailsNavBar>
       <Grid container spacing={2} sx={{ padding: '16px' }}>
-        {allThemes?.data?.data?.map((el: any) => (
-          <ThemeCard
-            toggleDrawerCommon={toggleDrawerCommon}
-            title={el?.title}
-            type={el.type}
-            image={el.image}
-            id={el._id}
-          />
-        ))}
+        {allThemesData
+          ?.filter((item: any) => item?.type?.includes(selectedType))
+          ?.map((el: any) => (
+            <ThemeCard
+              toggleDrawerCommon={toggleDrawerCommon}
+              handleThemeDelete={handleThemeDelete}
+              title={el?.title}
+              type={el.type}
+              image={el.image}
+              id={el._id}
+            />
+          ))}
       </Grid>
     </Container>
   );

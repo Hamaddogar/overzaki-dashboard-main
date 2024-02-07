@@ -15,6 +15,42 @@ const BestSellingView = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [bestSellingCategories, setBestSellingCategories] = useState([{}]);
   const [bestSellingItems, setBestSellingItems] = useState([{}]);
+  const sellingItems = [
+    {
+      id: '123',
+      productImage: '/raws/banner1.png',
+      productName: { en: 'Demo Product' },
+      totalOrders: 400,
+      totalSales: 200,
+      quantitySold: 300,
+    },
+    {
+      id: '323',
+      productImage: '/raws/banner1.png',
+      productName: { en: 'Demo Product 2' },
+      totalOrders: 400,
+      totalSales: 200,
+      quantitySold: 300,
+    },
+  ];
+  const sellingCategories = [
+    {
+      id: '123',
+      categoryImage: '/raws/banner1.png',
+      categoryName: { en: 'Demo Product' },
+      totalOrders: 400,
+      totalSales: 200,
+      quantitySold: 300,
+    },
+    {
+      id: '323',
+      categoryImage: '/raws/banner1.png',
+      categoryName: { en: 'Demo Product 2' },
+      totalOrders: 400,
+      totalSales: 200,
+      quantitySold: 300,
+    },
+  ];
 
   useEffect(() => {
     dispatch(fetchBestSellingItems()).then((resp) => setBestSellingItems(resp?.payload?.data));
@@ -22,134 +58,272 @@ const BestSellingView = () => {
       setBestSellingCategories(resp?.payload?.data)
     );
   }, []);
-  console.log(bestSellingItems);
+  // console.log(bestSellingItems);
   return (
     <Grid xs={12}>
       <AppHolder title="Best Selling Items">
-        {bestSellingItems?.map((item: any) => (
-          <Box sx={{ width: '250px' }} key={item.id}>
-            <Box component="img" src={item?.productImage?.[0]} alt="product-image" width="100%" />
-            <Box sx={{ width: '100%' }}>
-              <Typography component="h3">{item?.productName?.en}</Typography>
-              <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column' }}>
+        {bestSellingItems.length > 0
+          ? bestSellingItems?.map((item: any) => (
+              <Box sx={{ width: '250px' }} key={item.id}>
                 <Box
-                  sx={{
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    paddingTop: '4px',
-                    paddingBottom: '4px',
-                  }}
-                >
-                  <Typography sx={{ fontWeight: 600 }} component="h3">
-                    Total Sales
-                  </Typography>
-                  <Typography component="h3">KWD {item?.totalSales}</Typography>
-                </Box>
-                <Box
-                  sx={{
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    paddingTop: '4px',
-                    paddingBottom: '4px',
-                    borderTop: '1px solid lightgray',
-                  }}
-                >
-                  <Typography sx={{ fontWeight: 600 }} component="h3">
-                    Total Orders
-                  </Typography>
-                  <Typography component="h3">{item?.totalOrders}</Typography>
-                </Box>
-                <Box
-                  sx={{
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    paddingTop: '4px',
-                    paddingBottom: '4px',
-                    borderTop: '1px solid lightgray',
-                    borderBottom: '1px solid lightgray',
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontWeight: 600,
-                    }}
-                    component="h3"
-                  >
-                    Quantity Sold
-                  </Typography>
-                  <Typography component="h3">{item?.quantitySold}</Typography>
+                  component="img"
+                  src={item?.productImage?.[0]}
+                  alt="product-image"
+                  width="100%"
+                />
+                <Box sx={{ width: '100%' }}>
+                  <Typography component="h3">{item?.productName?.en}</Typography>
+                  <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column' }}>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        paddingTop: '4px',
+                        paddingBottom: '4px',
+                      }}
+                    >
+                      <Typography sx={{ fontWeight: 600 }} component="h3">
+                        Total Sales
+                      </Typography>
+                      <Typography component="h3">KWD {item?.totalSales}</Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        paddingTop: '4px',
+                        paddingBottom: '4px',
+                        borderTop: '1px solid lightgray',
+                      }}
+                    >
+                      <Typography sx={{ fontWeight: 600 }} component="h3">
+                        Total Orders
+                      </Typography>
+                      <Typography component="h3">{item?.totalOrders}</Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        paddingTop: '4px',
+                        paddingBottom: '4px',
+                        borderTop: '1px solid lightgray',
+                        borderBottom: '1px solid lightgray',
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontWeight: 600,
+                        }}
+                        component="h3"
+                      >
+                        Quantity Sold
+                      </Typography>
+                      <Typography component="h3">{item?.quantitySold}</Typography>
+                    </Box>
+                  </Box>
                 </Box>
               </Box>
-            </Box>
-          </Box>
-        ))}
+            ))
+          : sellingItems.map((item: any) => (
+              <Box sx={{ width: '250px' }} key={item.id}>
+                <Box component="img" src={item?.productImage} alt="product-image" width="100%" />
+                <Box sx={{ width: '100%' }}>
+                  <Typography component="h3">{item?.productName?.en}</Typography>
+                  <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column' }}>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        paddingTop: '4px',
+                        paddingBottom: '4px',
+                      }}
+                    >
+                      <Typography sx={{ fontWeight: 600 }} component="h3">
+                        Total Sales
+                      </Typography>
+                      <Typography component="h3">KWD {item?.totalSales}</Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        paddingTop: '4px',
+                        paddingBottom: '4px',
+                        borderTop: '1px solid lightgray',
+                      }}
+                    >
+                      <Typography sx={{ fontWeight: 600 }} component="h3">
+                        Total Orders
+                      </Typography>
+                      <Typography component="h3">{item?.totalOrders}</Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        paddingTop: '4px',
+                        paddingBottom: '4px',
+                        borderTop: '1px solid lightgray',
+                        borderBottom: '1px solid lightgray',
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontWeight: 600,
+                        }}
+                        component="h3"
+                      >
+                        Quantity Sold
+                      </Typography>
+                      <Typography component="h3">{item?.quantitySold}</Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+            ))}
       </AppHolder>
       {/* Best Selling Categories */}
       <AppHolder title="Best Selling Categories">
-        {bestSellingCategories?.map((category: any, i) => (
-          <Box sx={{ width: '250px' }} key={i}>
-            <Box component="img" src={category?.categoryImage} alt="product-image" width="100%" />
-            <Box sx={{ width: '100%' }}>
-              <Typography component="h3">{category?.categoryName?.en}</Typography>
-              <Box
-                sx={{
-                  display: 'flex',
-                  width: '100%',
-                  flexDirection: 'column',
-                }}
-              >
+        {bestSellingCategories?.length > 0
+          ? bestSellingCategories.map((category: any, i) => (
+              <Box sx={{ width: '250px' }} key={i}>
                 <Box
-                  sx={{
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    paddingTop: '4px',
-                    paddingBottom: '4px',
-                  }}
-                >
-                  <Typography sx={{ fontWeight: 600 }} component="h3">
-                    Total Sales
-                  </Typography>
-                  <Typography component="h3">KWD {category?.totalSales}</Typography>
-                </Box>
-                <Box
-                  sx={{
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderTop: '1px solid lightgray',
-                    paddingTop: '4px',
-                    paddingBottom: '4px',
-                  }}
-                >
-                  <Typography sx={{ fontWeight: 600 }} component="h3">
-                    Total Orders
-                  </Typography>
-                  <Typography component="h3">{category?.totalOrders}</Typography>
-                </Box>
-                <Box
-                  sx={{
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderTop: '1px solid lightgray',
-                    borderBottom: '1px solid lightgray',
-                    paddingTop: '4px',
-                    paddingBottom: '4px',
-                  }}
-                >
-                  <Typography sx={{ fontWeight: 600 }} component="h3">
-                    Quantity Sold
-                  </Typography>
-                  <Typography component="h3">{category?.quantitySold}</Typography>
+                  component="img"
+                  src={category?.categoryImage}
+                  alt="product-image"
+                  width="100%"
+                />
+                <Box sx={{ width: '100%' }}>
+                  <Typography component="h3">{category?.categoryName?.en}</Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      width: '100%',
+                      flexDirection: 'column',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        paddingTop: '4px',
+                        paddingBottom: '4px',
+                      }}
+                    >
+                      <Typography sx={{ fontWeight: 600 }} component="h3">
+                        Total Sales
+                      </Typography>
+                      <Typography component="h3">KWD {category?.totalSales}</Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        borderTop: '1px solid lightgray',
+                        paddingTop: '4px',
+                        paddingBottom: '4px',
+                      }}
+                    >
+                      <Typography sx={{ fontWeight: 600 }} component="h3">
+                        Total Orders
+                      </Typography>
+                      <Typography component="h3">{category?.totalOrders}</Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        borderTop: '1px solid lightgray',
+                        borderBottom: '1px solid lightgray',
+                        paddingTop: '4px',
+                        paddingBottom: '4px',
+                      }}
+                    >
+                      <Typography sx={{ fontWeight: 600 }} component="h3">
+                        Quantity Sold
+                      </Typography>
+                      <Typography component="h3">{category?.quantitySold}</Typography>
+                    </Box>
+                  </Box>
                 </Box>
               </Box>
-            </Box>
-          </Box>
-        ))}
+            ))
+          : sellingCategories.map((category) => (
+              <Box sx={{ width: '250px' }} key={category.id}>
+                <Box
+                  component="img"
+                  src={category?.categoryImage}
+                  alt="product-image"
+                  width="100%"
+                />
+                <Box sx={{ width: '100%' }}>
+                  <Typography component="h3">{category?.categoryName?.en}</Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      width: '100%',
+                      flexDirection: 'column',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        paddingTop: '4px',
+                        paddingBottom: '4px',
+                      }}
+                    >
+                      <Typography sx={{ fontWeight: 600 }} component="h3">
+                        Total Sales
+                      </Typography>
+                      <Typography component="h3">KWD {category?.totalSales}</Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        borderTop: '1px solid lightgray',
+                        paddingTop: '4px',
+                        paddingBottom: '4px',
+                      }}
+                    >
+                      <Typography sx={{ fontWeight: 600 }} component="h3">
+                        Total Orders
+                      </Typography>
+                      <Typography component="h3">{category?.totalOrders}</Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        borderTop: '1px solid lightgray',
+                        borderBottom: '1px solid lightgray',
+                        paddingTop: '4px',
+                        paddingBottom: '4px',
+                      }}
+                    >
+                      <Typography sx={{ fontWeight: 600 }} component="h3">
+                        Quantity Sold
+                      </Typography>
+                      <Typography component="h3">{category?.quantitySold}</Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+            ))}
       </AppHolder>
     </Grid>
   );

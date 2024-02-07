@@ -85,12 +85,6 @@ export function useNavData() {
           permissions: ['GET_ORDERS'],
         },
         {
-          title: t('Brands'),
-          path: paths.dashboard.brands.root,
-          icon: ICONS.integrations,
-          permissions: ['GET_BRANDS'],
-        },
-        {
           title: t('Categories'),
           path: paths.dashboard.categories.root,
           icon: ICONS.categorie,
@@ -103,6 +97,11 @@ export function useNavData() {
           permissions: ['GET_PRODUCTS'],
         },
         {
+          title: t('Brand'),
+          path: paths.dashboard.brand,
+          icon: ICONS.job,
+        },
+        {
           title: t('Customers'),
           path: paths.dashboard.customers.root,
           icon: ICONS.customers,
@@ -110,8 +109,14 @@ export function useNavData() {
         },
         {
           title: t('analytics'),
-          path: paths.dashboard.general.analytics,
+
           icon: ICONS.analytics,
+          path: '',
+          children: [
+            { title: t('Sales Analytics'), path: paths.dashboard.general.analytics },
+            { title: t('Best Selling'), path: paths.dashboard.general.bestSelling },
+            { title: t('Branch'), path: paths.dashboard.user.list },
+          ],
           permissions: ['GET_ORDERS'],
         },
         {
@@ -136,6 +141,7 @@ export function useNavData() {
           path: paths.dashboard.deliveryPickup.root,
           icon: ICONS.deliverypickup,
         },
+
         {
           title: t('Integrations'),
           path: paths.dashboard.integrations.root,
@@ -156,6 +162,7 @@ export function useNavData() {
           path: paths.dashboard.roles.root,
           icon: ICONS.job,
         },
+
         // {
         //   title: t('ecommerce'),
         //   path: paths.dashboard.general.ecommerce,
@@ -412,19 +419,52 @@ export function useNavData() {
 
     const additionalItems = [
       {
-        title: t('theme'),
-        path: paths.dashboard.theme,
-        icon: ICONS.blog,
+        title: t('Web Theme'),
+
+        icon: ICONS.analytics,
+        path: '',
+        children: [
+          {
+            title: t('theme'),
+            path: paths.dashboard.theme,
+            icon: ICONS.blog,
+          },
+          {
+            title: t('style'),
+            path: paths.dashboard.style,
+            icon: ICONS.blog,
+          },
+          {
+            title: t('icons'),
+            path: paths.dashboard.icon,
+            icon: ICONS.blog,
+          },
+        ],
+        permissions: ['GET_ORDERS'],
       },
       {
-        title: t('style'),
-        path: paths.dashboard.style,
-        icon: ICONS.blog,
-      },
-      {
-        title: t('icons'),
-        path: paths.dashboard.icon,
-        icon: ICONS.blog,
+        title: t('Mobile Theme'),
+
+        icon: ICONS.analytics,
+        path: '',
+        children: [
+          {
+            title: t('theme'),
+            path: paths.dashboard.theme,
+            icon: ICONS.blog,
+          },
+          {
+            title: t('style'),
+            path: paths.dashboard.style,
+            icon: ICONS.blog,
+          },
+          {
+            title: t('icons'),
+            path: paths.dashboard.icon,
+            icon: ICONS.blog,
+          },
+        ],
+        permissions: ['GET_ORDERS'],
       },
       {
         title: t('icons categoury'),
