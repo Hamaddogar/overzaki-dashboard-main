@@ -1,12 +1,13 @@
 // apiSlice.js
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { getCookie } from 'src/auth/context/jwt/utils';
 
 export const api = createApi({
     reducerPath: 'overzaki',
     baseQuery: fetchBaseQuery({
         baseUrl: 'https://www.overzaki.io/api',
         prepareHeaders: (headers, { getState }) => {
-            headers.set('Authorization', `Bearer ${sessionStorage.getItem('accessToken')}`);
+            headers.set('Authorization', `Bearer ${getCookie('accessToken')}`);
             return headers;
         }
     }),

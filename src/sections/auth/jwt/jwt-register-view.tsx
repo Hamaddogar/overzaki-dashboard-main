@@ -29,6 +29,7 @@ import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Box } from '@mui/system';
 import Image from 'next/image';
+import { setCookie } from 'src/auth/context/jwt/utils';
 // ----------------------------------------------------------------------
 
 export default function JwtRegisterView() {
@@ -85,14 +86,14 @@ export default function JwtRegisterView() {
           const { success } = result;
           // eslint-disable-next-line no-empty
           if (success) {
-            sessionStorage.setItem(
+            setCookie(
               'register_user_data',
               JSON.stringify({
                 email: data.email,
                 password: data.password,
                 firstName: data.firstName,
                 lastName: data.lastName,
-              })
+              }), 7
             );
             router.push(PATH_AFTER_REGISTER);
           }

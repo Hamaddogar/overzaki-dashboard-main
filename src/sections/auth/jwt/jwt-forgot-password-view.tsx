@@ -22,6 +22,7 @@ import { useRouter } from 'src/routes/hooks';
 import { PATH_AFTER_FORGOTPASSWORD } from 'src/config-global';
 import { useState } from 'react';
 import Alert from '@mui/material/Alert';
+import { setCookie } from 'src/auth/context/jwt/utils';
 
 // ----------------------------------------------------------------------
 
@@ -60,8 +61,7 @@ export default function JwtForgotPasswordView() {
         const { success } = result;
         // eslint-disable-next-line no-empty
         if (success) {
-          console.log("success", success);
-          sessionStorage.setItem('forgot_password_email', data.email);
+          setCookie('forgot_password_email', data.email , 7);
           router.push(PATH_AFTER_FORGOTPASSWORD);
         }
       }

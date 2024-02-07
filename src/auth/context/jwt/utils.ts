@@ -50,46 +50,80 @@ export const tokenExpired = (exp: number) => {
   expiredTimer = setTimeout(() => {
     alert('Token expired');
 
-    sessionStorage.removeItem('accessToken');
+    clearCookie("accessToken")
 
     window.location.href = paths.auth.jwt.login;
   }, timeLeft);
 };
 
 // ----------------------------------------------------------------------
+export function setCookie(key:string, value:string, expDays:number) {
+  const d = new Date();
+  d.setTime(d.getTime() + (expDays*24*60*60*1000)); // Convert expiration days to milliseconds
+  let expires = "expires="+ d.toUTCString();
+  document.cookie = key + "=" + value + ";" + expires + ";path=/";
+}
+
+export function getCookie(key:string) {
+  let name = key + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) === 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return null;
+}
+
+export function clearCookie(name:string) {
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
+
+// Assuming setCookie and clearCookie are defined as shown in previous examples
 
 export const setSession = (accessToken: string | null) => {
   if (accessToken) {
-    sessionStorage.setItem('accessToken', accessToken);
+    // Set accessToken in a cookie instead of session storage
+    setCookie('accessToken', accessToken, 7); // Expiry set to 3 days, adjust as needed
 
+    // Set the default authorization header for Axios
     axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
 
     // This function below will handle when token is expired
-    const { exp } = jwtDecode(accessToken); // ~3 days by minimals server
-    tokenExpired(exp);
+    const { exp } = jwtDecode(accessToken);
+    tokenExpired(exp); // Ensure this function is adapted to new context or handled appropriately
   } else {
-    sessionStorage.removeItem('accessToken');
+    // Clear accessToken cookie instead of removing from session storage
+    clearCookie('accessToken');
 
+    // Remove the default authorization header from Axios
     delete axios.defaults.headers.common.Authorization;
   }
 };
+
 // ----------------------------------------------------------------------
 
 export const setSocketURL = (URL: string | null) => {
   if (URL) {
-    sessionStorage.setItem('socketURL', URL);
+    setCookie("socketURL" ,URL , 7 )
   } else {
-    sessionStorage.removeItem('socketURL');
+    clearCookie("socketURL")
   }
 };
 
 export const setBuilderDomain = (domainURL: string | null) => {
   if (domainURL) {
-    sessionStorage.setItem('builder', domainURL);
+    setCookie('builder' , domainURL , 7)
   } else {
-    sessionStorage.removeItem('builder');
+    clearCookie('builder')
   }
 };
 export const getBuilderDomain = () => {
-  return sessionStorage.getItem('builder');
+  return getCookie('builder')
 };

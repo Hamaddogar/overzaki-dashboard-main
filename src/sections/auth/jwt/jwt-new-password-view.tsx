@@ -25,6 +25,7 @@ import { useState } from 'react';
 import { useRouter } from 'src/routes/hooks';
 import { useAuthContext } from 'src/auth/hooks';
 import { PATH_AFTER_LOGIN } from 'src/config-global';
+import { clearCookie, getCookie } from 'src/auth/context/jwt/utils';
 
 
 // ----------------------------------------------------------------------
@@ -48,7 +49,7 @@ export default function JwtNewPasswordView() {
       .oneOf([Yup.ref('password')], 'Passwords must match'),
   });
 
-  const emailDetails: any = sessionStorage.getItem('forgot_password_email');
+  const emailDetails: any = getCookie('forgot_password_email');
   const email: any = emailDetails || "";
 
   const defaultValues = {
@@ -77,7 +78,7 @@ export default function JwtNewPasswordView() {
         const { success } = result;
         // eslint-disable-next-line no-empty
         if (success) {
-          sessionStorage.removeItem('forgot_password_email');
+          clearCookie('forgot_password_email');
           // router.push(paths.auth.jwt.login);
           router.push(PATH_AFTER_LOGIN);
         }
