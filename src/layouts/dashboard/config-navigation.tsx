@@ -466,6 +466,16 @@ export function useNavData() {
         ],
         permissions: ['GET_ORDERS'],
       },
+      {
+        title: t('icons categoury'),
+        path: paths.dashboard.iconCategoury,
+        icon: ICONS.blog,
+      },
+      {
+        title: t('styles categoury'),
+        path: paths.dashboard.styleCategoury,
+        icon: ICONS.blog,
+      },
     ];
 
     if (isSuperMember) {

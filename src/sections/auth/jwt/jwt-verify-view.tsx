@@ -21,6 +21,7 @@ import { useRouter } from 'src/routes/hooks';
 import { PATH_AFTER_LOGIN } from 'src/config-global';
 import { useState } from 'react';
 import Alert from '@mui/material/Alert';
+import { clearCookie, getCookie } from 'src/auth/context/jwt/utils';
 // ----------------------------------------------------------------------
 
 export default function JwtVerifyView() {
@@ -36,7 +37,7 @@ export default function JwtVerifyView() {
   });
 
 
-  const registerUserDetails: any = sessionStorage.getItem('register_user_data');
+  const registerUserDetails: any = getCookie('register_user_data');
   const { email, password, firstName, lastName }: any = registerUserDetails ? JSON.parse(registerUserDetails) : {};
 
   const defaultValues = {
@@ -68,7 +69,7 @@ export default function JwtVerifyView() {
 
             const registerRes: any = await register?.(email, password, firstName, lastName);
             if (registerRes && registerRes.success) {
-              sessionStorage.removeItem('register_user_data');
+              clearCookie('register_user_data');
               router.push(PATH_AFTER_LOGIN);
             }
 

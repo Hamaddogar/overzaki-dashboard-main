@@ -74,6 +74,12 @@ const page = () => {
   const methods = useForm({
     resolver: yupResolver(ProductSchema),
   });
+  const {
+    reset,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = methods;
+
   const categoryMethods = useForm({
     resolver: yupResolver(CategorySchema),
   });
@@ -96,11 +102,6 @@ const page = () => {
     seticonData(null);
   };
 
-  const {
-    reset,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = methods;
 
   const [updateIcon, { isSuccess }] = useUpdateIconMutation();
   const onSubmit = handleSubmit(async (data: any) => {

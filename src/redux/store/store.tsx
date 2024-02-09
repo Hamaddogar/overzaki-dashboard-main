@@ -14,6 +14,7 @@ import iconsReducer from './thunks/icon';
 import stylesReducer from './thunks/style';
 import themesReducer from './thunks/theme';
 import { api } from './services/api';
+import selectedDomainReducer from './thunks/selectedDomain';
 
 const rootReducer = combineReducers({
   customers: customersReducer,
@@ -27,6 +28,7 @@ const rootReducer = combineReducers({
   builder: builderReducer,
   analytics: analyticsReducer,
   brands: brandsReducer,
+  selectedDomain: selectedDomainReducer,
   icons: iconsReducer,
   styles: stylesReducer,
   themes: themesReducer,

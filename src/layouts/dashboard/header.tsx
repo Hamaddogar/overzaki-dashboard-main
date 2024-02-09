@@ -37,6 +37,7 @@ import { fetchBuilderList, setBuilder } from 'src/redux/store/thunks/builder';
 import { useSelector } from 'react-redux';
 import { getBuilderDomain, setBuilderDomain } from 'src/auth/context/jwt/utils';
 import { resetAllReducers } from 'src/redux/store/thunks/resetSlice';
+import { addSelectedDomain } from 'src/redux/store/thunks/selectedDomain';
 
 // ----------------------------------------------------------------------
 
@@ -126,6 +127,7 @@ export default function Header({ onOpenNav }: Props) {
     setSelectedDomain(builder);
     setBuilderDomain(builder?.domain)
     dispatch(resetAllReducers());
+    dispatch(addSelectedDomain(builder))
   }
 
 

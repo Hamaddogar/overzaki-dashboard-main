@@ -5,7 +5,7 @@ import { useEffect, useReducer, useCallback, useMemo } from 'react';
 import axios, { endpoints } from 'src/utils/axios';
 //
 import { AuthContext } from './auth-context';
-import { getBuilderDomain, isValidToken, setBuilderDomain, setSession, setSocketURL } from './utils';
+import { clearCookie, getBuilderDomain, getCookie, isValidToken, setBuilderDomain, setCookie, setSession, setSocketURL } from './utils';
 import { ActionMapType, AuthStateType, AuthUserType } from '../../types';
 
 // ----------------------------------------------------------------------
@@ -122,7 +122,7 @@ export function AuthProvider({ children }: Props) {
 
   const initialize = useCallback(async () => {
     try {
-      const refreshTokenP = sessionStorage.getItem(REFRESH_KEY);
+      const refreshTokenP = getCookie('refreshToken');
 
       if (refreshTokenP && isValidToken(refreshTokenP)) {
         setSession(refreshTokenP);
@@ -131,12 +131,11 @@ export function AuthProvider({ children }: Props) {
 
         const { accessToken, refreshToken } = response.data.data;
 
-        console.log("response", response);
 
         const newSocketURL = getSocketURL(accessToken);
 
         setSession(accessToken);
-        sessionStorage.setItem(REFRESH_KEY, refreshToken);
+        setCookie(REFRESH_KEY, refreshToken, 7)
 
         dispatch({
           type: Types.INITIAL,
@@ -187,7 +186,7 @@ export function AuthProvider({ children }: Props) {
 
     const newSocketURL = getSocketURL(accessToken);
 
-    sessionStorage.setItem(REFRESH_KEY, refreshToken);
+    setCookie(REFRESH_KEY, refreshToken, 7)
     setSession(accessToken);
     setBuilderDomain(null);
     dispatch({
@@ -222,7 +221,7 @@ export function AuthProvider({ children }: Props) {
 
       const newSocketURL = getSocketURL(accessToken);
       setSession(accessToken);
-      sessionStorage.setItem(REFRESH_KEY, refreshToken);
+      setCookie(REFRESH_KEY , refreshToken , 7)
       setBuilderDomain(null);
       dispatch({
         type: Types.REGISTER,
@@ -306,7 +305,7 @@ export function AuthProvider({ children }: Props) {
   const logout = useCallback(async () => {
     await axios.get(endpoints.auth.loutout);
     setSession(null);
-    sessionStorage.removeItem(REFRESH_KEY)
+    clearCookie(REFRESH_KEY)
     setBuilderDomain(null);
     dispatch({
       type: Types.LOGOUT,
