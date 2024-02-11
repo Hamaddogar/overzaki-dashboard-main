@@ -15,13 +15,15 @@ interface HeaderSectionProps {
         key: string,
         value: string | number
     },
+    handleCancelBtn?: any,
     handleThemeConfig: (key: string, value: any, parentClass?: any) => void; // Adjust 'value' type as needed
 }
 
 
-export default function HeaderSection({ children, name, description, cancel, closer, handleThemeConfig }: HeaderSectionProps) {
+export default function HeaderSection({ children, name, description, cancel, closer, handleThemeConfig, handleCancelBtn }: HeaderSectionProps) {
     const handleNoAction = () => { };
     const handleCancle = () => {
+        handleCancelBtn();
         if (cancel.key === 'colors') {
             // handleThemeConfig('primaryColor', '#0D6EFD');
             // handleThemeConfig('secondaryColor', '#8688A3');
