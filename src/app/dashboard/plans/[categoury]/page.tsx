@@ -103,7 +103,7 @@ const page = () => {
           }}
         >
           <Grid xs={12} md="auto">
-            <CustomCrumbs heading="Styles" crums={false} />
+            <CustomCrumbs heading="Plans" crums={false} />
           </Grid>
           <Grid sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
             <BottomActions>
