@@ -11,7 +11,7 @@ export const api = createApi({
             return headers;
         }
     }),
-    tagTypes: ['Theme', 'Style', 'Icon', 'StyleCat', 'IconCat'],
+    tagTypes: ['Theme', 'Style', 'Icon', 'StyleCat', 'IconCat' , 'plan'],
     endpoints: (builder) => ({
         getThemeById: builder.query({
             query: (themeId) => `/app-theme/${themeId}`,
@@ -211,7 +211,33 @@ export const api = createApi({
                     'x-tenant-id': data
                 }
             }),
-        })
+        }),
+        // plans managment
+        getPlansByCat: builder.query({
+            query: (category) => ({
+                url: `/plans/by_category?category=${category}`,
+            }),
+            providesTags: ['plan']
+        }),
+        updatePlan: builder.mutation({
+            query: (data) => ({
+                url: `/plans/${data.id}`,
+                method: 'PUT',
+                body: {
+                    name: data.name,
+                    price: data.price
+                }
+            }),
+            invalidatesTags: ['plan']
+        }),
+        addNewFeature: builder.mutation({
+            query: (data) => ({
+                url: `/feature`,
+                method: 'POST',
+                body: data
+            }),
+            invalidatesTags: ['plan']
+        }),
     }),
 });
 
@@ -254,5 +280,9 @@ export const {
     useCheckDomainValidationMutation,
     usePayDomainMutation,
     // customer management
-    useGetCustomerAnalyticsQuery
+    useGetCustomerAnalyticsQuery,
+    // plans management
+    useGetPlansByCatQuery,
+    useUpdatePlanMutation,
+    useAddNewFeatureMutation
 } = api;
