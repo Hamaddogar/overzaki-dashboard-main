@@ -256,6 +256,12 @@ export const api = createApi({
             }),
             invalidatesTags: ['plan']
         }),
+        // builder details
+        getBuilderDetails: builder.query({
+            query: (id) => ({
+                url: `/builder/${id}`,
+            }),
+        }),
     }),
 });
 
@@ -304,5 +310,7 @@ export const {
     useUpdatePlanMutation,
     useAddNewFeatureMutation,
     useGetAllFeaturesByCatQuery,
-    useUpdateFeatureMutation
+    useUpdateFeatureMutation,
+    // builder
+    useGetBuilderDetailsQuery
 } = api;
