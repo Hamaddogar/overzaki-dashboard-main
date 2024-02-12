@@ -20,7 +20,6 @@ import * as Yup from 'yup';
 const page = () => {
   const { categoury } = useParams()
   const response = useGetPlansByCatQuery(categoury.toString().toLowerCase())
-  console.log(response.data)
   const [openAddFeature, setOpenAddFeature] = useState(false)
   const [addFeatureReq, addFeatureRes] = useAddNewFeatureMutation();
 

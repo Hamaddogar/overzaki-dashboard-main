@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, Typography, Button, Grid, Stack, Box } from '@mui/material';
-import { useAddNewFeatureMutation, useUpdatePlanMutation } from 'src/redux/store/services/api';
+import { useGetAllFeaturesByCatQuery, useUpdatePlanMutation } from 'src/redux/store/services/api';
 import DetailsNavBar from '../products/DetailsNavBar';
 import { LoadingButton } from '@mui/lab';
 import { useForm } from 'react-hook-form';
@@ -11,10 +11,13 @@ import { RHFCheckbox, RHFTextField } from 'src/components/hook-form';
 import * as Yup from 'yup';
 import { enqueueSnackbar } from 'notistack';
 import { useParams } from 'next/navigation';
+import FeatureCart from './featureCart';
 
 
 const FinancialPlanCard = ({ plan }: any) => {
-    const [openUpdateFeature, setOpenUpdateFeature] = useState(false)
+    // get all features
+    const { categoury } = useParams()
+    const allFeaturesRes = useGetAllFeaturesByCatQuery(categoury.toString().toLowerCase())
     // update plan
     const [upatePlanReq, updatePlanRes] = useUpdatePlanMutation()
     const [openChangePlan, setOpenChangePlan] = useState(false)
@@ -78,8 +81,7 @@ const FinancialPlanCard = ({ plan }: any) => {
     })
 
 
-    // add feature
-    
+
 
     return (
         <Card sx={{
@@ -93,7 +95,7 @@ const FinancialPlanCard = ({ plan }: any) => {
             <CardContent>
                 {/* Name and Price */}
                 <Typography variant="h5" component="div" sx={{ mb: 2 }}>
-                    {plan?.type}
+                    {plan?.type.toUpperCase()}
                 </Typography>
                 <Typography sx={{ mb: 2 }}>
                     Price: ${plan?.price}
@@ -105,22 +107,22 @@ const FinancialPlanCard = ({ plan }: any) => {
                 </Typography>
 
                 {/* Features List */}
-                {plan?.features.map((feature: any, index: any) => (
-                    <Typography key={index} variant="body2" sx={{ mb: 0.5 }}>
-                        - {feature}
-                    </Typography>
-                ))}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    {allFeaturesRes?.data?.data?.map((feature: any, index: any) => {
+                        if (plan.type === 'pro') {
+                            return feature.availableForPro && <FeatureCart key={index} feature={feature} />
+                        }
+                        if (plan.type === 'basic') {
+                            return feature.availableForFree && <FeatureCart key={index} feature={feature} />
+                        }
+                    })}
+                </Box>
 
                 {/* Buttons */}
-                <Grid container spacing={2} justifyContent="flex-start" sx={{ mt: 2 }}>
+                <Grid container spacing={2} justifyContent="center" sx={{ mt: 2 }}>
                     <Grid item>
                         <Button variant="contained" size="small" onClick={() => setOpenChangePlan(true)}>
                             Change Plan
-                        </Button>
-                    </Grid>
-                    <Grid item>
-                        <Button variant="contained" size="small">
-                            Change Features
                         </Button>
                     </Grid>
                 </Grid>

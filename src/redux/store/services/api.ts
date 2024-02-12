@@ -11,7 +11,7 @@ export const api = createApi({
             return headers;
         }
     }),
-    tagTypes: ['Theme', 'Style', 'Icon', 'StyleCat', 'IconCat' , 'plan'],
+    tagTypes: ['Theme', 'Style', 'Icon', 'StyleCat', 'IconCat', 'plan'],
     endpoints: (builder) => ({
         getThemeById: builder.query({
             query: (themeId) => `/app-theme/${themeId}`,
@@ -183,7 +183,7 @@ export const api = createApi({
             query: (data) => ({
                 url: `/domain-managment/check_availability`,
                 method: 'POST',
-                headers : {
+                headers: {
                     'x-tenant-id': data.tanant_id
                 },
                 body: {
@@ -238,6 +238,24 @@ export const api = createApi({
             }),
             invalidatesTags: ['plan']
         }),
+        getAllFeaturesByCat: builder.query({
+            query: (category) => ({
+                url: `/feature?category=${category}`,
+            }),
+            providesTags: ['plan']
+        }),
+        UpdateFeature: builder.mutation({
+            query: (data) => ({
+                url: `/feature/${data.id}`,
+                method: 'PUT',
+                body: {
+                    content: data.content,
+                    availableForPro: data.availableForPro,
+                    availableForFree: data.availableForFree,
+                }
+            }),
+            invalidatesTags: ['plan']
+        }),
     }),
 });
 
@@ -284,5 +302,7 @@ export const {
     // plans management
     useGetPlansByCatQuery,
     useUpdatePlanMutation,
-    useAddNewFeatureMutation
+    useAddNewFeatureMutation,
+    useGetAllFeaturesByCatQuery,
+    useUpdateFeatureMutation
 } = api;
