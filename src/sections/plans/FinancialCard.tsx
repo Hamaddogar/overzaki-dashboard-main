@@ -85,7 +85,7 @@ const FinancialPlanCard = ({ plan }: any) => {
 
     return (
         <Card sx={{
-            minWidth: 275, margin: 2, overflow: 'visible',
+            minWidth: 450, margin: 2, overflow: 'visible',
             transition: 'transform 0.3s ease-in-out, border 0.3s ease-in-out',
             '&:hover': {
                 transform: 'scale(1.02)', // Scale up the card on hover

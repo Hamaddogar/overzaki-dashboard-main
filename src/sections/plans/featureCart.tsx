@@ -88,7 +88,7 @@ const FeatureCart = ({ feature }: any) => {
     return (
         <Box display="flex" alignItems="center" justifyContent={'space-between'} gap="20px">
             {/* Display the feature title */}
-            <Typography variant="h6">{feature.content.en}</Typography>
+            <Typography variant="h6" maxWidth={350}>{feature.content.en}</Typography>
 
             {/* Edit button with an icon */}
             <Button variant="contained" startIcon={<EditIcon />} onClick={()=> setOpenChangeFeature(true)}>
