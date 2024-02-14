@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import './out-put/view/view.css';
 // @mui
@@ -15,10 +15,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Tooltip from '@mui/material/Tooltip';
 import Fade from '@mui/material/Fade';
 import Typography from '@mui/material/Typography';
-import { useDispatch } from 'react-redux';
-import { createSocketRequest } from 'src/redux/store/thunks/builder';
-
-import { Stack, Divider, Container } from '@mui/material';
+import { Stack, Container } from '@mui/material';
 // components
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar/scrollbar';
@@ -31,7 +28,6 @@ import FontFamilyDealer from './out-put/font-styles-selection';
 import LogoDealer from './out-put/logo-part';
 import ColorsDealer from './out-put/colors-selection';
 import CartsDealer from './out-put/carts-selection';
-import StyleCategoriesDealer from './out-put/style-categories-selection';
 import NavDealer from './out-put/nav-selection';
 import BannerDealer from './out-put/banner-selection';
 import HeaderDealer from './out-put/header-selection';
@@ -53,8 +49,8 @@ import Actions from './Actions';
 import SaveSettings from '../../utils/save-settings';
 import { socketClient } from '../../utils/helper-functions';
 import { useSnackbar } from 'notistack';
-import { useSettingsContext } from 'src/components/settings';
-import { useThrottledCallback } from 'use-debounce';
+import AddSectionComponent from './AddSectionComponent';
+import StyleCategoriesDealer from './out-put/style-categories-selection';
 
 const dataPages = [
   { title: "Home Page", link: 'https://ecom-zaki.vercel.app/' },
@@ -67,23 +63,196 @@ interface ControllsState {
   page: string,
   menu: EventTarget & (Element | HTMLElement) | null,
   addSection: Boolean,
-  // order_status: EventTarget & (Element | HTMLElement) | null;
-  // payment_method: EventTarget & (Element | HTMLElement) | null;
-  // order_value: any; // Replace 'any' with the appropriate type
-  // payment_value: any; // Replace 'any' with the appropriate type
-  // analytics: EventTarget & (Element | HTMLElement) | null;
 }
 
+const defaultSections = [
+  {
+    page: "Home Page",
+    sectinos: [
+      {
+        name: "App Bar",
+        img: "/raws/bars.svg",
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
+          <NavDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} builder_Id={builder_Id} />
+        )
+      },
+      {
+        name: "Banner",
+        img: "/raws/Banners.svg",
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+      {
+        name: "Header",
+        img: "/raws/Header.svg",
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
+          <HeaderDealer builderId={builder_Id} handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+      {
+        name: "CategoriesLayout",
+        img: "/raws/Categories.svg",
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <LayoutCategoriesDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+
+      },
+      {
+        name: "Nav",
+        img: "",
+        show: false
+      },
+      {
+        name: "Mobiles",
+        img: "/raws/Mobiles.svg",
+        show: false
+      },
+      {
+        name: "Trending",
+        img: "/raws/Trending.svg",
+        show: false
+      },
+      {
+        name: "Products",
+        img: "/raws/Products.svg",
+        show: false,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <ProductViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+        // onClick: () => {
+        //   setControlls({ ...controlls, page: "Products Page" });
+        //   setTimeout(() => {
+        //     handleButton('List View');
+        //   }, 1000);
+        // }
+      },
+    ]
+  },
+  {
+    page: "Products Page",
+    sectinos: [
+      {
+        name: "List View",
+        img: "/raws/listing.svg",
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <ListViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+      {
+        name: "Card Style",
+        img: "/raws/cards.svg",
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <CardStyleDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+      {
+        name: "Card Shape",
+        img: "/raws/shape.svg",
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <CardShapeDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+      {
+        name: "View",
+        img: "/raws/listing.svg",
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <ProductPageViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+      {
+        name: "Search",
+        img: "/raws/si.png",
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <ProductPageSearchDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+      {
+        name: "Filter",
+        img: "/raws/filters.png",
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <ProductPageFiltersDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+      {
+        name: "Product Card",
+        img: "/raws/cards.svg",
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <ProductPageProductCardDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+    ]
+  },
+  {
+    page: "Product Details Page",
+    sectinos: [
+      {
+        name: "Images",
+        img: "/raws/i.png",
+        show: false,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <ImagesStyleDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+      {
+        name: "Description",
+        img: "/raws/dd.png",
+        show: false,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <DescriptionDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+      {
+        name: "Similar Products",
+        img: "/raws/sp.png",
+        show: false,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <SimilarProductsDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+      {
+        name: "Wishlist",
+        img: "/raws/w.png",
+        show: false,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <WishlistDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+    ]
+  },
+  {
+    page: "Sign Up Page",
+    sectinos: [
+      {
+        name: "User Info",
+        img: "/raws/user-solid.svg",
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+    ]
+  }
+]
 
 export default function EcomDesignMain() {
   const socket = socketClient();
-  // const settings = useSettingsContext();
-
-  const { enqueueSnackbar } = useSnackbar();
-
 
   const [activeSection, setActiveSection] = useState('Style');
   const [deviceView, setDeviceView] = useState('mobile');
+
+  const [sectionsList, setSectionsList] = useState(defaultSections);
   const [controlls, setControlls] = useState<ControllsState>({
     page: 'Home Page',
     menu: null,
@@ -182,15 +351,21 @@ export default function EcomDesignMain() {
   const builder_Id = searchParams.get('id')?.toString() || "";
 
 
-  let timeoutId: NodeJS.Timeout | undefined;
-  let debouncedFunctionExecuted = false;
 
-  const handleThemeConfig = (key: string, newValue: any, parentClass: string | null = "") => {
+  const debounce = (func: any, delay: any) => {
+    let timeoutId: any;
+    return (...args: any) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
+  };
 
+  const handleThemeConfig = debounce((key: string, newValue: any, parentClass: string | null = "") => {
 
     let _socketKey = "";
     let valueToShare = "";
-
 
     if (!parentClass?.startsWith('layout')) {
 
@@ -200,10 +375,7 @@ export default function EcomDesignMain() {
       if (typeof newValue === 'number') {
         valueToShare = `${newValue}px`
       }
-
     } else {
-      // setThemeConfig(pv => ({ ...pv, ...newValue }));
-      // _socketKey = parentClass ? (parentClass + "." + key) : key;
       // Split the path into an array of keys
       const pathKeys = key.split('.');
       let newState = { ...themeConfig };
@@ -214,7 +386,6 @@ export default function EcomDesignMain() {
         currentLevel[key] = currentLevel[key] ? { ...currentLevel[key] } : {};
         currentLevel = currentLevel[key];
       }
-
       // Set the final value at the last key in the path
       currentLevel[pathKeys[pathKeys.length - 1]] = newValue;
 
@@ -226,44 +397,16 @@ export default function EcomDesignMain() {
 
     }
 
-
-    const debounceFunction = () => {
-      const data = {
-        builderId: builder_Id,
-        key: _socketKey,
-        value: valueToShare,
-      };
-      if (socket) {
-        socket.emit('website:cmd', data);
-      }
+    const data = {
+      builderId: builder_Id,
+      key: _socketKey,
+      value: valueToShare,
+    };
+    if (socket) {
+      socket.emit('website:cmd', data);
     }
 
-    // useThrottledCallback(debounceFunction, 500, { 'trailing': false })
-
-    const debouncedFunctionCalled = debounce(() => {
-      debounceFunction()
-    }, 300);
-    debouncedFunctionCalled();
-
-
-
-  };
-
-  const debounce = (callback: () => void, delay: number) => {
-    let timeoutId: NodeJS.Timeout | undefined;
-    let isPending = false; // Flag to track whether the function is pending execution
-    const executeCallback = () => {
-      isPending = false;
-      callback();
-    };
-    return () => {
-      if (isPending) {
-        clearTimeout(timeoutId);
-      }
-      timeoutId = setTimeout(executeCallback, delay);
-      isPending = true;
-    };
-  };
+  }, 500);
 
   // using Ressponsive view 
   const smUp = useResponsive('up', 'sm');
@@ -271,7 +414,8 @@ export default function EcomDesignMain() {
   const handleChangeSection = (newValue: string) => (event: React.SyntheticEvent | React.MouseEvent) => {
     if (smUp) {
       if (newValue === 'Layout') {
-        setbuttonSection('Nav');
+        // setbuttonSection('App Bar');
+        setbuttonSection('');
         setActiveSection(newValue);
         setControlls((pv) => ({ ...pv, addSection: false }))
       } else {
@@ -333,6 +477,9 @@ export default function EcomDesignMain() {
   }, []);
 
 
+  const handleCancelBtn = () => {
+    setbuttonSection("");
+  }
 
   return (
     <Box sx={{ height: '100%', transition: 'all .5' }}>
@@ -413,14 +560,13 @@ export default function EcomDesignMain() {
                 }} />
               </Stack>
               <Menu id="pages" anchorEl={controlls.menu} onClose={handleCloseDropDown("menu")} open={Boolean(controlls.menu)}>
-                {dataPages.map((page) => <MenuItem key={page.title} selected={controlls.page === page.title} sx={{ marginBottom: "20px", fontWeight: 600, fontSize: '12px !important' }} onClick={handleCloseDropDown("menu", page.title)}>
-                  {page.title}
+                {sectionsList.map((sectionObj) => <MenuItem key={sectionObj.page} selected={controlls.page === sectionObj.page} sx={{ marginBottom: "20px", fontWeight: 600, fontSize: '12px !important' }} onClick={handleCloseDropDown("menu", sectionObj.page)}>
+                  {sectionObj.page}
                 </MenuItem>)}
               </Menu>
 
               {/* View and Dsiplay Section */}
               <Box sx={{ pb: '20px' }}>
-                {/* <OutPutView deviceView={deviceView} page={linker(controlls.page)} /> */}
                 <OutPutView deviceView={deviceView} page={`${url}?builder_id=${builder_Id}`} />
               </Box>
 
@@ -431,59 +577,67 @@ export default function EcomDesignMain() {
           {/* Options and Options Side bar */}
           <Grid container xs={12} sm={5} sx={{ display: controlls.addSection ? 'none' : '' }}>
             <Grid xs={10} >
-              <Card sx={{ borderRadius: '0px', p: '20px', height: '100%', boxShadow: '0px -6px 40px #00000014', transition: 'all .7s !important' }}>
+              {buttonSection !== '' && (
+                <Card sx={{ borderRadius: '0px', p: '20px', height: '100%', boxShadow: '0px -6px 40px #00000014', transition: 'all .7s !important' }}>
 
-                {buttonSection === 'Font' && <Box>
-                  <HeaderSection
-                    name='Font Style'
-                    description=''
-                    cancel={{ key: 'fontStyle', value: 'Avernir' }}
-                    handleThemeConfig={handleThemeConfig}
-                  >
-                    <Button sx={{ background: '#F5F5F8', borderRadius: '16px', fontSize: '11px', color: '#8688A3', px: '19px' }} endIcon={<Iconify icon='ep:arrow-down-bold' width={15} />}>
-                      English
-                    </Button>
-                  </HeaderSection>
+                  {buttonSection === 'Font' && <Box>
+                    <HeaderSection
+                      name='Font Style'
+                      description=''
+                      cancel={{ key: 'fontStyle', value: 'Avernir' }}
+                      handleCancelBtn={handleCancelBtn}
+                      handleThemeConfig={handleThemeConfig}
+                    >
+                      <Button sx={{ background: '#F5F5F8', borderRadius: '16px', fontSize: '11px', color: '#8688A3', px: '19px' }} endIcon={<Iconify icon='ep:arrow-down-bold' width={15} />}>
+                        English
+                      </Button>
+                    </HeaderSection>
 
-                  <FontFamilyDealer themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
-                </Box>}
-                {buttonSection === 'Buttons' && <Box>
-                  <HeaderSection
-                    name='Button Style'
-                    description='Control the border radius of your button'
-                    cancel={{ key: 'buttonRadius', value: 10 }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <Buttons themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
-                </Box>}
-                {buttonSection === 'Logo' && <Box>
-                  <HeaderSection
-                    name='Branding Logo'
-                    description='Upload your website logo'
-                    cancel={{ key: 'logo', value: '' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <LogoDealer themeConfig={themeConfig} builderId={builder_Id} handleThemeConfig={handleThemeConfig} />
-                </Box>}
-                {buttonSection === 'Color' && <Box>
-                  <HeaderSection
-                    name='Colors'
-                    description='Define your brand colors'
-                    cancel={{ key: 'colors', value: '' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <ColorsDealer themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
-                </Box>}
-                {buttonSection === 'Cart' && <Box>
-                  <HeaderSection
-                    name='Cart Icon Style'
-                    description='Select the style of cart icon'
-                    cancel={{ key: 'cart', value: '1' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <CartsDealer themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
-                </Box>}
-                {/* {buttonSection === 'Categories' && <Box>
+                    <FontFamilyDealer themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
+                  </Box>}
+                  {buttonSection === 'Buttons' && <Box>
+                    <HeaderSection
+                      name='Button Style'
+                      description='Control the border radius of your button'
+                      cancel={{ key: 'buttonRadius', value: 10 }}
+                      handleCancelBtn={handleCancelBtn}
+                      handleThemeConfig={handleThemeConfig}
+                    />
+                    <Buttons themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
+                  </Box>}
+                  {buttonSection === 'Logo' && <Box>
+                    <HeaderSection
+                      name='Branding Logo'
+                      description='Upload your website logo'
+                      cancel={{ key: 'logo', value: '' }}
+                      handleCancelBtn={handleCancelBtn}
+                      handleThemeConfig={handleThemeConfig}
+                    />
+                    <LogoDealer themeConfig={themeConfig} builderId={builder_Id} handleThemeConfig={handleThemeConfig} />
+                  </Box>}
+                  {buttonSection === 'Color' && <Box>
+                    <HeaderSection
+                      name='Colors'
+                      description='Define your brand colors'
+                      cancel={{ key: 'colors', value: '' }}
+                      handleCancelBtn={handleCancelBtn}
+                      handleThemeConfig={handleThemeConfig}
+                    />
+                    <ColorsDealer themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
+                  </Box>}
+                  {buttonSection === 'Cart' && <Box>
+                    <HeaderSection
+                      name='Cart Icon Style'
+                      description='Select the style of cart icon'
+                      cancel={{ key: 'cart', value: '1' }}
+                      handleCancelBtn={handleCancelBtn}
+                      handleThemeConfig={handleThemeConfig}
+                    />
+                    <CartsDealer themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
+                  </Box>}
+
+
+                  {/* {buttonSection === 'Categories' && <Box>
                   <HeaderSection
                     name='Categories Card'
                     description='Select the style of category card'
@@ -493,177 +647,33 @@ export default function EcomDesignMain() {
                   <StyleCategoriesDealer themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
                 </Box>} */}
 
-
-                {/* Layout  HomePage */}
-
-                {buttonSection === 'Nav' && <Box>
-                  <HeaderSection
-                    name='Top Navigation'
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-
-                  <NavDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>}
-                {buttonSection === 'Banners' && <Box>
-                  <HeaderSection
-                    name='Banners'
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>}
-                {buttonSection === 'Header' && <Box>
-                  <HeaderSection
-                    name='Header'
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <HeaderDealer builderId={builder_Id} handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>}
-                {buttonSection === 'CategoriesLayout' && <Box>
-
-                  <HeaderSection
-                    name='Categories Layout'
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <LayoutCategoriesDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-
-                </Box>}
-                {buttonSection === 'Products' && <Box>
-                  <HeaderSection
-                    name='Show Products Section'
-                    cancel={{ key: 'cart', value: '1' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-
-                  <ProductViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-
-                </Box>}
-                {buttonSection === 'Mobiles' && <Box />}
-                {buttonSection === 'Trending' && <Box />}
-
-                {/* Layout  CategoriesPage */}
-                {buttonSection === 'List View' && <Box>
-                  <HeaderSection
-                    name='List View'
-                    description='Select the view of the categories list'
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <ListViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>}
-                {buttonSection === 'Card Style' && <Box>
-                  <HeaderSection
-                    name='Categories Card'
-                    description='Select the style of category card'
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <CardStyleDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>}
-                {buttonSection === 'Card Shape' && <Box>
-                  <HeaderSection
-                    name='Card Shape'
-                    description='Select the shape of category card'
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <CardShapeDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>}
-
-                {/* Product Details Page */}
-                {buttonSection === 'Images' && <Box>
-                  <HeaderSection
-                    name='Images'
-                    description='Select the design of Images'
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <ImagesStyleDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>}
-                {buttonSection === 'Description' && <Box>
-                  <HeaderSection
-                    name='Description'
-                    description=''
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-
-                  <DescriptionDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>}
-                {buttonSection === 'Similar Products' && <Box>
-                  <HeaderSection
-                    name='Similar Products'
-                    description=''
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <SimilarProductsDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>}
-                {buttonSection === 'Wishlist' && <Box>
-                  <HeaderSection
-                    name='Wishlist'
-                    description=''
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <WishlistDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>}
-
-                {/* Products Page */}
-                {/* {buttonSection === 'View' && <Box>
-                  <HeaderSection
-                    name='Product List View'
-                    description='Select the view of the product list'
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <ProductPageViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>} */}
-                {buttonSection === 'Search' && <Box>
-                  <HeaderSection
-                    name='Search'
-                    description=''
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <ProductPageSearchDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>}
-                {buttonSection === 'Filter' && <Box>
-                  <HeaderSection
-                    name='Filter'
-                    description=''
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <ProductPageFiltersDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>}
-                {buttonSection === 'Product Card' && <Box>
-                  <HeaderSection
-                    name='Product Card Style'
-                    description=''
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                  <ProductPageProductCardDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>}
-
-                {/* Sign Up Page */}
-                {buttonSection === 'User Info' && <Box>
-                  <HeaderSection
-                    name='Sign Up Info'
-                    description=''
-                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-
-                  <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Box>}
-
-
-              </Card>
+                  {/* Layout  HomePage */}
+                  {activeSection === 'Layout' && sectionsList.map((Obj, index) => (
+                    <Box key={"wrap" + index} >
+                      {Obj.sectinos.map((sectionObj, ind) => {
+                        if (sectionObj.show) {
+                          return (
+                            <Box key={"mainPageWrap_" + index + "_" + ind} >
+                              {buttonSection === sectionObj.name && (
+                                <Box key={"main_" + ind} >
+                                  <HeaderSection
+                                    name={sectionObj?.name ?? ""}
+                                    cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
+                                    handleCancelBtn={handleCancelBtn}
+                                    handleThemeConfig={handleThemeConfig}
+                                  />
+                                  {sectionObj?.Componenet && sectionObj?.Componenet(handleThemeConfig, themeConfig, builder_Id)}
+                                </Box>
+                              )}
+                            </Box>
+                          )
+                        }
+                      }
+                      )}
+                    </Box>
+                  ))}
+                </Card>
+              )}
             </Grid>
 
 
@@ -671,9 +681,7 @@ export default function EcomDesignMain() {
             <Grid xs={2}>
               <Card sx={{ borderRadius: '0px', py: '20px', height: '100%', transition: 'all .5s' }}>
                 <Scrollbar>
-
                   {activeSection === 'Style' && <Stack alignItems='center' sx={{ height: '100%', textAlign: 'center' }} spacing='20px' >
-
                     <Stack spacing='3px' alignItems='center' justifyContent='center'>
                       <Button sx={{
                         padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Font" ? "#1BFBB6" : '#F5F5F8',
@@ -740,284 +748,34 @@ export default function EcomDesignMain() {
                   </Stack>}
 
 
-                  {activeSection === 'Layout' && <Box>
+                  {activeSection === 'Layout' && sectionsList.map((Obj, index) => (
+                    <Box key={"wrap" + index} >
+                      {controlls.page === Obj.page && (
+                        <Stack alignItems='center' sx={{ height: '100%', textAlign: 'center', transition: 'all .5s' }} spacing='20px' >
+                          {Obj.sectinos.map((sectionObj, ind) => {
+                            if (sectionObj.show) {
+                              return (
+                                <Stack key={"main_" + ind} spacing='3px' alignItems='center' justifyContent='center'>
+                                  <Button sx={{
+                                    padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === sectionObj.name ? "#1BFBB6" : '#F5F5F8',
+                                    '&:hover': { background: buttonSection === sectionObj.name ? "#22C55E" : '#DEE1E6' }
+                                  }}
+                                    variant='contained'
+                                    onClick={handleButton(sectionObj.name)}
+                                  >
+                                    <Box component='img' src={sectionObj.img} sx={{ width: '20px', height: '20px' }} />
+                                  </Button>
+                                  <Typography variant='caption' color='#0F1349'>{sectionObj.name}</Typography>
+                                </Stack>
+                              )
+                            }
+                          }
+                          )}
+                        </Stack>
+                      )}
+                    </Box>
+                  ))}
 
-                    {controlls.page === "Home Page" && <Stack alignItems='center' sx={{ height: '100%', textAlign: 'center', transition: 'all .5s' }} spacing='20px' >
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Nav" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Nav" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Nav')}
-                        >
-                          <Box component='img' src='/raws/bars.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Nav</Typography>
-                      </Stack>
-
-                      {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Banners" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Banners" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Banners')}
-                        >
-                          <Box component='img' src='/raws/Banners.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Banners</Typography>
-                      </Stack> */}
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Header" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Header" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Header')}
-                        >
-                          <Box component='img' src='/raws/Header.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Header</Typography>
-                      </Stack>
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "CategoriesLayout" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "CategoriesLayout" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('CategoriesLayout')}
-                        >
-                          <Box component='img' src='/raws/Categories.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Categories</Typography>
-                      </Stack>
-
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Products" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Products" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          // onClick={handleButton('Products')}
-                          onClick={() => {
-                            setControlls({ ...controlls, page: "Products Page" });
-                            setTimeout(() => {
-                              handleButton('List View');
-                            }, 1000);
-                          }}
-                        >
-                          <Box component='img' src='/raws/Products.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Products</Typography>
-                      </Stack>
-
-
-                      {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Mobiles" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Mobiles" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Mobiles')}
-                        >
-                          <Box component='img' src='/raws/Mobiles.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Mobiles</Typography>
-                      </Stack> */}
-
-
-
-                      {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Trending" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Trending" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Trending')}
-                        >
-                          <Box component='img' src='/raws/Trending.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Trending</Typography>
-                      </Stack> */}
-
-
-                    </Stack>}
-
-                    {controlls.page === "Products Page" && <Stack alignItems='center' sx={{ height: '100%', textAlign: 'center', transition: 'all .5s' }} spacing='20px' >
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "List View" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "List View" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('List View')}
-                        >
-                          <Box component='img' src='/raws/listing.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>List View</Typography>
-                      </Stack>
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Card Style" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Card Style" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Card Style')}
-                        >
-                          <Box component='img' src='/raws/cards.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Card Style</Typography>
-                      </Stack>
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Card Shape" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Card Shape" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Card Shape')}
-                        >
-                          <Box component='img' src='/raws/shape.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Card Shape</Typography>
-                      </Stack>
-                      {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "View" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "View" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('View')}
-                        >
-                          <Box component='img' src='/raws/listing.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>View</Typography>
-                      </Stack> */}
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Search" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Search" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Search')}
-                        >
-                          <Box component='img' src='/raws/si.png' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Search</Typography>
-                      </Stack>
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Filter" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Filter" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Filter')}
-                        >
-                          <Box component='img' src='/raws/filters.png' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Filter</Typography>
-                      </Stack>
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Product Card" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Product Card" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Product Card')}
-                        >
-                          <Box component='img' src='/raws/cards.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Product Card</Typography>
-                      </Stack>
-                    </Stack>}
-
-                    {controlls.page === "Product Details Page" && <Stack alignItems='center' sx={{ height: '100%', textAlign: 'center', transition: 'all .5s' }} spacing='20px' >
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Images" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Images" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Images')}
-                        >
-                          <Box component='img' src='/raws/i.png' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Images</Typography>
-                      </Stack>
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Description" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Description" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Description')}
-                        >
-                          <Box component='img' src='/raws/dd.png' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Description</Typography>
-                      </Stack>
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Similar Products" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Similar Products" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Similar Products')}
-                        >
-                          <Box component='img' src='/raws/sp.png' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Similar Products</Typography>
-                      </Stack>
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Wishlist" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Wishlist" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Wishlist')}
-                        >
-                          <Box component='img' src='/raws/w.png' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>Wishlist</Typography>
-                      </Stack>
-
-
-
-
-
-                    </Stack>}
-
-                    {controlls.page === "Sign Up Page" && <Stack alignItems='center' sx={{ height: '100%', textAlign: 'center', transition: 'all .5s' }} spacing='20px' >
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "User Info" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "User Info" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('User Info')}
-                        >
-                          <Box component='img' src='/raws/user-solid.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349'>User Info</Typography>
-                      </Stack>
-
-                    </Stack>}
-
-                  </Box>}
 
                 </Scrollbar>
               </Card>
@@ -1026,1000 +784,10 @@ export default function EcomDesignMain() {
 
 
           <Grid xs={5} sx={{ display: controlls.addSection ? '' : 'none' }}>
-            <Card sx={{ borderRadius: '0px', p: '20px', height: '100%', boxShadow: '0px -6px 40px #00000014' }}>
-
-              <Stack direction='row' justifyContent='space-between'>
-                <Box>
-                  <Typography variant='h6'>Add New Section</Typography>
-                  <Typography variant='caption' color='#8688A3'>
-                    Select where you want to add this section.
-                  </Typography>
-                </Box>
-                <Iconify width={25} icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleCloseDropDown('addSection')} />
-              </Stack>
-
-
-              <Box mt='20px'>
-                <Typography variant='caption' color='#8688A3'>
-                  Top Navigation (1)
-                </Typography>
-
-                <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
-                  width: '100%',
-                  minHeight: '61px',
-                  border: '4px solid #8688A333',
-                  borderRadius: '8px',
-                }}>
-                  <Box component='img' src='/raws/navAS.png' sx={{ borderRadius: '8px', width: '100%' }} />
-                </Stack>
-              </Box>
-
-
-              <Divider sx={{
-                borderWidth: '2px', borderColor: '#F5F5F8', my: '20px',
-                '& .MuiDivider-wrapper': {
-                  padding: 0
-                }
-              }}>
-                <Stack direction='row' alignItems='center' spacing='8px' justifyContent='center' sx={{
-                  width: "120px",
-                  height: "36px",
-                  background: "#F5F5F8",
-                  borderRadius: "20px",
-                  cursor: 'pointer'
-                }} >
-                  <Iconify icon='mingcute:add-fill' style={{ color: '#8688A3' }} />
-                  <Typography variant='button' color='#8688A3'>Add Here</Typography>
-                </Stack>
-              </Divider>
-
-              <Box mt='20px'>
-                <Typography variant='caption' color='#8688A3'>
-                  Categories section (2)
-                </Typography>
-
-                <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
-                  width: '100%',
-                  height: '178px',
-                  border: '4px solid #8688A333',
-                  borderRadius: '8px',
-                }}>
-                  <Box component='img' src='/raws/catAS.png' sx={{ borderRadius: '8px', width: '100%', height: '100%' }} />
-                </Stack>
-              </Box>
-              <Divider sx={{
-                borderWidth: '2px', borderColor: '#F5F5F8', my: '20px',
-                '& .MuiDivider-wrapper': {
-                  padding: 0
-                }
-              }}>
-                <Stack direction='row' alignItems='center' spacing='8px' justifyContent='center' sx={{
-                  width: "120px",
-                  height: "36px",
-                  background: "#F5F5F8",
-                  borderRadius: "20px",
-                  cursor: 'pointer'
-                }} >
-                  <Iconify icon='mingcute:add-fill' style={{ color: '#8688A3' }} />
-                  <Typography variant='button' color='#8688A3'>Add Here</Typography>
-                </Stack>
-              </Divider>
-
-              <Box mt='20px'>
-                <Typography variant='caption' color='#8688A3'>
-                  Mobiles Section (3)
-                </Typography>
-
-                <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
-                  width: '100%',
-                  height: '178px',
-                  border: '4px solid #8688A333',
-                  borderRadius: '8px',
-                }}>
-                  <Box component='img' src='/raws/catAS.png' sx={{ borderRadius: '8px', width: '100%', height: '100%' }} />
-                </Stack>
-              </Box>
-
-
-            </Card>
-
+            <AddSectionComponent onClose={handleCloseDropDown('addSection')} onClick={(value = "") => { setbuttonSection(value); setControlls({ ...controlls, addSection: false }) }} />
           </Grid>
 
         </Grid>
-      </Box>}
-
-      {!smUp && <Box>
-        <Container>
-
-
-          <Grid container rowGap='10px'>
-            <Grid xs={12}>
-              <SaveSettings builderId={builder_Id} smUp={false} />
-            </Grid>
-
-            <Grid xs={12}>
-              {/* Tab view Styled Buttons */}
-              <Stack
-                sx={{ bgcolor: 'background.neutral', borderRadius: '12px', p: '5px' }}
-                direction='row' alignItems='center' justifyContent={{ xs: 'flex-start', md: 'flex-end' }} spacing='20px'>
-                <Button onClick={handleChangeSection('Style')}
-                  fullWidth variant='contained'
-                  size='small'
-                  sx={
-                    activeSection === "Style" ?
-                      {
-                        borderRadius: '10px',
-                        color: '#0F1349',
-                        backgroundColor: '#FFFFFF',
-                        boxShadow: '0px 6px 20px #00000033',
-                        '&:hover': { backgroundColor: '#FFFFFF', }
-                      }
-                      :
-                      {
-                        borderRadius: '10px',
-                        color: '#8688A3',
-                        backgroundColor: 'background.neutral',
-                        '&:hover': { backgroundColor: 'background.neutral' }
-                      }}
-                > Style </Button>
-                <Button onClick={handleChangeSection('Layout')}
-                  fullWidth variant='contained'
-                  size='small'
-                  sx={
-                    activeSection === "Layout" ? {
-                      borderRadius: '10px',
-                      color: '#0F1349',
-                      backgroundColor: '#FFFFFF',
-                      boxShadow: '0px 6px 20px #00000033',
-                      '&:hover': { backgroundColor: '#FFFFFF', }
-                    }
-                      :
-                      {
-                        borderRadius: '10px',
-                        color: '#8688A3',
-                        backgroundColor: 'background.neutral',
-                        '&:hover': { backgroundColor: '#FFFFFF', }
-                      }}
-                > Layout </Button>
-              </Stack>
-            </Grid>
-
-
-            <Grid xs={12}>
-              <Stack direction='row' alignItems='center' justifyContent='center' spacing='10px'>
-                <Iconify icon='entypo:mobile' onClick={handleDeviceView('mobile')} style={{
-                  opacity: deviceView === "mobile" ? 1 : .5,
-                  cursor: 'pointer',
-                  transition: 'all .4s'
-                }} />
-                <Iconify onClick={handleDeviceView('tablet')} icon='tabler:device-ipad-horizontal' width={27} style={{
-                  opacity: deviceView === "tablet" ? 1 : .5,
-                  cursor: 'pointer',
-                  transition: 'all .4s'
-                }} />
-                {/* <Iconify onClick={handleDeviceView('laptop')} icon='bi:laptop' width={30} style={{
-                  opacity: deviceView === "laptop" ? 1 : .5,
-                  cursor: 'pointer',
-                  transition: 'all .4s'
-                }} /> */}
-              </Stack>
-            </Grid>
-
-
-            <Grid xs={12} sx={{ pb: 8 }}>
-              {/* View and Dsiplay Section */}
-              <Box sx={{ pb: '20px' }}>
-                {/* <OutPutView deviceView={deviceView} page={linker(controlls.page)} /> */}
-                <OutPutView deviceView={deviceView} page={`${url}?builder_id=${builder_Id}`} />
-              </Box>
-            </Grid>
-
-            <Grid xs={12}>
-
-              <Menu id="pages" anchorEl={controlls.menu} onClose={handleCloseDropDown("menu")} open={Boolean(controlls.menu)}>
-                {dataPages.map((page) => <MenuItem key={page.title} selected={controlls.page === page.title} sx={{ marginBottom: "20px", fontWeight: 600, fontSize: '12px !important' }} onClick={handleCloseDropDown("menu", page.title)}>
-                  {page.title}
-                </MenuItem>)}
-              </Menu>
-
-              <BottomActions elevation={7}>
-
-                {/* buttons or controller for mobile view  */}
-                <Box sx={{ flexGrow: 1, width: '100%' }}>
-                  {activeSection === 'Layout' ?
-                    <Stack direction='row' justifyContent='space-between' alignItems='center' mb='10px' spacing='10px'>
-                      <Button
-                        disabled={!(activeSection === 'Layout')}
-                        onClick={handleOpenDropDown('menu')}
-                        endIcon={<Iconify icon='ep:arrow-down-bold' width={15} />}
-                      >{controlls.page}</Button>
-
-                      <Button size='small' startIcon={<Iconify icon='mi:add' />} onClick={handleOpenDropDown('addSection')} >Add Section</Button>
-                    </Stack>
-                    :
-                    <Stack direction='row' alignItems='center' mb='10px' spacing='10px'>
-                      <Typography variant='button' sx={{ fontWeight: 900 }}>Tools</Typography>
-                      <Tooltip title="Add" placement="right-end" TransitionComponent={Fade} TransitionProps={{ timeout: 600 }}>
-                        <Iconify icon='pajamas:information-o' width={15} sx={{ color: '#C2C3D1' }} />
-                      </Tooltip>
-                    </Stack>}
-
-                  <Scrollbar sx={{ pb: '10px' }}>
-                    {activeSection === 'Style' && <Stack sx={{ width: '100%', flexGrow: 1 }} direction='row' alignItems='center' spacing='20px'>
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{
-                          padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Font" ? "#1BFBB6" : '#F5F5F8',
-                          '&:hover': { background: buttonSection === "Font" ? "#22C55E" : '#DEE1E6' }
-                        }}
-                          variant='contained'
-                          onClick={handleButton('Font')}
-                        >
-                          <Box component='img' src='/raw/font.svg' sx={{ width: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349' fontWeight={900}>Font</Typography>
-                      </Stack>
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{ padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Buttons" ? "#1BFBB6" : '#F5F5F8', '&:hover': { background: buttonSection === "Buttons" ? "#22C55E" : '#DEE1E6' } }} variant='contained'
-                          onClick={handleButton('Buttons')}
-                        >
-                          <Box component='img' src='/raw/button.svg' sx={{ width: '27px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349' fontWeight={900}>Buttons</Typography>
-                      </Stack>
-
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{ padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Logo" ? "#1BFBB6" : '#F5F5F8', '&:hover': { background: buttonSection === "Logo" ? "#22C55E" : '#DEE1E6' } }} variant='contained'
-                          onClick={handleButton('Logo')}
-                        >
-                          <Box component='img' src='/raw/logoDe.svg' sx={{ width: '19px', height: '19px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349' fontWeight={900}>Logo</Typography>
-                      </Stack>
-
-
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{ padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Color" ? "#1BFBB6" : '#F5F5F8', '&:hover': { background: buttonSection === "Color" ? "#22C55E" : '#DEE1E6' } }} variant='contained'
-                          onClick={handleButton('Color')}
-                        >
-                          <Box component='img' src='/raw/color.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349' fontWeight={900}>Color</Typography>
-                      </Stack>
-
-
-                      <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{ padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Cart" ? "#1BFBB6" : '#F5F5F8', '&:hover': { background: buttonSection === "Cart" ? "#22C55E" : '#DEE1E6' } }} variant='contained'
-                          onClick={handleButton('Cart')}
-                        >
-                          <Box component='img' src='/raw/shopping-cart.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349' fontWeight={900}>Cart</Typography>
-                      </Stack>
-
-
-                      {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                        <Button sx={{ padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Categories" ? "#1BFBB6" : '#F5F5F8', '&:hover': { background: buttonSection === "Categories" ? "#22C55E" : '#DEE1E6' } }} variant='contained'
-                          onClick={handleButton('Categories')}
-                        >
-                          <Box component='img' src='/raw/Catogories.svg' sx={{ width: '20px', height: '20px' }} />
-                        </Button>
-                        <Typography variant='caption' color='#0F1349' fontWeight={900}>Categories</Typography>
-                      </Stack> */}
-                    </Stack>}
-
-
-                    {activeSection === 'Layout' && <Box sx={{ flexGrow: 1, width: '100%' }}>
-
-                      {controlls.page === "Home Page" && <Stack direction='row' alignItems='center' sx={{ width: '100%', flexGrow: 1, height: '100%', textAlign: 'center', transition: 'all .5s' }} spacing='20px' >
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Nav" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Nav" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('Nav')}
-                          >
-                            <Box component='img' src='/raws/bars.svg' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Nav</Typography>
-                        </Stack>
-
-                        {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Banners" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Banners" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('Banners')}
-                          >
-                            <Box component='img' src='/raws/Banners.svg' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Banners</Typography>
-                        </Stack> */}
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Header" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Header" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('Header')}
-                          >
-                            <Box component='img' src='/raws/Header.svg' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Header</Typography>
-                        </Stack>
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "CategoriesLayout" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "CategoriesLayout" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('CategoriesLayout')}
-                          >
-                            <Box component='img' src='/raws/Categories.svg' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Categories</Typography>
-                        </Stack>
-
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Products" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Products" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            // onClick={handleButton('Products')}
-                            onClick={() => {
-                              setControlls({ ...controlls, page: "Products Page" });
-                              setTimeout(() => {
-                                handleButton('List View');
-                              }, 1000);
-                            }}
-
-                          >
-                            <Box component='img' src='/raws/Products.svg' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Products</Typography>
-                        </Stack>
-
-
-                        {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Mobiles" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Mobiles" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('Mobiles')}
-                          >
-                            <Box component='img' src='/raws/Mobiles.svg' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Mobiles</Typography>
-                        </Stack> */}
-
-
-
-                        {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Trending" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Trending" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('Trending')}
-                          >
-                            <Box component='img' src='/raws/Trending.svg' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Trending</Typography>
-                        </Stack> */}
-
-
-                      </Stack>}
-
-                      {controlls.page === "Products Page" && <Stack direction='row' alignItems='center' sx={{ width: '100%', flexGrow: 1, height: '100%', textAlign: 'center', transition: 'all .5s' }} spacing='20px' >
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "List View" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "List View" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('List View')}
-                          >
-                            <Box component='img' src='/raws/listing.svg' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>List View</Typography>
-                        </Stack>
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Card Style" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Card Style" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('Card Style')}
-                          >
-                            <Box component='img' src='/raws/cards.svg' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Card Style</Typography>
-                        </Stack>
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Card Shape" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Card Shape" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('Card Shape')}
-                          >
-                            <Box component='img' src='/raws/shape.svg' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Card Shape</Typography>
-                        </Stack>
-
-                        {/* <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "View" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "View" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('View')}
-                          >
-                            <Box component='img' src='/raws/listing.svg' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>View</Typography>
-                        </Stack> */}
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Search" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Search" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('Search')}
-                          >
-                            <Box component='img' src='/raws/si.png' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Search</Typography>
-                        </Stack>
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Filter" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Filter" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('Filter')}
-                          >
-                            <Box component='img' src='/raws/filters.png' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Filter</Typography>
-                        </Stack>
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Product Card" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Product Card" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('Product Card')}
-                          >
-                            <Box component='img' src='/raws/cards.svg' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Product Card</Typography>
-                        </Stack>
-
-                      </Stack>}
-
-                      {controlls.page === "Product Details Page" && <Stack direction='row' alignItems='center' sx={{ width: '100%', flexGrow: 1, height: '100%', textAlign: 'center', transition: 'all .5s' }} spacing='20px' >
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Images" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Images" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('Images')}
-                          >
-                            <Box component='img' src='/raws/i.png' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Images</Typography>
-                        </Stack>
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Description" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Description" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('Description')}
-                          >
-                            <Box component='img' src='/raws/dd.png' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Description</Typography>
-                        </Stack>
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Similar Products" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Similar Products" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('Similar Products')}
-                          >
-                            <Box component='img' src='/raws/sp.png' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Similar Products</Typography>
-                        </Stack>
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "Wishlist" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "Wishlist" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('Wishlist')}
-                          >
-                            <Box component='img' src='/raws/w.png' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>Wishlist</Typography>
-                        </Stack>
-
-
-
-
-
-                      </Stack>}
-
-                      {controlls.page === "Sign Up Page" && <Stack direction='row' alignItems='center' sx={{ width: '100%', flexGrow: 1, height: '100%', textAlign: 'center', transition: 'all .5s' }} spacing='20px' >
-
-                        <Stack spacing='3px' alignItems='center' justifyContent='center'>
-                          <Button sx={{
-                            padding: '0px', width: '50px', height: '50px', minWidth: 'auto', borderRadius: '12px', background: buttonSection === "User Info" ? "#1BFBB6" : '#F5F5F8',
-                            '&:hover': { background: buttonSection === "User Info" ? "#22C55E" : '#DEE1E6' }
-                          }}
-                            variant='contained'
-                            onClick={handleButton('User Info')}
-                          >
-                            <Box component='img' src='/raws/user-solid.svg' sx={{ width: '20px', height: '20px' }} />
-                          </Button>
-                          <Typography variant='caption' color='#0F1349'>User Info</Typography>
-                        </Stack>
-
-                      </Stack>}
-
-                    </Box>}
-                  </Scrollbar>
-                </Box>
-
-
-                <Actions condition={controlls.addSection}>
-                  <Card sx={{ borderRadius: '0px', p: '20px', height: '100%', boxShadow: '0px -6px 40px #00000014' }}>
-
-                    <Stack direction='row' justifyContent='space-between'>
-                      <Box>
-                        <Typography variant='h6'>Add New Section</Typography>
-                        <Typography variant='caption' color='#8688A3'>
-                          Select where you want to add this section.
-                        </Typography>
-                      </Box>
-                      <Iconify width={25} icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleCloseDropDown('addSection')} />
-                    </Stack>
-
-
-                    <Box mt='20px'>
-                      <Typography variant='caption' color='#8688A3'>
-                        Top Navigation (1)
-                      </Typography>
-
-                      <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
-                        width: '100%',
-                        minHeight: '61px',
-                        border: '4px solid #8688A333',
-                        borderRadius: '8px',
-                      }}>
-                        <Box component='img' src='/raws/navAS.png' sx={{ borderRadius: '8px', width: '100%' }} />
-                      </Stack>
-                    </Box>
-
-
-                    <Divider sx={{
-                      borderWidth: '2px', borderColor: '#F5F5F8', my: '20px',
-                      '& .MuiDivider-wrapper': {
-                        padding: 0
-                      }
-                    }}>
-                      <Stack direction='row' alignItems='center' spacing='8px' justifyContent='center' sx={{
-                        width: "120px",
-                        height: "36px",
-                        background: "#F5F5F8",
-                        borderRadius: "20px",
-                        cursor: 'pointer'
-                      }} >
-                        <Iconify icon='mingcute:add-fill' style={{ color: '#8688A3' }} />
-                        <Typography variant='button' color='#8688A3'>Add Here</Typography>
-                      </Stack>
-                    </Divider>
-
-                    <Box mt='20px'>
-                      <Typography variant='caption' color='#8688A3'>
-                        Categories section (2)
-                      </Typography>
-
-                      <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
-                        width: '100%',
-                        height: '178px',
-                        border: '4px solid #8688A333',
-                        borderRadius: '8px',
-                      }}>
-                        <Box component='img' src='/raws/catAS.png' sx={{ borderRadius: '8px', width: '100%', height: '100%' }} />
-                      </Stack>
-                    </Box>
-                    <Divider sx={{
-                      borderWidth: '2px', borderColor: '#F5F5F8', my: '20px',
-                      '& .MuiDivider-wrapper': {
-                        padding: 0
-                      }
-                    }}>
-                      <Stack direction='row' alignItems='center' spacing='8px' justifyContent='center' sx={{
-                        width: "120px",
-                        height: "36px",
-                        background: "#F5F5F8",
-                        borderRadius: "20px",
-                        cursor: 'pointer'
-                      }} >
-                        <Iconify icon='mingcute:add-fill' style={{ color: '#8688A3' }} />
-                        <Typography variant='button' color='#8688A3'>Add Here</Typography>
-                      </Stack>
-                    </Divider>
-
-                    <Box mt='20px'>
-                      <Typography variant='caption' color='#8688A3'>
-                        Mobiles Section (3)
-                      </Typography>
-
-                      <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
-                        width: '100%',
-                        height: '178px',
-                        border: '4px solid #8688A333',
-                        borderRadius: '8px',
-                      }}>
-                        <Box component='img' src='/raws/catAS.png' sx={{ borderRadius: '8px', width: '100%', height: '100%' }} />
-                      </Stack>
-                    </Box>
-
-
-                  </Card>
-                </Actions>
-
-
-                <Actions condition={buttonSection === 'Font'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6'>Font Style</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-
-                  <Box pt='20px'>
-                    <Scrollbar sx={{ pl: '10px' }}>
-                      <FontFamilyDealer mobile themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
-                    </Scrollbar>
-                  </Box>
-                </Actions>
-                <Actions condition={buttonSection === 'Buttons'}>
-                  <HeaderSection
-                    name='Button Style'
-                    description='Control the border radius of your button'
-                    cancel={{ key: 'buttonRadius', value: 10 }}
-                    handleThemeConfig={handleThemeConfig}
-                  // closer={handleButton('')}
-                  />
-                  <Buttons
-                    themeConfig={themeConfig}
-                    handleThemeConfig={handleThemeConfig}
-                  />
-                </Actions>
-                <Actions condition={buttonSection === 'Logo'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6'>Branding Logo</Typography>
-
-                      <Typography variant='caption'>Upload your website logo</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <Box mt='40px'>
-                    <LogoDealer builderId={builder_Id} themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
-                  </Box>
-                </Actions>
-                <Actions condition={buttonSection === 'Color'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6'>Colors</Typography>
-                      <Typography variant='caption'>Define your brand colors</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-
-                  <ColorsDealer themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
-
-                </Actions>
-                <Actions condition={buttonSection === 'Cart'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6'>Cart Icon Style</Typography>
-                      <Typography variant='caption'>Select the style of cart icon</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-
-                  <Scrollbar sx={{ pl: '10px' }}>
-                    <CartsDealer mobile themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
-                  </Scrollbar>
-
-                </Actions>
-                {/* <Actions condition={buttonSection === 'Categories'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6'>Categories Card</Typography>
-                      <Typography variant='caption'>Select the style of category card</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <Scrollbar >
-                    <StyleCategoriesDealer mobile themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
-                  </Scrollbar>
-                </Actions> */}
-
-
-                {/* Layout  HomePage */}
-
-                <Actions condition={buttonSection === 'Nav'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6'>Top Navigation</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-
-                  <NavDealer mobile handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-                <Actions condition={buttonSection === 'Banners'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6'>Banners</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-                <Actions condition={buttonSection === 'Header'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6'>Header</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <HeaderDealer builderId={builder_Id} handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-                <Actions condition={buttonSection === 'CategoriesLayout'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6'>Categories Layout</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <LayoutCategoriesDealer mobile handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-                <Actions condition={buttonSection === 'Products'}>
-                  <Stack direction='row' justifyContent='space-between' mb='20px'>
-                    <Box>
-                      <Typography variant='h6'>Products</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-
-                  <ProductViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-
-                {/* Layout  CategoriesPage */}
-                <Actions condition={buttonSection === 'List View'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6' sx={{ fontWeight: 900 }}>List View</Typography>
-                      <Typography variant='caption'>Select the view of the categories list</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-
-                  <ListViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-                <Actions condition={buttonSection === 'Card Style'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6'>Categories Card</Typography>
-                      <Typography variant='caption'>Select the style of category card</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <CardStyleDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-                <Actions condition={buttonSection === 'Card Shape'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6' sx={{ fontWeight: 900 }}>Card Shape</Typography>
-                      <Typography variant='caption'>Select the shape of category card</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <CardShapeDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-
-                {/* Product Details Page */}
-                <Actions condition={buttonSection === 'Images'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6' sx={{ fontWeight: 900 }}>Card Shape</Typography>
-                      <Typography variant='caption'>Select the shape of category card</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <ImagesStyleDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-                <Actions condition={buttonSection === 'Description'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6' sx={{ fontWeight: 900 }}>Description</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <DescriptionDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-                <Actions condition={buttonSection === 'Similar Products'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6' sx={{ fontWeight: 900 }}>Similar Products</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <SimilarProductsDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-                <Actions condition={buttonSection === 'Wishlist'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6' sx={{ fontWeight: 900 }}>Wishlist</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <WishlistDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-
-                {/* Products Page */}
-                <Actions condition={buttonSection === 'View'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6' sx={{ fontWeight: 900 }}>Product List View</Typography>
-                      <Typography variant='caption'>Select the view of the product list</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <ProductPageViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-                <Actions condition={buttonSection === 'Search'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6' sx={{ fontWeight: 900 }}>Search</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <ProductPageSearchDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-                <Actions condition={buttonSection === 'Filter'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6' sx={{ fontWeight: 900 }}>Filter</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <ProductPageFiltersDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-                <Actions condition={buttonSection === 'Product Card'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6' sx={{ fontWeight: 900 }}>Product Card Style</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <ProductPageProductCardDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-
-                {/* Sign Up Page */}
-                <Actions condition={buttonSection === 'User Info'}>
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Box>
-                      <Typography variant='h6' sx={{ fontWeight: 900 }}>Sign Up Info</Typography>
-                    </Box>
-                    <Stack direction='row' spacing='15px'>
-                      <Iconify icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                      <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
-                    </Stack>
-                  </Stack>
-                  <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-                </Actions>
-
-              </BottomActions>
-            </Grid>
-          </Grid>
-        </Container>
       </Box>}
 
     </Box >

@@ -51,6 +51,7 @@ import {
   setSubCategory,
 } from '../../../redux/store/thunks/category';
 import type { AppDispatch } from '../../../redux/store/store';
+import { MuiColorInput } from 'mui-color-input';
 
 // ----------------------------------------------------------------------
 
@@ -180,6 +181,7 @@ export default function CategoriesView() {
         name: {},
         category: '',
         image: '',
+        icon: '',
       };
       Object.entries(subCategory).forEach(([fieldName, nestedData]: any) => {
         if (fieldName === 'name') {
@@ -198,6 +200,8 @@ export default function CategoriesView() {
           newSubCategoryObj.category = nestedData._id;
         } else if (fieldName === 'image') {
           newSubCategoryObj.image = nestedData;
+        } else if (fieldName === 'icon') {
+          newSubCategoryObj.icon = nestedData;
         }
       });
 
@@ -219,6 +223,12 @@ export default function CategoriesView() {
     if (typeof categoriesData.image !== 'string') {
       FormValues.append('image', categoriesData.image);
     }
+    if (typeof categoriesData.icon !== 'string') {
+      FormValues.append('icon', categoriesData.icon);
+    }
+    if (typeof categoriesData?.bgColor !== 'string') {
+      FormValues.append('bgColor', categoriesData?.bgColor);
+    }
 
     dispatch(createCategory(FormValues)).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
@@ -237,11 +247,21 @@ export default function CategoriesView() {
     const FormValues: any = new FormData();
     Object.keys(categoriesData.name).forEach((key) => {
       const value = categoriesData.name[key];
-      FormValues.append(`name[${key}]`, value);
+      if (key !== "localized") {
+        FormValues.append(`name[${key}]`, value);
+      }
     });
     if (typeof categoriesData.image !== 'string') {
       FormValues.append('image', categoriesData.image);
     }
+    if (typeof categoriesData.icon !== 'string') {
+      FormValues.append('icon', categoriesData.icon);
+    }
+
+    if (typeof categoriesData?.bgColor !== 'string') {
+      FormValues.append('bgColor', categoriesData?.bgColor);
+    }
+
 
     dispatch(editCategory({ categoryId: editCatId, data: FormValues })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
@@ -272,10 +292,10 @@ export default function CategoriesView() {
     } else if (removeData && removeData.type === 'subcategory') {
       dispatch(deleteSubCategory(removeData.id)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
-          // dispatch(fetchSubCategorysList(error));
-          dispatch(fetchSubCategorysList(error)).then((res) =>
-            setSubCategoriesData(res?.payload?.data?.data)
-          );
+          dispatch(fetchSubCategorysList(error));
+          // dispatch(fetchSubCategorysList(error)).then((res) =>
+          //   setSubCategoriesData(res?.payload?.data?.data)
+          // );
           enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
           confirm.onFalse();
         } else {
@@ -295,16 +315,23 @@ export default function CategoriesView() {
     if (typeof subCategoriesData.image !== 'string') {
       FormValues.append('image', subCategoriesData.image);
     }
+    if (typeof subCategoriesData.icon !== 'string') {
+      FormValues.append('icon', subCategoriesData.icon);
+    }
     if (subCategoriesData?.category) {
       FormValues.append('category', subCategoriesData.category);
+    }
+
+    if (subCategoriesData?.bgColor) {
+      FormValues.append('bgColor', subCategoriesData.bgColor);
     }
     dispatch(createSubCategory(FormValues)).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
         setSubCategoriesData(null);
-        // dispatch(fetchSubCategorysList(error));
-        dispatch(fetchSubCategorysList(error)).then((res) =>
-          setSubCategoriesData(res?.payload?.data?.data)
-        );
+        dispatch(fetchSubCategorysList(error));
+        // dispatch(fetchSubCategorysList(error)).then((res) =>
+        //   setSubCategoriesData(res?.payload?.data?.data)
+        // );
         enqueueSnackbar('Successfully Created!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -315,20 +342,29 @@ export default function CategoriesView() {
     const FormValues: any = new FormData();
     Object.keys(subCategoriesData.name).forEach((key) => {
       const value = subCategoriesData.name[key];
-      FormValues.append(`name[${key}]`, value);
+      if (key !== "localized") {
+        FormValues.append(`name[${key}]`, value);
+      }
     });
     if (typeof subCategoriesData.image !== 'string') {
       FormValues.append('image', subCategoriesData.image);
     }
+    if (typeof subCategoriesData.icon !== 'string') {
+      FormValues.append('icon', subCategoriesData.icon);
+    }
     if (subCategoriesData?.category) {
       FormValues.append('category', subCategoriesData.category);
+    }
+    if (subCategoriesData?.bgColor) {
+      FormValues.append('bgColor', subCategoriesData.bgColor);
     }
     dispatch(editSubCategory({ subcategoryId: editSubCatId, data: FormValues })).then(
       (response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchSubCategorysList(error)).then((res) =>
-            setSubCategoriesData(res?.payload?.data?.data)
-          );
+          // dispatch(fetchSubCategorysList(error)).then((res) =>
+          //   setSubCategoriesData(res?.payload?.data?.data)
+          // );
+          dispatch(fetchSubCategorysList(error));
           enqueueSnackbar('Successfully Updated!', { variant: 'success' });
         } else {
           enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -364,7 +400,7 @@ export default function CategoriesView() {
   };
   const removeSubCatLogo = () => {
     setSubCategoriesData((current: any) => {
-      const { logo, ...rest } = current;
+      const { icon, ...rest } = current;
       return rest;
     });
   };
@@ -391,12 +427,12 @@ export default function CategoriesView() {
   };
   const handleCategoryLogo = (files: any) => {
     if (files.length > 0) {
-      setCategoriesData({ ...categoriesData, logo: files[0] });
+      setCategoriesData({ ...categoriesData, icon: files[0] });
     }
   };
   const handleSubCategoryLogo = (files: any) => {
     if (files.length > 0) {
-      setSubCategoriesData({ ...subCategoriesData, logo: files[0] });
+      setSubCategoriesData({ ...subCategoriesData, icon: files[0] });
     }
   };
   const removeImage = () => {
@@ -407,7 +443,7 @@ export default function CategoriesView() {
   };
   const removeLogo = () => {
     setCategoriesData((current: any) => {
-      const { logo, ...rest } = current;
+      const { icon, ...rest } = current;
       return rest;
     });
   };
@@ -464,19 +500,19 @@ export default function CategoriesView() {
       dispatch(fetchCategorysList({ pageNumber, pageSize })).then((response: any) => {
         setCategoriesLength(response.payload.data.count);
         setListItems(response.payload.data.data);
-        // dispatch(fetchSubCategorysList(error));
+        dispatch(fetchSubCategorysList(error));
       });
     }
   }, [loadStatus, dispatch, pageNumber]);
-  useEffect(() => {
-    if (loadStatus === 'idle') {
-      dispatch(fetchCategorysList({ pageNumber, pageSize })).then((response: any) => {
-        setCategoriesLength(response.payload.data.count);
-        setListItems(response.payload.data.data);
-        // dispatch(fetchSubCategorysList(error));
-      });
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (loadStatus === 'idle') {
+  //     dispatch(fetchCategorysList({ pageNumber, pageSize })).then((response: any) => {
+  //       setCategoriesLength(response.payload.data.count);
+  //       setListItems(response.payload.data.data);
+  //       // dispatch(fetchSubCategorysList(error));
+  //     });
+  //   }
+  // }, []);
 
   const handleOnDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -515,7 +551,8 @@ export default function CategoriesView() {
     fetchData();
   }, []);
   useEffect(() => {
-    dispatch(fetchSubCategorysList(error)).then((res) => setSubCategoriesData(res?.payload?.data?.data));
+    // dispatch(fetchSubCategorysList(error)).then((res) => setSubCategoriesData(res?.payload?.data?.data));
+    dispatch(fetchSubCategorysList(error));
   }, []);
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -786,7 +823,7 @@ export default function CategoriesView() {
             <>
               <Grid item xs={12} sm={6}>
                 <Typography component="h5" variant="h5">
-                  You have {subCategoriesData.length} subcategories{' '}
+                  You have {subCatList.length} subcategories{' '}
                 </Typography>
               </Grid>
 
@@ -813,7 +850,7 @@ export default function CategoriesView() {
                   </Stack>
                 </BottomActions>
               </Grid>
-              {subCategoriesData.map((subCatObject: any, index: any) => (
+              {/* {subCategoriesData && subCategoriesData?.map((subCatObject: any, index: any) => (
                 <Grid key={index} sx={{ mt: '20px' }} item xs={12}>
                   <Paper
                     elevation={4}
@@ -881,11 +918,11 @@ export default function CategoriesView() {
                     </Grid>
                   </Paper>
                 </Grid>
-              ))}
-              {/* {subCategoriesData?.length > 0 && (
+              ))} */}
+              {list?.length > 0 && (
                 <Grid item xs={12} container spacing={2}>
-                  {subCategoriesData?.map((cat: any, indx: any) => {
-                    const subCat = subCategoriesData?.filter(
+                  {list?.map((cat: any, indx: any) => {
+                    const subCat = subCatList?.filter(
                       (item: any) => item?.category === cat?._id
                     );
                     return (
@@ -912,12 +949,85 @@ export default function CategoriesView() {
                             {subCat.length} subcategories
                           </Typography>
                         </Grid>
-                        
+                        {subCat.map((subCatObject: any, index: any) => (
+                          <Grid key={index} item xs={12}>
+                            <Paper
+                              elevation={4}
+                              sx={{
+                                border: '2px solid #FFFFFF',
+                                '&:hover': { border: '2px solid #1BFCB6' },
+                              }}
+                            >
+                              <Grid
+                                container
+                                item
+                                alignItems="center"
+                                justifyContent="space-between"
+                                rowGap={3}
+                                sx={{ px: 3, py: { xs: 1.5 } }}
+                              >
+                                <Grid item xs="auto">
+                                  <Box
+                                    sx={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '15px',
+                                    }}
+                                  >
+                                    <Iconify icon="ci:drag-vertical" />
+                                    <Box
+                                      component="img"
+                                      src={subCatObject.image}
+                                      alt=" "
+                                      width="60px"
+                                    />
+                                    <Box display="flex" gap="0px" flexDirection="column">
+                                      <Typography
+                                        component="p"
+                                        variant="subtitle2"
+                                        sx={{ fontSize: '.9rem', fontWeight: 800 }}
+                                      >
+                                        {' '}
+                                        {subCatObject?.name?.en || subCatObject?.name}{' '}
+                                      </Typography>
+                                      <Typography
+                                        component="p"
+                                        noWrap
+                                        variant="subtitle2"
+                                        sx={{
+                                          opacity: 0.7,
+                                          fontSize: '.9rem',
+                                          maxWidth: { xs: '120px', md: '218px' },
+                                        }}
+                                      >
+                                        {0} subcategories - {0} products
+                                      </Typography>
+                                    </Box>
+                                  </Box>
+                                </Grid>
+                                <Grid item xs="auto" textAlign="right">
+                                  <Iconify
+                                    icon="carbon:delete"
+                                    onClick={() => {
+                                      setRemoveData({ type: 'subcategory', id: subCatObject._id });
+                                      confirm.onTrue();
+                                    }}
+                                  />{' '}
+                                  &nbsp; &nbsp; &nbsp;
+                                  <Iconify
+                                    icon="bx:edit"
+                                    onClick={toggleDrawerCommon('sub', subCatObject._id)}
+                                  />
+                                </Grid>
+                              </Grid>
+                            </Paper>
+                          </Grid>
+                        ))}
                       </React.Fragment>
                     );
                   })}
                 </Grid>
-              )} */}
+              )}
             </>
           )}
         </Grid>
@@ -988,12 +1098,18 @@ export default function CategoriesView() {
               >
                 Background Color (optional)
               </Typography>
-              <RHFTextField
+              {/* <RHFTextField
                 fullWidth
                 variant="filled"
                 value={categoriesData?.bgColor || ''}
                 settingStateValue={handleCategoryData}
                 name="bgColor"
+              /> */}
+              <MuiColorInput sx={{ width: "100%", margin: "auto", '& .css-1rn6l8w-MuiInputAdornment-root.MuiInputAdornment-positionStart.css-1rn6l8w-MuiInputAdornment-root:not(.MuiInputAdornment-hiddenLabel)': { margin: 0 } }} variant="filled"
+                value={categoriesData?.bgColor || ''}
+                // fullWidth
+                // onChange={event => isColorValid(event) ? setAppBar({ ...appBar, color: event }) : null}
+                onChange={event => setCategoriesData({ ...categoriesData, bgColor: event })}
               />
 
               <Typography
@@ -1006,7 +1122,7 @@ export default function CategoriesView() {
                 Logo
               </Typography>
               <Stack direction="row" spacing="10px">
-                {categoriesData?.logo ? (
+                {categoriesData?.icon ? (
                   <Box width={'100%'} display={'flex'}>
                     <Box
                       display={'flex'}
@@ -1020,9 +1136,9 @@ export default function CategoriesView() {
                         component="img"
                         borderRadius={'5px'}
                         src={
-                          typeof categoriesData.logo === 'string'
-                            ? categoriesData.logo
-                            : URL.createObjectURL(categoriesData.logo)
+                          typeof categoriesData.icon === 'string'
+                            ? categoriesData.icon
+                            : URL.createObjectURL(categoriesData.icon)
                         }
                         alt=""
                       />
@@ -1280,7 +1396,7 @@ export default function CategoriesView() {
                 Logo
               </Typography>
               <Stack direction="row" spacing="10px">
-                {subCategoriesData?.logo ? (
+                {subCategoriesData?.icon ? (
                   <Box
                     sx={{
                       width: '140px',
@@ -1299,9 +1415,9 @@ export default function CategoriesView() {
                       component="img"
                       borderRadius={'5px'}
                       src={
-                        typeof subCategoriesData.logo === 'string'
-                          ? subCategoriesData.logo
-                          : URL.createObjectURL(subCategoriesData.logo)
+                        typeof subCategoriesData.icon === 'string'
+                          ? subCategoriesData.icon
+                          : URL.createObjectURL(subCategoriesData.icon)
                       }
                       alt="subCategory"
                     />
@@ -1424,25 +1540,6 @@ export default function CategoriesView() {
                     sx={{ flexGrow: 1, height: 'auto', py: 2.5, mb: 3 }}
                   />
                 )}
-                <Box>
-                  <Typography
-                    mt="0px"
-                    component="p"
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.9rem' }}
-                  >
-                    Maximum size is 5mb
-                  </Typography>
-
-                  <Typography
-                    mt="0px"
-                    component="p"
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                  >
-                    You can use these extensions PNG or JPG
-                  </Typography>
-                </Box>
               </Stack>
             </Box>
           </FormProvider>

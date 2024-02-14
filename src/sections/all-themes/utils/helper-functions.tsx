@@ -8,8 +8,6 @@ export const socketClient = () => {
 
   const socketURL = process.env.NEXT_PUBLIC_SOCKET_URL;
   if (socketURL) {
-    console.log("socketURL", socketURL);
-
     const socket = io(socketURL, {
       // autoConnect: false,
       transports: ['websocket'],
