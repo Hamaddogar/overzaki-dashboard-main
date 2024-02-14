@@ -3,17 +3,18 @@ import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import EditIcon from '@mui/icons-material/Edit'; 
+import EditIcon from '@mui/icons-material/Edit';
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { enqueueSnackbar } from 'notistack';
 import { useUpdateFeatureMutation } from 'src/redux/store/services/api';
 import DetailsNavBar from '../products/DetailsNavBar';
-import { Stack } from '@mui/material';
+import { IconButton, ListItem, ListItemIcon, ListItemText, Stack } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import FormProvider from 'src/components/hook-form/form-provider';
 import { RHFCheckbox, RHFTextField } from 'src/components/hook-form';
+import { CheckCircleOutline } from '@mui/icons-material';
 
 
 const FeatureCart = ({ feature }: any) => {
@@ -31,7 +32,7 @@ const FeatureCart = ({ feature }: any) => {
         availableForFree: Yup.boolean().required('This field is required'),
         availableForPro: Yup.boolean().required('This field is required'),
     });
-    
+
     const methods = useForm({
         resolver: yupResolver(UpdateFeatureSchema),
         defaultValues: {
@@ -46,7 +47,7 @@ const FeatureCart = ({ feature }: any) => {
             availableForPro: feature.availableForPro,
         }
     });
-    
+
     const updateFeature = methods.handleSubmit(async (data) => {
         await updateFeatureReq({
             id: feature._id, // Assuming each feature has a unique ID
@@ -55,7 +56,7 @@ const FeatureCart = ({ feature }: any) => {
             availableForPro: data.availableForPro,
         }).unwrap();
     });
-    
+
 
     useEffect(() => {
         if (openChangeFeature) {
@@ -72,7 +73,7 @@ const FeatureCart = ({ feature }: any) => {
             });
         }
     }, [openChangeFeature, feature, methods.reset]);
-    
+
 
     useEffect(() => {
         // Handle API call responses
@@ -86,14 +87,17 @@ const FeatureCart = ({ feature }: any) => {
     }, [updateFeatureRes]);
 
     return (
-        <Box display="flex" alignItems="center" justifyContent={'space-between'} gap="20px">
+        <>
             {/* Display the feature title */}
-            <Typography variant="h6" maxWidth={350}>{feature.content.en}</Typography>
-
-            {/* Edit button with an icon */}
-            <Button variant="contained" startIcon={<EditIcon />} onClick={()=> setOpenChangeFeature(true)}>
-                Edit
-            </Button>
+            <ListItem>
+                <ListItemIcon>
+                    <CheckCircleOutline color="success" />
+                </ListItemIcon>
+                <ListItemText primary={feature.content.en} />
+                <IconButton edge="end" aria-label="edit" onClick={()=> setOpenChangeFeature(true)}>
+                    <EditIcon />
+                </IconButton>
+            </ListItem>
             <DetailsNavBar
                 open={openChangeFeature}
                 onClose={() => setOpenChangeFeature(false)}
@@ -213,7 +217,7 @@ const FeatureCart = ({ feature }: any) => {
                     </Box>
                 </FormProvider>
             </DetailsNavBar>
-        </Box>
+        </>
     );
 };
 

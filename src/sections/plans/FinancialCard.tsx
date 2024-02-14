@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, Typography, Button, Grid, Stack, Box } from '@mui/material';
+import { Card, CardContent, Typography, Button, Grid, Stack, Box, ListItem, ListItemIcon, ListItemText, List } from '@mui/material';
 import { useGetAllFeaturesByCatQuery, useUpdatePlanMutation } from 'src/redux/store/services/api';
 import DetailsNavBar from '../products/DetailsNavBar';
 import { LoadingButton } from '@mui/lab';
@@ -84,49 +84,50 @@ const FinancialPlanCard = ({ plan }: any) => {
 
 
     return (
-        <Card sx={{
-            minWidth: 450, margin: 2, overflow: 'visible',
-            transition: 'transform 0.3s ease-in-out, border 0.3s ease-in-out',
-            '&:hover': {
-                transform: 'scale(1.02)', // Scale up the card on hover
-                border: '1px solid #1BFDB7', // Add a border on hover
-            },
-        }}>
-            <CardContent>
-                {/* Name and Price */}
-                <Typography variant="h5" component="div" sx={{ mb: 2 }}>
-                    {plan?.type.toUpperCase()}
-                </Typography>
-                <Typography sx={{ mb: 2 }}>
-                    Price: ${plan?.price}
-                </Typography>
+        <>
+            <Card sx={{
+                minWidth: 350, margin: 2, overflow: 'visible',
+                transition: 'transform 0.3s ease-in-out, border 0.3s ease-in-out',
+                '&:hover': {
+                    transform: 'scale(1.02)',
+                    border: '1px solid #1BFDB7',
+                },
+            }}>
+                <CardContent>
+                    {/* Name and Price */}
+                    <Typography variant="h5" component="div" sx={{ mb: 2, color: 'primary.main' }}>
+                        {plan?.type.toUpperCase()}
+                    </Typography>
+                    <Typography variant="h6" sx={{ mb: 2 }}>
+                        Price: <Box component="span" fontWeight="fontWeightBold">${plan?.price}</Box>
+                    </Typography>
 
-                {/* Features Header */}
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                    Features:
-                </Typography>
+                    {/* Features Header */}
+                    <Typography variant="subtitle1" fontWeight="fontWeightMedium" sx={{ mb: 2 }}>
+                        Features:
+                    </Typography>
 
-                {/* Features List */}
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    {allFeaturesRes?.data?.data?.map((feature: any, index: any) => {
-                        if (plan.type === 'pro') {
-                            return feature.availableForPro && <FeatureCart key={index} feature={feature} />
-                        }
-                        if (plan.type === 'basic') {
-                            return feature.availableForFree && <FeatureCart key={index} feature={feature} />
-                        }
-                    })}
-                </Box>
+                    {/* Features List */}
+                    <List dense>
+                        {allFeaturesRes?.data?.data?.map((feature:any, index:number) => {
+                            if (plan.type === 'pro' && feature.availableForPro) {
+                                return <FeatureCart key={index} feature={feature} />;
+                            }
+                            if (plan.type === 'basic' && feature.availableForFree) {
+                                return <FeatureCart key={index} feature={feature} />;
+                            }
+                            return null;
+                        })}
+                    </List>
 
-                {/* Buttons */}
-                <Grid container spacing={2} justifyContent="center" sx={{ mt: 2 }}>
-                    <Grid item>
+                    {/* Button */}
+                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                         <Button variant="contained" size="small" onClick={() => setOpenChangePlan(true)}>
                             Change Plan
                         </Button>
-                    </Grid>
-                </Grid>
-            </CardContent>
+                    </Box>
+                </CardContent>
+            </Card>
             {/* update plan */}
             <DetailsNavBar
                 open={openChangePlan}
@@ -241,7 +242,7 @@ const FinancialPlanCard = ({ plan }: any) => {
                     </Box>
                 </FormProvider>
             </DetailsNavBar>
-        </Card>
+        </>
     );
 };
 
