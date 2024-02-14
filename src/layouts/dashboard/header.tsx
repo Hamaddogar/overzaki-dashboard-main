@@ -149,7 +149,7 @@ export default function Header({ onOpenNav }: Props) {
 
 
           {selectedDomain && Object.entries(selectedDomain).length > 0 && (
-            <Stack direction='row' alignItems='center' spacing="4px" >
+            <Stack direction='row' alignItems='center' spacing="4px" sx={{cursor:"pointer"}}>
               <Box component='img' src={selectedDomain?.appLogo} sx={{ width: '40px' }} />
               <Box>
                 <Typography
@@ -174,7 +174,7 @@ export default function Header({ onOpenNav }: Props) {
 
         </Box>
       )}
-      <Menu id="domain-menu" anchorEl={domain.open} onClose={handleClose('all')} open={Boolean(domain.open)}>
+      <Menu id="domain-menu" anchorEl={domain.open} sx={{}} onClose={handleClose('all')} open={Boolean(domain.open)}>
 
         {list?.map((builder: any, index: any) => (
           <MenuItem key={index} selected={selectedDomain?._id === builder?._id} sx={{ marginBottom: "20px" }} onClick={handleClose(builder)}>
@@ -185,13 +185,13 @@ export default function Header({ onOpenNav }: Props) {
                   <Typography
                     component='p'
                     variant="subtitle2"
-                    sx={{ opacity: 0.8, display: 'flex', alignItems: 'center', fontSize: '0.775rem', fontWeight: 900, gap: '3px' }}
-                  > <span>{builder?.appName?.localized || ""}</span> </Typography>
+                    sx={{ opacity: 0.8, display: 'flex', alignItems: 'center', cursor:'pointer', fontSize: '0.775rem', fontWeight: 900, gap: '3px' }}
+                  > <span style={{ cursor: 'pointer'}}>{builder?.appName?.localized || ""}</span> </Typography>
                   <Typography
                     component='p'
                     variant="subtitle2"
-                    sx={{ opacity: 0.6, fontSize: '0.675rem' }}
-                  > <span>{builder?.domain || ""}</span>  </Typography>
+                    sx={{ opacity: 0.6, fontSize: '0.675rem' , cursor:'pointer'}}
+                  > <span style={{ cursor: 'pointer'}}>{builder?.domain || ""}</span>  </Typography>
                 </Box>
               </Stack>
               {selectedDomain?._id === builder?._id && (
