@@ -1,13 +1,16 @@
 // apiSlice.js
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { getCookie } from 'src/auth/context/jwt/utils';
+import { RootState } from '../store';
 
 export const api = createApi({
     reducerPath: 'overzaki',
     baseQuery: fetchBaseQuery({
         baseUrl: 'https://www.overzaki.io/api',
         prepareHeaders: (headers, { getState }) => {
+            const state: RootState = getState() as any
             headers.set('Authorization', `Bearer ${getCookie('accessToken')}`);
+            headers.set('x-tenant-id', state.selectedDomain.data.domain)
             return headers;
         }
     }),
@@ -262,6 +265,14 @@ export const api = createApi({
                 url: `/builder/${id}`,
             }),
         }),
+        // upgrade plan
+        upgradePlan: builder.mutation({
+            query: (data) => ({
+                url: `/plan-subscription/upgrade_plan`,
+                method: 'PUT',
+                body: data
+            }),
+        }),
     }),
 });
 
@@ -311,6 +322,8 @@ export const {
     useAddNewFeatureMutation,
     useGetAllFeaturesByCatQuery,
     useUpdateFeatureMutation,
+    // plan sub
+    useUpgradePlanMutation,
     // builder
     useGetBuilderDetailsQuery
 } = api;

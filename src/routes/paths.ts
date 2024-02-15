@@ -107,6 +107,7 @@ export const paths = {
     icon: `${ROOTS.DASHBOARD}/icon`,
     style: `${ROOTS.DASHBOARD}/style`,
     plans: `${ROOTS.DASHBOARD}/plans`,
+    upgradePlans: `${ROOTS.DASHBOARD}/upgrade-Plans`,
     general: {
       app: `${ROOTS.DASHBOARD}/app`,
       apptools: `${ROOTS.DASHBOARD}/tools`,

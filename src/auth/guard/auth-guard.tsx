@@ -1,9 +1,13 @@
+'use client'
 import { useEffect, useCallback, useState } from 'react';
 // routes
 import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
+import { usePathname, useRouter } from 'src/routes/hooks';
 //
 import { useAuthContext } from '../hooks';
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/redux/store/store';
+import { useGetBuilderDetailsQuery } from 'src/redux/store/services/api';
 
 // ----------------------------------------------------------------------
 
@@ -21,6 +25,9 @@ type Props = {
 };
 
 export default function AuthGuard({ children }: Props) {
+  const selectedDomain = useSelector((state:RootState)=> state.selectedDomain.data)
+  const getBuilderDomainDetailsRes = useGetBuilderDetailsQuery(selectedDomain?._id)
+  const path = usePathname()
   const router = useRouter();
 
   const { authenticated, method } = useAuthContext();
@@ -47,6 +54,13 @@ export default function AuthGuard({ children }: Props) {
     check();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if(getBuilderDomainDetailsRes?.data?.data?.planSubscription?.remainingDays === 0) {
+      router.push(paths.dashboard.upgradePlans)
+    }
+  }, [path , getBuilderDomainDetailsRes])
+  
 
   if (!checked) {
     return null;
