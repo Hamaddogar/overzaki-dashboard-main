@@ -1,8 +1,9 @@
 
-import React, { ChangeEvent } from 'react';
-import { TextField, Typography, Box, Stack, Switch, Divider } from '@mui/material';
+import React, { ChangeEvent, useState } from 'react';
+import { TextField, Typography, Box, Stack, Switch, Divider, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import Iconify from 'src/components/iconify';
 import { VisuallyHiddenInput } from './logo-part';
+import './style.css'
 
 
 // ----------------------------------------------------------------------
@@ -10,7 +11,7 @@ import { VisuallyHiddenInput } from './logo-part';
 interface BannerProps {
     themeConfig: {
         bannerShow: boolean;
-        bannerImages:Array<string>
+        bannerImages: Array<string>
         // Add other themeConfig properties as needed
     };
     handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
@@ -18,6 +19,7 @@ interface BannerProps {
 }
 
 export default function BannerDealer({ themeConfig, handleThemeConfig, mobile = false }: BannerProps) {
+    const [banner, setBanner] = useState<any>({})
 
     const handleActionsBanner = (action: string, location: number, arrayData: any) => (event: any) => {
         switch (action) {
@@ -50,6 +52,9 @@ export default function BannerDealer({ themeConfig, handleThemeConfig, mobile = 
         }
     };
 
+    const handleChangeEvent = (key: string, value: any, parent: any) => {
+
+    }
     return (
         <Box pt='20px'>
 
@@ -64,8 +69,19 @@ export default function BannerDealer({ themeConfig, handleThemeConfig, mobile = 
 
             <Divider sx={{ borderWidth: '1px', borderColor: '#EBEBEB', my: '20px' }} />
 
-            <Typography variant='caption' component='p' color='#8688A3'>Sort</Typography>
-            <TextField variant='filled' defaultValue={2} />
+            <Box sx={{ width: "100%" }} >
+                <Typography variant='caption' color='#8688A3'>Banner Type</Typography>
+                <RadioGroup row value={banner?.search?.status || "true"} onChange={(event: any) => handleChangeEvent('status', event?.target?.value, 'search')}>
+                    <FormControlLabel value="slider" control={<Radio size="medium" />} label="Slider" />
+                    <FormControlLabel value="image" control={<Radio size="medium" />} label="Image" />
+                    <FormControlLabel value="video" control={<Radio size="medium" />} label="Video" />
+                </RadioGroup>
+            </Box>
+
+
+
+            {/* <Typography variant='caption' component='p' color='#8688A3'>Sort</Typography>
+            <TextField variant='filled' defaultValue={2} /> */}
 
             {themeConfig.bannerImages.map((img, index, self) => <Box key={index} sx={{
                 width: "100%",

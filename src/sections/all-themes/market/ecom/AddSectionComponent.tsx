@@ -57,17 +57,34 @@ const AddSectionComponent = ({ onClose, onClick }: any) => {
 
                 <Box mt='20px'>
                     <Typography variant='caption' color='#8688A3'>
+                        Top Bar
+                    </Typography>
+
+                    <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
+                        width: '100%',
+                        height: '58px',
+                        border: '4px solid #8688A333',
+                        borderRadius: '8px',
+                        cursor: "pointer",
+                        overflow: "hidden"
+
+                    }} onClick={() => onClick("Top Bar")} >
+                        <Box component='img' src='/raws/topBar.png' sx={{ borderRadius: '8px', width: '80%', m: 'auto' }} />
+                    </Stack>
+                </Box>
+                <Box mt='20px'>
+                    <Typography variant='caption' color='#8688A3'>
                         App Bar
                     </Typography>
 
                     <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
                         width: '100%',
-                        height: '178px',
+                        height: '110px',
                         border: '4px solid #8688A333',
                         borderRadius: '8px',
                         cursor: "pointer"
                     }} onClick={() => onClick("App Bar")} >
-                        <Box component='img' src='/raws/nav2.svg' sx={{ borderRadius: '8px', width: '100%', height: '100%' }} />
+                        <Box component='img' src='/raws/nav2.svg' sx={{ borderRadius: '8px', width: '80%', m: "auto" }} />
                     </Stack>
                 </Box>
                 <Divider sx={{
@@ -84,10 +101,46 @@ const AddSectionComponent = ({ onClose, onClick }: any) => {
                         cursor: 'pointer'
                     }} >
                         <Iconify icon='mingcute:add-fill' style={{ color: '#8688A3' }} />
-                        <Typography variant='button' color='#8688A3'>Add Here</Typography>
+                        <Typography variant='button' color='#8688A3'>Slider</Typography>
                     </Stack>
                 </Divider>
 
+                <Box mt='20px'>
+                    <Typography variant='caption' color='#8688A3'>
+                        Slider
+                    </Typography>
+
+                    <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
+                        width: '100%',
+                        height: '258px',
+                        border: '4px solid #8688A333',
+                        borderRadius: '8px',
+                        cursor: "pointer",
+                        overflow: "hidden"
+
+                    }} onClick={() => onClick("Header")} >
+                        <Box component='img' src='/raws/slider.png' sx={{ borderRadius: '8px', width: '80%', m: "auto" }} />
+                    </Stack>
+                </Box>
+
+
+                <Divider sx={{
+                    borderWidth: '2px', borderColor: '#F5F5F8', my: '20px',
+                    '& .MuiDivider-wrapper': {
+                        padding: 0
+                    }
+                }}>
+                    <Stack direction='row' alignItems='center' spacing='8px' justifyContent='center' sx={{
+                        width: "120px",
+                        height: "36px",
+                        background: "#F5F5F8",
+                        borderRadius: "20px",
+                        cursor: 'pointer'
+                    }} >
+                        <Iconify icon='mingcute:add-fill' style={{ color: '#8688A3' }} />
+                        <Typography variant='button' color='#8688A3'>Categories</Typography>
+                    </Stack>
+                </Divider>
                 <Box mt='20px'>
                     <Typography variant='caption' color='#8688A3'>
                         Categories section (2)
@@ -98,8 +151,11 @@ const AddSectionComponent = ({ onClose, onClick }: any) => {
                         height: '178px',
                         border: '4px solid #8688A333',
                         borderRadius: '8px',
-                    }}>
-                        <Box component='img' src='/raws/catAS.png' sx={{ borderRadius: '8px', width: '100%', height: '100%' }} />
+                    }}
+                        onClick={() => onClick("CategoriesLayout")}
+                    >
+
+                        <Box component='img' src='/raws/categories.png' sx={{ borderRadius: '8px', width: '80%', m: "auto" }} />
                     </Stack>
                 </Box>
                 <Divider sx={{
@@ -116,22 +172,124 @@ const AddSectionComponent = ({ onClose, onClick }: any) => {
                         cursor: 'pointer'
                     }} >
                         <Iconify icon='mingcute:add-fill' style={{ color: '#8688A3' }} />
-                        <Typography variant='button' color='#8688A3'>Add Here</Typography>
+                        <Typography variant='button' color='#8688A3'>Video Section</Typography>
+                    </Stack>
+                </Divider>
+                <Box mt='20px'>
+                    <Typography variant='caption' color='#8688A3'>
+                        Video section (2)
+                    </Typography>
+
+                    <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
+                        width: '100%',
+                        // height: '178px',
+                        border: '4px solid #8688A333',
+                        borderRadius: '8px',
+                    }}
+                        onClick={() => onClick("video")}
+                    >
+
+                        <Box component='img' src='/raws/video.png' sx={{ borderRadius: '8px', width: '80%', height: "auto", m: "auto" }} />
+                    </Stack>
+                </Box>
+                <Divider sx={{
+                    borderWidth: '2px', borderColor: '#F5F5F8', my: '20px',
+                    '& .MuiDivider-wrapper': {
+                        padding: 0
+                    }
+                }}>
+                    <Stack direction='row' alignItems='center' spacing='8px' justifyContent='center' sx={{
+                        width: "120px",
+                        height: "36px",
+                        background: "#F5F5F8",
+                        borderRadius: "20px",
+                        cursor: 'pointer'
+                    }} >
+                        <Iconify icon='mingcute:add-fill' style={{ color: '#8688A3' }} />
+                        <Typography variant='button' color='#8688A3'>Banners</Typography>
+                    </Stack>
+                </Divider>
+                <Box mt='20px'>
+                    <Typography variant='caption' color='#8688A3'>
+                        Banner
+                    </Typography>
+
+                    <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
+                        width: '100%',
+                        height: '150px',
+                        border: '4px solid #8688A333',
+                        borderRadius: '8px',
+                        cursor: "pointer",
+                        overflow: "hidden"
+
+                    }} onClick={() => onClick("Banner")} >
+                        <Box component='img' src='/raws/banner2.png' sx={{ borderRadius: '8px', width: '80%', m: "auto" }} />
+                    </Stack>
+                </Box>
+
+
+                <Divider sx={{
+                    borderWidth: '2px', borderColor: '#F5F5F8', my: '20px',
+                    '& .MuiDivider-wrapper': {
+                        padding: 0
+                    }
+                }}>
+                    <Stack direction='row' alignItems='center' spacing='8px' justifyContent='center' sx={{
+                        width: "120px",
+                        height: "36px",
+                        background: "#F5F5F8",
+                        borderRadius: "20px",
+                        cursor: 'pointer'
+                    }} >
+                        <Iconify icon='mingcute:add-fill' style={{ color: '#8688A3' }} />
+                        <Typography variant='button' color='#8688A3'>Products</Typography>
                     </Stack>
                 </Divider>
 
                 <Box mt='20px'>
                     <Typography variant='caption' color='#8688A3'>
-                        Mobiles Section (3)
+                        Products Section
                     </Typography>
 
                     <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
                         width: '100%',
-                        height: '178px',
+                        // height: '178px',
                         border: '4px solid #8688A333',
                         borderRadius: '8px',
-                    }}>
-                        <Box component='img' src='/raws/catAS.png' sx={{ borderRadius: '8px', width: '100%', height: '100%' }} />
+                    }} onClick={() => onClick("Products")} >
+                        <Box component='img' src='/raws/products.png' sx={{ borderRadius: '8px', width: '80%', m: "auto" }} />
+                    </Stack>
+                </Box>
+                <Divider sx={{
+                    borderWidth: '2px', borderColor: '#F5F5F8', my: '20px',
+                    '& .MuiDivider-wrapper': {
+                        padding: 0
+                    }
+                }}>
+                    <Stack direction='row' alignItems='center' spacing='8px' justifyContent='center' sx={{
+                        width: "120px",
+                        height: "36px",
+                        background: "#F5F5F8",
+                        borderRadius: "20px",
+                        cursor: 'pointer'
+                    }} >
+                        <Iconify icon='mingcute:add-fill' style={{ color: '#8688A3' }} />
+                        <Typography variant='button' color='#8688A3'>Footer</Typography>
+                    </Stack>
+                </Divider>
+
+                <Box mt='20px'>
+                    <Typography variant='caption' color='#8688A3'>
+                        Footer Section
+                    </Typography>
+
+                    <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
+                        width: '100%',
+                        height: '128px',
+                        border: '4px solid #8688A333',
+                        borderRadius: '8px',
+                    }} onClick={() => onClick("Footer")} >
+                        <Box component='img' src='/raws/footer.png' sx={{ borderRadius: '8px', width: '80%', m: "auto" }} />
                     </Stack>
                 </Box>
 

@@ -208,3 +208,7 @@
 .swiper-button-next.slider-arrow::after {
   display: none;
 }
+
+.css-afhsyo-MuiPaper-root-MuiAccordion-root.Mui-expanded {
+  background-color: red !important;
+}

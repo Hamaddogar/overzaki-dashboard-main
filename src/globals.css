@@ -5,3 +5,9 @@
 ::-webkit-scrollbar {
   display: none;
 }
+.MuiStack-root .Mui-expanded {
+  background: #161c24 !important;
+}
+.css-afhsyo-MuiPaper-root-MuiAccordion-root.Mui-expanded {
+  background: #161c24 !important;
+}
