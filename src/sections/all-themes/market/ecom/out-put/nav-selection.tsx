@@ -25,7 +25,6 @@ import LogoDealer, { VisuallyHiddenInput } from './logo-part';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
 import { saveLogo } from 'src/redux/store/thunks/builder';
-import ColorPicker from 'react-best-gradient-color-picker';
 import Sketch from '@uiw/react-color-sketch';
 import './style.css';
 // ----------------------------------------------------------------------
@@ -77,6 +76,17 @@ export default function NavDealer({
     };
   };
 
+  // useEffect(() => {
+  //   if (socket) {
+  //     socket.on(`${builder_Id}:cmd`, (data) => {
+  //       console.log("response");
+
+  //       console.log(JSON.stringify(data.result));
+  //     });
+  //   }
+  // }, [builder_Id])
+
+
   const handleChangeEvent = debounce(
     (
       key: string,
@@ -102,7 +112,8 @@ export default function NavDealer({
       // valueToShare = typeof newValue === 'number' ? `${newValue}px` : newValue;
       valueToShare = newValue;
 
-      const targetHeader = 'appBar.appBar.';
+      // const targetHeader = 'appBar.appBar.';
+      const targetHeader = 'home.sections.appBar.';
       const data = {
         builderId: builder_Id,
         key: targetHeader + _socketKey,
@@ -110,7 +121,6 @@ export default function NavDealer({
       };
 
       console.log("data", data);
-
 
       if (socket) {
         socket.emit('website:cmd', data);
@@ -196,18 +206,17 @@ export default function NavDealer({
   }, [menus]);
 
   const sendSocketMsg = debounce((menuesList: any) => {
-    // const _socketKey = "menuItems";
-    // const valueToShare = menuesList;
-    // const targetHeader = 'appBar.appBar.menu';
-    // const data = {
-    //   builderId: builder_Id,
-    //   key: targetHeader + _socketKey,
-    //   value: valueToShare,
-    // };
-    // // console.log("data", data);
-    // if (socket) {
-    //   socket.emit('website:cmd', data);
-    // }
+    const targetHeader = 'home.sections.appBar.menu.';
+    const _socketKey = "menuItems";
+    const valueToShare = menuesList;
+    const data = {
+      builderId: builder_Id,
+      key: targetHeader + _socketKey,
+      value: valueToShare,
+    };
+    if (socket) {
+      socket.emit('website:cmd', data);
+    }
   }, 1500)
 
 
@@ -243,9 +252,6 @@ export default function NavDealer({
         <Accordion
           sx={{
             width: '100%',
-            '& .css-55bqac-MuiPaper-root-MuiAccordion-root.Mui-expanded': {
-              backgroundColor: 'white !important',
-            },
           }}
         >
           <AccordionSummary
@@ -562,7 +568,7 @@ export default function NavDealer({
                         <TextField
                           variant="filled"
                           type="number"
-                          value={appBar?.menu?.size}
+                          value={appBar?.menu?.style?.size}
                           onChange={(event) =>
                             handleChangeEvent('size', event.target.value, 'menu', 'style')
                           }
@@ -801,6 +807,21 @@ export default function NavDealer({
                   />
                 </Stack>
 
+                <Box sx={{ width: '100%', my: 2 }}>
+                  <Typography variant="caption" color="#8688A3">
+                    Position
+                  </Typography>
+                  <RadioGroup
+                    row
+                    value={appBar?.search?.position}
+                    onChange={(event: any) => handleChangeEvent('position', event.target.value, 'search')}
+                  >
+                    <FormControlLabel value="left" control={<Radio size="medium" />} label="Left" />
+                    <FormControlLabel value="center" control={<Radio size="medium" />} label="Center " />
+                    <FormControlLabel value="right" control={<Radio size="medium" />} label="Right" />
+                  </RadioGroup>
+                </Box>
+
                 <Box sx={{ width: '100%' }}>
                   <Typography variant="caption" color="#8688A3">
                     Background Color
@@ -878,8 +899,6 @@ export default function NavDealer({
                           handleChangeEvent('borderWidth', newValue, 'search')
                         }
                         valueLabelDisplay="auto"
-                        marks
-                        // step={5}
                         min={0}
                         max={20}
                       />

@@ -65,9 +65,6 @@ export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalPr
     setThemeType(theme_type.toLowerCase());
   }, [theme_type]);
 
-  // useEffect(() => {
-  // }, [theme_type])
-
   const data = [
     { name: 'ecom', image: ECom, type: 'market', url: 'https://ecom-zaki.vercel.app', num: 1 },
     {
@@ -274,7 +271,12 @@ export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalPr
                     Preview
                   </button>
                   <Link
-                    href={paths.dashboard.design.theme(themeType, theme?.name, theme?.url, 'temporary')}
+                    href={paths.dashboard.design.theme(
+                      themeType,
+                      theme?.name,
+                      theme?.url,
+                      'temporary'
+                    )}
                     type="button"
                     style={{
                       backgroundColor: '#10134a',

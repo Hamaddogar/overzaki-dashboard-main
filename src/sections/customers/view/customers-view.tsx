@@ -159,7 +159,6 @@ export default function OrdersListView() {
       } else {
         await createCustomerFun();
       }
-      setOpenDetails(false)
     } catch (error) {
       reset();
       setErrorMsg(typeof error === 'string' ? error : error.message);

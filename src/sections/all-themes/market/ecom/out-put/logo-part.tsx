@@ -61,7 +61,8 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
     // valueToShare = typeof newValue === 'number' ? `${newValue}px` : newValue;
     valueToShare = newValue;
 
-    const targetHeader = 'appBar.websiteLogo.';
+    // const targetHeader = 'appBar.websiteLogo.';
+    const targetHeader = 'home.sections.general.websiteLogo.';
     const data = {
       builderId: builderId,
       key: targetHeader + _socketKey,
@@ -141,7 +142,7 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
         </Typography>
         <Switch
           checked={logoObj?.status}
-          onChange={(event: any) => handleChangeEvent('status', event?.target?.value)}
+          onChange={(event: any, value: any) => handleChangeEvent('status', value)}
           inputProps={{ 'aria-label': 'controlled' }}
         />
       </Stack>
@@ -210,8 +211,6 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
                 handleChangeEvent('borderWidth', newValue, 'logoObj')
               }
               valueLabelDisplay="auto"
-              marks
-              step={1}
               min={0}
               max={5}
             />
@@ -230,8 +229,6 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
                 handleChangeEvent('borderRaduis', newValue, 'logoObj')
               }
               valueLabelDisplay="auto"
-              marks
-              step={5}
               min={0}
               max={100}
             />

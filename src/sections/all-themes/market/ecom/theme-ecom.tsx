@@ -51,6 +51,10 @@ import { socketClient } from '../../utils/helper-functions';
 import { useSnackbar } from 'notistack';
 import AddSectionComponent from './AddSectionComponent';
 import StyleCategoriesDealer from './out-put/style-categories-selection';
+import TopBarDealer from './out-put/topbar-selection';
+import VideoDealer from './out-put/video-dealer';
+import BrandDealer from './out-put/brand-dealer';
+import StylesDealer from './out-put/styles-dealer';
 
 const dataPages = [
   { title: 'Home Page', link: 'https://ecom-zaki.vercel.app/' },
@@ -86,9 +90,13 @@ const defaultSections = [
         name: 'Top Bar',
         img: '/raws/bars.svg',
         show: true,
-        // Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
-        //   <NavDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} builder_Id={builder_Id} />
-        // )
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
+          <TopBarDealer
+            handleThemeConfig={handleThemeConfig}
+            themeConfig={themeConfig}
+            builder_Id={builder_Id}
+          />
+        ),
       },
       {
         name: 'App Bar',
@@ -144,6 +152,15 @@ const defaultSections = [
         name: 'Video',
         img: '/raws/Trending.svg',
         show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <VideoDealer />,
+      },
+      {
+        name: 'Brand Ads',
+        img: '/raws/Trending.svg',
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <BrandDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        ),
       },
       {
         name: 'Products',
@@ -169,6 +186,28 @@ const defaultSections = [
   {
     page: 'Products Page',
     sectinos: [
+      {
+        name: 'Search',
+        img: '/raws/si.png',
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <ProductPageSearchDealer
+            handleThemeConfig={handleThemeConfig}
+            themeConfig={themeConfig}
+          />
+        ),
+      },
+      {
+        name: 'Filter',
+        img: '/raws/filters.png',
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <ProductPageFiltersDealer
+            handleThemeConfig={handleThemeConfig}
+            themeConfig={themeConfig}
+          />
+        ),
+      },
       {
         name: 'List View',
         img: '/raws/listing.svg',
@@ -201,28 +240,7 @@ const defaultSections = [
           <ProductPageViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
         ),
       },
-      {
-        name: 'Search',
-        img: '/raws/si.png',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <ProductPageSearchDealer
-            handleThemeConfig={handleThemeConfig}
-            themeConfig={themeConfig}
-          />
-        ),
-      },
-      {
-        name: 'Filter',
-        img: '/raws/filters.png',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <ProductPageFiltersDealer
-            handleThemeConfig={handleThemeConfig}
-            themeConfig={themeConfig}
-          />
-        ),
-      },
+
       {
         name: 'Product Card',
         img: '/raws/cards.svg',
@@ -419,7 +437,7 @@ export default function EcomDesignMain() {
 
     //
     bannerShow: false,
-    bannerImages: ['/raws/banner1.png', '/raws/bags.jpg'],
+    bannerImages: [],
     //
     headerShow: false,
     headerImages: '/raws/bags.jpg',
@@ -494,8 +512,9 @@ export default function EcomDesignMain() {
   });
 
   const searchParams = useSearchParams();
-  const url = searchParams.get('url')?.toString() || '';
   const builder_Id = searchParams.get('id')?.toString() || '';
+  // const url = searchParams.get('url')?.toString() || '';
+  const url = "http://localhost:3000";
 
   const debounce = (func: any, delay: any) => {
     let timeoutId: any;
@@ -665,18 +684,18 @@ export default function EcomDesignMain() {
                       sx={
                         activeSection === 'Style'
                           ? {
-                              borderRadius: '12px',
-                              color: '#0F1349',
-                              backgroundColor: '#FFFFFF',
-                              boxShadow: '0px 6px 20px #00000033',
-                              '&:hover': { backgroundColor: '#FFFFFF' },
-                            }
+                            borderRadius: '12px',
+                            color: '#0F1349',
+                            backgroundColor: '#FFFFFF',
+                            boxShadow: '0px 6px 20px #00000033',
+                            '&:hover': { backgroundColor: '#FFFFFF' },
+                          }
                           : {
-                              borderRadius: '12px',
-                              color: '#8688A3',
-                              backgroundColor: 'background.neutral',
-                              '&:hover': { backgroundColor: 'background.neutral' },
-                            }
+                            borderRadius: '12px',
+                            color: '#8688A3',
+                            backgroundColor: 'background.neutral',
+                            '&:hover': { backgroundColor: 'background.neutral' },
+                          }
                       }
                     >
                       {' '}
@@ -690,18 +709,18 @@ export default function EcomDesignMain() {
                       sx={
                         activeSection === 'Layout'
                           ? {
-                              borderRadius: '12px',
-                              color: '#0F1349',
-                              backgroundColor: '#FFFFFF',
-                              boxShadow: '0px 6px 20px #00000033',
-                              '&:hover': { backgroundColor: '#FFFFFF' },
-                            }
+                            borderRadius: '12px',
+                            color: '#0F1349',
+                            backgroundColor: '#FFFFFF',
+                            boxShadow: '0px 6px 20px #00000033',
+                            '&:hover': { backgroundColor: '#FFFFFF' },
+                          }
                           : {
-                              borderRadius: '12px',
-                              color: '#8688A3',
-                              backgroundColor: 'background.neutral',
-                              '&:hover': { backgroundColor: '#FFFFFF' },
-                            }
+                            borderRadius: '12px',
+                            color: '#8688A3',
+                            backgroundColor: 'background.neutral',
+                            '&:hover': { backgroundColor: '#FFFFFF' },
+                          }
                       }
                     >
                       {' '}
@@ -867,6 +886,21 @@ export default function EcomDesignMain() {
                           handleThemeConfig={handleThemeConfig}
                         />
                         <CartsDealer
+                          themeConfig={themeConfig}
+                          handleThemeConfig={handleThemeConfig}
+                        />
+                      </Box>
+                    )}
+                    {buttonSection === 'Styles' && (
+                      <Box>
+                        <HeaderSection
+                          name="General Style"
+                          description="Select the style of Icons"
+                          cancel={{ key: 'cart', value: '1' }}
+                          handleCancelBtn={handleCancelBtn}
+                          handleThemeConfig={handleThemeConfig}
+                        />
+                        <StylesDealer
                           themeConfig={themeConfig}
                           handleThemeConfig={handleThemeConfig}
                         />
@@ -1061,6 +1095,32 @@ export default function EcomDesignMain() {
                           </Button>
                           <Typography variant="caption" color="#0F1349">
                             Cart
+                          </Typography>
+                        </Stack>
+                        <Stack spacing="3px" alignItems="center" justifyContent="center">
+                          <Button
+                            sx={{
+                              padding: '0px',
+                              width: '50px',
+                              height: '50px',
+                              minWidth: 'auto',
+                              borderRadius: '12px',
+                              background: buttonSection === 'Cart' ? '#1BFBB6' : '#F5F5F8',
+                              '&:hover': {
+                                background: buttonSection === 'Cart' ? '#22C55E' : '#DEE1E6',
+                              },
+                            }}
+                            variant="contained"
+                            onClick={handleButton('Styles')}
+                          >
+                            <Box
+                              component="img"
+                              src="/raw/shopping-cart.svg"
+                              sx={{ width: '30px', height: '30px' }}
+                            />
+                          </Button>
+                          <Typography variant="caption" color="#0F1349">
+                            General Styling
                           </Typography>
                         </Stack>
 

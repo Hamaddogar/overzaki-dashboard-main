@@ -164,7 +164,6 @@ export default function OrdersListView() {
       } else {
         await createProductFun();
       }
-      setOpenDetails(false)
     } catch (error) {
       console.error(error);
       reset();
