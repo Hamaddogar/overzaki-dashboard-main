@@ -16,7 +16,7 @@ import Link from 'next/link';
 import ThemesViewRoot from 'src/sections/all-themes/view/themes-view';
 
 
-const data = [
+export const data = [
     {
         icon: 'ant-design:shopping-outlined',
         title: 'Market',

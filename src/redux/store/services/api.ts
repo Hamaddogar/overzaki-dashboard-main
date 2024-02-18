@@ -1,17 +1,20 @@
 // apiSlice.js
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { getCookie } from 'src/auth/context/jwt/utils';
+import { RootState } from '../store';
 
 export const api = createApi({
     reducerPath: 'overzaki',
     baseQuery: fetchBaseQuery({
         baseUrl: 'https://www.overzaki.io/api',
         prepareHeaders: (headers, { getState }) => {
+            const state: RootState = getState() as any
             headers.set('Authorization', `Bearer ${getCookie('accessToken')}`);
+            headers.set('x-tenant-id', state.selectedDomain.data.domain)
             return headers;
         }
     }),
-    tagTypes: ['Theme', 'Style', 'Icon', 'StyleCat', 'IconCat'],
+    tagTypes: ['Theme', 'Style', 'Icon', 'StyleCat', 'IconCat', 'plan'],
     endpoints: (builder) => ({
         getThemeById: builder.query({
             query: (themeId) => `/app-theme/${themeId}`,
@@ -183,7 +186,7 @@ export const api = createApi({
             query: (data) => ({
                 url: `/domain-managment/check_availability`,
                 method: 'POST',
-                headers : {
+                headers: {
                     'x-tenant-id': data.tanant_id
                 },
                 body: {
@@ -211,7 +214,65 @@ export const api = createApi({
                     'x-tenant-id': data
                 }
             }),
-        })
+        }),
+        // plans managment
+        getPlansByCat: builder.query({
+            query: (category) => ({
+                url: `/plans/by_category?category=${category}`,
+            }),
+            providesTags: ['plan']
+        }),
+        updatePlan: builder.mutation({
+            query: (data) => ({
+                url: `/plans/${data.id}`,
+                method: 'PUT',
+                body: {
+                    name: data.name,
+                    price: data.price
+                }
+            }),
+            invalidatesTags: ['plan']
+        }),
+        addNewFeature: builder.mutation({
+            query: (data) => ({
+                url: `/feature`,
+                method: 'POST',
+                body: data
+            }),
+            invalidatesTags: ['plan']
+        }),
+        getAllFeaturesByCat: builder.query({
+            query: (category) => ({
+                url: `/feature?category=${category}`,
+            }),
+            providesTags: ['plan']
+        }),
+        UpdateFeature: builder.mutation({
+            query: (data) => ({
+                url: `/feature/${data.id}`,
+                method: 'PUT',
+                body: {
+                    content: data.content,
+                    availableForPro: data.availableForPro,
+                    availableForFree: data.availableForFree,
+                }
+            }),
+            invalidatesTags: ['plan']
+        }),
+        // builder details
+        getBuilderDetails: builder.query({
+            query: (id) => ({
+                url: `/builder/${id}`,
+            }),
+        }),
+        // upgrade plan
+        upgradePlan: builder.mutation({
+            query: (data) => ({
+                url: `/plan-subscription/upgrade_plan`,
+                method: 'PUT',
+                body: data
+            }),
+        }),
     }),
 });
 
@@ -254,5 +315,15 @@ export const {
     useCheckDomainValidationMutation,
     usePayDomainMutation,
     // customer management
-    useGetCustomerAnalyticsQuery
+    useGetCustomerAnalyticsQuery,
+    // plans management
+    useGetPlansByCatQuery,
+    useUpdatePlanMutation,
+    useAddNewFeatureMutation,
+    useGetAllFeaturesByCatQuery,
+    useUpdateFeatureMutation,
+    // plan sub
+    useUpgradePlanMutation,
+    // builder
+    useGetBuilderDetailsQuery
 } = api;

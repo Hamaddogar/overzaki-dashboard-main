@@ -128,6 +128,7 @@ export default function CategoriesView() {
       } else {
         await handleCreateCategory();
       }
+      setCategoryDrawer(false)
     } catch (err) {
       console.error(err);
       reset();

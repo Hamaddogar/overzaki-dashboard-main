@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import AppOrders from '../../app/app-orders';
 import AppHolder from '../../app/app-holder';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Card, CardContent, CardMedia, Chip, Grid, Paper, Stack, Typography } from '@mui/material';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
 import {
@@ -18,16 +18,16 @@ const BestSellingView = () => {
   const sellingItems = [
     {
       id: '123',
-      productImage: '/raws/banner1.png',
-      productName: { en: 'Demo Product' },
+      image: '/raws/banner1.png',
+      name: { en: 'Demo Product' },
       totalOrders: 400,
       totalSales: 200,
       quantitySold: 300,
     },
     {
       id: '323',
-      productImage: '/raws/banner1.png',
-      productName: { en: 'Demo Product 2' },
+      image: '/raws/banner1.png',
+      name: { en: 'Demo Product 2' },
       totalOrders: 400,
       totalSales: 200,
       quantitySold: 300,
@@ -36,16 +36,16 @@ const BestSellingView = () => {
   const sellingCategories = [
     {
       id: '123',
-      categoryImage: '/raws/banner1.png',
-      categoryName: { en: 'Demo Product' },
+      image: '/raws/banner1.png',
+      name: { en: 'Demo Product' },
       totalOrders: 400,
       totalSales: 200,
       quantitySold: 300,
     },
     {
       id: '323',
-      categoryImage: '/raws/banner1.png',
-      categoryName: { en: 'Demo Product 2' },
+      image: '/raws/banner1.png',
+      name: { en: 'Demo Product 2' },
       totalOrders: 400,
       totalSales: 200,
       quantitySold: 300,
@@ -63,270 +63,76 @@ const BestSellingView = () => {
     <Grid xs={12}>
       <AppHolder title="Best Selling Items">
         {bestSellingItems.length > 0
-          ? bestSellingItems?.map((item: any) => (
-              <Box sx={{ width: '250px' }} key={item.id}>
-                <Box
-                  component="img"
-                  src={item?.productImage?.[0]}
-                  alt="product-image"
-                  width="100%"
-                />
-                <Box sx={{ width: '100%' }}>
-                  <Typography component="h3">{item?.productName?.en}</Typography>
-                  <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column' }}>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        paddingTop: '4px',
-                        paddingBottom: '4px',
-                      }}
-                    >
-                      <Typography sx={{ fontWeight: 600 }} component="h3">
-                        Total Sales
-                      </Typography>
-                      <Typography component="h3">KWD {item?.totalSales}</Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        paddingTop: '4px',
-                        paddingBottom: '4px',
-                        borderTop: '1px solid lightgray',
-                      }}
-                    >
-                      <Typography sx={{ fontWeight: 600 }} component="h3">
-                        Total Orders
-                      </Typography>
-                      <Typography component="h3">{item?.totalOrders}</Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        paddingTop: '4px',
-                        paddingBottom: '4px',
-                        borderTop: '1px solid lightgray',
-                        borderBottom: '1px solid lightgray',
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          fontWeight: 600,
-                        }}
-                        component="h3"
-                      >
-                        Quantity Sold
-                      </Typography>
-                      <Typography component="h3">{item?.quantitySold}</Typography>
-                    </Box>
-                  </Box>
-                </Box>
-              </Box>
-            ))
-          : sellingItems.map((item: any) => (
-              <Box sx={{ width: '250px' }} key={item.id}>
-                <Box component="img" src={item?.productImage} alt="product-image" width="100%" />
-                <Box sx={{ width: '100%' }}>
-                  <Typography component="h3">{item?.productName?.en}</Typography>
-                  <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column' }}>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        paddingTop: '4px',
-                        paddingBottom: '4px',
-                      }}
-                    >
-                      <Typography sx={{ fontWeight: 600 }} component="h3">
-                        Total Sales
-                      </Typography>
-                      <Typography component="h3">KWD {item?.totalSales}</Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        paddingTop: '4px',
-                        paddingBottom: '4px',
-                        borderTop: '1px solid lightgray',
-                      }}
-                    >
-                      <Typography sx={{ fontWeight: 600 }} component="h3">
-                        Total Orders
-                      </Typography>
-                      <Typography component="h3">{item?.totalOrders}</Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        paddingTop: '4px',
-                        paddingBottom: '4px',
-                        borderTop: '1px solid lightgray',
-                        borderBottom: '1px solid lightgray',
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          fontWeight: 600,
-                        }}
-                        component="h3"
-                      >
-                        Quantity Sold
-                      </Typography>
-                      <Typography component="h3">{item?.quantitySold}</Typography>
-                    </Box>
-                  </Box>
-                </Box>
-              </Box>
-            ))}
+          ? bestSellingItems?.map((item: any, index) => (
+            <ProductCard category={item} key={index} />
+          ))
+          : sellingItems.map((item: any, index) => (
+            <ProductCard category={item} key={index} />
+          ))}
       </AppHolder>
       {/* Best Selling Categories */}
       <AppHolder title="Best Selling Categories">
         {bestSellingCategories?.length > 0
           ? bestSellingCategories.map((category: any, i) => (
-              <Box sx={{ width: '250px' }} key={i}>
-                <Box
-                  component="img"
-                  src={category?.categoryImage}
-                  alt="product-image"
-                  width="100%"
-                />
-                <Box sx={{ width: '100%' }}>
-                  <Typography component="h3">{category?.categoryName?.en}</Typography>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      width: '100%',
-                      flexDirection: 'column',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        paddingTop: '4px',
-                        paddingBottom: '4px',
-                      }}
-                    >
-                      <Typography sx={{ fontWeight: 600 }} component="h3">
-                        Total Sales
-                      </Typography>
-                      <Typography component="h3">KWD {category?.totalSales}</Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        borderTop: '1px solid lightgray',
-                        paddingTop: '4px',
-                        paddingBottom: '4px',
-                      }}
-                    >
-                      <Typography sx={{ fontWeight: 600 }} component="h3">
-                        Total Orders
-                      </Typography>
-                      <Typography component="h3">{category?.totalOrders}</Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        borderTop: '1px solid lightgray',
-                        borderBottom: '1px solid lightgray',
-                        paddingTop: '4px',
-                        paddingBottom: '4px',
-                      }}
-                    >
-                      <Typography sx={{ fontWeight: 600 }} component="h3">
-                        Quantity Sold
-                      </Typography>
-                      <Typography component="h3">{category?.quantitySold}</Typography>
-                    </Box>
-                  </Box>
-                </Box>
-              </Box>
-            ))
-          : sellingCategories.map((category) => (
-              <Box sx={{ width: '250px' }} key={category.id}>
-                <Box
-                  component="img"
-                  src={category?.categoryImage}
-                  alt="product-image"
-                  width="100%"
-                />
-                <Box sx={{ width: '100%' }}>
-                  <Typography component="h3">{category?.categoryName?.en}</Typography>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      width: '100%',
-                      flexDirection: 'column',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        paddingTop: '4px',
-                        paddingBottom: '4px',
-                      }}
-                    >
-                      <Typography sx={{ fontWeight: 600 }} component="h3">
-                        Total Sales
-                      </Typography>
-                      <Typography component="h3">KWD {category?.totalSales}</Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        borderTop: '1px solid lightgray',
-                        paddingTop: '4px',
-                        paddingBottom: '4px',
-                      }}
-                    >
-                      <Typography sx={{ fontWeight: 600 }} component="h3">
-                        Total Orders
-                      </Typography>
-                      <Typography component="h3">{category?.totalOrders}</Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        borderTop: '1px solid lightgray',
-                        borderBottom: '1px solid lightgray',
-                        paddingTop: '4px',
-                        paddingBottom: '4px',
-                      }}
-                    >
-                      <Typography sx={{ fontWeight: 600 }} component="h3">
-                        Quantity Sold
-                      </Typography>
-                      <Typography component="h3">{category?.quantitySold}</Typography>
-                    </Box>
-                  </Box>
-                </Box>
-              </Box>
-            ))}
+            <ProductCard category={category} key={i} />
+
+          ))
+          : sellingCategories.map((category, index) => (
+            <ProductCard category={category} key={index} />
+          ))}
       </AppHolder>
     </Grid>
   );
 };
 
 export default BestSellingView;
+
+
+const SalesInfo = ({ label, value }: any) => (
+  <Grid container justifyContent="space-between">
+    <Grid item>
+      <Typography variant="body1" color="textSecondary">
+        {label}
+      </Typography>
+    </Grid>
+    <Grid item>
+      <Typography variant="body2" fontWeight="fontWeightMedium">
+        {value}
+      </Typography>
+    </Grid>
+  </Grid>
+);
+
+const ProductCard = ({ category }: any) => (
+  <Card
+    sx={{
+      maxWidth: 345,
+      mr: 2,
+      transition: 'transform 0.3s ease-in-out, border 0.3s ease-in-out',
+      '&:hover': {
+        transform: 'scale(1.01)',
+        border: '2px solid #1BFBB6', // Use your preferred border color
+      },
+    }}
+  >
+    <CardMedia
+      component="img"
+      height="140"
+      image={category?.image}
+      alt="product-image"
+    />
+    <CardContent>
+      <Typography gutterBottom variant="h5" component="div">
+        {category?.name?.en}
+      </Typography>
+      {category?.offer && (
+        <Chip label={`${category?.offer} OFF`} color="primary" size="small" />
+      )}
+      <Box mt={2}>
+        <SalesInfo label="Total Sales" value={`KWD ${category?.totalSales}`} />
+        <SalesInfo label="Total Orders" value={category?.totalOrders} />
+        <SalesInfo label="Quantity Sold" value={category?.quantitySold} />
+      </Box>
+    </CardContent>
+  </Card>
+);
