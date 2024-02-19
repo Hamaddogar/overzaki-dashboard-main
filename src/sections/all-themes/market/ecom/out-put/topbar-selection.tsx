@@ -14,7 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import Sketch from '@uiw/react-color-sketch';
-import React, { useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import Iconify from 'src/components/iconify';
 import { VisuallyHiddenInput } from './logo-part';
 import { AppDispatch } from 'src/redux/store/store';
@@ -58,16 +58,21 @@ const TopBarDealer = ({
   mobile = false,
   builder_Id,
 }: TopBarProps) => {
+
   const dispatch = useDispatch<AppDispatch>();
   const socket = socketClient();
-
+  const targetHeader = 'home.sections.appBar.adAppBar.';
 
   const [topBarObj, setTopBarObj] = useState<any>(null);
   const [appBarItems, setAppBarItems] = useState([]);
+  const [sliderArray, setSliderArray] = useState([]);
 
+  // Create a ref to store the latest state value
+  const appBarItemsRef = useRef(appBarItems);
+  appBarItemsRef.current = appBarItems;
 
+  let timeoutId: any;
   const debounce = (func: any, delay: any) => {
-    let timeoutId: any;
     return (...args: any) => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
@@ -75,6 +80,12 @@ const TopBarDealer = ({
       }, delay);
     };
   };
+
+
+
+  // useEffect(() => {
+  //   handleAppBarItemsChange()
+  // }, [appBarItems])
 
 
   const handleChangeEvent = debounce((key: any, newValue: any, parentClass: any) => {
@@ -89,14 +100,11 @@ const TopBarDealer = ({
     valueToShare = newValue;
 
     // const targetHeader = 'appBar.websiteLogo.';
-    const targetHeader = 'home.sections.appBar.adAppBar.';
     const data = {
       builderId: builder_Id,
       key: targetHeader + _socketKey,
       value: valueToShare,
     };
-
-    console.log("data", data);
 
     if (socket) {
       socket.emit('website:cmd', data);
@@ -112,8 +120,65 @@ const TopBarDealer = ({
 
 
 
+  const handleAppBarItemsChange = () => {
+    const currentAppBarItems = appBarItemsRef.current;
+    let _socketKey = 'Slider';
+    const data = {
+      builderId: builder_Id,
+      key: targetHeader + _socketKey,
+      value: currentAppBarItems,
+    };
+    if (socket) {
+      socket.emit('website:cmd', data);
+    }
+
+  }
 
 
+  const debouncedHandleAppBarItemsChange = React.useCallback(
+    debounce(handleAppBarItemsChange, 2000),
+    []
+  );
+
+  useEffect(() => {
+    debouncedHandleAppBarItemsChange();
+  }, [appBarItems]);
+
+
+
+  const handleSliderItemChange = (index: number, value: string, target: string) => {
+    setAppBarItems((prev: any) => {
+      return prev.map((item: any, i: number) => {
+        if (i === index) {
+          return {
+            ...item,
+            [target]: value
+          }
+        } else {
+          return item
+        }
+      });
+    })
+  }
+
+
+  const handleImageChange64 = (key: number) => (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const base64 = reader.result?.toString().split(',')[1]; // Get the base64 data
+        // console.log('Base64:', base64); // Log the base64 data
+        handleSliderItemChange(key, reader.result?.toString() || '', 'image')
+      };
+
+      reader.readAsDataURL(file); // Read the file as data URL
+    } else {
+      alert('Please select a valid image file.');
+    }
+  };
 
 
   return (
@@ -243,7 +308,7 @@ const TopBarDealer = ({
                 <Typography variant="caption" sx={{ fontWeight: 900 }}>
                   Ad {i + 1}
                 </Typography>
-                <Stack direction="row" my={2} alignItems="center" spacing="20px" display={'none'} >
+                <Stack direction="row" my={2} alignItems="center" spacing="20px" >
                   <Box
                     sx={{
                       width: '80px',
@@ -257,7 +322,7 @@ const TopBarDealer = ({
                     }}
                     component="label"
                   >
-                    <VisuallyHiddenInput type="file" />
+                    <VisuallyHiddenInput type="file" onChange={handleImageChange64(i)} />
                     <Iconify icon="bi:image" style={{ color: '#C2C3D1', display: 'block' }} />
                   </Box>
 
@@ -289,8 +354,8 @@ const TopBarDealer = ({
                       variant="filled"
                       type="text"
                       placeholder="Get 25% Off"
-                      value={topBarObj?.Slider?.[`text${i}`]}
-                      onChange={(event) => handleChangeEvent(`text${i}`, event.target.value, 'Slider')}
+                      // value={topBarObj?.Slider?.[`text${i}`]}
+                      onChange={(event) => handleSliderItemChange(i, event.target.value, 'text')}
                     />
                   </Box>
                   <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -302,8 +367,8 @@ const TopBarDealer = ({
                       variant="filled"
                       type="text"
                       placeholder="www.overzaki.com"
-                    // value={appBar?.logoObj?.width}
-                    // onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
+                      // value={appBar?.logoObj?.width}
+                      onChange={(event) => handleSliderItemChange(i, event.target.value, 'href')}
                     />
                   </Box>
                 </Stack>
@@ -331,7 +396,8 @@ const TopBarDealer = ({
             <Typography variant="caption" color="#8688A3">
               Offer Text Position
             </Typography>
-            <RadioGroup row>
+
+            <RadioGroup row onChange={(event) => handleChangeEvent(`textPosition`, event.target.value)}>
               <FormControlLabel value="left" control={<Radio size="medium" />} label="Left" />
               <FormControlLabel value="center" control={<Radio size="medium" />} label="Center " />
               <FormControlLabel value="right" control={<Radio size="medium" />} label="Right" />
