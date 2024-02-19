@@ -568,7 +568,7 @@ export default function NavDealer({
                         <TextField
                           variant="filled"
                           type="number"
-                          value={appBar?.menu?.style?.size}
+                          // value={appBar?.menu?.style?.size}
                           onChange={(event) =>
                             handleChangeEvent('size', event.target.value, 'menu', 'style')
                           }
@@ -676,7 +676,7 @@ export default function NavDealer({
                             variant="filled"
                             type="text"
                             placeholder="https://"
-                            value={item.link}
+                            // value={item.link}
                             onChange={(event) => handleChangeMenu(event, "link", i)}
                           // onChange={(event) =>
                           //   // setMenus([...menus])
@@ -695,7 +695,7 @@ export default function NavDealer({
                             variant="filled"
                             type="text"
                             placeholder="Name"
-                            value={item?.name}
+                            // value={item?.name}
                             onChange={(event) =>
                               handleChangeMenu(event, "name", i)
                             }
@@ -813,7 +813,7 @@ export default function NavDealer({
                   </Typography>
                   <RadioGroup
                     row
-                    value={appBar?.search?.position}
+                    // value={appBar?.search?.position}
                     onChange={(event: any) => handleChangeEvent('position', event.target.value, 'search')}
                   >
                     <FormControlLabel value="left" control={<Radio size="medium" />} label="Left" />
@@ -894,7 +894,7 @@ export default function NavDealer({
                   <Stack direction="row" alignItems="center" spacing="18px">
                     <Stack direction="row" alignItems="center" spacing={1} width={1}>
                       <Slider
-                        value={appBar?.search?.borderWidth || 0}
+                        // value={appBar?.search?.borderWidth || 0}
                         onChange={(_event: Event, newValue: number | number[]) =>
                           handleChangeEvent('borderWidth', newValue, 'search')
                         }

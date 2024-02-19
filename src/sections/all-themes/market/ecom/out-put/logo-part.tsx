@@ -76,7 +76,7 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
     }
 
 
-  }, 1500);
+  }, 2000);
 
   const handleImageChange64 = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -245,8 +245,8 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
             <Stack direction="row" alignItems="center" spacing={1} width={1}>
               <TextField
                 variant="filled"
-                type="number"
-                value={logoObj?.logoObj?.width}
+                type="text"
+                // value={logoObj?.logoObj?.width}
                 onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
               />
             </Stack>
@@ -260,8 +260,8 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
             <Stack direction="row" alignItems="center" spacing={1} width={1}>
               <TextField
                 variant="filled"
-                type="number"
-                value={logoObj?.logoObj?.height}
+                type="text"
+                // value={logoObj?.logoObj?.height}
                 onChange={(event) => handleChangeEvent('height', event.target.value, 'logoObj')}
               />
             </Stack>
@@ -278,7 +278,7 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
             variant="filled"
             type="text"
             fullWidth
-            value={logoObj?.logoObj?.text}
+            // value={logoObj?.logoObj?.text}
             onChange={(event: any) => handleChangeEvent('text', event.target.value, 'logoObj')}
           />
         </Stack>

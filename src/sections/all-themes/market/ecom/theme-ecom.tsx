@@ -513,8 +513,8 @@ export default function EcomDesignMain() {
 
   const searchParams = useSearchParams();
   const builder_Id = searchParams.get('id')?.toString() || '';
-  // const url = searchParams.get('url')?.toString() || '';
-  const url = "http://localhost:3000";
+  const url = searchParams.get('url')?.toString() || '';
+  // const url = "http://localhost:3000";
 
   const debounce = (func: any, delay: any) => {
     let timeoutId: any;
