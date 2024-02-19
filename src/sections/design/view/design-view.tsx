@@ -34,7 +34,7 @@ import Link from 'next/link';
 
 
 
-const data = [
+export const data = [
   {
     icon: 'ant-design:shopping-outlined',
     title: 'Market',
