@@ -275,7 +275,7 @@ export default function NavDealer({
                     Appbar
                   </Typography>
                   <Switch
-                    checked={appBar?.container?.show}
+                    // checked={appBar?.container?.show}
                     onChange={(event: any, value: any) =>
                       handleChangeEvent('show', value, 'container')
                     }
@@ -292,7 +292,7 @@ export default function NavDealer({
                     Shadow
                   </Typography>
                   <Switch
-                    checked={appBar?.container?.isShadow}
+                    // checked={appBar?.container?.isShadow}
                     onChange={(event: any, value: any) =>
                       handleChangeEvent('isShadow', value, 'container')
                     }

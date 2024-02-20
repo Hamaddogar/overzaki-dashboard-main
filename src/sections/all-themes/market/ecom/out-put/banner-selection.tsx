@@ -19,10 +19,14 @@ import { VisuallyHiddenInput } from './logo-part';
 import './style.css';
 import Sketch from '@uiw/react-color-sketch';
 import BannerSliderAccordion from './bannerSliderAccordion';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from 'src/redux/store/store';
+import { socketClient } from 'src/sections/all-themes/utils/helper-functions';
 
 // ----------------------------------------------------------------------
 
 interface BannerProps {
+  builderId?: any;
   themeConfig: {
     bannerShow: boolean;
     bannerImages: Array<string>;
@@ -35,11 +39,71 @@ interface BannerProps {
 export default function BannerDealer({
   themeConfig,
   handleThemeConfig,
-  mobile = false,
+  builderId
 }: BannerProps) {
+
+
   const [banner, setBanner] = useState<any>({});
+  const [bannerSliderImages, setBannerSliderImages] = useState([]);
   const [bannerType, setBannerType] = useState('');
 
+
+
+  const dispatch = useDispatch<AppDispatch>();
+  const socket = socketClient();
+  const targetHeader = 'home.sections.banner.';
+
+  let timeoutId: any;
+  const debounce = (func: any, delay: any) => {
+    return (...args: any) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
+  };
+
+  const handleChangeEvent = debounce((key: any, newValue: any, parentClass: any) => {
+
+    let _socketKey = '';
+    let valueToShare = '';
+    // const nestedAppbar = topBarObj?.[parentClass] ?? {};
+    // setTopBarObj({ ...topBarObj, [parentClass]: { ...nestedAppbar, [key]: newValue } });
+
+    _socketKey = parentClass ? parentClass + '.' + key : key;
+    valueToShare = newValue;
+
+    const data = {
+      builderId: builderId,
+      key: targetHeader + _socketKey,
+      value: valueToShare,
+    };
+
+    // console.log(data);
+
+    if (socket) {
+      socket.emit('website:cmd', data);
+    }
+
+
+  }, 1500);
+
+  const isColorValid = (color: string) =>
+    /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^rgb\(\d{1,3}, \d{1,3}, \d{1,3}\)$|^rgba\(\d{1,3}, \d{1,3}, \d{1,3}, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$|^hsl\(\d{1,3}, \d{1,3}%, \d{1,3}%\)$|^hsla\(\d{1,3}, \d{1,3}%, \d{1,3}%, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$/.test(
+      color
+    );
+
+
+
+
+
+
+
+
+
+
+
+  // -------------------------------------------------------------------------
   const handleActionsBanner =
     (action: string, location: number, arrayData: any) => (event: any) => {
       switch (action) {
@@ -52,10 +116,10 @@ export default function BannerDealer({
           break;
       }
     };
-  const [bannerSliderImages, setBannerSliderImages] = useState([]);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) =>
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     handleThemeConfig('bannerShow', event.target.checked);
+  }
 
   const handleNewBanner = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -72,21 +136,20 @@ export default function BannerDealer({
       alert('Please select a valid image file.');
     }
   };
-  const handleNewSliderBanner = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
 
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
 
-      reader.onload = () => {
-        [...bannerSliderImages, reader.result?.toString()];
-      };
-
-      reader.readAsDataURL(file); // Read the file as data URL
-    } else {
-      alert('Please select a valid image file.');
-    }
-  };
+  // const handleNewSliderBanner = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0];
+  //   if (file && file.type.startsWith('image/')) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       [...bannerSliderImages, reader.result?.toString()];
+  //     };
+  //     reader.readAsDataURL(file); // Read the file as data URL
+  //   } else {
+  //     alert('Please select a valid image file.');
+  //   }
+  // };
 
   const customPresets = [
     '#FF5733', // Reddish Orange
@@ -110,7 +173,8 @@ export default function BannerDealer({
     '#33FF57', // Greenish Yellow
     '#3366FF', // Vivid Blue
   ];
-  const handleChangeEvent = (key: string, value: any, parent: any) => {};
+
+
   return (
     <Box pt="20px">
       <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -119,7 +183,11 @@ export default function BannerDealer({
         </Typography>
         <Switch
           checked={themeConfig.bannerShow}
-          onChange={handleChange}
+          // onChange={handleChange}
+          onChange={(event: any) => {
+            handleChange(event)
+            handleChangeEvent("show", event.target.checked, "container")
+          }}
           inputProps={{ 'aria-label': 'controlled' }}
         />
       </Stack>
@@ -146,7 +214,10 @@ export default function BannerDealer({
               <RadioGroup
                 row
                 //   value={logoObj?.position || 'center'}
-                onChange={(event: any) => setBannerType(event.target.value)}
+                onChange={(event: any) => {
+                  setBannerType(event.target.value);
+                  handleChangeEvent("backgroundType", event.target.value, "bannerBackground")
+                }}
               >
                 <FormControlLabel value="slider" control={<Radio size="medium" />} label="Slider" />
                 <FormControlLabel value="image" control={<Radio size="medium" />} label="Image " />
@@ -265,9 +336,9 @@ export default function BannerDealer({
                     <RadioGroup
                       row
                       // value={logoObj?.position || 'center'}
-                      // onChange={(event: any) =>
-                      //   handleChangeEvent('position', event?.target?.value, 'logoObj')
-                      // }
+                      onChange={(event: any) =>
+                        handleChangeEvent('sliderType', event?.target?.value, 'bannerBackground')
+                      }
                     >
                       <FormControlLabel
                         value="auto"
@@ -350,9 +421,9 @@ export default function BannerDealer({
                   <Stack direction="row" alignItems="center" spacing={1} width={1}>
                     <Slider
                       // value={logoObj?.borderRaduis || 0}
-                      // onChange={(_event: Event, newValue: number | number[]) =>
-                      //   handleChangeEvent('borderRaduis', newValue, 'logoObj')
-                      // }
+                      onChange={(_event: Event, newValue: number | number[]) =>
+                        handleChangeEvent('borderRadius', newValue, 'container')
+                      }
                       valueLabelDisplay="auto"
                       min={0}
                       max={100}
@@ -362,15 +433,15 @@ export default function BannerDealer({
               </Box>
               <Box sx={{ width: '100%' }}>
                 <Typography variant="caption" color="#8688A3">
-                  Border Bottom Width
+                  Border Width
                 </Typography>
                 <Stack direction="row" alignItems="center" spacing="18px">
                   <Stack direction="row" alignItems="center" spacing={1} width={1}>
                     <Slider
                       // value={appBar?.container?.borderBottomWidth || 0}
-                      // onChange={(_event: Event, newValue: number | number[]) => {
-                      //   handleChangeEvent('borderBottomWidth', newValue, 'container');
-                      // }}
+                      onChange={(_event: Event, newValue: number | number[]) => {
+                        handleChangeEvent('borderWidth', newValue, 'container')
+                      }}
                       valueLabelDisplay="auto"
                       min={0}
                       max={20}
@@ -383,7 +454,11 @@ export default function BannerDealer({
                   Border Color
                 </Typography>
                 <Stack direction="row" alignItems="center" spacing="18px">
-                  <Sketch presetColors={customPresets} style={{ width: '100%' }} />
+                  <Sketch presetColors={customPresets} onChange={(event: any) =>
+                    isColorValid(event?.hex)
+                      ? handleChangeEvent('borderColor', event?.hex, 'container')
+                      : null
+                  } style={{ width: '100%' }} />
                 </Stack>
               </Box>
               <Stack
@@ -397,7 +472,7 @@ export default function BannerDealer({
                 </Typography>
                 <Switch
                   // checked={appBar?.icon?.shadow}
-                  // onChange={(event: any, value: any) => handleChangeEvent('shadow', value, 'icon')}
+                  onChange={(event: any, value: any) => handleChangeEvent('isShadow', value, 'container')}
                   inputProps={{ 'aria-label': 'controlled' }}
                 />
               </Stack>
@@ -406,7 +481,11 @@ export default function BannerDealer({
                   Shadow Color
                 </Typography>
                 <Stack direction="row" alignItems="center" spacing="18px">
-                  <Sketch presetColors={customPresets} style={{ width: '100%' }} />
+                  <Sketch presetColors={customPresets} onChange={(event: any) =>
+                    isColorValid(event?.hex)
+                      ? handleChangeEvent('colorShadow', event?.hex, 'container')
+                      : null
+                  } style={{ width: '100%' }} />
                 </Stack>
               </Box>
               <Box sx={{ width: '100%' }}>
@@ -417,9 +496,9 @@ export default function BannerDealer({
                   <Stack direction="row" alignItems="center" spacing={1} width={1}>
                     <Slider
                       // value={appBar?.container?.borderBottomWidth || 0}
-                      // onChange={(_event: Event, newValue: number | number[]) => {
-                      //   handleChangeEvent('borderBottomWidth', newValue, 'container');
-                      // }}
+                      onChange={(_event: Event, newValue: number | number[]) => {
+                        handleChangeEvent('marginTopl', newValue, 'container');
+                      }}
                       valueLabelDisplay="auto"
                       min={0}
                       max={20}
@@ -435,9 +514,9 @@ export default function BannerDealer({
                   <Stack direction="row" alignItems="center" spacing={1} width={1}>
                     <Slider
                       // value={appBar?.container?.borderBottomWidth || 0}
-                      // onChange={(_event: Event, newValue: number | number[]) => {
-                      //   handleChangeEvent('borderBottomWidth', newValue, 'container');
-                      // }}
+                      onChange={(_event: Event, newValue: number | number[]) => {
+                        handleChangeEvent('marginBottom', newValue, 'container');
+                      }}
                       valueLabelDisplay="auto"
                       min={0}
                       max={20}
@@ -449,7 +528,7 @@ export default function BannerDealer({
           </AccordionDetails>
         </Accordion>
       )}
-      {themeConfig.bannerShow && (
+      {/* {themeConfig.bannerShow && (
         <Accordion>
           <AccordionSummary
             sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
@@ -460,7 +539,7 @@ export default function BannerDealer({
             </Box>
           </AccordionSummary>
         </Accordion>
-      )}
+      )} */}
 
       {/* <Divider sx={{ borderWidth: '1px', borderColor: '#EBEBEB', my: '20px' }} /> */}
     </Box>

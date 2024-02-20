@@ -126,8 +126,8 @@ const defaultSections = [
         name: 'Banner',
         img: '/raws/Banners.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
+          <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} builderId={builder_Id} />
         ),
       },
       {

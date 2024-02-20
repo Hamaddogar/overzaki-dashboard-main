@@ -17,6 +17,7 @@ import Iconify from 'src/components/iconify';
 
 const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPresets }: any) => {
   const [showTextBlock, setShowTextBlock] = useState(false);
+
   return (
     <Accordion>
       <AccordionSummary
@@ -127,8 +128,8 @@ const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPr
                   variant="filled"
                   type="text"
                   placeholder="i.e. Shop Now"
-                  // value={appBar?.logoObj?.width}
-                  // onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
+                // value={appBar?.logoObj?.width}
+                // onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
                 />
               </Box>
               <Box sx={{ width: '100%' }}>
@@ -191,8 +192,8 @@ const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPr
 </RadioGroup> */}
                     <RadioGroup
                       row
-                      //   value={logoObj?.position || 'center'}
-                      // onChange={(event: any) => setBannerType(event.target.value)}
+                    //   value={logoObj?.position || 'center'}
+                    // onChange={(event: any) => setBannerType(event.target.value)}
                     >
                       <FormControlLabel
                         value="left"
@@ -217,8 +218,8 @@ const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPr
 </RadioGroup> */}
                     <RadioGroup
                       row
-                      //   value={logoObj?.position || 'center'}
-                      // onChange={(event: any) => setBannerType(event.target.value)}
+                    //   value={logoObj?.position || 'center'}
+                    // onChange={(event: any) => setBannerType(event.target.value)}
                     >
                       <FormControlLabel value="top" control={<Radio size="medium" />} label="top" />
                       <FormControlLabel

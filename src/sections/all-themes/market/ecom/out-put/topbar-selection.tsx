@@ -122,7 +122,7 @@ const TopBarDealer = ({
 
   const handleAppBarItemsChange = () => {
     const currentAppBarItems = appBarItemsRef.current;
-    let _socketKey = 'Slider';
+    let _socketKey = 'slider';
     const data = {
       builderId: builder_Id,
       key: targetHeader + _socketKey,
