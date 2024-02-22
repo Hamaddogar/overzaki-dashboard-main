@@ -96,6 +96,7 @@ export default function OrdersListView() {
 
 
   const [productData, setProductData] = useState<any>(null);
+  const [productDataSections, setProductDataSections] = useState(0)
   const [editProductId, setEditProductId] = useState<any>(null);
   const [removeData, setRemoveData] = useState<any>(null);
 
@@ -169,6 +170,7 @@ export default function OrdersListView() {
       reset();
       setErrorMsg(typeof error === 'string' ? error : error.message);
     }
+    handleDrawerCloseCommon('new')
   });
 
   // reseting removeData value
@@ -411,7 +413,10 @@ export default function OrdersListView() {
       ) {
         return;
       }
-      if (state === 'new') setOpenDetails(false);
+      if (state === 'new') {
+        setOpenDetails(false);
+        setProductDataSections(0)
+      }
       if (state === 'variants') {
         setOpenVariant(false);
         setTempVariantId(null);
@@ -655,6 +660,573 @@ export default function OrdersListView() {
     };
     fetchData();
   }, []);
+
+  const handleNextInputs = async () => {
+    const isValid = await methods.trigger(['name.en', 'name.ar', 'categoryId']);
+    if (isValid) {
+      setProductDataSections(prev => prev + 1);
+    }
+  }
+
+
+  const renderDetails = () => {
+    switch (productDataSections) {
+      case 0:
+        return <>
+          <Typography
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Product Name (English)
+          </Typography>
+          {/* defaultValue='iPhone 13 Pro Max' */}
+          {/* <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.en || ""} name='name.en' /> */}
+          <RHFTextField
+            fullWidth
+            variant="filled"
+            settingStateValue={handleNestedProductData}
+            value={productData?.name?.en || ''}
+            name="name.en"
+          />
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Product Name (Arabic)
+          </Typography>
+          {/* defaultValue="ايفون 13 برو ماكس" */}
+          {/* <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.ar || ""} name='name.ar' /> */}
+          <RHFTextField
+            fullWidth
+            variant="filled"
+            settingStateValue={handleNestedProductData}
+            value={productData?.name?.ar || ''}
+            name="name.ar"
+          />
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Upload Product Images
+          </Typography>
+
+          <Box mt="10px" sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+            {imagesItrations.map((itration: any, ind: any) => {
+              return (
+                <Box key={ind}>
+                  {/* {productData?.images ? ( */}
+                  {productData?.images?.length > 0 && productData?.images[itration] ? (
+                    <Box
+                      sx={{
+                        width: '100px',
+                        height: '100px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px',
+                        flexDirection: 'column',
+                        border: '1px dashed rgb(134, 136, 163,.5)',
+                        borderRadius: '16px',
+                        position: 'relative',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={
+                          typeof productData?.images[itration] === 'string'
+                            ? productData?.images[itration]
+                            : URL.createObjectURL(productData?.images[itration])
+                        }
+                        // src={typeof productData?.images === 'string' ? productData?.images : URL.createObjectURL(productData?.images)}
+                        alt=""
+                        sx={{ maxHeight: '95px' }}
+                      />
+                      <Box
+                        onClick={() => handleRemoveImage(itration)}
+                        sx={{
+                          backgroundColor: 'rgb(134, 136, 163,.09)',
+                          padding: '10px 11px 7px 11px',
+                          borderRadius: '36px',
+                          cursor: 'pointer',
+                          position: 'absolute',
+                          top: 0,
+                          right: 0,
+                        }}
+                      >
+                        <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
+                      </Box>
+                    </Box>
+                  ) : (
+                    <UploadBox
+                      sx={{
+                        width: '100px!important',
+                        height: '100px!important',
+                        textAlign: 'center',
+                        padding: '20px',
+                      }}
+                      onDrop={handleAddImage}
+                      maxFiles={1}
+                      maxSize={5242880}
+                      accept={{
+                        'image/jpeg': [],
+                        'image/png': [],
+                      }}
+                      placeholder={
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '10px',
+                            flexDirection: 'column',
+                          }}
+                        >
+                          <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
+                          <span style={{ color: '#8688A3', fontSize: '.6rem' }}>
+                            Upload Image
+                          </span>
+                        </Box>
+                      }
+                    />
+                  )}
+                </Box>
+              );
+            })}
+          </Box>
+
+          {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            Upload Product Video
+          </Typography>
+          <Box mt='10px' sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+            <Box sx={{
+              width: '100px', height: '100px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+              flexDirection: 'column', border: '1px dashed rgb(134, 136, 163,.5)', borderRadius: '16px'
+            }}>
+              <Iconify icon="octicon:video-16" style={{ color: '#8688A3' }} />
+            </Box>
+          </Box> */}
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Category
+          </Typography>
+
+          {/* <FormControl fullWidth>
+              <Select
+                variant='filled'
+                value={productData?.categoryId || ""}
+                onChange={handleProductData}
+                name='categoryId'
+              >
+                {categoryState.list.map((cat: any, index: any) => (
+                  <MenuItem key={index} value={cat._id}>{cat.name.en || cat.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl> */}
+          <RHFSelect
+            fullWidth
+            variant="filled"
+            name="categoryId"
+            id="demo-simple-select2"
+            value={productData?.categoryId || null}
+            settingStateValue={handleProductData}
+          >
+            {categoryState.list.map((cat: any, index: any) => (
+              <MenuItem key={index} value={cat._id}>
+                {cat?.name?.en || cat?.name || ''}
+              </MenuItem>
+            ))}
+          </RHFSelect>
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Sub-Category
+          </Typography>
+
+          {/* <FormControl fullWidth>
+              <Select
+                variant='filled'
+                value={productData?.subCategory || ""}
+                onChange={handleProductData}
+                name='subCategory'
+              >
+                {productData?.categoryId && categoryState.subCatList.filter((item: any) => item.category === productData.categoryId).map((item: any, ind: any) => (
+                  <MenuItem key={ind} value={item._id}>{item.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl> */}
+          <RHFSelect
+            fullWidth
+            variant="filled"
+            id="demo-simple-select"
+            name="subCategory"
+            value={productData?.subCategory || null}
+            settingStateValue={handleProductData}
+          >
+            {productData?.categoryId &&
+              categoryState.subCatList
+                .filter((item: any) => item.category === productData.categoryId)
+                .map((item: any, ind: any) => (
+                  <MenuItem key={ind} value={item._id}>
+                    {item?.name?.en || item?.name || ''}
+                  </MenuItem>
+                ))}
+          </RHFSelect>
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Brand
+          </Typography>
+          {/* <RHFTextField
+                fullWidth
+                variant="filled"
+                settingStateValue={handleProductData}
+                value={productData?.brand || ''}
+                name="brand"
+              /> */}
+          {/* {console.log(brandState)} */}
+          <RHFSelect
+            fullWidth
+            variant="filled"
+            name="brand"
+            id="demo-simple-brand"
+            value={productData?.brand || null}
+            settingStateValue={handleProductData}
+          >
+            {brandState?.list && brandState.list?.map((brandObj: any) => (
+              <MenuItem key={brandObj._id} value={brandObj._id}>{brandObj.name.localized}</MenuItem>
+            ))}
+          </RHFSelect>
+        </>
+      case 1:
+        return <>
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Price
+          </Typography>
+
+          {/* <TextField fullWidth variant='filled' onChange={handleProductData} value={productData?.price || ""} name='price' /> */}
+          <RHFTextField
+            fullWidth
+            variant="filled"
+            settingStateValue={handleProductData}
+            value={productData?.price || ''}
+            name="price"
+          />
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Discount
+          </Typography>
+          <RHFTextField
+            fullWidth
+            variant="filled"
+            settingStateValue={handleProductData}
+            value={productData?.discount || ''}
+            name="discount"
+          />
+
+          <Grid
+            container
+            mt="20px"
+            columnSpacing="20px"
+            pb="5px"
+            alignItems="flex-end"
+            rowGap="20px"
+            justifyContent="space-between"
+          >
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  width: '100%',
+                  height: '56px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '.9rem',
+                  borderRadius: '16px',
+                  fontWeight: 800,
+                  cursor: "pointer",
+                  ...(productData?.discount_type === 'amount' ? activeTab : nonActiveTab),
+                }}
+                onClick={() => setProductData({ ...productData, discount_type: 'amount' })}
+              >
+                Fixed Amount
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  width: '100%',
+                  height: '56px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '.9rem',
+                  borderRadius: '16px',
+                  fontWeight: 800,
+                  cursor: "pointer",
+                  ...(productData?.discount_type === 'amount' ? nonActiveTab : activeTab),
+                }}
+                onClick={() => setProductData({ ...productData, discount_type: 'percentage' })}
+              >
+                Percentage
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography
+                component="p"
+                mb="5px"
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.8rem' }}
+              >
+                Start Date
+              </Typography>
+              <RHFTextField
+                fullWidth type="date" variant="filled"
+                name="discount_start"
+                value={productData?.discount_start || ''}
+                settingStateValue={handleProductData}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <Typography
+                component="p"
+                mb="5px"
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.8rem' }}
+              >
+                End Date
+              </Typography>
+              <RHFTextField
+                fullWidth
+                type="date"
+                variant="filled"
+                name="discount_end"
+                value={productData?.discount_end || ''}
+                settingStateValue={handleProductData}
+              />
+            </Grid>
+
+
+          </Grid>
+
+          {/* <FormControl fullWidth>
+            <Select
+              variant='filled'
+              value={dropDown.price}
+              onChange={handleChangeDropDown('price')}
+            >
+              <MenuItem value='165.000'>165.000</MenuItem>
+              <MenuItem value='200.000'>200.000</MenuItem>
+            </Select>
+          </FormControl> */}
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem' }}
+          >
+            Description (English)
+          </Typography>
+
+          {/* <TextField
+              variant='filled'
+              multiline
+              fullWidth
+              rows={5}
+              sx={{ fontWeight: 900, fontSize: '26px' }}
+              value={productData?.description?.en || ""}
+              onChange={handleNestedProductData}
+              name='description.en'
+            /> */}
+          <RHFTextField
+            variant="filled"
+            multiline
+            fullWidth
+            rows={5}
+            sx={{ fontWeight: 900, fontSize: '26px' }}
+            value={productData?.description?.en || ''}
+            settingStateValue={handleNestedProductData}
+            name="description.en"
+          />
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem' }}
+          >
+            Description (Arabic)
+          </Typography>
+
+          {/* <TextField
+              variant='filled'
+              multiline
+              fullWidth
+              rows={5}
+              dir="rtl"
+              sx={{ fontWeight: 900, fontSize: '26px' }}
+              // defaultValue="هنالك العديد من الأنواع المتوفرة لنصوص لوريم إيبسوم، ولكن الغالبية تم تعديلها بشكل ما عبر إدخال بعض الكلمات العشوائية"
+              value={productData?.description?.ar || ""}
+              onChange={handleNestedProductData}
+              name='description.ar'
+            /> */}
+          <RHFTextField
+            variant="filled"
+            multiline
+            fullWidth
+            rows={5}
+            dir="rtl"
+            sx={{ fontWeight: 900, fontSize: '26px' }}
+            value={productData?.description?.ar || ''}
+            settingStateValue={handleNestedProductData}
+            name="description.ar"
+          />
+
+          {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            Available
+          </Typography>
+          <FormControl fullWidth>
+            <Select
+              variant='filled'
+              value={dropDown.available}
+              onChange={handleChangeDropDown('available')}
+            >
+              <MenuItem value='All Branches'>All Branches</MenuItem>
+              <MenuItem value='Main Branch'>Main Branch</MenuItem>
+            </Select>
+          </FormControl> */}
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem' }}
+          >
+            Quantity (in stock)
+          </Typography>
+          {/* <TextField type='number' fullWidth variant='filled' onChange={handleProductData} value={productData?.quantity || ""} name='quantity' /> */}
+          <RHFTextField
+            type="number"
+            fullWidth
+            variant="filled"
+            settingStateValue={handleProductData}
+            value={productData?.quantity || ''}
+            name="quantity"
+          />
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Max Quantity
+          </Typography>
+          <RHFTextField
+            fullWidth
+            variant="filled"
+            settingStateValue={handleProductData}
+            value={productData?.max_quantity || ''}
+            name="max_quantity"
+          />
+
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem' }}
+          >
+            Product Status
+          </Typography>
+
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{
+              borderRadius: '16px',
+              padding: '7px 14px',
+              // backgroundColor: '#F5F6F8',
+            }}
+          >
+            <Typography
+              component="p"
+              variant="subtitle2"
+              sx={{ fontWeight: 900, fontSize: '.9rem' }}
+            >
+              Published
+            </Typography>
+            <Switch
+              size="medium"
+              checked={productData?.publish_app || false}
+              onChange={(e: any) =>
+                setProductData({ ...productData, publish_app: e.target.checked })
+              }
+            />
+          </Stack>
+        </>
+      default:
+        return null;
+    }
+  }
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -921,586 +1493,52 @@ export default function OrdersListView() {
           title={editProductId ? 'Edit Product' : 'Add New Product'}
           actions={
             <Stack alignItems="center" justifyContent="center" spacing="10px">
-              <LoadingButton
-                fullWidth
-                variant="soft"
-                color="success"
-                size="large"
-                // onClick={editProductId ? editProductFun : createProductFun}
-                loading={isSubmitting}
-                onClick={() => methods.handleSubmit(onSubmit as any)()}
-                sx={{ borderRadius: '30px' }}
-              >
-                {editProductId ? 'Update' : 'Save'}
-              </LoadingButton>
+              {productDataSections === 0 ? (
+                // Render only the "Next" button for the first section
+                <LoadingButton
+                  fullWidth
+                  variant="soft"
+                  color="success"
+                  size="large"
+                  loading={isSubmitting}
+                  onClick={handleNextInputs}
+                  sx={{ borderRadius: '30px' }}
+                >
+                  Next
+                </LoadingButton>
+              ) : (
+                // Render "Submit/Update" and "Back" buttons for other sections
+                <>
+                  <LoadingButton
+                    fullWidth
+                    variant="soft"
+                    color="success"
+                    size="large"
+                    loading={isSubmitting}
+                    onClick={methods.handleSubmit(onSubmit as any)}
+                    sx={{ borderRadius: '30px' }}
+                  >
+                    {editProductId ? 'Update' : 'Save'}
+                  </LoadingButton>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    color="inherit"
+                    size="large"
+                    onClick={() => setProductDataSections(0)} // Adjust this function as needed to go back to the first section
+                    sx={{ borderRadius: '30px', marginLeft: '10px' }}
+                  >
+                    Back
+                  </Button>
+                </>
+              )}
             </Stack>
           }
         >
           <FormProvider methods={methods} onSubmit={onSubmit}>
             <Divider flexItem />
             {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
-            <Box width="100%">
-              <Typography
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-              >
-                Product Name (English)
-              </Typography>
-              {/* defaultValue='iPhone 13 Pro Max' */}
-              {/* <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.en || ""} name='name.en' /> */}
-              <RHFTextField
-                fullWidth
-                variant="filled"
-                settingStateValue={handleNestedProductData}
-                value={productData?.name?.en || ''}
-                name="name.en"
-              />
-
-              <Typography
-                mt="20px"
-                mb="5px"
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-              >
-                Product Name (Arabic)
-              </Typography>
-              {/* defaultValue="ايفون 13 برو ماكس" */}
-              {/* <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.ar || ""} name='name.ar' /> */}
-              <RHFTextField
-                fullWidth
-                variant="filled"
-                settingStateValue={handleNestedProductData}
-                value={productData?.name?.ar || ''}
-                name="name.ar"
-              />
-
-              <Typography
-                mt="20px"
-                mb="5px"
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-              >
-                Upload Product Images
-              </Typography>
-
-              <Box mt="10px" sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-                {imagesItrations.map((itration: any, ind: any) => {
-                  return (
-                    <Box key={ind}>
-                      {/* {productData?.images ? ( */}
-                      {productData?.images?.length > 0 && productData?.images[itration] ? (
-                        <Box
-                          sx={{
-                            width: '100px',
-                            height: '100px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '10px',
-                            flexDirection: 'column',
-                            border: '1px dashed rgb(134, 136, 163,.5)',
-                            borderRadius: '16px',
-                            position: 'relative',
-                            overflow: 'hidden',
-                          }}
-                        >
-                          <Box
-                            component="img"
-                            src={
-                              typeof productData?.images[itration] === 'string'
-                                ? productData?.images[itration]
-                                : URL.createObjectURL(productData?.images[itration])
-                            }
-                            // src={typeof productData?.images === 'string' ? productData?.images : URL.createObjectURL(productData?.images)}
-                            alt=""
-                            sx={{ maxHeight: '95px' }}
-                          />
-                          <Box
-                            onClick={() => handleRemoveImage(itration)}
-                            sx={{
-                              backgroundColor: 'rgb(134, 136, 163,.09)',
-                              padding: '10px 11px 7px 11px',
-                              borderRadius: '36px',
-                              cursor: 'pointer',
-                              position: 'absolute',
-                              top: 0,
-                              right: 0,
-                            }}
-                          >
-                            <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
-                          </Box>
-                        </Box>
-                      ) : (
-                        <UploadBox
-                          sx={{
-                            width: '100px!important',
-                            height: '100px!important',
-                            textAlign: 'center',
-                            padding: '20px',
-                          }}
-                          onDrop={handleAddImage}
-                          maxFiles={1}
-                          maxSize={5242880}
-                          accept={{
-                            'image/jpeg': [],
-                            'image/png': [],
-                          }}
-                          placeholder={
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '10px',
-                                flexDirection: 'column',
-                              }}
-                            >
-                              <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
-                              <span style={{ color: '#8688A3', fontSize: '.6rem' }}>
-                                Upload Image
-                              </span>
-                            </Box>
-                          }
-                        />
-                      )}
-                    </Box>
-                  );
-                })}
-              </Box>
-
-              {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Upload Product Video
-          </Typography>
-          <Box mt='10px' sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-            <Box sx={{
-              width: '100px', height: '100px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-              flexDirection: 'column', border: '1px dashed rgb(134, 136, 163,.5)', borderRadius: '16px'
-            }}>
-              <Iconify icon="octicon:video-16" style={{ color: '#8688A3' }} />
-            </Box>
-          </Box> */}
-
-              <Typography
-                mt="20px"
-                mb="5px"
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-              >
-                Category
-              </Typography>
-
-              {/* <FormControl fullWidth>
-              <Select
-                variant='filled'
-                value={productData?.categoryId || ""}
-                onChange={handleProductData}
-                name='categoryId'
-              >
-                {categoryState.list.map((cat: any, index: any) => (
-                  <MenuItem key={index} value={cat._id}>{cat.name.en || cat.name}</MenuItem>
-                ))}
-              </Select>
-            </FormControl> */}
-              <RHFSelect
-                fullWidth
-                variant="filled"
-                name="categoryId"
-                id="demo-simple-select2"
-                value={productData?.categoryId || null}
-                settingStateValue={handleProductData}
-              >
-                {categoryState.list.map((cat: any, index: any) => (
-                  <MenuItem key={index} value={cat._id}>
-                    {cat?.name?.en || cat?.name || ''}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
-
-              <Typography
-                mt="20px"
-                mb="5px"
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-              >
-                Sub-Category
-              </Typography>
-
-              {/* <FormControl fullWidth>
-              <Select
-                variant='filled'
-                value={productData?.subCategory || ""}
-                onChange={handleProductData}
-                name='subCategory'
-              >
-                {productData?.categoryId && categoryState.subCatList.filter((item: any) => item.category === productData.categoryId).map((item: any, ind: any) => (
-                  <MenuItem key={ind} value={item._id}>{item.name}</MenuItem>
-                ))}
-              </Select>
-            </FormControl> */}
-              <RHFSelect
-                fullWidth
-                variant="filled"
-                id="demo-simple-select"
-                name="subCategory"
-                value={productData?.subCategory || null}
-                settingStateValue={handleProductData}
-              >
-                {productData?.categoryId &&
-                  categoryState.subCatList
-                    .filter((item: any) => item.category === productData.categoryId)
-                    .map((item: any, ind: any) => (
-                      <MenuItem key={ind} value={item._id}>
-                        {item?.name?.en || item?.name || ''}
-                      </MenuItem>
-                    ))}
-              </RHFSelect>
-
-              <Typography
-                mt="20px"
-                mb="5px"
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-              >
-                Brand
-              </Typography>
-              {/* <RHFTextField
-                fullWidth
-                variant="filled"
-                settingStateValue={handleProductData}
-                value={productData?.brand || ''}
-                name="brand"
-              /> */}
-              {/* {console.log(brandState)} */}
-              <RHFSelect
-                fullWidth
-                variant="filled"
-                name="brand"
-                id="demo-simple-brand"
-                value={productData?.brand || null}
-                settingStateValue={handleProductData}
-              >
-                {brandState?.list && brandState.list?.map((brandObj: any) => (
-                  <MenuItem key={brandObj._id} value={brandObj._id}>{brandObj.name.localized}</MenuItem>
-                ))}
-              </RHFSelect>
-
-
-
-              <Typography
-                mt="20px"
-                mb="5px"
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-              >
-                Price
-              </Typography>
-
-              {/* <TextField fullWidth variant='filled' onChange={handleProductData} value={productData?.price || ""} name='price' /> */}
-              <RHFTextField
-                fullWidth
-                variant="filled"
-                settingStateValue={handleProductData}
-                value={productData?.price || ''}
-                name="price"
-              />
-
-              <Typography
-                mt="20px"
-                mb="5px"
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-              >
-                Discount
-              </Typography>
-              <RHFTextField
-                fullWidth
-                variant="filled"
-                settingStateValue={handleProductData}
-                value={productData?.discount || ''}
-                name="discount"
-              />
-
-              <Grid
-                container
-                mt="20px"
-                columnSpacing="20px"
-                pb="5px"
-                alignItems="flex-end"
-                rowGap="20px"
-                justifyContent="space-between"
-              >
-                <Grid item xs={6}>
-                  <Box
-                    sx={{
-                      width: '100%',
-                      height: '56px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '.9rem',
-                      borderRadius: '16px',
-                      fontWeight: 800,
-                      cursor: "pointer",
-                      ...(productData?.discount_type === 'amount' ? activeTab : nonActiveTab),
-                    }}
-                    onClick={() => setProductData({ ...productData, discount_type: 'amount' })}
-                  >
-                    Fixed Amount
-                  </Box>
-                </Grid>
-                <Grid item xs={6}>
-                  <Box
-                    sx={{
-                      width: '100%',
-                      height: '56px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '.9rem',
-                      borderRadius: '16px',
-                      fontWeight: 800,
-                      cursor: "pointer",
-                      ...(productData?.discount_type === 'amount' ? nonActiveTab : activeTab),
-                    }}
-                    onClick={() => setProductData({ ...productData, discount_type: 'percentage' })}
-                  >
-                    Percentage
-                  </Box>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography
-                    component="p"
-                    mb="5px"
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                  >
-                    Start Date
-                  </Typography>
-                  <RHFTextField
-                    fullWidth type="date" variant="filled"
-                    name="discount_start"
-                    value={productData?.discount_start || ''}
-                    settingStateValue={handleProductData}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography
-                    component="p"
-                    mb="5px"
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                  >
-                    End Date
-                  </Typography>
-                  <RHFTextField
-                    fullWidth
-                    type="date"
-                    variant="filled"
-                    name="discount_end"
-                    value={productData?.discount_end || ''}
-                    settingStateValue={handleProductData}
-                  />
-                </Grid>
-
-
-              </Grid>
-
-              {/* <FormControl fullWidth>
-            <Select
-              variant='filled'
-              value={dropDown.price}
-              onChange={handleChangeDropDown('price')}
-            >
-              <MenuItem value='165.000'>165.000</MenuItem>
-              <MenuItem value='200.000'>200.000</MenuItem>
-            </Select>
-          </FormControl> */}
-
-              <Typography
-                mt="20px"
-                mb="5px"
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem' }}
-              >
-                Description (English)
-              </Typography>
-
-              {/* <TextField
-              variant='filled'
-              multiline
-              fullWidth
-              rows={5}
-              sx={{ fontWeight: 900, fontSize: '26px' }}
-              value={productData?.description?.en || ""}
-              onChange={handleNestedProductData}
-              name='description.en'
-            /> */}
-              <RHFTextField
-                variant="filled"
-                multiline
-                fullWidth
-                rows={5}
-                sx={{ fontWeight: 900, fontSize: '26px' }}
-                value={productData?.description?.en || ''}
-                settingStateValue={handleNestedProductData}
-                name="description.en"
-              />
-
-              <Typography
-                mt="20px"
-                mb="5px"
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem' }}
-              >
-                Description (Arabic)
-              </Typography>
-
-              {/* <TextField
-              variant='filled'
-              multiline
-              fullWidth
-              rows={5}
-              dir="rtl"
-              sx={{ fontWeight: 900, fontSize: '26px' }}
-              // defaultValue="هنالك العديد من الأنواع المتوفرة لنصوص لوريم إيبسوم، ولكن الغالبية تم تعديلها بشكل ما عبر إدخال بعض الكلمات العشوائية"
-              value={productData?.description?.ar || ""}
-              onChange={handleNestedProductData}
-              name='description.ar'
-            /> */}
-              <RHFTextField
-                variant="filled"
-                multiline
-                fullWidth
-                rows={5}
-                dir="rtl"
-                sx={{ fontWeight: 900, fontSize: '26px' }}
-                value={productData?.description?.ar || ''}
-                settingStateValue={handleNestedProductData}
-                name="description.ar"
-              />
-
-              {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
-            Available
-          </Typography>
-          <FormControl fullWidth>
-            <Select
-              variant='filled'
-              value={dropDown.available}
-              onChange={handleChangeDropDown('available')}
-            >
-              <MenuItem value='All Branches'>All Branches</MenuItem>
-              <MenuItem value='Main Branch'>Main Branch</MenuItem>
-            </Select>
-          </FormControl> */}
-
-              <Typography
-                mt="20px"
-                mb="5px"
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem' }}
-              >
-                Quantity (in stock)
-              </Typography>
-              {/* <TextField type='number' fullWidth variant='filled' onChange={handleProductData} value={productData?.quantity || ""} name='quantity' /> */}
-              <RHFTextField
-                type="number"
-                fullWidth
-                variant="filled"
-                settingStateValue={handleProductData}
-                value={productData?.quantity || ''}
-                name="quantity"
-              />
-
-              <Typography
-                mt="20px"
-                mb="5px"
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-              >
-                Max Quantity
-              </Typography>
-              <RHFTextField
-                fullWidth
-                variant="filled"
-                settingStateValue={handleProductData}
-                value={productData?.max_quantity || ''}
-                name="max_quantity"
-              />
-
-              {/* <FormControl fullWidth>
-            <Select
-              variant='filled'
-              value={dropDown.qty}
-              onChange={handleChangeDropDown('qty')}
-            >
-              <MenuItem value='Unlimited'>Unlimited</MenuItem>
-              <MenuItem value='200'>200</MenuItem>
-            </Select>
-          </FormControl> */}
-
-              <Typography
-                mt="20px"
-                mb="5px"
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem' }}
-              >
-                Product Status
-              </Typography>
-
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-                sx={{
-                  borderRadius: '16px',
-                  padding: '7px 14px',
-                  // backgroundColor: '#F5F6F8',
-                }}
-              >
-                <Typography
-                  component="p"
-                  variant="subtitle2"
-                  sx={{ fontWeight: 900, fontSize: '.9rem' }}
-                >
-                  Published
-                </Typography>
-                <Switch
-                  size="medium"
-                  checked={productData?.publish_app || false}
-                  onChange={(e: any) =>
-                    setProductData({ ...productData, publish_app: e.target.checked })
-                  }
-                />
-              </Stack>
-
-              {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+            {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
             Barcode (Optional)
           </Typography>
           <TextField fullWidth variant='filled' defaultValue='481155444762' name='branchCode'
@@ -1511,7 +1549,7 @@ export default function OrdersListView() {
             }}
           /> */}
 
-              {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
             Color (Optional)
           </Typography>
           <FormControl fullWidth>
@@ -1539,6 +1577,9 @@ export default function OrdersListView() {
 
             </Select>
           </FormControl> */}
+            <Box width="100%">
+              {/* section 1 */}
+              {renderDetails()}
             </Box>
           </FormProvider>
         </DetailsNavBar>
