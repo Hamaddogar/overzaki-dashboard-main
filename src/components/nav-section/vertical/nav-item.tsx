@@ -40,7 +40,7 @@ export default function NavItem({
     const userPermissions = config.currentPermissions || [];
 
     const hasCommonRoleV = userRoles.some((role: string) => roles && roles.includes(role)) || false;
-    const hasCommonPermissionV = permissions && permissions.some((permission: string) => userPermissions && userPermissions.includes(permission)) || false;
+    const hasCommonPermissionV = permissions && permissions.some((permission: string) => userPermissions && userPermissions?.permissions?.includes(permission)) || false;
 
     setHasCommonRole(hasCommonRoleV);
     setHasCommonPermission(hasCommonPermissionV);

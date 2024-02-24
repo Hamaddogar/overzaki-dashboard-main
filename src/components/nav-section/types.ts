@@ -13,7 +13,7 @@ export type NavConfigProps = {
   itemSubHeight?: number;
   itemRootHeight?: number;
   currentRoles?: string[];
-  currentPermissions?: string[];
+  currentPermissions?: any;
 };
 
 export type NavItemProps = ListItemButtonProps & {

@@ -64,7 +64,6 @@ const ICONS = {
 export function useNavData() {
   const { t } = useLocales();
   const { user } = useAuthContext();
-  const isSuperMember = user?.permissions?.includes('CREATE_APP_THEME');
 
   // Initialize state with the initial value for navData
   const [navData, setNavData] = useState([
@@ -165,80 +164,7 @@ export function useNavData() {
       ],
     },
   ]);
-
-  useEffect(() => {
-    let updatedItems = [...navData[0].items];
-
-    const additionalItems = [
-      {
-        title: t('Web Theme'),
-        icon: ICONS.analytics,
-        path: '',
-        children: [
-          {
-            title: t('theme'),
-            path: paths.dashboard.theme,
-            icon: ICONS.blog,
-          },
-          {
-            title: t('style'),
-            path: paths.dashboard.style,
-            icon: ICONS.blog,
-          },
-          {
-            title: t('icons'),
-            path: paths.dashboard.icon,
-            icon: ICONS.blog,
-          },
-        ],
-        permissions: ['GET_ORDERS'],
-      },
-      {
-        title: t('Mobile Theme'),
-
-        icon: ICONS.analytics,
-        path: '',
-        children: [
-          {
-            title: t('theme'),
-            path: paths.dashboard.theme,
-            icon: ICONS.blog,
-          },
-          {
-            title: t('style'),
-            path: paths.dashboard.style,
-            icon: ICONS.blog,
-          },
-          {
-            title: t('icons'),
-            path: paths.dashboard.icon,
-            icon: ICONS.blog,
-          },
-        ],
-        permissions: ['GET_ORDERS'],
-      },
-      {
-        title: t('Plans'),
-        path: paths.dashboard.plans,
-        icon: ICONS.blog
-      }
-    ];
-
-    if (isSuperMember) {
-      additionalItems.forEach((item) => {
-        // Check if the item already exists based on the title
-        if (!updatedItems.some((navItem) => item.title === navItem.title)) {
-          updatedItems.push(item as any);
-        }
-      });
-    }
-
-    // Create a new navData array with the updated items
-    const newNavData = [{ ...navData[0], items: updatedItems }];
-
-    // Update the navData state
-    setNavData(newNavData);
-  }, [t, user, isSuperMember]); // Add any other dependencies as needed
+// Add any other dependencies as needed
 
   return navData;
 }
