@@ -47,7 +47,7 @@ const RoleBasedGuard = ({
       const userPermissions = user?.permissions || [];
 
       const hasCommonRoleV = userRoles.some((role: string) => roles && roles.includes(role));
-      const hasCommonPermissionV = permission && userPermissions.includes(permission);
+      const hasCommonPermissionV = permission && userPermissions.permissions.includes(permission);
 
       setHasCommonRole(hasCommonRoleV);
       setHasCommonPermission(hasCommonPermissionV);
