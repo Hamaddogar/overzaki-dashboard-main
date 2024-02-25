@@ -22,11 +22,13 @@ import BannerSliderAccordion from './bannerSliderAccordion';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
 import { socketClient } from 'src/sections/all-themes/utils/helper-functions';
+import { builderSetObjectInDesign } from 'src/redux/store/thunks/builder';
 
 // ----------------------------------------------------------------------
 
 interface BannerProps {
   builderId?: any;
+  url?: any
   themeConfig: {
     bannerShow: boolean;
     bannerImages: Array<string>;
@@ -36,10 +38,13 @@ interface BannerProps {
   mobile?: boolean;
 }
 
+
+
 export default function BannerDealer({
   themeConfig,
   handleThemeConfig,
-  builderId
+  builderId,
+  url
 }: BannerProps) {
 
 
@@ -130,8 +135,37 @@ export default function BannerDealer({
       reader.onload = () => {
         handleThemeConfig(key, [...themeConfig.bannerImages, reader.result?.toString()]);
       };
-
       reader.readAsDataURL(file); // Read the file as data URL
+
+      console.log(key);
+
+      const payload = {
+        src: "",
+        path: "home.sections.banner.bannerBackground.image",
+        data: {
+          "textStatus": false,
+          "type": "testValue",
+          "style": {
+            "top": "10",
+            "color": "color",
+            "textposition": "textposition",
+            "fontWeight": "12",
+            "size": 1,
+            "left": 2
+          },
+          "text": "text",
+          "href": "href"
+        }
+      }
+      if (url.startsWith("https://")) {
+        url = url.replace(/^https?:\/\//, "");
+      }
+
+      dispatch(builderSetObjectInDesign({ url: url, builderId: builderId, data: payload })).then((response: any) => {
+        console.log("response", response);
+      })
+
+
     } else {
       alert('Please select a valid image file.');
     }
@@ -375,7 +409,7 @@ export default function BannerDealer({
                     <VisuallyHiddenInput
                       disabled={themeConfig.bannerImages.length == 3}
                       type="file"
-                      onChange={handleNewBanner('bannerImages')}
+                      onChange={handleNewBanner('sliderImage')}
                     />
                     <Iconify icon="ic:round-add" style={{ color: '#B2B3C5' }} />
                     <Typography variant="caption" component="p" color="#8688A3">

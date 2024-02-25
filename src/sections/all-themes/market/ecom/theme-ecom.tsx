@@ -126,8 +126,8 @@ const defaultSections = [
         name: 'Banner',
         img: '/raws/Banners.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
-          <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} builderId={builder_Id} />
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any, url: any) => (
+          <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} builderId={builder_Id} url={url} />
         ),
       },
       {
@@ -937,7 +937,8 @@ export default function EcomDesignMain() {
                                         sectionObj?.Componenet(
                                           handleThemeConfig,
                                           themeConfig,
-                                          builder_Id
+                                          builder_Id,
+                                          url
                                         )}
                                     </Box>
                                   )}

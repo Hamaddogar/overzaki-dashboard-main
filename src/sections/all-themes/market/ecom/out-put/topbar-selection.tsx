@@ -61,7 +61,9 @@ const TopBarDealer = ({
 
   const dispatch = useDispatch<AppDispatch>();
   const socket = socketClient();
+
   const targetHeader = 'home.sections.appBar.adAppBar.';
+
 
   const [topBarObj, setTopBarObj] = useState<any>(null);
   const [appBarItems, setAppBarItems] = useState([]);
@@ -80,7 +82,6 @@ const TopBarDealer = ({
       }, delay);
     };
   };
-
 
 
   // useEffect(() => {

@@ -99,6 +99,22 @@ export const builderActivateApplication = createAsyncThunk(
   }
 );
 
+export const builderSetObjectInDesign = createAsyncThunk(
+  'builder/builderSetObjectInDesign',
+  async ({ builderId, url, data }: any) => {
+    if (url && builderId) {
+      let headersObj = defaultConfig();
+      headersObj.headers['x-tenant-id'] = url;
+      const response = await postRequest(
+        `${endpoints.builder.setObject}/${builderId}`,
+        data,
+        headersObj
+      );
+      return response.data;
+    }
+  }
+);
+
 const builderSlice = createSlice({
   name: 'builder',
   initialState: {
