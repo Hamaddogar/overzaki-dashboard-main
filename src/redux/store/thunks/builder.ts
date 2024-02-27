@@ -105,7 +105,8 @@ export const builderSetObjectInDesign = createAsyncThunk(
     if (url && builderId) {
       let headersObj = defaultConfig();
       headersObj.headers['x-tenant-id'] = url;
-      const response = await postRequest(
+      headersObj.headers['Content-Type'] = 'multipart/form-data';
+      const response = await putRequest(
         `${endpoints.builder.setObject}/${builderId}`,
         data,
         headersObj

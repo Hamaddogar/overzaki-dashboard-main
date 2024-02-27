@@ -439,6 +439,8 @@ export default function EcomDesignMain() {
     bannerShow: false,
     bannerImages: [],
     //
+    sliderImage: [],
+    //
     headerShow: false,
     headerImages: '/raws/bags.jpg',
     headerTitle: 'Find everything you need',

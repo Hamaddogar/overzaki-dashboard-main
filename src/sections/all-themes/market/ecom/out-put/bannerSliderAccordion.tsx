@@ -13,15 +13,88 @@ import {
   Typography,
 } from '@mui/material';
 import Sketch from '@uiw/react-color-sketch';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import Iconify from 'src/components/iconify';
+import { AppDispatch } from 'src/redux/store/store';
+import { builderSetObjectInDesign } from 'src/redux/store/thunks/builder';
 
-const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPresets }: any) => {
+const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPresets, dataObj, url, builderId }: any) => {
   const [showTextBlock, setShowTextBlock] = useState(false);
+  const [data, setData] = useState<any>({});
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    setData(dataObj)
+  }, [dataObj]);
+
+
+  useEffect(() => {
+    // console.log("data", data);
+    if (Object.entries(data).length > 0) {
+      handleSaveSettings()
+    }
+  }, [data]);
+
+
+  const handleSaveSettings = () => {
+    const formData = new FormData();
+    const filePath = `home.sections.banner.slider.${index}`;
+    formData.append('image', data?.file || "");
+    formData.append('data', JSON.stringify(data?.data));
+    formData.append('path', filePath);
+
+    if (url.startsWith("https://")) {
+      url = url.replace(/^https?:\/\//, "");
+    }
+
+    dispatch(builderSetObjectInDesign({ url: url, builderId: builderId, data: formData })).then((response: any) => {
+      console.log("response", response);
+    })
+
+  }
+
+
+  let timeoutId: any;
+  const debounce = (func: any, delay: any) => {
+    return (...args: any) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
+  };
+
+
+
+
+
+  const handleUpdateData = debounce((name: any, value: any, parentClass: any = null) => {
+    // console.log();
+    if (parentClass) {
+
+      const newData = {
+        ...data?.data,
+        [parentClass]: {
+          ...data?.data?.[parentClass],
+          [name]: value
+        }
+      }
+      setData({ ...data, data: newData });
+    } else {
+
+      setData({ ...data, data: { ...data?.data, [name]: value } })
+    }
+
+  }, 1500)
+
+  const isColorValid = (color: string) =>
+    /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^rgb\(\d{1,3}, \d{1,3}, \d{1,3}\)$|^rgba\(\d{1,3}, \d{1,3}, \d{1,3}, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$|^hsl\(\d{1,3}, \d{1,3}%, \d{1,3}%\)$|^hsla\(\d{1,3}, \d{1,3}%, \d{1,3}%, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$/.test(
+      color
+    );
 
   return (
     <Box>
-      <Button>Add</Button>
       <Accordion>
         <AccordionSummary
           sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
@@ -108,7 +181,11 @@ const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPr
               </Typography>
               <Switch
                 // checked={appBar?.icon?.shadow}
-                onChange={() => setShowTextBlock((pv) => !pv)}
+                // onChange={() => setShowTextBlock((pv) => !pv)}
+                onChange={(e) => {
+                  handleUpdateData('textStatus', e.target.checked);
+                  setShowTextBlock((pv) => !pv);
+                }}
                 inputProps={{ 'aria-label': 'controlled' }}
               />
             </Stack>
@@ -131,8 +208,9 @@ const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPr
                     variant="filled"
                     type="text"
                     placeholder="i.e. Shop Now"
-                  // value={appBar?.logoObj?.width}
-                  // onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
+                    // value={appBar?.logoObj?.width}
+                    // onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
+                    onChange={(event) => handleUpdateData('text', event.target.value)}
                   />
                 </Box>
                 <Box sx={{ width: '100%' }}>
@@ -141,11 +219,12 @@ const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPr
                   </Typography>
                   <Stack direction="row" alignItems="center" spacing="18px">
                     <Sketch
-                      //   onChange={(event) =>
-                      //     isColorValid(event?.hex)
-                      //       ? handleChangeEvent('tintColor', event?.hex, 'icon')
-                      //       : null
-                      //   }
+                      // onChange={(event) => handleUpdateData('text', event.target.value)}
+                      onChange={(event) =>
+                        isColorValid(event?.hex)
+                          ? handleUpdateData('color', event?.hex, 'style')
+                          : null
+                      }
                       presetColors={customPresets}
                       style={{ width: '100%' }}
                     />
@@ -162,6 +241,7 @@ const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPr
                   </Typography>
                   <Switch
                     // checked={appBar?.icon?.shadow}
+                    onChange={(event: any, value: any) => handleUpdateData('fontWeight', value ? '12' : '0', 'style')}
                     // onChange={(event: any, value: any) => handleChangeEvent('shadow', value, 'icon')}
                     inputProps={{ 'aria-label': 'controlled' }}
                   />
