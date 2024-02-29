@@ -305,6 +305,17 @@ export const api = createApi({
             }),
             invalidatesTags: ['product']
         }),
+        updateProduct: builder.mutation({
+            query: ({ domain, data , id }) => ({
+                url: `/products/${id}`,
+                method: 'PUT',
+                headers: {
+                    'x-tenant-id': domain
+                },
+                body: data
+            }),
+            invalidatesTags: ['product']
+        }),
     }),
 });
 
@@ -361,5 +372,6 @@ export const {
     // products
     useGetAllProductsQuery,
     useCreateProductMutation,
-    useGetProductQuery
+    useGetProductQuery,
+    useUpdateProductMutation
 } = api;

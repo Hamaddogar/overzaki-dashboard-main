@@ -1,5 +1,5 @@
-import { Box, Button, Divider, Grid, IconButton, MenuItem, Paper, Stack, Typography } from '@mui/material';
-import React, { useState } from 'react'
+import { Box, Button, Divider, Grid, IconButton, MenuItem, Paper, Stack, Switch, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react'
 import Iconify from 'src/components/iconify/iconify';
 import Link from 'next/link';
 import { Draggable } from '@hello-pangea/dnd';
@@ -14,30 +14,52 @@ import FormProvider from 'src/components/hook-form/form-provider';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { enqueueSnackbar } from 'notistack';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useGetProductQuery } from 'src/redux/store/services/api';
+import { useGetProductQuery, useUpdateProductMutation } from 'src/redux/store/services/api';
 
 const Product = ({ product, indx }: any) => {
     const categoryState = useSelector((state: RootState) => state.category);
     const brandState = useSelector((state: RootState) => state.brands);
     const selectedDomain = useSelector((state: RootState) => state?.selectedDomain?.data)
-    const productDetails = useGetProductQuery({domain: selectedDomain?.domain , id : product?._id}).data?.data
+    const [updateProductReq , updateProductRes] = useUpdateProductMutation()
+    const productDetails = useGetProductQuery({ domain: selectedDomain?.domain, id: product?._id }).data?.data
     const [productData, setProductData] = useState<any>(productDetails)
     const [openEditProduct, setopenEditProduct] = useState(false)
-    const [createProductSections, setcreateProductSections] = useState(0)
+    const [updateProductSections, setupdateProductSections] = useState(0)
     const [ingrediants, setIngrediants] = useState<string[]>(product?.ingredients)
     const [seasons, setSeason] = useState<string[]>(product?.season)
     const [styles, setStyles] = useState<string[]>(product?.style)
     const [occasion, setOccasion] = useState<string[]>(product?.occasion)
-    const [variants, setVariants] = useState([0])
-    const [variantsRows, setVariantsRow] = useState([0])
-
+    // const [variants, setVariants] = useState([0])
+    // const [variantsRows, setVariantsRow] = useState([0])
 
 
     const methods = useForm({
         resolver: yupResolver(ProductSchema),
         defaultValues: {
+            name: productData?.title, // Assuming title matches the name structure
+            description: productData?.description,
+            // Add other fields from productData as needed, mapping them to the form structure
+            sort: productData?.sort,
+            preparationTime: productData?.preparationTime,
+            preparationTimeUnit: productData?.preparationTimeUnit,
+            ingredients: productData?.ingredients,
+            seasons: productData?.season,
+            styles: productData?.style,
+            occasions: productData?.occasion,
+            // Note: Ensure every field in your form that expects a value has a corresponding default value
+            price: productData?.sellPrice,
+            purcahsePrice: productData?.purchasePrice,
+            purchaseLimit: productData?.purchaseLimit,
+            quantity: productData?.quantity,
+            barcode: productData?.barcode,
+            sku: productData?.sku,
+            discountType: productData?.discountType,
+            discountValue: productData?.discountValue,
+            allBranches: productData?.isAvailableOnAllBranhces,
+            avalibleForMobile: productData?.publish_app,
+            avalibleForWebsite: productData?.publish_website,
         }
     });
 
@@ -48,9 +70,37 @@ const Product = ({ product, indx }: any) => {
         formState: { isSubmitting },
         getValues,
         watch,
-        setValue
+        setValue,
+        control
     } = methods;
 
+    useEffect(() => {
+        setProductData(productDetails);
+        reset({
+            name: productDetails?.title, // Assuming title matches the name structure
+            description: productDetails?.description,
+            // Add other fields from productData as needed, mapping them to the form structure
+            sort: productDetails?.sort,
+            preparationTime: productDetails?.preparationTime,
+            preparationTimeUnit: productDetails?.preparationTimeUnit,
+            ingredients: productDetails?.ingredients,
+            seasons: productDetails?.season,
+            styles: productDetails?.style,
+            occasions: productDetails?.occasion,
+            // Note: Ensure every field in your form that expects a value has a corresponding default value
+            price: productDetails?.sellPrice,
+            purcahsePrice: productDetails?.purchasePrice,
+            purchaseLimit: productDetails?.purchaseLimit,
+            quantity: productDetails?.quantity,
+            barcode: productDetails?.barcode,
+            sku: productDetails?.sku,
+            discountType: productDetails?.discountType,
+            discountValue: productDetails?.discountValue,
+            allBranches: productDetails?.isAvailableOnAllBranhces,
+            avalibleForMobile: productDetails?.publish_app,
+            avalibleForWebsite: productDetails?.publish_website,
+        })
+    }, [productDetails, reset]);
     const selectedDiscountType = watch('discountType');
 
 
@@ -126,16 +176,21 @@ const Product = ({ product, indx }: any) => {
         data.varients?.forEach((el: any, index: any) => {
             formData.append(`varients[${index}]`, JSON.stringify(el))
         })
-        console.log(formData)
+        await updateProductReq({id:product?._id , data:formData , domain: selectedDomain?.domain}).unwrap().then(()=>{
+            setopenEditProduct(false)
+            setupdateProductSections(0)
+            reset()
+            setProductData(productDetails)
+        })
     };
 
 
     const handleNextInputs = async () => {
-        setcreateProductSections(prev => prev + 1)
+        setupdateProductSections(prev => prev + 1)
     }
 
     const renderDetails = () => {
-        switch (createProductSections) {
+        switch (updateProductSections) {
             case 0:
                 return <>
                     {selectedDomain?.appLanguage?.map((el: string) =>
@@ -152,7 +207,7 @@ const Product = ({ product, indx }: any) => {
                                 fullWidth
                                 variant="filled"
                                 name={`name.${el}`}
-                                defaultValue={productData?.name?.[el] || productData?.title?.[el] || ''}
+                                defaultValue={productData?.name?.[el] || productData?.title?.[el]}
                             />
                         </>
 
@@ -421,7 +476,7 @@ const Product = ({ product, indx }: any) => {
                             <AddIcon />
                         </IconButton>
                     </Box>
-                    {seasons.map((el , index) =>
+                    {seasons.map((el, index) =>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                             <RHFTextField
                                 variant="filled"
@@ -448,7 +503,7 @@ const Product = ({ product, indx }: any) => {
                             <AddIcon />
                         </IconButton>
                     </Box>
-                    {styles.map((el , index) =>
+                    {styles.map((el, index) =>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                             <RHFTextField
                                 variant="filled"
@@ -475,7 +530,7 @@ const Product = ({ product, indx }: any) => {
                             <AddIcon />
                         </IconButton>
                     </Box>
-                    {occasion.map((el , index) =>
+                    {occasion.map((el, index) =>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                             <RHFTextField
                                 variant="filled"
@@ -500,6 +555,7 @@ const Product = ({ product, indx }: any) => {
                         fullWidth
                         variant="filled"
                         name={`fit`}
+                        defaultValue={productData?.fit}
                     />
                     <Typography
                         component="p"
@@ -513,6 +569,7 @@ const Product = ({ product, indx }: any) => {
                         fullWidth
                         variant="filled"
                         name={`calories`}
+                        defaultValue={productData?.calories}
                     />
                 </>
             case 1:
@@ -532,6 +589,7 @@ const Product = ({ product, indx }: any) => {
                         fullWidth
                         variant="filled"
                         name="price"
+                        defaultValue={productData?.sellPrice}
                     />
 
                     <Typography
@@ -549,6 +607,7 @@ const Product = ({ product, indx }: any) => {
                         variant="filled"
                         name="purcahsePrice"
                         type='number'
+                        defaultValue={productData?.purchasePrice}
                     />
                     <Typography
                         mt="20px"
@@ -565,6 +624,7 @@ const Product = ({ product, indx }: any) => {
                         variant="filled"
                         name="purchaseLimit"
                         type='number'
+                        defaultValue={productData?.purchaseLimit}
                     />
                     <Typography
                         mt="20px"
@@ -580,6 +640,7 @@ const Product = ({ product, indx }: any) => {
                         fullWidth
                         variant="filled"
                         name="barcode"
+                        defaultValue={productData?.barcode}
                     />
                     <Typography
                         mt="20px"
@@ -595,6 +656,7 @@ const Product = ({ product, indx }: any) => {
                         fullWidth
                         variant="filled"
                         name="sku"
+                        defaultValue={productData?.sku}
                     />
                     <Typography
                         mt="20px"
@@ -611,6 +673,7 @@ const Product = ({ product, indx }: any) => {
                         variant="filled"
                         name="discountValue"
                         type='number'
+                        defaultValue={productData?.discountValue}
                     />
                     <Grid
                         container
@@ -677,240 +740,272 @@ const Product = ({ product, indx }: any) => {
                         fullWidth
                         variant="filled"
                         name="quantity"
+                        defaultValue={productData?.quantity}
                     />
                 </>
+            // case 2:
+            //     return <>
+            //         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            //             <Typography
+            //                 component="p"
+            //                 noWrap
+            //                 variant="subtitle2"
+            //                 sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            //             >
+            //                 Variants
+            //             </Typography>
+            //             <IconButton onClick={() => setVariants(prev => [...prev, prev.length])}>
+            //                 <AddIcon />
+            //             </IconButton>
+            //         </Box>
+            //         {variants.map(variant => <>
+            //             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            //                 <Typography
+            //                     component="p"
+            //                     noWrap
+            //                     variant="subtitle2"
+            //                     sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            //                 >
+            //                     Variant {variant + 1}
+            //                 </Typography>
+            //                 <IconButton onClick={() => setVariants(prev => prev.filter(element => element !== variant))}>
+            //                     <DeleteIcon />
+            //                 </IconButton>
+            //             </Box>
+            //             {selectedDomain?.appLanguage?.map((el: string) =>
+            //                 <>
+            //                     <Typography
+            //                         component="p"
+            //                         noWrap
+            //                         variant="subtitle2"
+            //                         sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            //                     >
+            //                         Group Name ({el.toUpperCase()})
+            //                     </Typography>
+            //                     <RHFTextField
+            //                         fullWidth
+            //                         variant="filled"
+            //                         name={`varients[${variant}].groupName.${el}`}
+            //                     />
+            //                 </>
+            //             )}
+            //             <Typography
+            //                 component="p"
+            //                 noWrap
+            //                 variant="subtitle2"
+            //                 sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            //             >
+            //                 Selection Type
+            //             </Typography>
+            //             <RHFSelect
+            //                 variant="filled"
+            //                 name={`varients[${variant}].selectionType`}
+            //                 id="demo-simple-brand"
+            //                 fullWidth
+            //             >
+            //                 {selectionTypes?.map((unit) => (
+            //                     <MenuItem key={unit} value={unit}>{unit.toUpperCase()}</MenuItem>
+            //                 ))}
+            //             </RHFSelect>
+            //             <Typography
+            //                 component="p"
+            //                 noWrap
+            //                 variant="subtitle2"
+            //                 sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            //             >
+            //                 Minimum
+            //             </Typography>
+            //             <RHFTextField
+            //                 fullWidth
+            //                 variant="filled"
+            //                 name={`varients[${variant}].minimum`}
+            //                 type='number'
+            //             />
+            //             <Typography
+            //                 component="p"
+            //                 noWrap
+            //                 variant="subtitle2"
+            //                 sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            //             >
+            //                 Maximum
+            //             </Typography>
+            //             <RHFTextField
+            //                 fullWidth
+            //                 variant="filled"
+            //                 name={`varients[${variant}].maximum`}
+            //                 type='number'
+            //             />
+            //             <RHFCheckbox
+            //                 name={`varients[${variant}].required`}
+            //                 label="Required" // Assuming your RHFCheckbox supports a label prop
+            //             />
+            //             <RHFCheckbox
+            //                 name={`varients[${variant}].allowMoreQuantity`}
+            //                 label="Allow More Quantity" // Assuming your RHFCheckbox supports a label prop
+            //             />
+            //             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            //                 <Typography
+            //                     component="p"
+            //                     noWrap
+            //                     variant="subtitle2"
+            //                     sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            //                 >
+            //                     Variants Rows
+            //                 </Typography>
+            //                 <IconButton onClick={() => setVariantsRow(prev => [...prev, prev.length])}>
+            //                     <AddIcon />
+            //                 </IconButton>
+            //             </Box>
+            //             {variantsRows.map(row => <>
+            //                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            //                     <Typography
+            //                         component="p"
+            //                         noWrap
+            //                         variant="subtitle2"
+            //                         sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            //                     >
+            //                         Row {row + 1}
+            //                     </Typography>
+            //                     <IconButton onClick={() => setVariantsRow(prev => prev.filter(element => element !== row))}>
+            //                         <DeleteIcon />
+            //                     </IconButton>
+            //                 </Box>
+            //                 {selectedDomain?.appLanguage?.map((el: string) =>
+            //                     <>
+            //                         <Typography
+            //                             component="p"
+            //                             noWrap
+            //                             variant="subtitle2"
+            //                             sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            //                         >
+            //                             Variant Name ({el.toUpperCase()})
+            //                         </Typography>
+            //                         <RHFTextField
+            //                             fullWidth
+            //                             variant="filled"
+            //                             name={`varients[${variant}].varientRows[${row}].name.${el}`}
+            //                         />
+            //                     </>
+            //                 )}
+            //                 <Typography
+            //                     component="p"
+            //                     noWrap
+            //                     variant="subtitle2"
+            //                     sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            //                 >
+            //                     Price
+            //                 </Typography>
+            //                 <RHFTextField
+            //                     fullWidth
+            //                     variant="filled"
+            //                     name={`varients[${variant}].varientRows[${row}].price`}
+            //                     type='number'
+            //                 />
+            //                 <Typography
+            //                     component="p"
+            //                     noWrap
+            //                     variant="subtitle2"
+            //                     sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            //                 >
+            //                     Price After Discount
+            //                 </Typography>
+            //                 <RHFTextField
+            //                     fullWidth
+            //                     variant="filled"
+            //                     name={`varients[${variant}].varientRows[${row}].priceAfterDiscount`}
+            //                     type='number'
+            //                 />
+            //                 <Typography
+            //                     component="p"
+            //                     noWrap
+            //                     variant="subtitle2"
+            //                     sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            //                 >
+            //                     Quantity
+            //                 </Typography>
+            //                 <RHFTextField
+            //                     fullWidth
+            //                     variant="filled"
+            //                     name={`varients[${variant}].varientRows[${row}].quantity`}
+            //                     type='number'
+            //                 />
+            //                 <Typography
+            //                     component="p"
+            //                     noWrap
+            //                     variant="subtitle2"
+            //                     sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            //                 >
+            //                     Sku
+            //                 </Typography>
+            //                 <RHFTextField
+            //                     fullWidth
+            //                     variant="filled"
+            //                     name={`varients[${variant}].varientRows[${row}].sku`}
+            //                 />
+            //                 <Typography
+            //                     component="p"
+            //                     noWrap
+            //                     variant="subtitle2"
+            //                     sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            //                 >
+            //                     Barcode
+            //                 </Typography>
+            //                 <RHFTextField
+            //                     fullWidth
+            //                     variant="filled"
+            //                     name={`varients[${variant}].varientRows[${row}].barcode`}
+            //                 />
+            //             </>)}
+            //         </>)}
+            //     </>
             case 2:
-                return <>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography
-                            component="p"
-                            noWrap
-                            variant="subtitle2"
-                            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                        >
-                            Variants
-                        </Typography>
-                        <IconButton onClick={() => setVariants(prev => [...prev, prev.length])}>
-                            <AddIcon />
-                        </IconButton>
-                    </Box>
-                    {variants.map(variant => <>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography
-                                component="p"
-                                noWrap
-                                variant="subtitle2"
-                                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                            >
-                                Variant {variant + 1}
-                            </Typography>
-                            <IconButton onClick={() => setVariants(prev => prev.filter(element => element !== variant))}>
-                                <DeleteIcon />
-                            </IconButton>
-                        </Box>
-                        {selectedDomain?.appLanguage?.map((el: string) =>
-                            <>
-                                <Typography
-                                    component="p"
-                                    noWrap
-                                    variant="subtitle2"
-                                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                                >
-                                    Group Name ({el.toUpperCase()})
-                                </Typography>
-                                <RHFTextField
-                                    fullWidth
-                                    variant="filled"
-                                    name={`varients[${variant}].groupName.${el}`}
-                                />
-                            </>
+                return <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <Controller
+                        name="allBranches"
+                        control={control}
+                        defaultValue={productData?.isAvailableOnAllBranhces} // Default state of the switch
+                        render={({ field }: any) => (
+                            <Switch
+                                {...field}
+                                checked={field.value}
+                                onChange={(e: any) => field.onChange(e.target.checked)}
+                            />
                         )}
-                        <Typography
-                            component="p"
-                            noWrap
-                            variant="subtitle2"
-                            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                        >
-                            Selection Type
-                        </Typography>
-                        <RHFSelect
-                            variant="filled"
-                            name={`varients[${variant}].selectionType`}
-                            id="demo-simple-brand"
-                            fullWidth
-                        >
-                            {selectionTypes?.map((unit) => (
-                                <MenuItem key={unit} value={unit}>{unit.toUpperCase()}</MenuItem>
-                            ))}
-                        </RHFSelect>
-                        <Typography
-                            component="p"
-                            noWrap
-                            variant="subtitle2"
-                            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                        >
-                            Minimum
-                        </Typography>
-                        <RHFTextField
-                            fullWidth
-                            variant="filled"
-                            name={`varients[${variant}].minimum`}
-                            type='number'
-                        />
-                        <Typography
-                            component="p"
-                            noWrap
-                            variant="subtitle2"
-                            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                        >
-                            Maximum
-                        </Typography>
-                        <RHFTextField
-                            fullWidth
-                            variant="filled"
-                            name={`varients[${variant}].maximum`}
-                            type='number'
-                        />
-                        <RHFCheckbox
-                            name={`varients[${variant}].required`}
-                            label="Required" // Assuming your RHFCheckbox supports a label prop
-                        />
-                        <RHFCheckbox
-                            name={`varients[${variant}].allowMoreQuantity`}
-                            label="Allow More Quantity" // Assuming your RHFCheckbox supports a label prop
-                        />
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography
-                                component="p"
-                                noWrap
-                                variant="subtitle2"
-                                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                            >
-                                Variants Rows
-                            </Typography>
-                            <IconButton onClick={() => setVariantsRow(prev => [...prev, prev.length])}>
-                                <AddIcon />
-                            </IconButton>
-                        </Box>
-                        {variantsRows.map(row => <>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Typography
-                                    component="p"
-                                    noWrap
-                                    variant="subtitle2"
-                                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                                >
-                                    Row {row + 1}
-                                </Typography>
-                                <IconButton onClick={() => setVariantsRow(prev => prev.filter(element => element !== row))}>
-                                    <DeleteIcon />
-                                </IconButton>
-                            </Box>
-                            {selectedDomain?.appLanguage?.map((el: string) =>
-                                <>
-                                    <Typography
-                                        component="p"
-                                        noWrap
-                                        variant="subtitle2"
-                                        sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                                    >
-                                        Variant Name ({el.toUpperCase()})
-                                    </Typography>
-                                    <RHFTextField
-                                        fullWidth
-                                        variant="filled"
-                                        name={`varients[${variant}].varientRows[${row}].name.${el}`}
-                                    />
-                                </>
-                            )}
-                            <Typography
-                                component="p"
-                                noWrap
-                                variant="subtitle2"
-                                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                            >
-                                Price
-                            </Typography>
-                            <RHFTextField
-                                fullWidth
-                                variant="filled"
-                                name={`varients[${variant}].varientRows[${row}].price`}
-                                type='number'
-                            />
-                            <Typography
-                                component="p"
-                                noWrap
-                                variant="subtitle2"
-                                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                            >
-                                Price After Discount
-                            </Typography>
-                            <RHFTextField
-                                fullWidth
-                                variant="filled"
-                                name={`varients[${variant}].varientRows[${row}].priceAfterDiscount`}
-                                type='number'
-                            />
-                            <Typography
-                                component="p"
-                                noWrap
-                                variant="subtitle2"
-                                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                            >
-                                Quantity
-                            </Typography>
-                            <RHFTextField
-                                fullWidth
-                                variant="filled"
-                                name={`varients[${variant}].varientRows[${row}].quantity`}
-                                type='number'
-                            />
-                            <Typography
-                                component="p"
-                                noWrap
-                                variant="subtitle2"
-                                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                            >
-                                Sku
-                            </Typography>
-                            <RHFTextField
-                                fullWidth
-                                variant="filled"
-                                name={`varients[${variant}].varientRows[${row}].sku`}
-                            />
-                            <Typography
-                                component="p"
-                                noWrap
-                                variant="subtitle2"
-                                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                            >
-                                Barcode
-                            </Typography>
-                            <RHFTextField
-                                fullWidth
-                                variant="filled"
-                                name={`varients[${variant}].varientRows[${row}].barcode`}
-                            />
-                        </>)}
-                    </>)}
-                </>
+                    />
+                    <Typography>Avalible For All Branches</Typography>
+                </Box>
             case 3:
                 return <>
-                    <RHFCheckbox
-                        name={`allBranches`}
-                        label="Avalible for All Branches" // Assuming your RHFCheckbox supports a label prop
-                    />
-                </>
-            case 4:
-                return <>
-                    <RHFCheckbox
-                        name={`avalibleForMobile`}
-                        label="Avalible for Mobile"
-                    />
-                    <RHFCheckbox
-                        name={`avalibleForWebsite`}
-                        label="Avalible for Website"
-                    />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <Controller
+                            name="avalibleForMobile"
+                            control={control}
+                            defaultValue={productData?.publish_app} // Default state of the switch
+                            render={({ field }: any) => (
+                                <Switch
+                                    {...field}
+                                    checked={field.value}
+                                    onChange={(e: any) => field.onChange(e.target.checked)}
+                                />
+                            )}
+                        />
+                        <Typography>Avalible for Mobile</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <Controller
+                            name="avalibleForWebsite"
+                            control={control}
+                            defaultValue={productData?.publish_website} // Default state of the switch
+                            render={({ field }: any) => (
+                                <Switch
+                                    {...field}
+                                    checked={field.value}
+                                    onChange={(e: any) => field.onChange(e.target.checked)}
+                                />
+                            )}
+                        />
+                        <Typography>Avalible for Website</Typography>
+                    </Box>
                 </>
             default:
                 return null;
@@ -1027,11 +1122,14 @@ const Product = ({ product, indx }: any) => {
             </Draggable>
             <DetailsNavBar
                 open={openEditProduct}
-                onClose={() => setopenEditProduct(false)}
-                title={'Add New Product'}
+                onClose={() => {
+                    setopenEditProduct(false)
+                    setProductData(productDetails)
+                }}
+                title={'Edit Product'}
                 actions={
                     <Stack alignItems="center" justifyContent="center" spacing="10px">
-                        {createProductSections !== 4 ? (
+                        {updateProductSections !== 3 ? (
                             // Render only the "Next" button for the first section
                             <>
                                 <LoadingButton
@@ -1045,12 +1143,12 @@ const Product = ({ product, indx }: any) => {
                                 >
                                     Next
                                 </LoadingButton>
-                                {createProductSections > 0 && <Button
+                                {updateProductSections > 0 && <Button
                                     fullWidth
                                     variant="outlined"
                                     color="inherit"
                                     size="large"
-                                    onClick={() => setcreateProductSections(prev => prev - 1)} // Adjust this function as needed to go back to the first section
+                                    onClick={() => setupdateProductSections(prev => prev - 1)} // Adjust this function as needed to go back to the first section
                                     sx={{ borderRadius: '30px', marginLeft: '10px' }}
                                 >
                                     Back
@@ -1075,7 +1173,7 @@ const Product = ({ product, indx }: any) => {
                                     variant="outlined"
                                     color="inherit"
                                     size="large"
-                                    onClick={() => setcreateProductSections(prev => prev - 1)} // Adjust this function as needed to go back to the first section
+                                    onClick={() => setupdateProductSections(prev => prev - 1)} // Adjust this function as needed to go back to the first section
                                     sx={{ borderRadius: '30px', marginLeft: '10px' }}
                                 >
                                     Back
