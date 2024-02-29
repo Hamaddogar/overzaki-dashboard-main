@@ -40,12 +40,12 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 
-const activeTab = {
+export const activeTab = {
   color: '#0F1349',
   background: 'rgb(209, 255, 240)',
   border: '2px solid #1AF9B3',
 };
-const nonActiveTab = {
+export const nonActiveTab = {
   color: '#8688A3',
   background: 'rgb(245, 245, 248)',
 };
@@ -53,7 +53,7 @@ const nonActiveTab = {
 // components
 
 
-const preparationTimeUnits = [
+export const preparationTimeUnits = [
   {
     name: 'M',
     value: 'minuits'
@@ -64,12 +64,87 @@ const preparationTimeUnits = [
   },
 ]
 
-const selectionTypes = ['multiple' , 'single']
+export const selectionTypes = ['multiple' , 'single']
+
+
+export const ProductSchema = Yup.object().shape({
+  name: Yup.object().shape({
+    en: Yup.string().required(),
+    es: Yup.string().required(),
+    fr: Yup.string().required(),
+    tr: Yup.string().required(),
+    ar: Yup.string().required(),
+  }),
+  description: Yup.object().shape({
+    en: Yup.string().required(),
+    es: Yup.string().required(),
+    fr: Yup.string().required(),
+    tr: Yup.string().required(),
+    ar: Yup.string().required(),
+  }),
+  categoryId: Yup.string(),
+  subcategoryId: Yup.string(),
+  brandId: Yup.string(),
+  sort: Yup.number(),
+  preparationTime: Yup.number(),
+  preparationTimeUnit: Yup.string(),
+  ingredients: Yup.array().of(Yup.string()),
+  seasons: Yup.array().of(Yup.string()),
+  styles: Yup.array().of(Yup.string()),
+  occasions: Yup.array().of(Yup.string()),
+  fit: Yup.string(),
+  calories: Yup.string(),
+  price: Yup.number().required(),
+  purcahsePrice: Yup.number(),
+  purchaseLimit: Yup.number(),
+  quantity: Yup.number(),
+  barcode: Yup.string(),
+  sku: Yup.string(),
+  discountType: Yup.string(),
+  discountValue: Yup.number(),
+  varients: Yup.array().of(
+    Yup.object().shape({
+      groupName: Yup.object().shape({
+        en: Yup.string().required(),
+        ar: Yup.string().required(),
+        tr: Yup.string().required(),
+        es: Yup.string().required(),
+        fr: Yup.string().required(),
+        de: Yup.string().required(),
+      }),
+      selectionType: Yup.string(),
+      required: Yup.boolean(),
+      minimum: Yup.number(),
+      maximum: Yup.number(),
+      allowMoreQuantity: Yup.boolean(),
+      varientRows: Yup.array().of(
+        Yup.object().shape({
+          name: Yup.object().shape({
+            en: Yup.string().required(),
+            ar: Yup.string().required(),
+            tr: Yup.string().required(),
+            es: Yup.string().required(),
+            fr: Yup.string().required(),
+            de: Yup.string().required(),
+          }),
+          price: Yup.number(),
+          priceAfterDiscount: Yup.number(),
+          sku: Yup.string(),
+          barcode: Yup.string(),
+          quantity: Yup.number(),
+        })
+      ).required(),
+    })
+  ),
+  allBranches: Yup.boolean(),
+  avalibleForMobile: Yup.boolean(),
+  avalibleForWebsite: Yup.boolean(),
+});
+
 
 export default function OrdersListView() {
   const settings = useSettingsContext();
   const selectedDomain = useSelector((state: RootState) => state?.selectedDomain?.data)
-  // console.log(selectedDomain)
   const categoryState = useSelector((state: RootState) => state.category);
   const brandState = useSelector((state: RootState) => state.brands);
   const { enqueueSnackbar } = useSnackbar();
@@ -84,80 +159,6 @@ export default function OrdersListView() {
   const [occasion, setOccasion] = useState([0])
   const [variants, setVariants] = useState([0])
   const [variantsRows, setVariantsRow] = useState([0])
-
-  const ProductSchema = Yup.object().shape({
-    name: Yup.object().shape({
-      en: Yup.string().required(),
-      es: Yup.string().required(),
-      fr: Yup.string().required(),
-      tr: Yup.string().required(),
-      ar: Yup.string().required(),
-    }),
-    description: Yup.object().shape({
-      en: Yup.string().required(),
-      es: Yup.string().required(),
-      fr: Yup.string().required(),
-      tr: Yup.string().required(),
-      ar: Yup.string().required(),
-    }),
-    categoryId: Yup.string(),
-    subcategoryId: Yup.string(),
-    brandId: Yup.string(),
-    sort: Yup.number(),
-    preparationTime: Yup.number(),
-    preparationTimeUnit: Yup.string(),
-    ingredients: Yup.array().of(Yup.string()),
-    seasons: Yup.array().of(Yup.string()),
-    styles: Yup.array().of(Yup.string()),
-    occasions: Yup.array().of(Yup.string()),
-    fit: Yup.string(),
-    calories: Yup.string(),
-    price: Yup.number().required(),
-    purcahsePrice: Yup.number(),
-    purchaseLimit: Yup.number(),
-    quantity: Yup.number(),
-    barcode: Yup.string(),
-    sku: Yup.string(),
-    discountType: Yup.string(),
-    discountValue: Yup.number(),
-    varients: Yup.array().of(
-      Yup.object().shape({
-        groupName: Yup.object().shape({
-          en: Yup.string().required(),
-          ar: Yup.string().required(),
-          tr: Yup.string().required(),
-          es: Yup.string().required(),
-          fr: Yup.string().required(),
-          de: Yup.string().required(),
-        }),
-        selectionType: Yup.string(),
-        required: Yup.boolean(),
-        minimum: Yup.number(),
-        maximum: Yup.number(),
-        allowMoreQuantity: Yup.boolean(),
-        varientRows: Yup.array().of(
-          Yup.object().shape({
-            name: Yup.object().shape({
-              en: Yup.string().required(),
-              ar: Yup.string().required(),
-              tr: Yup.string().required(),
-              es: Yup.string().required(),
-              fr: Yup.string().required(),
-              de: Yup.string().required(),
-            }),
-            price: Yup.number(),
-            priceAfterDiscount: Yup.number(),
-            sku: Yup.string(),
-            barcode: Yup.string(),
-            quantity: Yup.number(),
-          })
-        ).required(),
-      })
-    ),
-    allBranches: Yup.boolean(),
-    avalibleForMobile: Yup.boolean(),
-    avalibleForWebsite: Yup.boolean(),
-  });
 
   const methods = useForm({
     resolver: yupResolver(ProductSchema),
@@ -223,7 +224,6 @@ export default function OrdersListView() {
     const formData = new FormData()
     productData?.images?.forEach((el:any , index:number) => {
       formData.append(`images`, el as any)
-      console.log(el)
     })
     selectedDomain?.appLanguage?.forEach((el: string) => {
       formData.append(`title[${el}]`, data.name[el as keyof typeof data.name])
@@ -272,6 +272,7 @@ export default function OrdersListView() {
       reset()
       setOpenCreateProduct(false)
       setcreateProductSections(0)
+      setProductData(null)
     })
   };
 

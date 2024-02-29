@@ -284,6 +284,16 @@ export const api = createApi({
             }),
             providesTags: ['product']
         }),
+        getProduct: builder.query({
+            query: ({domain , id}) => ({
+                url: `/products/${id}`,
+                method: "GET",
+                headers: {
+                    'x-tenant-id': domain
+                }
+            }),
+            providesTags: ['product']
+        }),
         createProduct: builder.mutation({
             query: ({ domain, data }) => ({
                 url: `/products`,
@@ -350,5 +360,6 @@ export const {
     useGetBuilderDetailsQuery,
     // products
     useGetAllProductsQuery,
-    useCreateProductMutation
+    useCreateProductMutation,
+    useGetProductQuery
 } = api;
