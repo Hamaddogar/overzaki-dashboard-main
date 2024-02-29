@@ -74,9 +74,8 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
     if (socket) {
       socket.emit('website:cmd', data);
     }
+  }, 1500);
 
-
-  }, 2000);
 
   const handleImageChange64 = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

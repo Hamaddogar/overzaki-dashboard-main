@@ -58,8 +58,6 @@ export default function NavDealer({
   mobile = false,
   builder_Id,
 }: NavProps) {
-
-
   const [currentTab, setCurrentTab] = useState('Layout');
   const [appBar, setAppBar] = useState<any>({});
   const [mainAppBar, setMainAppBar] = useState<any>({});
@@ -86,46 +84,44 @@ export default function NavDealer({
   //   }
   // }, [builder_Id])
 
+  const handleChangeEvent = (
+    key: string,
+    newValue: any,
+    parentClass: string,
+    subchild: string = ''
+  ) => {
+    let _socketKey = '';
+    let valueToShare = '';
 
-  const handleChangeEvent = debounce(
-    (
-      key: string,
-      newValue: any,
-      parentClass: string,
-      subchild: string = ''
-    ) => {
-      let _socketKey = '';
-      let valueToShare = '';
+    if (subchild === 'mobileView') {
+      const nestedAppbar = appBar?.[parentClass]?.[subchild] ?? {};
+      setAppBar({
+        ...appBar,
+        [parentClass]: { [subchild]: { ...nestedAppbar, [key]: newValue } },
+      });
+    } else {
+      const nestedAppbar = appBar?.[parentClass] ?? {};
+      setAppBar({ ...appBar, [parentClass]: { ...nestedAppbar, [key]: newValue } });
+    }
 
-      if (subchild === 'mobileView') {
-        const nestedAppbar = appBar?.[parentClass]?.[subchild] ?? {};
-        setAppBar({
-          ...appBar,
-          [parentClass]: { [subchild]: { ...nestedAppbar, [key]: newValue } },
-        });
-      } else {
-        const nestedAppbar = appBar?.[parentClass] ?? {};
-        setAppBar({ ...appBar, [parentClass]: { ...nestedAppbar, [key]: newValue } });
-      }
+    _socketKey = parentClass ? parentClass + '.' + (subchild ? subchild + '.' : '') + key : key;
+    // valueToShare = typeof newValue === 'number' ? `${newValue}px` : newValue;
+    valueToShare = newValue;
 
-      _socketKey = parentClass ? parentClass + '.' + (subchild ? subchild + '.' : '') + key : key;
-      // valueToShare = typeof newValue === 'number' ? `${newValue}px` : newValue;
-      valueToShare = newValue;
+    // const targetHeader = 'appBar.appBar.';
+    const targetHeader = 'home.sections.appBar.';
+    const data = {
+      builderId: builder_Id,
+      key: targetHeader + _socketKey,
+      value: valueToShare,
+    };
 
-      // const targetHeader = 'appBar.appBar.';
-      const targetHeader = 'home.sections.appBar.';
-      const data = {
-        builderId: builder_Id,
-        key: targetHeader + _socketKey,
-        value: valueToShare,
-      };
+    console.log('data', data);
 
-      console.log("data", data);
-
-      if (socket) {
-        socket.emit('website:cmd', data);
-      }
-    }, 500);
+    if (socket) {
+      socket.emit('website:cmd', data);
+    }
+  };
 
   const isColorValid = (color: string) =>
     /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^rgb\(\d{1,3}, \d{1,3}, \d{1,3}\)$|^rgba\(\d{1,3}, \d{1,3}, \d{1,3}, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$|^hsl\(\d{1,3}, \d{1,3}%, \d{1,3}%\)$|^hsla\(\d{1,3}, \d{1,3}%, \d{1,3}%, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$/.test(
@@ -199,15 +195,15 @@ export default function NavDealer({
   ]);
 
   useEffect(() => {
-    const menuesList = menus.filter((menuObj: any) => menuObj.link !== "" && menuObj.name !== "");
+    const menuesList = menus.filter((menuObj: any) => menuObj.link !== '' && menuObj.name !== '');
     if (menuesList.length > 0) {
-      sendSocketMsg(menuesList)
+      sendSocketMsg(menuesList);
     }
   }, [menus]);
 
   const sendSocketMsg = debounce((menuesList: any) => {
     const targetHeader = 'home.sections.appBar.menu.';
-    const _socketKey = "menuItems";
+    const _socketKey = 'menuItems';
     const valueToShare = menuesList;
     const data = {
       builderId: builder_Id,
@@ -217,9 +213,7 @@ export default function NavDealer({
     if (socket) {
       socket.emit('website:cmd', data);
     }
-  }, 1500)
-
-
+  }, 1500);
 
   const handleChangeMenu = (event: any, target: any, index: any) => {
     const updatedMenus = menus.map((menuItem, i) => {
@@ -230,7 +224,10 @@ export default function NavDealer({
     });
     setMenus(updatedMenus);
   };
-
+  const [containerBackgroundColor, setContainerBackgrounColor] = useState(false);
+  const [searchBackgroundColor, setSearchBackgroundColor] = useState(false);
+  const [isMenu, setIsMenu] = useState(false);
+  const [menuColors, setMenuColors] = useState({ textBackgroundColor: false, hoverColor: false });
 
   return (
     <div>
@@ -282,50 +279,71 @@ export default function NavDealer({
                     inputProps={{ 'aria-label': 'controlled' }}
                   />
                 </Stack>
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  width={'100%'}
-                >
-                  <Typography variant="caption" sx={{ fontWeight: 900 }}>
-                    Shadow
-                  </Typography>
-                  <Switch
-                    // checked={appBar?.container?.isShadow}
-                    onChange={(event: any, value: any) =>
-                      handleChangeEvent('isShadow', value, 'container')
-                    }
-                    inputProps={{ 'aria-label': 'controlled' }}
-                  />
-                </Stack>
+                {appBar?.container?.show && (
+                  <Stack width={'100%'}>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      width={'100%'}
+                    >
+                      <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                        Shadow
+                      </Typography>
+                      <Switch
+                        checked={appBar?.container?.isShadow}
+                        onChange={(event: any, value: any) =>
+                          handleChangeEvent('isShadow', value, 'container')
+                        }
+                        inputProps={{ 'aria-label': 'controlled' }}
+                      />
+                    </Stack>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      width={'100%'}
+                    >
+                      <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                        Background Color
+                      </Typography>
+                      <Switch
+                        checked={containerBackgroundColor}
+                        onChange={(event: any, value: any) =>
+                          setContainerBackgrounColor((pv) => !pv)
+                        }
+                        inputProps={{ 'aria-label': 'controlled' }}
+                      />
+                    </Stack>
 
-                {/* <Box sx={{ width: "100%" }} >
+                    {/* <Box sx={{ width: "100%" }} >
                                     <Typography variant='caption' color='#8688A3'>Show</Typography>
                                     <RadioGroup row value={appBar?.container?.show || "true"} onChange={(event: any) => handleChangeEvent('show', event?.target?.value, 'container')}>
                                         <FormControlLabel value="true" control={<Radio size="medium" />} label="true" />
                                         <FormControlLabel value="false" control={<Radio size="medium" />} label="false" />
                                     </RadioGroup>
                                 </Box> */}
-                {/* <Box sx={{ width: "100%" }} >
+                    {/* <Box sx={{ width: "100%" }} >
                                     <Typography variant='caption' color='#8688A3'>Shadow</Typography>
                                     <RadioGroup row value={appBar?.container?.isShadow || "true"} onChange={(event: any) => handleChangeEvent('isShadow', event?.target?.value, 'container')}>
                                         <FormControlLabel value={"true"} control={<Radio size="medium" />} label="Show" />
                                         <FormControlLabel value={"false"} control={<Radio size="medium" />} label="Hide" />
                                     </RadioGroup>
                                 </Box> */}
-                <Box sx={{ width: '100%' }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Background Color
-                  </Typography>
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    justifyContent={'center'}
-                    spacing="18px"
-                    marginTop="10px"
-                  >
-                    {/* <MuiColorInput
+
+                    {containerBackgroundColor && (
+                      <Box sx={{ width: '100%' }}>
+                        <Typography variant="caption" color="#8688A3">
+                          Background Color
+                        </Typography>
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          justifyContent={'center'}
+                          spacing="18px"
+                          marginTop="10px"
+                        >
+                          {/* <MuiColorInput
                       sx={{ width: '100%', margin: 'auto' }}
                       variant="outlined"
                       value={appBar?.container?.backgroundColor ?? '#000001'}
@@ -336,18 +354,19 @@ export default function NavDealer({
                           : null
                       }
                     /> */}
-                    <Sketch
-                      onChange={(event: any) =>
-                        isColorValid(event?.hex)
-                          ? handleChangeEvent('backgroundColor', event?.hex, 'container')
-                          : null
-                      }
-                      presetColors={customPresets}
-                      style={{ width: '100%' }}
-                    />
-                  </Stack>
-                </Box>
-                {/* <Box sx={{ width: "100%" }} >
+                          <Sketch
+                            onChange={(event: any) =>
+                              isColorValid(event?.hex)
+                                ? handleChangeEvent('backgroundColor', event?.hex, 'container')
+                                : null
+                            }
+                            presetColors={customPresets}
+                            style={{ width: '100%' }}
+                          />
+                        </Stack>
+                      </Box>
+                    )}
+                    {/* <Box sx={{ width: "100%" }} >
                                     <Typography variant='caption' color='#8688A3'>Background Color(Dark)</Typography>
                                     <Stack direction='row' alignItems='center' spacing='18px'>
                                         <MuiColorInput sx={{ width: "100%", margin: "auto", }} variant="outlined"
@@ -357,30 +376,31 @@ export default function NavDealer({
                                         />
                                     </Stack>
                                 </Box> */}
-                <Box sx={{ width: '100%' }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Border Bottom Width
-                  </Typography>
-                  <Stack direction="row" alignItems="center" spacing="18px">
-                    <Stack direction="row" alignItems="center" spacing={1} width={1}>
-                      <Slider
-                        // value={appBar?.container?.borderBottomWidth || 0}
-                        onChange={(_event: Event, newValue: number | number[]) => {
-                          handleChangeEvent('borderBottomWidth', newValue, 'container');
-                        }}
-                        valueLabelDisplay="auto"
-                        min={0}
-                        max={20}
-                      />
-                    </Stack>
-                  </Stack>
-                </Box>
-                <Box sx={{ width: '100%' }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Border Bottom Color
-                  </Typography>
-                  <Stack direction="row" alignItems="center" spacing="18px">
-                    {/* <MuiColorInput
+                    <Box sx={{ width: '100%' }}>
+                      <Typography variant="caption" color="#8688A3">
+                        Border Bottom Width
+                      </Typography>
+                      <Stack direction="row" alignItems="center" spacing="18px">
+                        <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                          <Slider
+                            // value={appBar?.container?.borderBottomWidth || 0}
+                            onChange={(_event: Event, newValue: number | number[]) => {
+                              handleChangeEvent('borderBottomWidth', newValue, 'container');
+                            }}
+                            valueLabelDisplay="auto"
+                            min={0}
+                            max={20}
+                          />
+                        </Stack>
+                      </Stack>
+                    </Box>
+                    {appBar?.container?.borderBottomWidth > 0 && (
+                      <Box sx={{ width: '100%' }}>
+                        <Typography variant="caption" color="#8688A3">
+                          Border Bottom Color
+                        </Typography>
+                        <Stack direction="row" alignItems="center" spacing="18px">
+                          {/* <MuiColorInput
                       sx={{ width: '100%', margin: 'auto' }}
                       variant="outlined"
                       value={appBar?.container?.borderBottomColor ?? '#'}
@@ -392,18 +412,20 @@ export default function NavDealer({
                           : null
                       }
                     /> */}
-                    <Sketch
-                      onChange={(event: any) =>
-                        isColorValid(event?.hex)
-                          ? handleChangeEvent('borderBottomColor', event?.hex, 'container')
-                          : null
-                      }
-                      presetColors={customPresets}
-                      style={{ width: '100%' }}
-                    />
-                  </Stack>
-                </Box>
-                {/* <Box sx={{ width: "100%" }} >
+                          <Sketch
+                            onChange={(event: any) =>
+                              isColorValid(event?.hex)
+                                ? handleChangeEvent('borderBottomColor', event?.hex, 'container')
+                                : null
+                            }
+                            presetColors={customPresets}
+                            style={{ width: '100%' }}
+                          />
+                        </Stack>
+                      </Box>
+                    )}
+
+                    {/* <Box sx={{ width: "100%" }} >
                                     <Typography variant='caption' color='#8688A3'>Margin Bottom</Typography>
                                     <Stack direction='row' alignItems='center' spacing='18px'>
                                         <Stack direction="row" alignItems="center" spacing={1} width={1}>
@@ -418,6 +440,8 @@ export default function NavDealer({
                                         </Stack>
                                     </Stack>
                                 </Box> */}
+                  </Stack>
+                )}
               </Stack>
             </Box>
           </AccordionDetails>
@@ -556,33 +580,53 @@ export default function NavDealer({
             </Box>
           </AccordionSummary>
           <AccordionDetails>
-            <Box sx={{ p: 0 }}>
-              <Stack direction="column" gap={2} alignItems="start" justifyContent="space-between">
-                <Box sx={{ width: '100%', display: 'flex', gap: 2 }}>
-                  <Box>
-                    <Typography variant="caption" color="#8688A3">
-                      Size
-                    </Typography>
-                    <Stack direction="row" alignItems="center" spacing="18px">
-                      <Stack direction="row" alignItems="center" spacing={1} width={1}>
-                        <TextField
-                          variant="filled"
-                          type="number"
-                          // value={appBar?.menu?.style?.size}
-                          onChange={(event) =>
-                            handleChangeEvent('size', event.target.value, 'menu', 'style')
-                          }
-                        />
+            <Box sx={{ width: '100%', my: 2 }}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                width={'100%'}
+              >
+                <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                  Add Menu
+                </Typography>
+                <Switch
+                  checked={isMenu}
+                  onChange={() => setIsMenu((pv) => !pv)}
+                  inputProps={{ 'aria-label': 'controlled' }}
+                />
+              </Stack>
+            </Box>
+            {isMenu && (
+              <Box sx={{ p: 0 }}>
+                <Stack direction="column" gap={2} alignItems="start" justifyContent="space-between">
+                  <Box sx={{ width: '100%', display: 'flex', gap: 2 }}>
+                    <Box>
+                      <Typography variant="caption" color="#8688A3">
+                        Size
+                      </Typography>
+                      <Stack direction="row" alignItems="center" spacing="18px">
+                        <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                          <TextField
+                            variant="filled"
+                            type="number"
+                            value={appBar?.menu?.style?.size}
+                            onChange={(event) =>
+                              handleChangeEvent('size', event.target.value, 'menu', 'style')
+                            }
+                          />
+                        </Stack>
                       </Stack>
-                    </Stack>
+                    </Box>
                   </Box>
-                </Box>
-                <Box sx={{ width: '100%' }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Text Color
-                  </Typography>
-                  <Stack direction="row" alignItems="center" spacing="18px">
-                    {/* <MuiColorInput
+
+                  <Stack width={'100%'}>
+                    <Box sx={{ width: '100%' }}>
+                      <Typography variant="caption" color="#8688A3">
+                        Text Color
+                      </Typography>
+                      <Stack direction="row" alignItems="center" spacing="18px">
+                        {/* <MuiColorInput
                       sx={{ width: '100%', margin: 'auto' }}
                       variant="outlined"
                       value={appBar?.logoObj?.color ?? '#000001'}
@@ -591,123 +635,164 @@ export default function NavDealer({
                         isColorValid(event) ? handleChangeEvent('color', event, 'logoObj') : null
                       }
                     /> */}
-                    <Sketch
-                      onChange={(event: any) =>
-                        isColorValid(event?.hex)
-                          ? handleChangeEvent('color', event?.hex, 'menu', 'style')
-                          : null
-                      }
-                      presetColors={customPresets}
-                      style={{ width: '100%' }}
-                    />
-                  </Stack>
-                </Box>
-                <Box sx={{ width: '100%' }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Text Background
-                  </Typography>
-                  <Stack direction="row" alignItems="center" spacing="18px">
-                    {/* <MuiColorInput
-                      sx={{ width: '100%', margin: 'auto' }}
-                      variant="outlined"
-                      value={appBar?.logoObj?.textBg ?? '#000001'}
-                      format="hex"
-                      onChange={(event) =>
-                        isColorValid(event) ? handleChangeEvent('textBg', event, 'logoObj') : null
-                      }
-                    /> */}
-                    <Sketch
-                      onChange={(event: any) =>
-                        isColorValid(event?.hex)
-                          ? handleChangeEvent('backgroundColor', event?.hex, 'menu', 'style')
-                          : null
-                      }
-                      presetColors={customPresets}
-                      style={{ width: '100%' }}
-                    />
-                  </Stack>
-                </Box>
-                <Box sx={{ width: '100%' }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Hover Color
-                  </Typography>
-                  <Stack direction="row" alignItems="center" spacing="18px">
-                    {/* <MuiColorInput
-                      sx={{ width: '100%', margin: 'auto' }}
-                      variant="outlined"
-                      value={appBar?.logoObj?.textBg ?? '#000001'}
-                      format="hex"
-                      onChange={(event) =>
-                        isColorValid(event) ? handleChangeEvent('textBg', event, 'logoObj') : null
-                      }
-                    /> */}
-                    <Sketch
-                      onChange={(event: any) =>
-                        isColorValid(event?.hex)
-                          ? handleChangeEvent('hoverColor', event?.hex, 'menu', 'style')
-                          : null
-                      }
-                      presetColors={customPresets}
-                      style={{ width: '100%' }}
-                    />
-                  </Stack>
-                </Box>
-                <Divider />
-                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="subtitle1">Menu</Typography>
-                  <IconButton
-                    onClick={() => setMenus((pv) => [...pv, { link: '', name: '' }])}
-                    color="primary"
-                  >
-                    <Iconify icon="ic:baseline-plus" />
-                  </IconButton>
-                </Box>
-                {/* Menu Start */}
-
-                {menus.map((item: any, i) => (
-                  <Box key={i} sx={{ width: '100%', display: 'flex', gap: 2 }}>
-                    <Box>
-                      <Typography variant="caption" color="#8688A3">
-                        Link
-                      </Typography>
-                      <Stack direction="row" alignItems="center" spacing="18px">
-                        <Stack direction="row" alignItems="center" spacing={1} width={1}>
-                          <TextField
-                            variant="filled"
-                            type="text"
-                            placeholder="https://"
-                            // value={item.link}
-                            onChange={(event) => handleChangeMenu(event, "link", i)}
-                          // onChange={(event) =>
-                          //   // setMenus([...menus])
-                          // }
-                          />
-                        </Stack>
+                        <Sketch
+                          onChange={(event: any) =>
+                            isColorValid(event?.hex)
+                              ? handleChangeEvent('color', event?.hex, 'menu', 'style')
+                              : null
+                          }
+                          presetColors={customPresets}
+                          style={{ width: '100%' }}
+                        />
                       </Stack>
                     </Box>
-                    <Box>
-                      <Typography variant="caption" color="#8688A3">
-                        Name
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      width={'100%'}
+                    >
+                      <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                        Text Background Color
                       </Typography>
-                      <Stack direction="row" alignItems="center" spacing="18px">
-                        <Stack direction="row" alignItems="center" spacing={1} width={1}>
-                          <TextField
-                            variant="filled"
-                            type="text"
-                            placeholder="Name"
-                            // value={item?.name}
-                            onChange={(event) =>
-                              handleChangeMenu(event, "name", i)
+                      <Switch
+                        checked={menuColors.textBackgroundColor}
+                        onChange={(event: any, value: any) =>
+                          setMenuColors((pv) => ({
+                            ...pv,
+                            textBackgroundColor: !pv.textBackgroundColor,
+                          }))
+                        }
+                        inputProps={{ 'aria-label': 'controlled' }}
+                      />
+                    </Stack>
+                    {menuColors.textBackgroundColor && (
+                      <Box sx={{ width: '100%' }}>
+                        <Typography variant="caption" color="#8688A3">
+                          Text Background
+                        </Typography>
+                        <Stack direction="row" alignItems="center" spacing="18px">
+                          {/* <MuiColorInput
+                      sx={{ width: '100%', margin: 'auto' }}
+                      variant="outlined"
+                      value={appBar?.logoObj?.textBg ?? '#000001'}
+                      format="hex"
+                      onChange={(event) =>
+                        isColorValid(event) ? handleChangeEvent('textBg', event, 'logoObj') : null
+                      }
+                    /> */}
+                          <Sketch
+                            onChange={(event: any) =>
+                              isColorValid(event?.hex)
+                                ? handleChangeEvent('backgroundColor', event?.hex, 'menu', 'style')
+                                : null
                             }
+                            presetColors={customPresets}
+                            style={{ width: '100%' }}
                           />
                         </Stack>
-                      </Stack>
-                    </Box>
+                      </Box>
+                    )}
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      width={'100%'}
+                    >
+                      <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                        Hover Color
+                      </Typography>
+                      <Switch
+                        checked={menuColors.hoverColor}
+                        onChange={(event: any, value: any) =>
+                          setMenuColors((pv) => ({ ...pv, hoverColor: !pv.hoverColor }))
+                        }
+                        inputProps={{ 'aria-label': 'controlled' }}
+                      />
+                    </Stack>
+                    {menuColors.hoverColor && (
+                      <Box sx={{ width: '100%' }}>
+                        <Typography variant="caption" color="#8688A3">
+                          Hover Color
+                        </Typography>
+                        <Stack direction="row" alignItems="center" spacing="18px">
+                          {/* <MuiColorInput
+                      sx={{ width: '100%', margin: 'auto' }}
+                      variant="outlined"
+                      value={appBar?.logoObj?.textBg ?? '#000001'}
+                      format="hex"
+                      onChange={(event) =>
+                        isColorValid(event) ? handleChangeEvent('textBg', event, 'logoObj') : null
+                      }
+                    /> */}
+                          <Sketch
+                            onChange={(event: any) =>
+                              isColorValid(event?.hex)
+                                ? handleChangeEvent('hoverColor', event?.hex, 'menu', 'style')
+                                : null
+                            }
+                            presetColors={customPresets}
+                            style={{ width: '100%' }}
+                          />
+                        </Stack>
+                      </Box>
+                    )}
+                  </Stack>
+                  <Divider />
+                  <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="subtitle1">Menu</Typography>
+                    <IconButton
+                      onClick={() => setMenus((pv) => [...pv, { link: '', name: '' }])}
+                      color="primary"
+                    >
+                      <Iconify icon="ic:baseline-plus" />
+                    </IconButton>
                   </Box>
-                ))}
-                {/* Menu End */}
-              </Stack>
-            </Box>
+                  {/* Menu Start */}
+
+                  {menus.map((item: any, i) => (
+                    <Box key={i} sx={{ width: '100%', display: 'flex', gap: 2 }}>
+                      <Box>
+                        <Typography variant="caption" color="#8688A3">
+                          Link
+                        </Typography>
+                        <Stack direction="row" alignItems="center" spacing="18px">
+                          <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                            <TextField
+                              variant="filled"
+                              type="text"
+                              placeholder="https://"
+                              value={item.link}
+                              onChange={(event) => handleChangeMenu(event, 'link', i)}
+                            // onChange={(event) =>
+                            //   // setMenus([...menus])
+                            // }
+                            />
+                          </Stack>
+                        </Stack>
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" color="#8688A3">
+                          Name
+                        </Typography>
+                        <Stack direction="row" alignItems="center" spacing="18px">
+                          <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                            <TextField
+                              variant="filled"
+                              type="text"
+                              placeholder="Name"
+                              value={item?.name}
+                              onChange={(event) => handleChangeMenu(event, 'name', i)}
+                            />
+                          </Stack>
+                        </Stack>
+                      </Box>
+                    </Box>
+                  ))}
+                  {/* Menu End */}
+                </Stack>
+              </Box>
+            )}
           </AccordionDetails>
         </Accordion>
         <Accordion sx={{ width: '100%' }}>
@@ -788,46 +873,77 @@ export default function NavDealer({
                     inputProps={{ 'aria-label': 'controlled' }}
                   />
                 </Stack>
+                {appBar?.search?.status && (
+                  <Stack width={'100%'}>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      width={'100%'}
+                    >
+                      <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                        Show Input
+                      </Typography>
+                      <Switch
+                        checked={appBar?.search?.input}
+                        onChange={(event: any, value: any) =>
+                          handleChangeEvent('input', value, 'search')
+                        }
+                        inputProps={{ 'aria-label': 'controlled' }}
+                      />
+                    </Stack>
 
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  width={'100%'}
-                >
-                  <Typography variant="caption" sx={{ fontWeight: 900 }}>
-                    Show Input
-                  </Typography>
-                  <Switch
-                    checked={appBar?.search?.input}
-                    onChange={(event: any, value: any) =>
-                      handleChangeEvent('input', value, 'search')
-                    }
-                    inputProps={{ 'aria-label': 'controlled' }}
-                  />
-                </Stack>
-
-                <Box sx={{ width: '100%', my: 2 }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Position
-                  </Typography>
-                  <RadioGroup
-                    row
-                    // value={appBar?.search?.position}
-                    onChange={(event: any) => handleChangeEvent('position', event.target.value, 'search')}
-                  >
-                    <FormControlLabel value="left" control={<Radio size="medium" />} label="Left" />
-                    <FormControlLabel value="center" control={<Radio size="medium" />} label="Center " />
-                    <FormControlLabel value="right" control={<Radio size="medium" />} label="Right" />
-                  </RadioGroup>
-                </Box>
-
-                <Box sx={{ width: '100%' }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Background Color
-                  </Typography>
-                  <Stack direction="row" alignItems="center" spacing="18px">
-                    {/* <MuiColorInput
+                    <Box sx={{ width: '100%', my: 2 }}>
+                      <Typography variant="caption" color="#8688A3">
+                        Position
+                      </Typography>
+                      <RadioGroup
+                        row
+                        value={appBar?.search?.position}
+                        onChange={(event: any) =>
+                          handleChangeEvent('position', event.target.value, 'search')
+                        }
+                      >
+                        <FormControlLabel
+                          value="left"
+                          control={<Radio size="medium" />}
+                          label="Left"
+                        />
+                        <FormControlLabel
+                          value="center"
+                          control={<Radio size="medium" />}
+                          label="Center "
+                        />
+                        <FormControlLabel
+                          value="right"
+                          control={<Radio size="medium" />}
+                          label="Right"
+                        />
+                      </RadioGroup>
+                    </Box>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      width={'100%'}
+                    >
+                      <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                        Add Background & Text Color
+                      </Typography>
+                      <Switch
+                        checked={searchBackgroundColor}
+                        onChange={(event: any, value: any) => setSearchBackgroundColor((pv) => !pv)}
+                        inputProps={{ 'aria-label': 'controlled' }}
+                      />
+                    </Stack>
+                    {searchBackgroundColor && (
+                      <Stack width={'100%'}>
+                        <Box sx={{ width: '100%' }}>
+                          <Typography variant="caption" color="#8688A3">
+                            Background Color
+                          </Typography>
+                          <Stack direction="row" alignItems="center" spacing="18px">
+                            {/* <MuiColorInput
                       sx={{ width: '100%', margin: 'auto' }}
                       variant="outlined"
                       value={appBar?.icon?.backgroundColor ?? '#000001'}
@@ -839,25 +955,25 @@ export default function NavDealer({
                           : null
                       }
                     /> */}
-                    <Sketch
-                      onChange={(event: any) =>
-                        isColorValid(event?.hex)
-                          // ? handleChangeEvent('backgroundColor', event?.hex, 'icon')
-                          ? handleChangeEvent('textBg', event?.hex, 'search')
-                          : null
-                      }
-                      presetColors={customPresets}
-                      style={{ width: '100%' }}
-                    />
-                  </Stack>
-                </Box>
+                            <Sketch
+                              onChange={(event: any) =>
+                                isColorValid(event?.hex)
+                                  ? // ? handleChangeEvent('backgroundColor', event?.hex, 'icon')
+                                  handleChangeEvent('textBg', event?.hex, 'search')
+                                  : null
+                              }
+                              presetColors={customPresets}
+                              style={{ width: '100%' }}
+                            />
+                          </Stack>
+                        </Box>
 
-                <Box sx={{ width: '100%' }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Color
-                  </Typography>
-                  <Stack direction="row" alignItems="center" spacing="18px">
-                    {/* <MuiColorInput
+                        <Box sx={{ width: '100%' }}>
+                          <Typography variant="caption" color="#8688A3">
+                            Text Color
+                          </Typography>
+                          <Stack direction="row" alignItems="center" spacing="18px">
+                            {/* <MuiColorInput
                       sx={{ width: '100%', margin: 'auto' }}
                       variant="outlined"
                       value={appBar?.icon?.tintColor ?? '#000001'}
@@ -867,19 +983,21 @@ export default function NavDealer({
                         isColorValid(event) ? handleChangeEvent('tintColor', event, 'icon') : null
                       }
                     /> */}
-                    <Sketch
-                      onChange={(event: any) =>
-                        isColorValid(event?.hex)
-                          ? handleChangeEvent('textColor', event?.hex, 'search')
-                          : null
-                      }
-                      presetColors={customPresets}
-                      style={{ width: '100%' }}
-                    />
-                  </Stack>
-                </Box>
+                            <Sketch
+                              onChange={(event: any) =>
+                                isColorValid(event?.hex)
+                                  ? handleChangeEvent('textColor', event?.hex, 'search')
+                                  : null
+                              }
+                              presetColors={customPresets}
+                              style={{ width: '100%' }}
+                            />
+                          </Stack>
+                        </Box>
+                      </Stack>
+                    )}
 
-                {/* <Box sx={{ width: "100%" }} >
+                    {/* <Box sx={{ width: "100%" }} >
                                     <Typography variant='caption' color='#8688A3'>Shadow</Typography>
                                     <RadioGroup row value={appBar?.icon?.shadow || "true"} onChange={(event: any) => handleChangeEvent('shadow', event?.target?.value, 'icon')}>
                                         <FormControlLabel value={"true"} control={<Radio size="medium" />} label="Show" />
@@ -887,30 +1005,31 @@ export default function NavDealer({
                                     </RadioGroup>
                                 </Box> */}
 
-                <Box sx={{ width: '100%' }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Border Width (%)
-                  </Typography>
-                  <Stack direction="row" alignItems="center" spacing="18px">
-                    <Stack direction="row" alignItems="center" spacing={1} width={1}>
-                      <Slider
-                        // value={appBar?.search?.borderWidth || 0}
-                        onChange={(_event: Event, newValue: number | number[]) =>
-                          handleChangeEvent('borderWidth', newValue, 'search')
-                        }
-                        valueLabelDisplay="auto"
-                        min={0}
-                        max={20}
-                      />
-                    </Stack>
-                  </Stack>
-                </Box>
-                <Box sx={{ width: '100%' }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Border Color
-                  </Typography>
-                  <Stack direction="row" alignItems="center" spacing="18px">
-                    {/* <MuiColorInput
+                    <Box sx={{ width: '100%' }}>
+                      <Typography variant="caption" color="#8688A3">
+                        Border Width (%)
+                      </Typography>
+                      <Stack direction="row" alignItems="center" spacing="18px">
+                        <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                          <Slider
+                            value={appBar?.search?.borderWidth || 0}
+                            onChange={(_event: Event, newValue: number | number[]) =>
+                              handleChangeEvent('borderWidth', newValue, 'search')
+                            }
+                            valueLabelDisplay="auto"
+                            min={0}
+                            max={20}
+                          />
+                        </Stack>
+                      </Stack>
+                    </Box>
+                    {appBar?.search?.borderWidth > 0 && (
+                      <Box sx={{ width: '100%' }}>
+                        <Typography variant="caption" color="#8688A3">
+                          Border Color
+                        </Typography>
+                        <Stack direction="row" alignItems="center" spacing="18px">
+                          {/* <MuiColorInput
                       sx={{ width: '100%', margin: 'auto' }}
                       variant="outlined"
                       value={appBar?.icon?.borderColor ?? '#000001'}
@@ -920,17 +1039,20 @@ export default function NavDealer({
                         isColorValid(event) ? handleChangeEvent('borderColor', event, 'icon') : null
                       }
                     /> */}
-                    <Sketch
-                      onChange={(event: any) =>
-                        isColorValid(event?.hex)
-                          ? handleChangeEvent('borderColor', event?.hex, 'search')
-                          : null
-                      }
-                      presetColors={customPresets}
-                      style={{ width: '100%' }}
-                    />
+                          <Sketch
+                            onChange={(event: any) =>
+                              isColorValid(event?.hex)
+                                ? handleChangeEvent('borderColor', event?.hex, 'search')
+                                : null
+                            }
+                            presetColors={customPresets}
+                            style={{ width: '100%' }}
+                          />
+                        </Stack>
+                      </Box>
+                    )}
                   </Stack>
-                </Box>
+                )}
                 {/* <Box sx={{ width: '100%', display: 'flex', gap: 2 }}>
                   <Box>
                     <Typography variant="caption" color="#8688A3">

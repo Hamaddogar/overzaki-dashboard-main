@@ -221,7 +221,7 @@ export function AuthProvider({ children }: Props) {
 
       const newSocketURL = getSocketURL(accessToken);
       setSession(accessToken);
-      setCookie(REFRESH_KEY , refreshToken , 7)
+      setCookie(REFRESH_KEY, refreshToken, 7)
       setBuilderDomain(null);
       dispatch({
         type: Types.REGISTER,
@@ -238,7 +238,7 @@ export function AuthProvider({ children }: Props) {
     (data: any) => {
       const { permission, roles } = data
       const userRoles = state.user?.roles || [];
-      const userPermissions = state.user?.permissions.permissions || [];
+      const userPermissions = state.user?.permissions?.permissions || [];
       const hasCommonRole = userRoles.some((role: string) => roles && roles.includes(role));
       const hasCommonPermission = permission && userPermissions.includes(permission);
       if ((roles && !hasCommonRole) || (permission && !hasCommonPermission)) {

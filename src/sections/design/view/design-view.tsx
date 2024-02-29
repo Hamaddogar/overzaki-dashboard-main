@@ -117,7 +117,7 @@ const DesignMain: React.FC<DesignMainProps> = () => {
   const { list, builder, error, status } = useSelector((state: any) => state.builder);
 
   useEffect(() => {
-    console.log(list);
+    // console.log(list);
 
     if (status === 'idle') {
       dispatch(fetchBuilderList(error));

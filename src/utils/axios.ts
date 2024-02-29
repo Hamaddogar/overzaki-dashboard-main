@@ -119,6 +119,7 @@ export const endpoints = {
     headerImage: '/design/header_image',
     get: '/builder?type=website',
     search: '/builder/search',
+    setObject: '/home-design/lists',
   },
   customer: {
     list: '/customers',

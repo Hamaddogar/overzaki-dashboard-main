@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import {
   TextField,
   Typography,
@@ -22,29 +22,35 @@ import BannerSliderAccordion from './bannerSliderAccordion';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
 import { socketClient } from 'src/sections/all-themes/utils/helper-functions';
+import { builderSetObjectInDesign } from 'src/redux/store/thunks/builder';
 
 // ----------------------------------------------------------------------
 
 interface BannerProps {
   builderId?: any;
+  url?: any
   themeConfig: {
     bannerShow: boolean;
     bannerImages: Array<string>;
+    sliderImage: Array<string>;
     // Add other themeConfig properties as needed
   };
   handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
   mobile?: boolean;
 }
 
+
+
 export default function BannerDealer({
   themeConfig,
   handleThemeConfig,
-  builderId
+  builderId,
+  url
 }: BannerProps) {
 
 
   const [banner, setBanner] = useState<any>({});
-  const [bannerSliderImages, setBannerSliderImages] = useState([]);
+  const [bannerSliderImages, setBannerSliderImages] = useState<any>([]);
   const [bannerType, setBannerType] = useState('');
 
 
@@ -52,6 +58,14 @@ export default function BannerDealer({
   const dispatch = useDispatch<AppDispatch>();
   const socket = socketClient();
   const targetHeader = 'home.sections.banner.';
+
+  // useEffect(() => {
+
+  // }, [bannerSliderImages])
+
+
+
+
 
   let timeoutId: any;
   const debounce = (func: any, delay: any) => {
@@ -104,11 +118,13 @@ export default function BannerDealer({
 
 
   // -------------------------------------------------------------------------
-  const handleActionsBanner =
+  const handleActionsBanner: any =
     (action: string, location: number, arrayData: any) => (event: any) => {
       switch (action) {
         case 'delete':
           arrayData.splice(1, location);
+          console.log("arrayData", arrayData);
+
           handleThemeConfig('bannerImages', arrayData);
           break;
 
@@ -128,14 +144,61 @@ export default function BannerDealer({
       const reader = new FileReader();
 
       reader.onload = () => {
-        handleThemeConfig(key, [...themeConfig.bannerImages, reader.result?.toString()]);
+        // handleThemeConfig(key, [...themeConfig.bannerImages, reader.result?.toString()]);
+        handleThemeConfig(key, [...(key === 'bannerImages' ? themeConfig.bannerImages : themeConfig.sliderImage), reader.result?.toString()]);
       };
 
+
+
+
       reader.readAsDataURL(file); // Read the file as data URL
+
+      let filePath = "";
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      if (key === 'bannerImages') {
+        filePath = "home.sections.banner.bannerBackground.file";
+        formData.append('filePath', filePath);
+      } else {
+        const defaultVideoData = {
+          textStatus: true,
+          type: "",
+          style: {
+            top: "10",
+            color: "black",
+            textposition: "10",
+            fontWeight: "12",
+            size: 1,
+            left: 2
+          },
+          text: "",
+          href: ""
+        }
+        setBannerSliderImages([...bannerSliderImages, { file: file, data: defaultVideoData }])
+        filePath = "home.sections.banner.slider";
+        formData.append('data', JSON.stringify(defaultVideoData));
+        formData.append('path', filePath);
+      }
+
+
+
+      if (url.startsWith("https://")) {
+        url = url.replace(/^https?:\/\//, "");
+      }
+
+      dispatch(builderSetObjectInDesign({ url: url, builderId: builderId, data: formData })).then((response: any) => {
+        console.log("response", response);
+      })
+
+
     } else {
       alert('Please select a valid image file.');
     }
   };
+
+
 
 
   // const handleNewSliderBanner = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
@@ -375,20 +438,23 @@ export default function BannerDealer({
                     <VisuallyHiddenInput
                       disabled={themeConfig.bannerImages.length == 3}
                       type="file"
-                      onChange={handleNewBanner('bannerImages')}
+                      onChange={handleNewBanner('sliderImage')}
                     />
                     <Iconify icon="ic:round-add" style={{ color: '#B2B3C5' }} />
                     <Typography variant="caption" component="p" color="#8688A3">
                       Add New Banner (Max 3)
                     </Typography>
                   </Box>
-                  {themeConfig.bannerImages.map((img, index, self) => (
+                  {themeConfig?.sliderImage.map((img: any, index: any, self: any) => (
                     <BannerSliderAccordion
                       customPresets={customPresets}
                       img={img}
                       index={index}
                       handleActionsBanner={handleActionsBanner}
+                      dataObj={bannerSliderImages[index]}
                       self={self}
+                      url={url}
+                      builderId={builderId}
                     />
                   ))}
                 </Box>

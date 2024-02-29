@@ -512,7 +512,8 @@ export default function EcomDesignMain() {
                     cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
                     handleThemeConfig={handleThemeConfig}
                   />
-                  <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+                  {/* <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} builderId={builderId}
+                    url={url} /> */}
                 </Box>}
                 {buttonSection === 'Header' && <Box>
                   <HeaderSection
@@ -1725,7 +1726,7 @@ export default function EcomDesignMain() {
                       <Iconify icon='charm:tick' style={{ cursor: 'pointer' }} onClick={handleButton('')} />
                     </Stack>
                   </Stack>
-                  <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+                  {/* <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} /> */}
                 </Actions>
                 <Actions condition={buttonSection === 'Header'}>
                   <Stack direction='row' justifyContent='space-between'>
