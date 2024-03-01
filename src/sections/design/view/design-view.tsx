@@ -32,8 +32,6 @@ import { useAuthContext } from 'src/auth/hooks';
 import { fetchBuilderList } from 'src/redux/store/thunks/builder';
 import Link from 'next/link';
 
-
-
 export const data = [
   {
     icon: 'ant-design:shopping-outlined',
@@ -108,7 +106,6 @@ interface DesignMainProps {
   // Add any props if needed
 }
 
-
 const DesignMain: React.FC<DesignMainProps> = () => {
   const settings = useSettingsContext();
 
@@ -123,7 +120,6 @@ const DesignMain: React.FC<DesignMainProps> = () => {
       dispatch(fetchBuilderList(error));
     }
   }, [status]);
-
 
   // const listStuff = data;
   const listStuff = list;
@@ -168,7 +164,6 @@ const DesignMain: React.FC<DesignMainProps> = () => {
     fetchData();
   }, []);
 
-
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'} sx={{ mt: 3 }}>
@@ -192,7 +187,7 @@ const DesignMain: React.FC<DesignMainProps> = () => {
                     spacing="10px"
                     sx={{ width: '100%', maxWidth: { xs: '100%', sm: '200px' } }}
                   >
-                    <Linker path={paths.dashboard.newDesign.root} >
+                    <Linker path={paths.dashboard.newDesign.root}>
                       <Button
                         startIcon="+"
                         fullWidth
@@ -209,8 +204,6 @@ const DesignMain: React.FC<DesignMainProps> = () => {
                 </BottomActions>
               </RoleBasedGuard>
             </Grid>
-
-
 
             <Grid item xs={12}>
               <Box>
@@ -233,7 +226,7 @@ const DesignMain: React.FC<DesignMainProps> = () => {
                                 item
                                 xs={12}
                               >
-                                <Paper elevation={4} >
+                                <Paper elevation={4}>
                                   <Grid
                                     container
                                     item
@@ -242,7 +235,7 @@ const DesignMain: React.FC<DesignMainProps> = () => {
                                     rowGap={3}
                                     p={3}
                                     minHeight="80px"
-                                  // sx={voucher.status ? stylesActive : stylesDisabled}
+                                    // sx={voucher.status ? stylesActive : stylesDisabled}
                                   >
                                     <Grid
                                       item
@@ -269,11 +262,7 @@ const DesignMain: React.FC<DesignMainProps> = () => {
                                           alignItems={'center'}
                                           justifyContent={'center'}
                                         >
-                                          <Iconify
-                                            icon="uil:images"
-                                            width="40px"
-                                            height="40px"
-                                          />
+                                          <Iconify icon="uil:images" width="40px" height="40px" />
                                         </Box>
                                       )}
                                       <Box sx={{ minWidth: { xs: 'auto', md: '140px' } }}>
@@ -283,7 +272,9 @@ const DesignMain: React.FC<DesignMainProps> = () => {
                                           variant="subtitle2"
                                           sx={{ fontSize: '.8rem' }}
                                         >
-                                          {builderObj?.appName?.localized || builderObj?.appName?.en || ""}
+                                          {builderObj?.appName?.localized ||
+                                            builderObj?.appName?.en ||
+                                            ''}
                                         </Typography>
                                         <Typography
                                           component="p"
@@ -291,9 +282,8 @@ const DesignMain: React.FC<DesignMainProps> = () => {
                                           variant="subtitle2"
                                           sx={{ mt: '5px', fontWeight: 900, fontSize: '.8rem' }}
                                         >
-                                          {builderObj?.domain || ""}
+                                          {builderObj?.domain || ''}
                                         </Typography>
-
                                       </Box>
                                     </Grid>
 
@@ -338,39 +328,47 @@ const DesignMain: React.FC<DesignMainProps> = () => {
                                         </Box>
                                       )} */}
                                         <Link
-                                          target='_blank'
+                                          target="_blank"
                                           href={`https://${builderObj?.domain}`}
                                         >
-                                          <Chip label="Preview Theme" sx={{ cursor: "pointer" }} variant="outlined" />
-
+                                          <Chip
+                                            label="Preview Theme"
+                                            sx={{ cursor: 'pointer' }}
+                                            variant="outlined"
+                                          />
                                         </Link>
-                                        {allowAction.edit && (
-                                          <Link
-                                            href={paths.dashboard.design.theme(builderObj?.BusinessCategory, builderObj?.websiteTheme, `https://${builderObj?.domain}`, builderObj?._id)}
+                                        {/* {allowAction.edit && ( */}
+                                        <Link
+                                          href={paths.dashboard.design.theme(
+                                            builderObj?.BusinessCategory,
+                                            builderObj?.websiteTheme,
+                                            `https://${builderObj?.domain}`,
+                                            builderObj?._id
+                                          )}
+                                        >
+                                          <Box
+                                            sx={{
+                                              width: '36px',
+                                              height: '36px',
+                                              borderRadius: '20px',
+                                              background: 'rgb(134, 136, 163,0.09)',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              cursor: 'pointer',
+                                              '&:hover': {
+                                                background: 'rgb(134, 136, 163,0.2)',
+                                              },
+                                            }}
                                           >
                                             <Box
-                                              sx={{
-                                                width: '36px',
-                                                height: '36px',
-                                                borderRadius: '20px',
-                                                background: 'rgb(134, 136, 163,0.09)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                cursor: 'pointer',
-                                                '&:hover': {
-                                                  background: 'rgb(134, 136, 163,0.2)',
-                                                },
-                                              }}
-                                            >
-                                              <Box
-                                                component="img"
-                                                src="/raw/edit-pen.svg"
-                                                width="13px"
-                                              />
-                                            </Box>
-                                          </Link>
-                                        )}
+                                              component="img"
+                                              src="/raw/edit-pen.svg"
+                                              width="13px"
+                                            />
+                                          </Box>
+                                        </Link>
+                                        {/* )} */}
                                       </Box>
                                     </Grid>
                                   </Grid>
@@ -383,8 +381,6 @@ const DesignMain: React.FC<DesignMainProps> = () => {
                     )}
                   </Droppable>
                 </DragDropContext>
-
-
               </Box>
             </Grid>
           </Grid>
@@ -432,10 +428,8 @@ const DesignMain: React.FC<DesignMainProps> = () => {
           ))}
         </Grid>
       </Box> */}
-
     </>
-
   );
-}
+};
 
 export default DesignMain;

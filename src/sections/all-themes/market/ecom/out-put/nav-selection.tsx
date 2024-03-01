@@ -27,6 +27,8 @@ import { AppDispatch } from 'src/redux/store/store';
 import { saveLogo } from 'src/redux/store/thunks/builder';
 import Sketch from '@uiw/react-color-sketch';
 import './style.css';
+import NavbarTheme from 'src/sections/all-themes/component/NavbarTheme';
+import { sections } from 'src/sections/all-themes/component/response';
 // ----------------------------------------------------------------------
 
 const TABS = [
@@ -58,6 +60,7 @@ export default function NavDealer({
   mobile = false,
   builder_Id,
 }: NavProps) {
+  const [navbarState, setNavbarState] = useState(sections);
   const [currentTab, setCurrentTab] = useState('Layout');
   const [appBar, setAppBar] = useState<any>({});
   const [mainAppBar, setMainAppBar] = useState<any>({});
@@ -228,7 +231,16 @@ export default function NavDealer({
   const [searchBackgroundColor, setSearchBackgroundColor] = useState(false);
   const [isMenu, setIsMenu] = useState(false);
   const [menuColors, setMenuColors] = useState({ textBackgroundColor: false, hoverColor: false });
+  // Navbar
+  const [generalIcons, setGeneralIcons] = useState(navbarState[0].generalIcons);
+  const [appBarSearch, setAppBarSearch] = useState(navbarState[0].appBar.search);
+  // console.log(generalIcons);
+  const [appBarLogo, setAppBarLogo] = useState(navbarState[0]?.websiteLogo);
 
+  const [appBarContainer, setAppBarContainer] = useState(navbarState[0].appBar.container);
+
+  const [centerMenu, setCenterMenu] = useState(navbarState[0]?.appBar?.menu);
+  console.log(appBarContainer);
   return (
     <div>
       <Stack
@@ -246,6 +258,14 @@ export default function NavDealer({
           },
         }}
       >
+        <NavbarTheme
+          centerMenu={centerMenu}
+          appBarContainer={appBarContainer}
+          appBarLogo={appBarLogo}
+          appBarSearch={appBarSearch}
+          generalIcons={generalIcons}
+          navbarState={navbarState}
+        />
         <Accordion
           sx={{
             width: '100%',
@@ -292,9 +312,10 @@ export default function NavDealer({
                       </Typography>
                       <Switch
                         checked={appBar?.container?.isShadow}
-                        onChange={(event: any, value: any) =>
-                          handleChangeEvent('isShadow', value, 'container')
-                        }
+                        onChange={(event: any, value: any) => {
+                          handleChangeEvent('isShadow', value, 'container');
+                          setAppBarContainer((prev) => ({ ...prev, isShadow: prev?.isShadow }));
+                        }}
                         inputProps={{ 'aria-label': 'controlled' }}
                       />
                     </Stack>
@@ -309,9 +330,14 @@ export default function NavDealer({
                       </Typography>
                       <Switch
                         checked={containerBackgroundColor}
-                        onChange={(event: any, value: any) =>
-                          setContainerBackgrounColor((pv) => !pv)
-                        }
+                        onChange={(event: any, value: any) => {
+                          setContainerBackgrounColor((pv) => !pv);
+                          // setAppBarContainer((prev) => ({
+                          //   ...prev,
+                          //   backgroundColor: event ,
+                          // }));
+                          // console.log(value);
+                        }}
                         inputProps={{ 'aria-label': 'controlled' }}
                       />
                     </Stack>
@@ -355,11 +381,15 @@ export default function NavDealer({
                       }
                     /> */}
                           <Sketch
-                            onChange={(event: any) =>
+                            onChange={(event: any) => {
                               isColorValid(event?.hex)
                                 ? handleChangeEvent('backgroundColor', event?.hex, 'container')
-                                : null
-                            }
+                                : null;
+                              setAppBarContainer((prev) => ({
+                                ...prev,
+                                backgroundColor: event?.hex,
+                              }));
+                            }}
                             presetColors={customPresets}
                             style={{ width: '100%' }}
                           />
@@ -384,8 +414,13 @@ export default function NavDealer({
                         <Stack direction="row" alignItems="center" spacing={1} width={1}>
                           <Slider
                             // value={appBar?.container?.borderBottomWidth || 0}
-                            onChange={(_event: Event, newValue: number | number[]) => {
+                            onChange={(event: any, newValue: number | number[]) => {
                               handleChangeEvent('borderBottomWidth', newValue, 'container');
+                              // console.log(_event);
+                              setAppBarContainer((prev) => ({
+                                ...prev,
+                                borderBottomWidth: event?.target?.value,
+                              }));
                             }}
                             valueLabelDisplay="auto"
                             min={0}
@@ -413,11 +448,15 @@ export default function NavDealer({
                       }
                     /> */}
                           <Sketch
-                            onChange={(event: any) =>
+                            onChange={(event: any) => {
                               isColorValid(event?.hex)
                                 ? handleChangeEvent('borderBottomColor', event?.hex, 'container')
-                                : null
-                            }
+                                : null;
+                              setAppBarContainer((prev) => ({
+                                ...prev,
+                                borderBottomColor: event?.hex,
+                              }));
+                            }}
                             presetColors={customPresets}
                             style={{ width: '100%' }}
                           />
@@ -467,6 +506,8 @@ export default function NavDealer({
                                 </Box> */}
 
                 <LogoDealer
+                  // appBarLogo={appBarLogo}
+                  // setAppBarLogo={setAppBarLogo}
                   themeConfig={{ logo: '', ...themeConfig }}
                   builderId={builder_Id}
                   handleThemeConfig={handleThemeConfig}
@@ -867,9 +908,10 @@ export default function NavDealer({
                   </Typography>
                   <Switch
                     checked={appBar?.search?.status}
-                    onChange={(event: any, value: any) =>
-                      handleChangeEvent('status', value, 'search')
-                    }
+                    onChange={(event: any, value: any) => {
+                      handleChangeEvent('status', value, 'search');
+                      setAppBarSearch((prev) => ({ ...prev, status: !prev.status }));
+                    }}
                     inputProps={{ 'aria-label': 'controlled' }}
                   />
                 </Stack>
@@ -886,9 +928,10 @@ export default function NavDealer({
                       </Typography>
                       <Switch
                         checked={appBar?.search?.input}
-                        onChange={(event: any, value: any) =>
-                          handleChangeEvent('input', value, 'search')
-                        }
+                        onChange={(event: any, value: any) => {
+                          handleChangeEvent('input', value, 'search');
+                          setAppBarSearch((prev) => ({ ...prev, input: !prev.input }));
+                        }}
                         inputProps={{ 'aria-label': 'controlled' }}
                       />
                     </Stack>
@@ -900,9 +943,10 @@ export default function NavDealer({
                       <RadioGroup
                         row
                         value={appBar?.search?.position}
-                        onChange={(event: any) =>
-                          handleChangeEvent('position', event.target.value, 'search')
-                        }
+                        onChange={(event: any) => {
+                          handleChangeEvent('position', event.target.value, 'search');
+                          setAppBarSearch((prev) => ({ ...prev, position: event.target.value }));
+                        }}
                       >
                         <FormControlLabel
                           value="left"
@@ -938,12 +982,12 @@ export default function NavDealer({
                     </Stack>
                     {searchBackgroundColor && (
                       <Stack width={'100%'}>
-                        <Box sx={{ width: '100%' }}>
+                        {/* <Box sx={{ width: '100%' }}>
                           <Typography variant="caption" color="#8688A3">
                             Background Color
                           </Typography>
-                          <Stack direction="row" alignItems="center" spacing="18px">
-                            {/* <MuiColorInput
+                          <Stack direction="row" alignItems="center" spacing="18px"> */}
+                        {/* <MuiColorInput
                       sx={{ width: '100%', margin: 'auto' }}
                       variant="outlined"
                       value={appBar?.icon?.backgroundColor ?? '#000001'}
@@ -955,7 +999,7 @@ export default function NavDealer({
                           : null
                       }
                     /> */}
-                            <Sketch
+                        {/* <Sketch
                               onChange={(event: any) =>
                                 isColorValid(event?.hex)
                                   ? // ? handleChangeEvent('backgroundColor', event?.hex, 'icon')
@@ -964,9 +1008,9 @@ export default function NavDealer({
                               }
                               presetColors={customPresets}
                               style={{ width: '100%' }}
-                            />
-                          </Stack>
-                        </Box>
+                            /> */}
+                        {/* </Stack> */}
+                        {/* </Box> */}
 
                         <Box sx={{ width: '100%' }}>
                           <Typography variant="caption" color="#8688A3">
@@ -984,11 +1028,12 @@ export default function NavDealer({
                       }
                     /> */}
                             <Sketch
-                              onChange={(event: any) =>
+                              onChange={(event: any) => {
                                 isColorValid(event?.hex)
                                   ? handleChangeEvent('textColor', event?.hex, 'search')
-                                  : null
-                              }
+                                  : null;
+                                setAppBarSearch((prev) => ({ ...prev, textColor: event?.hex }));
+                              }}
                               presetColors={customPresets}
                               style={{ width: '100%' }}
                             />
@@ -1013,9 +1058,13 @@ export default function NavDealer({
                         <Stack direction="row" alignItems="center" spacing={1} width={1}>
                           <Slider
                             value={appBar?.search?.borderWidth || 0}
-                            onChange={(_event: Event, newValue: number | number[]) =>
-                              handleChangeEvent('borderWidth', newValue, 'search')
-                            }
+                            onChange={(event: any, newValue: number | number[]) => {
+                              handleChangeEvent('borderWidth', newValue, 'search');
+                              setAppBarSearch((prev) => ({
+                                ...prev,
+                                borderWidth: event?.target?.value,
+                              }));
+                            }}
                             valueLabelDisplay="auto"
                             min={0}
                             max={20}
@@ -1040,11 +1089,12 @@ export default function NavDealer({
                       }
                     /> */}
                           <Sketch
-                            onChange={(event: any) =>
+                            onChange={(event: any) => {
                               isColorValid(event?.hex)
                                 ? handleChangeEvent('borderColor', event?.hex, 'search')
-                                : null
-                            }
+                                : null;
+                              setAppBarSearch((prev) => ({ ...prev, borderColor: event?.hex }));
+                            }}
                             presetColors={customPresets}
                             style={{ width: '100%' }}
                           />

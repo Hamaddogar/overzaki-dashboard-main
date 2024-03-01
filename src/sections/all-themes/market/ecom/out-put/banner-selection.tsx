@@ -23,6 +23,8 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
 import { socketClient } from 'src/sections/all-themes/utils/helper-functions';
 import { builderSetObjectInDesign } from 'src/redux/store/thunks/builder';
+import BannerSlider from 'src/sections/all-themes/component/Banner';
+import { sections } from 'src/sections/all-themes/component/response';
 
 // ----------------------------------------------------------------------
 
@@ -44,6 +46,7 @@ interface BannerProps {
 export default function BannerDealer({
   themeConfig,
   handleThemeConfig,
+  mobile = false,
   builderId,
   url
 }: BannerProps) {
@@ -183,6 +186,14 @@ export default function BannerDealer({
       }
 
 
+      // if (file && file.type.startsWith('image/')) {
+      //   const reader = new FileReader();
+      //   reader.onload = () => {
+      //     [...bannerSliderImages, reader.result?.toString()];
+      //   };
+      //   reader.readAsDataURL(file); // Read the file as data URL
+      // }
+
 
       if (url.startsWith("https://")) {
         url = url.replace(/^https?:\/\//, "");
@@ -236,10 +247,58 @@ export default function BannerDealer({
     '#33FF57', // Greenish Yellow
     '#3366FF', // Vivid Blue
   ];
+  // const handleChangeEvent = (key: string, value: any, parent: any) => { };
+  const [bannerContainer, setBannerContainer] = useState<any>({
+    shadow: true,
+    borderBottomWidth: 0,
+  });
+
+  const [sliderType, setSliderType] = useState<any>(
+    sections[0]?.banner?.bannerBackground?.sliderType
+  );
+  const [data, setData] = useState<any>(sections[0]?.banner?.bannerBackground?.slider);
+
+
+
+  const uploadImages = (images: any) => {
+    // Assuming images is an array of image files to upload
+    const uploadedUrls = images.map((image: any) => {
+      // Upload image and get URL
+      // For demonstration purposes, let's assume we get the URL from themeConfig.bannerImages
+      return image; // Replace with actual uploaded URL
+    });
+
+    // Now, set each URL obtained from uploaded images to the corresponding object in the array
+    const updatedArray = [...data, ...uploadedUrls.map((url: any) => ({ src: url }))];
+    const filteredArray = updatedArray.filter(
+      (item, index, self) => index === self.findIndex((t) => t.src === item.src)
+    );
+    // Now, updatedArray contains the original objects with the src property updated with the uploaded URLs
+    setData(filteredArray);
+  };
+
+  // console.log(data);
+  useEffect(() => {
+    uploadImages(themeConfig.bannerImages);
+  }, [themeConfig.bannerImages]);
+  // Call uploadImages function with the array of images to upload
+  const [bannerContainerStyling, setBannerContainerStyling] = useState({});
+  // console.log(bannerContainerStyling);
+
+
 
 
   return (
     <Box pt="20px">
+      {bannerType === 'slider' ? (
+        <BannerSlider
+          bannerContainerStyling={bannerContainerStyling}
+          data={data}
+          bannerType={sliderType}
+        />
+      ) : (
+        <img src={themeConfig.bannerImages[0]} />
+      )}
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography variant="caption" sx={{ fontWeight: 900 }}>
           Show Banners Section
@@ -402,19 +461,20 @@ export default function BannerDealer({
                       onChange={(event: any) =>
                         handleChangeEvent('sliderType', event?.target?.value, 'bannerBackground')
                       }
+                    // onChange={(event: any) => setSliderType(event.target.value)}
                     >
                       <FormControlLabel
-                        value="auto"
+                        value="Auto"
                         control={<Radio size="medium" />}
                         label="Auto"
                       />
                       <FormControlLabel
-                        value="manual"
+                        value="Manual"
                         control={<Radio size="medium" />}
                         label="Manual "
                       />
                       <FormControlLabel
-                        value="fadeOut"
+                        value="Fade"
                         control={<Radio size="medium" />}
                         label="Fade Out"
                       />
@@ -447,6 +507,8 @@ export default function BannerDealer({
                   </Box>
                   {themeConfig?.sliderImage.map((img: any, index: any, self: any) => (
                     <BannerSliderAccordion
+                      setBannerContainerStyling={setBannerContainerStyling}
+                      setData={setData}
                       customPresets={customPresets}
                       img={img}
                       index={index}
@@ -486,10 +548,13 @@ export default function BannerDealer({
                 <Stack direction="row" alignItems="center" spacing="18px">
                   <Stack direction="row" alignItems="center" spacing={1} width={1}>
                     <Slider
-                      // value={logoObj?.borderRaduis || 0}
-                      onChange={(_event: Event, newValue: number | number[]) =>
-                        handleChangeEvent('borderRadius', newValue, 'container')
-                      }
+                      onChange={(_event: Event, newValue: number | number[]) => {
+                        handleChangeEvent('borderRadius', newValue, 'container');
+                        setBannerContainerStyling((prev) => ({
+                          ...prev,
+                          borderRadius: newValue + '%',
+                        }));
+                      }}
                       valueLabelDisplay="auto"
                       min={0}
                       max={100}
@@ -499,14 +564,19 @@ export default function BannerDealer({
               </Box>
               <Box sx={{ width: '100%' }}>
                 <Typography variant="caption" color="#8688A3">
-                  Border Width
+                  Border Bottom Width
                 </Typography>
                 <Stack direction="row" alignItems="center" spacing="18px">
                   <Stack direction="row" alignItems="center" spacing={1} width={1}>
                     <Slider
-                      // value={appBar?.container?.borderBottomWidth || 0}
+                      value={bannerContainer.borderBottomWidth}
                       onChange={(_event: Event, newValue: number | number[]) => {
                         handleChangeEvent('borderWidth', newValue, 'container')
+                        setBannerContainer((pv: any) => ({ ...pv, borderBottomWidth: newValue }));
+                        setBannerContainerStyling((prev) => ({
+                          ...prev,
+                          borderBottomWidth: `${newValue}px`,
+                        }));
                       }}
                       valueLabelDisplay="auto"
                       min={0}
@@ -515,18 +585,29 @@ export default function BannerDealer({
                   </Stack>
                 </Stack>
               </Box>
+
+
               <Box sx={{ width: '100%' }}>
                 <Typography variant="caption" color="#8688A3">
                   Border Color
                 </Typography>
                 <Stack direction="row" alignItems="center" spacing="18px">
-                  <Sketch presetColors={customPresets} onChange={(event: any) =>
-                    isColorValid(event?.hex)
-                      ? handleChangeEvent('borderColor', event?.hex, 'container')
-                      : null
-                  } style={{ width: '100%' }} />
+                  <Sketch presetColors={customPresets}
+                    onChange={(event: any) => {
+                      setBannerContainerStyling((prev: any) => ({
+                        ...prev,
+                        borderBottom: `${prev?.borderBottomWidth} solid ${event?.hex} `,
+                      }));
+
+                      isColorValid(event?.hex)
+                        ? handleChangeEvent('borderColor', event?.hex, 'container')
+                        : null
+                    }
+                    }
+                    style={{ width: '100%' }} />
                 </Stack>
               </Box>
+
               <Stack
                 direction="row"
                 justifyContent="space-between"
@@ -537,23 +618,31 @@ export default function BannerDealer({
                   Shadow
                 </Typography>
                 <Switch
-                  // checked={appBar?.icon?.shadow}
-                  onChange={(event: any, value: any) => handleChangeEvent('isShadow', value, 'container')}
+                  checked={bannerContainer.shadow}
+                  onChange={(event: any, value: any) => {
+                    handleChangeEvent('isShadow', value, 'container')
+                    setBannerContainer((pv: any) => ({ ...pv, shadow: !pv.shadow }))
+                  }}
                   inputProps={{ 'aria-label': 'controlled' }}
                 />
               </Stack>
-              <Box sx={{ width: '100%' }}>
-                <Typography variant="caption" color="#8688A3">
-                  Shadow Color
-                </Typography>
-                <Stack direction="row" alignItems="center" spacing="18px">
-                  <Sketch presetColors={customPresets} onChange={(event: any) =>
-                    isColorValid(event?.hex)
-                      ? handleChangeEvent('colorShadow', event?.hex, 'container')
-                      : null
-                  } style={{ width: '100%' }} />
-                </Stack>
-              </Box>
+              {bannerContainer.shadow && (
+                <Box sx={{ width: '100%' }}>
+                  <Typography variant="caption" color="#8688A3">
+                    Shadow Color
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing="18px">
+                    <Sketch presetColors={customPresets} onChange={(event: any) =>
+                      isColorValid(event?.hex)
+                        ? handleChangeEvent('colorShadow', event?.hex, 'container')
+                        : null
+                    } style={{ width: '100%' }} />
+                  </Stack>
+                </Box>
+              )}
+
+
+
               <Box sx={{ width: '100%' }}>
                 <Typography variant="caption" color="#8688A3">
                   Margin Top
@@ -564,6 +653,7 @@ export default function BannerDealer({
                       // value={appBar?.container?.borderBottomWidth || 0}
                       onChange={(_event: Event, newValue: number | number[]) => {
                         handleChangeEvent('marginTopl', newValue, 'container');
+                        setBannerContainerStyling((prev) => ({ ...prev, marginTop: newValue }));
                       }}
                       valueLabelDisplay="auto"
                       min={0}
@@ -579,10 +669,14 @@ export default function BannerDealer({
                 <Stack direction="row" alignItems="center" spacing="18px">
                   <Stack direction="row" alignItems="center" spacing={1} width={1}>
                     <Slider
-                      // value={appBar?.container?.borderBottomWidth || 0}
                       onChange={(_event: Event, newValue: number | number[]) => {
                         handleChangeEvent('marginBottom', newValue, 'container');
+                        setBannerContainerStyling((prev) => ({ ...prev, marginBottom: newValue }));
                       }}
+                      // value={appBar?.container?.borderBottomWidth || 0}
+                      // onChange={(_event: Event, newValue: number | number[]) => {
+                      //   handleChangeEvent('borderBottomWidth', newValue, 'container');
+                      // }}
                       valueLabelDisplay="auto"
                       min={0}
                       max={20}
@@ -594,18 +688,6 @@ export default function BannerDealer({
           </AccordionDetails>
         </Accordion>
       )}
-      {/* {themeConfig.bannerShow && (
-        <Accordion>
-          <AccordionSummary
-            sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
-            expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
-          >
-            <Box sx={{ width: '100%' }}>
-              <Typography variant="subtitle1">Banner</Typography>
-            </Box>
-          </AccordionSummary>
-        </Accordion>
-      )} */}
 
       {/* <Divider sx={{ borderWidth: '1px', borderColor: '#EBEBEB', my: '20px' }} /> */}
     </Box>

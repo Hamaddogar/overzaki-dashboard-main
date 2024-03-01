@@ -19,7 +19,16 @@ import Iconify from 'src/components/iconify';
 import { AppDispatch } from 'src/redux/store/store';
 import { builderSetObjectInDesign } from 'src/redux/store/thunks/builder';
 
-const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPresets, dataObj, url, builderId }: any) => {
+const BannerSliderAccordion = ({
+  img,
+  index,
+  self,
+  handleActionsBanner,
+  customPresets,
+  // setData,
+  setBannerContainerStyling,
+  dataObj, url, builderId
+}: any) => {
   const [showTextBlock, setShowTextBlock] = useState(false);
   const [data, setData] = useState<any>({});
   const dispatch = useDispatch<AppDispatch>();
@@ -181,10 +190,14 @@ const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPr
               </Typography>
               <Switch
                 // checked={appBar?.icon?.shadow}
-                // onChange={() => setShowTextBlock((pv) => !pv)}
                 onChange={(e) => {
                   handleUpdateData('textStatus', e.target.checked);
                   setShowTextBlock((pv) => !pv);
+                  setData((prev: any) =>
+                    prev.map((item: any, i: number) =>
+                      i === index ? { ...item, textStatus: !item.textStatus } : item
+                    )
+                  );
                 }}
                 inputProps={{ 'aria-label': 'controlled' }}
               />
@@ -209,8 +222,16 @@ const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPr
                     type="text"
                     placeholder="i.e. Shop Now"
                     // value={appBar?.logoObj?.width}
-                    // onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
-                    onChange={(event) => handleUpdateData('text', event.target.value)}
+                    onChange={(event) => {
+                      handleUpdateData('text', event.target.value)
+                      setData((prev: any) =>
+                        prev.map((item: any, i: number) =>
+                          i === index ? { ...item, text: event.target.value } : item
+                        )
+                      )
+                    }
+
+                    }
                   />
                 </Box>
                 <Box sx={{ width: '100%' }}>
@@ -219,11 +240,18 @@ const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPr
                   </Typography>
                   <Stack direction="row" alignItems="center" spacing="18px">
                     <Sketch
-                      // onChange={(event) => handleUpdateData('text', event.target.value)}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        setData((prev: any) =>
+                          prev.map((item: any, i: number) =>
+                            i === index
+                              ? { ...item, style: { ...item.style, color: event.hex } }
+                              : item
+                          )
+                        )
                         isColorValid(event?.hex)
                           ? handleUpdateData('color', event?.hex, 'style')
                           : null
+                      }
                       }
                       presetColors={customPresets}
                       style={{ width: '100%' }}
@@ -241,8 +269,23 @@ const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPr
                   </Typography>
                   <Switch
                     // checked={appBar?.icon?.shadow}
-                    onChange={(event: any, value: any) => handleUpdateData('fontWeight', value ? '12' : '0', 'style')}
-                    // onChange={(event: any, value: any) => handleChangeEvent('shadow', value, 'icon')}
+                    onChange={(event, value) => {
+                      setData((prev: any) =>
+                        prev.map((item: any, i: number) =>
+                          i === index
+                            ? {
+                              ...item,
+                              style: {
+                                ...item.style,
+                                fontWeight: value === true ? 900 : 400,
+                              },
+                            }
+                            : item
+                        )
+                      )
+                      handleUpdateData('fontWeight', value ? '12' : '0', 'style')
+                    }
+                    }
                     inputProps={{ 'aria-label': 'controlled' }}
                   />
                 </Stack>
@@ -275,7 +318,25 @@ const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPr
 </RadioGroup> */}
                       <RadioGroup
                         row
-                      //   value={logoObj?.position || 'center'}
+                        //   value={logoObj?.position || 'center'}
+                        onChange={(event) =>
+                          setData((prev: any) =>
+                            prev.map((item: any, i: number) =>
+                              i === index
+                                ? {
+                                  ...item,
+                                  style: {
+                                    ...item.style,
+                                    // Conditional assignment based on the checkbox value
+                                    ...(event.target.value === 'left'
+                                      ? { left: '20px', right: undefined }
+                                      : { right: '20px', left: undefined }),
+                                  },
+                                }
+                                : item
+                            )
+                          )
+                        }
                       // onChange={(event: any) => setBannerType(event.target.value)}
                       >
                         <FormControlLabel
@@ -301,8 +362,25 @@ const BannerSliderAccordion = ({ img, index, self, handleActionsBanner, customPr
 </RadioGroup> */}
                       <RadioGroup
                         row
-                      //   value={logoObj?.position || 'center'}
-                      // onChange={(event: any) => setBannerType(event.target.value)}
+                        //   value={logoObj?.position || 'center'}
+                        onChange={(event: any) =>
+                          setData((prev: any) =>
+                            prev.map((item: any, i: number) =>
+                              i === index
+                                ? {
+                                  ...item,
+                                  style: {
+                                    ...item.style,
+                                    // Conditional assignment based on the checkbox value
+                                    ...(event.target.value === 'top'
+                                      ? { top: '20px', bottom: undefined }
+                                      : { bottom: '20px', top: undefined }),
+                                  },
+                                }
+                                : item
+                            )
+                          )
+                        }
                       >
                         <FormControlLabel value="top" control={<Radio size="medium" />} label="top" />
                         <FormControlLabel

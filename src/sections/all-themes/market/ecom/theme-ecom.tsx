@@ -18,6 +18,7 @@ import Typography from '@mui/material/Typography';
 import { Stack, Container } from '@mui/material';
 // components
 import Iconify from 'src/components/iconify';
+
 import Scrollbar from 'src/components/scrollbar/scrollbar';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { BottomActions } from 'src/components/bottom-actions';
@@ -55,6 +56,7 @@ import TopBarDealer from './out-put/topbar-selection';
 import VideoDealer from './out-put/video-dealer';
 import BrandDealer from './out-put/brand-dealer';
 import StylesDealer from './out-put/styles-dealer';
+import ProductSelectionDealer from './out-put/product-selection-dealer';
 
 const dataPages = [
   { title: 'Home Page', link: 'https://ecom-zaki.vercel.app/' },
@@ -127,7 +129,12 @@ const defaultSections = [
         img: '/raws/Banners.svg',
         show: true,
         Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any, url: any) => (
-          <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} builderId={builder_Id} url={url} />
+          <BannerDealer
+            handleThemeConfig={handleThemeConfig}
+            themeConfig={themeConfig}
+            builderId={builder_Id}
+            url={url}
+          />
         ),
       },
       {
@@ -207,6 +214,12 @@ const defaultSections = [
             themeConfig={themeConfig}
           />
         ),
+      },
+      {
+        name: 'Products Dealer',
+        img: '/raws/filters.png',
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <ProductSelectionDealer />,
       },
       {
         name: 'List View',
