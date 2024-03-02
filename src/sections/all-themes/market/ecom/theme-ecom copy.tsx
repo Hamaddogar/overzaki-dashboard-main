@@ -100,7 +100,7 @@ export default function EcomDesignMain() {
     cart: '1',
     categoryShow: '1',
     navLogoPosition: 'center',
-
+    sliderImage: [],
     // 
     bannerShow: false,
     bannerImages: ['/raws/banner1.png', '/raws/bags.jpg'],

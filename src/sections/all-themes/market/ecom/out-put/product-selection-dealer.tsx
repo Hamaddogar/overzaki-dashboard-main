@@ -14,6 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import Sketch from '@uiw/react-color-sketch';
+import { AnyArray } from 'mongoose';
 import React, { useState } from 'react';
 import Iconify from 'src/components/iconify';
 import ProductCard from 'src/sections/all-themes/component/product/ProductCard';
@@ -164,12 +165,12 @@ const ProductSelectionDealer = () => {
             gridTemplateColumns: `repeat(${numberOfColumns}, 0fr)`,
           }}
           gap={1}
-          // direction={'row'}
+        // direction={'row'}
         >
-          {productDummyData.map((item) => (
+          {productDummyData.map((item: any) => (
             <ProductCard
               key={item.name}
-              outOfStock={item.outOfStock}
+              outOfStock={item?.outOfStock?.toString() || ""}
               brand={item.brand}
               layoutContentStyling={layoutContentStyling}
               styleWishlistStyling={styleWishlistStyling}
@@ -199,18 +200,18 @@ const ProductSelectionDealer = () => {
             sx={
               activeSection === 'Section'
                 ? {
-                    borderRadius: '12px',
-                    color: '#0F1349',
-                    backgroundColor: '#FFFFFF',
-                    boxShadow: '0px 6px 20px #00000033',
-                    '&:hover': { backgroundColor: '#FFFFFF' },
-                  }
+                  borderRadius: '12px',
+                  color: '#0F1349',
+                  backgroundColor: '#FFFFFF',
+                  boxShadow: '0px 6px 20px #00000033',
+                  '&:hover': { backgroundColor: '#FFFFFF' },
+                }
                 : {
-                    borderRadius: '12px',
-                    color: '#8688A3',
-                    backgroundColor: 'background.neutral',
-                    '&:hover': { backgroundColor: 'background.neutral' },
-                  }
+                  borderRadius: '12px',
+                  color: '#8688A3',
+                  backgroundColor: 'background.neutral',
+                  '&:hover': { backgroundColor: 'background.neutral' },
+                }
             }
           >
             {' '}
@@ -224,18 +225,18 @@ const ProductSelectionDealer = () => {
             sx={
               activeSection === 'Style'
                 ? {
-                    borderRadius: '12px',
-                    color: '#0F1349',
-                    backgroundColor: '#FFFFFF',
-                    boxShadow: '0px 6px 20px #00000033',
-                    '&:hover': { backgroundColor: '#FFFFFF' },
-                  }
+                  borderRadius: '12px',
+                  color: '#0F1349',
+                  backgroundColor: '#FFFFFF',
+                  boxShadow: '0px 6px 20px #00000033',
+                  '&:hover': { backgroundColor: '#FFFFFF' },
+                }
                 : {
-                    borderRadius: '12px',
-                    color: '#8688A3',
-                    backgroundColor: 'background.neutral',
-                    '&:hover': { backgroundColor: 'background.neutral' },
-                  }
+                  borderRadius: '12px',
+                  color: '#8688A3',
+                  backgroundColor: 'background.neutral',
+                  '&:hover': { backgroundColor: 'background.neutral' },
+                }
             }
           >
             {' '}
@@ -249,18 +250,18 @@ const ProductSelectionDealer = () => {
             sx={
               activeSection === 'Layout'
                 ? {
-                    borderRadius: '12px',
-                    color: '#0F1349',
-                    backgroundColor: '#FFFFFF',
-                    boxShadow: '0px 6px 20px #00000033',
-                    '&:hover': { backgroundColor: '#FFFFFF' },
-                  }
+                  borderRadius: '12px',
+                  color: '#0F1349',
+                  backgroundColor: '#FFFFFF',
+                  boxShadow: '0px 6px 20px #00000033',
+                  '&:hover': { backgroundColor: '#FFFFFF' },
+                }
                 : {
-                    borderRadius: '12px',
-                    color: '#8688A3',
-                    backgroundColor: 'background.neutral',
-                    '&:hover': { backgroundColor: '#FFFFFF' },
-                  }
+                  borderRadius: '12px',
+                  color: '#8688A3',
+                  backgroundColor: 'background.neutral',
+                  '&:hover': { backgroundColor: '#FFFFFF' },
+                }
             }
           >
             {' '}
@@ -427,10 +428,10 @@ const ProductSelectionDealer = () => {
                   </Typography>
                   <Stack direction="row" alignItems="center" spacing="18px">
                     <Sketch
-                      onChange={(_event: Event, newValue: number | number[]) => {
+                      onChange={(event: any) => {
                         setStyleStyling((prev) => ({
                           ...prev,
-                          border: `${prev?.borderWidth} solid ${_event?.hex} `,
+                          border: `${prev?.borderWidth} solid ${event?.hex} `,
                         }));
                       }}
                       presetColors={customPresets}
@@ -525,10 +526,10 @@ const ProductSelectionDealer = () => {
                   </Typography>
                   <Stack direction="row" alignItems="center" spacing="18px">
                     <Sketch
-                      onChange={(_event: Event, newValue: number | number[]) => {
+                      onChange={(event: any) => {
                         setStyleImageStyling((prev) => ({
                           ...prev,
-                          border: `${prev?.borderWidth} solid ${_event?.hex} `,
+                          border: `${prev?.borderWidth} solid ${event?.hex} `,
                         }));
                       }}
                       presetColors={customPresets}
@@ -543,7 +544,7 @@ const ProductSelectionDealer = () => {
                   <Stack direction="row" alignItems="center" spacing="18px">
                     <Stack direction="row" alignItems="center" spacing={1} width={1}>
                       <Slider
-                        onChange={(_event: Event, newValue: number | number[]) => {
+                        onChange={(_event: any, newValue: any) => {
                           setStyleImageStyling((prev) => ({
                             ...prev,
                             margin: newValue + 'px',
@@ -600,7 +601,7 @@ const ProductSelectionDealer = () => {
                     row
                     // value={logoObj?.position}
                     onChange={(event: any) =>
-                      setStyleWishlistStyling((prev) => {
+                      setStyleWishlistStyling((prev: any) => {
                         const { value } = event.target;
                         // If 'top' checkbox is checked, set 'top' style to '5px' and remove 'bottom' style
                         if (value === 'left') {
@@ -639,7 +640,7 @@ const ProductSelectionDealer = () => {
                     row
                     // value={logoObj?.position}
                     onChange={(event: any) =>
-                      setStyleWishlistStyling((prev) => {
+                      setStyleWishlistStyling((prev: any) => {
                         const { value } = event.target;
                         // If 'top' checkbox is checked, set 'top' style to '5px' and remove 'bottom' style
                         if (value === 'top') {
@@ -676,10 +677,10 @@ const ProductSelectionDealer = () => {
                   </Typography>
                   <Stack direction="row" alignItems="center" spacing="18px">
                     <Sketch
-                      onChange={(_event: Event, newValue: number | number[]) => {
+                      onChange={(event: any) => {
                         setStyleWishlistStyling((prev) => ({
                           ...prev,
-                          backgroundColor: _event?.hex,
+                          backgroundColor: event?.hex,
                         }));
                       }}
                       presetColors={customPresets}
@@ -719,9 +720,9 @@ const ProductSelectionDealer = () => {
                     <Stack direction="row" alignItems="center" spacing={1} width={1}>
                       <Slider
                         onChange={(_event: Event, newValue: number | number[]) => {
-                          setStyleWishlistStyling((prev) => ({
+                          setStyleWishlistStyling((prev: any) => ({
                             ...prev,
-                            border: newValue + 'px solid ' + prev.borderColor,
+                            border: newValue + 'px solid ' + prev?.borderColor,
                             borderWidth: newValue + 'px',
                           }));
                         }}
@@ -742,10 +743,10 @@ const ProductSelectionDealer = () => {
                   </Typography>
                   <Stack direction="row" alignItems="center" spacing="18px">
                     <Sketch
-                      onChange={(_event: Event, newValue: number | number[]) => {
-                        setStyleWishlistStyling((prev) => ({
+                      onChange={(event: any) => {
+                        setStyleWishlistStyling((prev: any) => ({
                           ...prev,
-                          border: `${prev?.borderWidth} solid ${_event?.hex} `,
+                          border: `${prev?.borderWidth} solid ${event?.hex} `,
                         }));
                       }}
                       presetColors={customPresets}
@@ -1010,7 +1011,7 @@ const ProductSelectionDealer = () => {
                       <Stack direction="row" alignItems="center" spacing="18px">
                         <Stack direction="row" alignItems="center" spacing={1} width={1}>
                           <Slider
-                            value={layoutContentStyling.title.fontSize.split('px')[0]}
+                            // value={layoutContentStyling?.title?.fontSize?.split('px')[0] || 0}
                             onChange={(_event: Event, newValue: number | number[]) => {
                               setLayoutContentStyling((prev) => ({
                                 ...prev,
@@ -1059,7 +1060,7 @@ const ProductSelectionDealer = () => {
                           <Slider
                             value={layoutContentStyling.title.lineClamp}
                             onChange={(_event: Event, newValue: number | number[]) => {
-                              setLayoutContentStyling((prev) => ({
+                              setLayoutContentStyling((prev: any) => ({
                                 ...prev,
                                 title: {
                                   ...prev.title,
@@ -1080,12 +1081,12 @@ const ProductSelectionDealer = () => {
                       </Typography>
                       <Stack direction="row" alignItems="center" spacing="18px">
                         <Sketch
-                          onChange={(_event: Event, newValue: number | number[]) => {
+                          onChange={(event: any) => {
                             setLayoutContentStyling((prev) => ({
                               ...prev,
                               title: {
                                 ...prev.title,
-                                color: _event?.hex,
+                                color: event?.hex,
                               },
                             }));
                           }}
@@ -1136,7 +1137,7 @@ const ProductSelectionDealer = () => {
                       <Stack direction="row" alignItems="center" spacing="18px">
                         <Stack direction="row" alignItems="center" spacing={1} width={1}>
                           <Slider
-                            value={layoutContentStyling.category.fontSize.split('px')[0]}
+                            // value={layoutContentStyling?.category?.fontSize ?  layoutContentStyling?.category?.fontSize?.split('px')[0] : ""}
                             onChange={(_event: Event, newValue: number | number[]) => {
                               setLayoutContentStyling((prev) => ({
                                 ...prev,
@@ -1183,12 +1184,12 @@ const ProductSelectionDealer = () => {
                       </Typography>
                       <Stack direction="row" alignItems="center" spacing="18px">
                         <Sketch
-                          onChange={(_event: Event, newValue: number | number[]) => {
+                          onChange={(event: any) => {
                             setLayoutContentStyling((prev) => ({
                               ...prev,
                               category: {
                                 ...prev.category,
-                                color: _event?.hex,
+                                color: event?.hex,
                               },
                             }));
                           }}
@@ -1240,7 +1241,7 @@ const ProductSelectionDealer = () => {
                       <Stack direction="row" alignItems="center" spacing="18px">
                         <Stack direction="row" alignItems="center" spacing={1} width={1}>
                           <Slider
-                            value={layoutContentStyling.brand.fontSize.split('px')[0]}
+                            // value={layoutContentStyling.brand.fontSize.split('px')[0]}
                             onChange={(_event: Event, newValue: number | number[]) => {
                               setLayoutContentStyling((prev) => ({
                                 ...prev,
@@ -1287,12 +1288,12 @@ const ProductSelectionDealer = () => {
                       </Typography>
                       <Stack direction="row" alignItems="center" spacing="18px">
                         <Sketch
-                          onChange={(_event: Event, newValue: number | number[]) => {
+                          onChange={(event: any) => {
                             setLayoutContentStyling((prev) => ({
                               ...prev,
                               brand: {
                                 ...prev.brand,
-                                color: _event?.hex,
+                                color: event?.hex,
                               },
                             }));
                           }}
@@ -1342,12 +1343,12 @@ const ProductSelectionDealer = () => {
                       </Typography>
                       <Stack direction="row" alignItems="center" spacing="18px">
                         <Sketch
-                          onChange={(_event: Event, newValue: number | number[]) => {
+                          onChange={(event: any) => {
                             setLayoutContentStyling((prev) => ({
                               ...prev,
                               stock: {
                                 ...prev.stock,
-                                color: _event?.hex,
+                                color: event?.hex,
                               },
                             }));
                           }}
@@ -1362,12 +1363,12 @@ const ProductSelectionDealer = () => {
                       </Typography>
                       <Stack direction="row" alignItems="center" spacing="18px">
                         <Sketch
-                          onChange={(_event: Event, newValue: number | number[]) => {
+                          onChange={(event: any) => {
                             setLayoutContentStyling((prev) => ({
                               ...prev,
                               stock: {
                                 ...prev.stock,
-                                backgroundColor: _event?.hex,
+                                backgroundColor: event?.hex,
                               },
                             }));
                           }}
@@ -1417,12 +1418,12 @@ const ProductSelectionDealer = () => {
                       </Typography>
                       <Stack direction="row" alignItems="center" spacing="18px">
                         <Sketch
-                          onChange={(_event: Event, newValue: number | number[]) => {
+                          onChange={(event: any) => {
                             setLayoutContentStyling((prev) => ({
                               ...prev,
                               outOfStock: {
                                 ...prev.outOfStock,
-                                color: _event?.hex,
+                                color: event?.hex,
                               },
                             }));
                           }}
@@ -1437,12 +1438,12 @@ const ProductSelectionDealer = () => {
                       </Typography>
                       <Stack direction="row" alignItems="center" spacing="18px">
                         <Sketch
-                          onChange={(_event: Event, newValue: number | number[]) => {
+                          onChange={(event: any) => {
                             setLayoutContentStyling((prev) => ({
                               ...prev,
                               outOfStock: {
                                 ...prev.outOfStock,
-                                backgroundColor: _event?.hex,
+                                backgroundColor: event?.hex,
                               },
                             }));
                           }}
@@ -1496,9 +1497,9 @@ const ProductSelectionDealer = () => {
                         Five Star
                       </Typography>
                       <Switch
-                        checked={layoutContentStyling.rating.fiveStar === 5}
+                        checked={layoutContentStyling?.rating?.fiveStar || false}
                         onChange={() =>
-                          setLayoutContentStyling((prev) => ({
+                          setLayoutContentStyling((prev: any) => ({
                             ...prev,
                             rating: {
                               ...prev.rating,
@@ -1515,12 +1516,12 @@ const ProductSelectionDealer = () => {
                       </Typography>
                       <Stack direction="row" alignItems="center" spacing="18px">
                         <Sketch
-                          onChange={(_event: Event, newValue: number | number[]) => {
+                          onChange={(event: any) => {
                             setLayoutContentStyling((prev) => ({
                               ...prev,
                               rating: {
                                 ...prev.rating,
-                                backgroundColorFilled: _event?.hex,
+                                backgroundColorFilled: event?.hex,
                               },
                             }));
                           }}
@@ -1535,12 +1536,12 @@ const ProductSelectionDealer = () => {
                       </Typography>
                       <Stack direction="row" alignItems="center" spacing="18px">
                         <Sketch
-                          onChange={(_event: Event, newValue: number | number[]) => {
+                          onChange={(event: any) => {
                             setLayoutContentStyling((prev) => ({
                               ...prev,
                               rating: {
                                 ...prev.rating,
-                                backgroundColorEmpty: _event?.hex,
+                                backgroundColorEmpty: event?.hex,
                               },
                             }));
                           }}
@@ -1593,9 +1594,9 @@ const ProductSelectionDealer = () => {
                           <Stack direction="row" alignItems="center" spacing="18px">
                             <Stack direction="row" alignItems="center" spacing={1} width={1}>
                               <Slider
-                                value={
-                                  layoutContentStyling.rating.textValue.fontSize.split('px')[0]
-                                }
+                                // value={
+                                //   layoutContentStyling.rating.textValue.fontSize.split('px')[0]
+                                // }
                                 onChange={(_event: Event, newValue: number | number[]) => {
                                   setLayoutContentStyling((prev) => ({
                                     ...prev,
@@ -1648,14 +1649,14 @@ const ProductSelectionDealer = () => {
                           </Typography>
                           <Stack direction="row" alignItems="center" spacing="18px">
                             <Sketch
-                              onChange={(_event: Event, newValue: number | number[]) => {
+                              onChange={(event: any) => {
                                 setLayoutContentStyling((prev) => ({
                                   ...prev,
                                   rating: {
                                     ...prev.rating,
                                     textValue: {
                                       ...prev.rating.textValue,
-                                      color: _event.hex,
+                                      color: event.hex,
                                     },
                                   },
                                 }));
@@ -1693,7 +1694,7 @@ const ProductSelectionDealer = () => {
                       }))
                     }
                     value={styleStyling.display}
-                    // value={logoObj?.position}
+                  // value={logoObj?.position}
                   >
                     <FormControlLabel
                       value="flex"
@@ -1754,7 +1755,7 @@ const ProductSelectionDealer = () => {
                     <Stack direction="row" alignItems="center" spacing={1} width={1}>
                       <Slider
                         value={numberOfColumns}
-                        onChange={(_event: Event, newValue: number) => setNumberOfColumns(newValue)}
+                        onChange={(event: any, newValue: any) => setNumberOfColumns(newValue)}
                         valueLabelDisplay="auto"
                         min={1}
                         max={3}

@@ -15,9 +15,9 @@ const OfferNavbar = ({ adAppbar }: any) => {
         autoplay={{ delay: 1700 }}
         loop
         style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        // className="w-full flex items-center justify-center"
+      // className="w-full flex items-center justify-center"
       >
-        {adAppbar?.Slider?.map((item, i) => (
+        {adAppbar?.Slider?.map((item: any, i: any) => (
           <SwiperSlide
             style={{
               ...restOfStyles,
@@ -41,8 +41,8 @@ const OfferNavbar = ({ adAppbar }: any) => {
                       : 'end',
                 alignItems: 'center',
               }}
-              //   onClick={item?.href ? () => router.push(item?.href) : () => {}}
-              //   className="flex cursor-pointer items-center w-full justify-center"
+            //   onClick={item?.href ? () => router.push(item?.href) : () => {}}
+            //   className="flex cursor-pointer items-center w-full justify-center"
             >
               {/* <img
                 style={{ width: '12px', height: '12px' }}
