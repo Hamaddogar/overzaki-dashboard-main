@@ -40,7 +40,6 @@ const Product = ({ product, indx }: any) => {
         defaultValues: {
             name: productData?.title, // Assuming title matches the name structure
             description: productData?.description,
-            // Add other fields from productData as needed, mapping them to the form structure
             sort: productData?.sort,
             preparationTime: productData?.preparationTime,
             preparationTimeUnit: productData?.preparationTimeUnit,
@@ -48,7 +47,6 @@ const Product = ({ product, indx }: any) => {
             seasons: productData?.season,
             styles: productData?.style,
             occasions: productData?.occasion,
-            // Note: Ensure every field in your form that expects a value has a corresponding default value
             price: productData?.sellPrice,
             purcahsePrice: productData?.purchasePrice,
             purchaseLimit: productData?.purchaseLimit,
@@ -60,6 +58,7 @@ const Product = ({ product, indx }: any) => {
             allBranches: productData?.isAvailableOnAllBranhces,
             avalibleForMobile: productData?.publish_app,
             avalibleForWebsite: productData?.publish_website,
+            
         }
     });
 
@@ -340,6 +339,7 @@ const Product = ({ product, indx }: any) => {
                         variant="filled"
                         name="categoryId"
                         id="demo-simple-select2"
+                        defaultValue={productData?.categoryId}
                     >
                         {categoryState.list.map((cat: any, index: any) => (
                             <MenuItem key={index} value={cat._id}>
@@ -363,6 +363,8 @@ const Product = ({ product, indx }: any) => {
                         variant="filled"
                         id="demo-simple-select"
                         name="subcategoryId"
+                        defaultValue={productData?.subCategoryId}
+
                     >
                         {categoryState.subCatList.map((item: any, ind: any) => (
                             <MenuItem key={ind} value={item._id}>
@@ -386,6 +388,7 @@ const Product = ({ product, indx }: any) => {
                         variant="filled"
                         name="brandId"
                         id="demo-simple-brand"
+                        defaultValue={productData?.brandId}
                     >
                         {brandState?.list && brandState.list?.map((brandObj: any) => (
                             <MenuItem key={brandObj._id} value={brandObj._id}>{brandObj.name.localized}</MenuItem>

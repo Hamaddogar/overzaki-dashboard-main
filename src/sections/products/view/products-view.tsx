@@ -177,13 +177,13 @@ export default function OrdersListView() {
         tr: '',
         ar: '',
       },
-      categoryId: '',
-      subcategoryId: '',
+      categoryId: categoryState.list[0] && categoryState.list[0]._id,
+      subcategoryId: categoryState?.subCatList[0] && categoryState?.subCatList[0]?._id,
       quantity: 0,
-      brandId: '',
+      brandId: brandState?.list[0]?._id,
       sort: 0, // assuming sort starts from 0 or any number you prefer
       preparationTime: 0, // assuming default preparation time as 0
-      preparationTimeUnit: '', // specify default unit if there's one
+      preparationTimeUnit: preparationTimeUnits[0].value, // specify default unit if there's one
       ingredients: [], // empty array indicating no default ingredients
       seasons: [], // similarly, an empty array for seasons
       styles: [],
@@ -198,8 +198,6 @@ export default function OrdersListView() {
       discountType: '',
       discountValue: 0,
       varients: [
-        // if you expect a default variant, specify it here following the schema's structure
-        // otherwise, leave it as an empty array
       ],
       allBranches: false,
       avalibleForMobile: false,
@@ -457,8 +455,9 @@ export default function OrdersListView() {
             variant="filled"
             name="categoryId"
             id="demo-simple-select2"
+            defaultValue={categoryState.list[0] && categoryState.list[0]._id}
           >
-            {categoryState.list.map((cat: any, index: any) => (
+            {categoryState && categoryState.list.map((cat: any, index: any) => (
               <MenuItem key={index} value={cat._id}>
                 {cat?.name?.en || cat?.name || ''}
               </MenuItem>
@@ -480,8 +479,10 @@ export default function OrdersListView() {
             variant="filled"
             id="demo-simple-select"
             name="subcategoryId"
+            defaultValue={categoryState && categoryState?.subCatList[0]?._id}
+
           >
-            {categoryState.subCatList.map((item: any, ind: any) => (
+            {categoryState && categoryState.subCatList.map((item: any, ind: any) => (
               <MenuItem key={ind} value={item._id}>
                 {item?.name?.en || item?.name || ''}
               </MenuItem>
@@ -503,6 +504,7 @@ export default function OrdersListView() {
             variant="filled"
             name="brandId"
             id="demo-simple-brand"
+            defaultValue={brandState?.list[0]?._id}
           >
             {brandState?.list && brandState.list?.map((brandObj: any) => (
               <MenuItem key={brandObj._id} value={brandObj._id}>{brandObj.name.localized}</MenuItem>
@@ -542,8 +544,9 @@ export default function OrdersListView() {
               name="preparationTimeUnit"
               id="demo-simple-brand"
               sx={{ width: '30%' }}
+              defaultValue={preparationTimeUnits[0].value}
             >
-              {preparationTimeUnits?.map((unit: any) => (
+              {preparationTimeUnits.map((unit: any) => (
                 <MenuItem key={unit.value} value={unit.value}>{unit.name}</MenuItem>
               ))}
             </RHFSelect>
@@ -902,6 +905,8 @@ export default function OrdersListView() {
               name={`varients[${variant}].selectionType`}
               id="demo-simple-brand"
               fullWidth
+              defaultValue={selectionTypes[0]}
+
             >
               {selectionTypes?.map((unit) => (
                 <MenuItem key={unit} value={unit}>{unit.toUpperCase()}</MenuItem>
