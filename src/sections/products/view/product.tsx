@@ -58,7 +58,8 @@ const Product = ({ product, indx }: any) => {
             allBranches: productData?.isAvailableOnAllBranhces,
             avalibleForMobile: productData?.publish_app,
             avalibleForWebsite: productData?.publish_website,
-            
+            categoryId: productData?.categoryId?._id,
+            brandId: productData?.brandId?._id
         }
     });
 
