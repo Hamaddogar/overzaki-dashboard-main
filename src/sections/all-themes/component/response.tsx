@@ -1,7 +1,7 @@
 export const sections = [
   {
     websiteLogo: {
-      status: false,
+      status: true,
       position: 'left',
       text: '',
       backgroundColor: 'transparent',
@@ -49,19 +49,19 @@ export const sections = [
       menu: {
         status: false,
         menuItems: [
-          {
-            name: 'Hassaan',
-            link: '',
-          },
-          {
-            name: 'AHmed',
-            link: '',
-          },
+          // {
+          //   name: '',
+          //   link: '',
+          // },
+          // {
+          //   name: '',
+          //   link: '',
+          // },
         ],
         style: {
           size: '18',
           color: '#2b2bd0',
-          backgroundColor: 'red',
+          backgroundColor: 'transparent',
           hoverColor: 'black',
           fontStyle: '',
         },

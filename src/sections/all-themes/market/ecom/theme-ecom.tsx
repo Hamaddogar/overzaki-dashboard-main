@@ -57,6 +57,7 @@ import VideoDealer from './out-put/video-dealer';
 import BrandDealer from './out-put/brand-dealer';
 import StylesDealer from './out-put/styles-dealer';
 import ProductSelectionDealer from './out-put/product-selection-dealer';
+import CategoryViewDealer from './out-put/category-selection';
 
 const dataPages = [
   { title: 'Home Page', link: 'https://ecom-zaki.vercel.app/' },
@@ -314,6 +315,12 @@ const defaultSections = [
         Componenet: (handleThemeConfig: any, themeConfig: any) => (
           <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
         ),
+      },
+      {
+        name: 'Category',
+        img: '/raws/user-solid.svg',
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <CategoryViewDealer />,
       },
     ],
   },
@@ -872,8 +879,7 @@ export default function EcomDesignMain() {
                         <LogoDealer
                           themeConfig={themeConfig}
                           builderId={builder_Id}
-                          handleThemeConfig={handleThemeConfig}
-                        />
+                          handleThemeConfig={handleThemeConfig} setAppBarLogo={undefined} appBarLogo={undefined} />
                       </Box>
                     )}
                     {buttonSection === 'Color' && (

@@ -218,15 +218,6 @@ export default function NavDealer({
     }
   }, 1500);
 
-  const handleChangeMenu = (event: any, target: any, index: any) => {
-    const updatedMenus = menus.map((menuItem, i) => {
-      if (i === index) {
-        return { ...menuItem, [target]: event.target.value };
-      }
-      return menuItem;
-    });
-    setMenus(updatedMenus);
-  };
   const [containerBackgroundColor, setContainerBackgrounColor] = useState(false);
   const [searchBackgroundColor, setSearchBackgroundColor] = useState(false);
   const [isMenu, setIsMenu] = useState(false);
@@ -240,7 +231,17 @@ export default function NavDealer({
   const [appBarContainer, setAppBarContainer] = useState(navbarState[0].appBar.container);
 
   const [centerMenu, setCenterMenu] = useState(navbarState[0]?.appBar?.menu);
-  console.log(appBarContainer);
+  const handleChangeMenu = (event: any, target: any, index: any) => {
+    const updatedMenus = menus.map((menuItem, i) => {
+      if (i === index) {
+        return { ...menuItem, [target]: event.target.value };
+      }
+      return menuItem;
+    });
+    setMenus(updatedMenus);
+    setCenterMenu((prev: any) => ({ ...prev, menuItems: updatedMenus }));
+  };
+  console.log(centerMenu);
   return (
     <div>
       <Stack
@@ -506,8 +507,8 @@ export default function NavDealer({
                                 </Box> */}
 
                 <LogoDealer
-                  // appBarLogo={appBarLogo}
-                  // setAppBarLogo={setAppBarLogo}
+                  appBarLogo={appBarLogo}
+                  setAppBarLogo={setAppBarLogo}
                   themeConfig={{ logo: '', ...themeConfig }}
                   builderId={builder_Id}
                   handleThemeConfig={handleThemeConfig}
@@ -633,7 +634,10 @@ export default function NavDealer({
                 </Typography>
                 <Switch
                   checked={isMenu}
-                  onChange={() => setIsMenu((pv) => !pv)}
+                  onChange={() => {
+                    setIsMenu((pv) => !pv);
+                    setCenterMenu((prev) => ({ ...prev, status: !prev.status }));
+                  }}
                   inputProps={{ 'aria-label': 'controlled' }}
                 />
               </Stack>
@@ -642,7 +646,7 @@ export default function NavDealer({
               <Box sx={{ p: 0 }}>
                 <Stack direction="column" gap={2} alignItems="start" justifyContent="space-between">
                   <Box sx={{ width: '100%', display: 'flex', gap: 2 }}>
-                    <Box>
+                    {/* <Box>
                       <Typography variant="caption" color="#8688A3">
                         Size
                       </Typography>
@@ -658,7 +662,7 @@ export default function NavDealer({
                           />
                         </Stack>
                       </Stack>
-                    </Box>
+                    </Box> */}
                   </Box>
 
                   <Stack width={'100%'}>
@@ -677,10 +681,18 @@ export default function NavDealer({
                       }
                     /> */}
                         <Sketch
-                          onChange={(event: any) =>
+                          onChange={(event: any) => {
                             isColorValid(event?.hex)
                               ? handleChangeEvent('color', event?.hex, 'menu', 'style')
                               : null
+                            setCenterMenu((prev) => ({
+                              ...prev,
+                              style: {
+                                ...prev.style,
+                                color: event.hex,
+                              },
+                            }))
+                          }
                           }
                           presetColors={customPresets}
                           style={{ width: '100%' }}
@@ -723,10 +735,18 @@ export default function NavDealer({
                       }
                     /> */}
                           <Sketch
-                            onChange={(event: any) =>
+                            onChange={(event: any) => {
                               isColorValid(event?.hex)
                                 ? handleChangeEvent('backgroundColor', event?.hex, 'menu', 'style')
                                 : null
+                              setCenterMenu((prev) => ({
+                                ...prev,
+                                style: {
+                                  ...prev.style,
+                                  backgroundColor: event.hex,
+                                },
+                              }))
+                            }
                             }
                             presetColors={customPresets}
                             style={{ width: '100%' }}
@@ -767,10 +787,18 @@ export default function NavDealer({
                       }
                     /> */}
                           <Sketch
-                            onChange={(event: any) =>
+                            onChange={(event: any) => {
                               isColorValid(event?.hex)
                                 ? handleChangeEvent('hoverColor', event?.hex, 'menu', 'style')
                                 : null
+                              setCenterMenu((prev) => ({
+                                ...prev,
+                                style: {
+                                  ...prev.style,
+                                  hoverColor: event.hex,
+                                },
+                              }))
+                            }
                             }
                             presetColors={customPresets}
                             style={{ width: '100%' }}
@@ -791,7 +819,7 @@ export default function NavDealer({
                   </Box>
                   {/* Menu Start */}
 
-                  {menus.map((item: any, i) => (
+                  {menus?.map((item: any, i) => (
                     <Box key={i} sx={{ width: '100%', display: 'flex', gap: 2 }}>
                       <Box>
                         <Typography variant="caption" color="#8688A3">

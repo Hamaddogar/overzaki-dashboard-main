@@ -511,7 +511,7 @@
 //   width: 1,
 // });
 
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import {
   Stack,
@@ -540,11 +540,19 @@ interface LogoProps {
     navLogoPosition?: string;
     // Add other themeConfig properties as needed
   };
+  setAppBarLogo?: any;
+  appBarLogo?: any;
   builderId: string;
   handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
 }
 
-export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }: LogoProps) {
+export default function LogoDealer({
+  appBarLogo,
+  themeConfig,
+  handleThemeConfig,
+  builderId,
+  setAppBarLogo,
+}: LogoProps) {
   const [logoObj, setLogoObj] = useState<any>(null);
   const dispatch = useDispatch<AppDispatch>();
   const socket = socketClient();
@@ -596,11 +604,11 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
         console.log('Base64:', base64); // Log the base64 data
         // setImagePreview(reader.result?.toString() || null);
         handleThemeConfig(key, reader.result?.toString() || '');
-
         saveTempData(file);
       };
 
-      reader.readAsDataURL(file); // Read the file as data URL
+      reader.readAsDataURL(file);
+      // Read the file as data URL
     } else {
       alert('Please select a valid image file.');
     }
@@ -644,6 +652,9 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
     status: false,
     textBackground: false,
   });
+  useEffect(() => {
+    setAppBarLogo((prev: any) => ({ ...prev, logo: themeConfig?.logo }));
+  }, [themeConfig?.logo]);
 
   return (
     <Box width={'100%'} mt="20px">
@@ -669,7 +680,10 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
             <RadioGroup
               row
               value={logoObj?.position}
-              onChange={(event: any) => handleChangeEvent('position', event?.target?.value)}
+              onChange={(event: any) => {
+                handleChangeEvent('position', event?.target?.value)
+                setAppBarLogo((prev: any) => ({ ...prev, position: event?.target?.value }))
+              }}
             >
               <FormControlLabel value="left" control={<Radio size="medium" />} label="Left" />
               <FormControlLabel value="center" control={<Radio size="medium" />} label="Center " />
@@ -722,9 +736,10 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
               <Stack direction="row" alignItems="center" spacing={1} width={1}>
                 <Slider
                   value={logoObj?.logoObj?.borderWidth || 0}
-                  onChange={(_event: Event, newValue: number | number[]) =>
+                  onChange={(_event: Event, newValue: number | number[]) => {
+                    setAppBarLogo((prev: any) => ({ ...prev, borderWidth: newValue + 'px' }))
                     handleChangeEvent('borderWidth', newValue, 'logoObj')
-                  }
+                  }}
                   valueLabelDisplay="auto"
                   min={0}
                   max={5}
@@ -762,7 +777,10 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
                     variant="filled"
                     type="text"
                     // value={logoObj?.logoObj?.width}
-                    onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
+                    onChange={(event) => {
+                      handleChangeEvent('width', event.target.value, 'logoObj')
+                      setAppBarLogo((prev: any) => ({ ...prev, width: event.target.value + 'px' }))
+                    }}
                   />
                 </Stack>
               </Stack>
@@ -811,9 +829,10 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
                   variant="filled"
                   type="text"
                   fullWidth
-                  // value={logoObj?.logoObj?.text}
-                  onChange={(event: any) =>
+                  onChange={(event: any) => {
+                    setAppBarLogo((prev: any) => ({ ...prev, text: event.target.value }))
                     handleChangeEvent('text', event.target.value, 'logoObj')
+                  }
                   }
                 />
               </Stack>
@@ -829,10 +848,12 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
                         onChange={event => isColorValid(event) ? handleChangeEvent('textBg', event, 'logoObj') : null}
                     /> */}
                   <Sketch
-                    onChange={(event: any) =>
+                    onChange={(event: any) => {
+                      setAppBarLogo((prev: any) => ({ ...prev, textBg: event.hex }))
                       isColorValid(event?.hex)
                         ? handleChangeEvent('backgroundColor', event?.hex, 'text')
                         : null
+                    }
                     }
                     presetColors={customPresets}
                     style={{ width: '100%' }}
@@ -855,10 +876,12 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
             }
           /> */}
                   <Sketch
-                    onChange={(event: any) =>
+                    onChange={(event: any) => {
+                      setAppBarLogo((prev: any) => ({ ...prev, textColor: event.hex }))
                       isColorValid(event?.hex)
                         ? handleChangeEvent('color', event?.hex, 'text')
                         : null
+                    }
                     }
                     presetColors={customPresets}
                     style={{ width: '100%' }}
