@@ -68,7 +68,7 @@ const VideoDealer = () => {
           Header Video
         </Typography>
         <video style={{ ...videoStyling }} autoPlay muted>
-          <source src="https://www.pexels.com/video/close-up-footage-of-a-pizza-7172266/" type="video/mp4" />
+          <source src="/demo-video.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       </Stack>
