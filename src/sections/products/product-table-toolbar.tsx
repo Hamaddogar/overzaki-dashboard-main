@@ -36,8 +36,6 @@ export default function ProductTableToolbar({
           fullWidth
           variant="filled"
           onChange={(e) => setQuery(e.target.value)}
-          // value={filters.name}
-          // onChange={handleFilterName}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
