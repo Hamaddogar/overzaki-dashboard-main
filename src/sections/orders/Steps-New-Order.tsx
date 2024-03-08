@@ -11,7 +11,22 @@ import Stepper from '@mui/material/Stepper';
 import StepLabel from '@mui/material/StepLabel';
 import Typography from '@mui/material/Typography';
 import { LoadingButton } from '@mui/lab';
-import { Select, Autocomplete, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControlLabel, InputAdornment, TextField, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
+import {
+  Select,
+  Autocomplete,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControlLabel,
+  InputAdornment,
+  TextField,
+  FormControl,
+  InputLabel,
+  SelectChangeEvent,
+} from '@mui/material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { Stack } from '@mui/system';
@@ -31,7 +46,6 @@ import { fetchProductsList } from '../../redux/store/thunks/products';
 import { fetchLocationsList } from '../../redux/store/thunks/location';
 import { fetchDeliveryZonesForBranch } from '../../redux/store/thunks/deliveryZone';
 
-
 // ----------------------------------------------------------------------
 // interface DropDownState {
 //   order_status: (EventTarget & (Element | HTMLElement)) | null;
@@ -46,7 +60,7 @@ const defaultOrderData = {
   discount: 0,
   vat: 0,
   delivery_fee: 0,
-}
+};
 
 export default function StepsNewOrders({ closeDrawer }: any) {
   const [addressDialogOpen, setAddressDialogOpen] = useState(false);
@@ -57,7 +71,6 @@ export default function StepsNewOrders({ closeDrawer }: any) {
   const productState = useSelector((state: any) => state.products);
   const locationsState = useSelector((state: any) => state.locations);
 
-
   const [selectedProducts, setSelectedProducts] = useState<any>([]);
   const [customersList, setCustomersList] = useState<any>(customersState?.list);
   const [orderData, setOrderData] = useState<any>(defaultOrderData);
@@ -66,23 +79,20 @@ export default function StepsNewOrders({ closeDrawer }: any) {
   useEffect(() => {
     let subTotal = 0;
     selectedProducts.forEach((product: any) => {
-      subTotal += (Number(product.price) * product.count)
+      subTotal += Number(product.price) * product.count;
     });
 
     if (subTotal !== orderData?.subTotal) {
       setOrderData({ ...orderData, subTotal });
     }
-  }, [orderData, selectedProducts])
-
-
+  }, [orderData, selectedProducts]);
 
   useEffect(() => {
     if (customersState?.status === 'idle') {
       const { error } = customersState;
       dispatch(fetchCustomersList(error));
     }
-    setCustomersList(customersState?.list || [])
-
+    setCustomersList(customersState?.list || []);
   }, [customersState, dispatch]);
 
   useEffect(() => {
@@ -96,23 +106,17 @@ export default function StepsNewOrders({ closeDrawer }: any) {
     if (locationsState?.status === 'idle') {
       dispatch(fetchLocationsList(locationsState?.error));
     }
-
   }, [locationsState, dispatch]);
 
-
   useEffect(() => {
-    if (orderData?.branchId && orderData?.branchId !== "") {
+    if (orderData?.branchId && orderData?.branchId !== '') {
       dispatch(fetchDeliveryZonesForBranch(orderData?.branchId)).then((dzRes: any) => {
         if (dzRes.meta.requestStatus === 'fulfilled') {
           setDeliveryZoneList(dzRes.payload.data);
         }
       });
     }
-  }, [dispatch, orderData])
-
-
-
-
+  }, [dispatch, orderData]);
 
   const [dropDown, setDropDown] = React.useState<any>({
     order_status: null,
@@ -124,7 +128,8 @@ export default function StepsNewOrders({ closeDrawer }: any) {
     (openTo: string) => (event: React.MouseEvent<HTMLElement> | React.KeyboardEvent) => {
       console.log('event.currentTarget', event.currentTarget);
 
-      if (openTo === 'order') setDropDown((pv: any) => ({ ...pv, order_status: event.currentTarget }));
+      if (openTo === 'order')
+        setDropDown((pv: any) => ({ ...pv, order_status: event.currentTarget }));
       else if (openTo === 'payment')
         setDropDown((pv: any) => ({ ...pv, payment_method: event.currentTarget }));
       else if (openTo === 'analytics')
@@ -149,15 +154,13 @@ export default function StepsNewOrders({ closeDrawer }: any) {
             order_status: null,
           }));
           setOrderData({ ...orderData, status: value });
-        }
-        else if (closeTo === 'payment') {
+        } else if (closeTo === 'payment') {
           setDropDown((pv: any) => ({
             ...pv,
             payment_method: null,
           }));
           setOrderData({ ...orderData, paymentMethod: value });
-        }
-        else if (closeTo === 'analytics') {
+        } else if (closeTo === 'analytics') {
           handleReset();
           setDropDown({
             order_status: null,
@@ -176,10 +179,8 @@ export default function StepsNewOrders({ closeDrawer }: any) {
   const handleNext = () => setActiveStep((prevActiveStep) => prevActiveStep + 1);
 
   const handleReset = () => setActiveStep(0);
-  const DetailSchema = Yup.object().shape({
-  });
-  const DetailSchema2 = Yup.object().shape({
-  });
+  const DetailSchema = Yup.object().shape({});
+  const DetailSchema2 = Yup.object().shape({});
   const methods = useForm({
     resolver: yupResolver(DetailSchema),
   });
@@ -189,7 +190,7 @@ export default function StepsNewOrders({ closeDrawer }: any) {
   const { handleSubmit } = methods;
   const { handleSubmit: handSub } = methods2;
   const onSubmit = handleSubmit(async (data) => {
-    console.log("data", data);
+    console.log('data', data);
     handleNext();
   });
   const onSubmit2 = handSub(async (data) => {
@@ -207,30 +208,32 @@ export default function StepsNewOrders({ closeDrawer }: any) {
     });
 
     setCustomersList(newList);
-  }
+  };
 
   const handleSelectedProduct = (e: any, product: any) => {
     const isExist = selectedProducts.find((item: any) => item?._id === product?._id);
     if (!isExist) {
-      setSelectedProducts([...selectedProducts, { ...product, count: 1 }])
+      setSelectedProducts([...selectedProducts, { ...product, count: 1 }]);
     }
-  }
+  };
 
   const handleCount = (action: any, id: any) => {
-    setSelectedProducts((prev: any) => prev.map((item: any) => {
-      if (item?._id === id) {
-        return {
-          ...item,
-          count: action === 'plus' ? (item.count + 1) : (item.count - 1)
+    setSelectedProducts((prev: any) =>
+      prev.map((item: any) => {
+        if (item?._id === id) {
+          return {
+            ...item,
+            count: action === 'plus' ? item.count + 1 : item.count - 1,
+          };
         }
-      }
-      return item;
-    }))
-  }
+        return item;
+      })
+    );
+  };
 
   const handleRemoveProduct = (id: any) => {
-    setSelectedProducts((prev: any) => prev.filter((item: any) => item?._id !== id))
-  }
+    setSelectedProducts((prev: any) => prev.filter((item: any) => item?._id !== id));
+  };
 
   const closeAddressDialog = () => {
     setAddressDialogOpen(false);
@@ -248,7 +251,7 @@ export default function StepsNewOrders({ closeDrawer }: any) {
           productId: product?._id,
           varientId: product?.selectedVariant,
           varientRowId: product?.selectedRow,
-          count: product?.count
+          count: product?.count,
         })),
         userId: orderData?.customer?._id,
         status: orderData.status,
@@ -256,7 +259,7 @@ export default function StepsNewOrders({ closeDrawer }: any) {
         paymentMethod: orderData.paymentMethod,
         branchId: orderData?.branchId,
         deliveryZoneId: orderData?.deliveryZoneId,
-      }
+      };
 
       dispatch(createOrders(submitData)).then((response: any) => {
         console.log(response);
@@ -265,32 +268,29 @@ export default function StepsNewOrders({ closeDrawer }: any) {
           setSelectedProducts([]);
           setActiveStep(0);
           dispatch(fetchOrderssList(undefined));
-          handleCloseDropDown('analytics')
+          handleCloseDropDown('analytics');
           enqueueSnackbar('Successfully Created!', { variant: 'success' });
         } else {
           enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
         }
       });
-
     }
-
-  }
+  };
 
   const handleSelectVariant = (variant_id: any, product_id: any) => {
-
     const selectedArray = selectedProducts.map((prev_product: any) => {
       if (prev_product?._id === product_id) {
         return {
           ...prev_product,
           selectedVariant: variant_id,
-          selectedRow: ""
-        }
+          selectedRow: '',
+        };
       }
       return prev_product;
     });
 
-    setSelectedProducts(selectedArray)
-  }
+    setSelectedProducts(selectedArray);
+  };
   const handleSelectRow = (event: SelectChangeEvent, product_id: any) => {
     const row_id: any = event.target.value;
     const selectedArray = selectedProducts.map((prev_product: any) => {
@@ -298,13 +298,13 @@ export default function StepsNewOrders({ closeDrawer }: any) {
         return {
           ...prev_product,
           selectedRow: row_id,
-        }
+        };
       }
       return prev_product;
-    })
+    });
 
-    setSelectedProducts(selectedArray)
-  }
+    setSelectedProducts(selectedArray);
+  };
 
   return (
     <>
@@ -394,8 +394,9 @@ export default function StepsNewOrders({ closeDrawer }: any) {
               sx={{ mt: '12px', opacity: 0.7, fontSize: '.8rem' }}
             >
               {' '}
-              {orderData?.customer ? "1 Customer is Selected" : "Or Select from current customers"}
-              {' '}
+              {orderData?.customer
+                ? '1 Customer is Selected'
+                : 'Or Select from current customers'}{' '}
             </Typography>
 
             {customersList?.map((customer: any, index: any) => (
@@ -406,11 +407,14 @@ export default function StepsNewOrders({ closeDrawer }: any) {
                   padding: '13px 20px',
                   boxShadow: '0px 4px 20px #0F134914',
                   borderRadius: '13px',
-                  borderColor: orderData?.customer?._id === customer?._id ? '#1BFBB6' : 'transparent'
+                  borderColor:
+                    orderData?.customer?._id === customer?._id ? '#1BFBB6' : 'transparent',
                 }}
                 color="primary"
                 variant="outlined"
-                onClick={() => { setOrderData({ ...orderData, customer }) }}
+                onClick={() => {
+                  setOrderData({ ...orderData, customer });
+                }}
               >
                 <Typography
                   component="p"
@@ -469,7 +473,6 @@ export default function StepsNewOrders({ closeDrawer }: any) {
       {activeStep === 1 && (
         <Box sx={{ width: '100%', textAlign: 'left' }}>
           <FormProvider onSubmit={handSub(onSubmit2 as any)} methods={methods2}>
-
             <Autocomplete
               fullWidth
               freeSolo
@@ -493,13 +496,12 @@ export default function StepsNewOrders({ closeDrawer }: any) {
               )}
             />
 
-
             <Typography
               component="p"
               variant="subtitle2"
               sx={{ mt: '12px', opacity: 0.7, fontSize: '.8rem' }}
             >
-              {selectedProducts?.length > 0 ? "Selected Products" : "No Product Selected"}
+              {selectedProducts?.length > 0 ? 'Selected Products' : 'No Product Selected'}
             </Typography>
 
             {selectedProducts.map((product: any, index: any) => (
@@ -514,10 +516,17 @@ export default function StepsNewOrders({ closeDrawer }: any) {
               >
                 <Stack direction="row" spacing="20px">
                   <Box>
-                    <Box component="img" width='80px' src={product?.images[0]} alt="img" />
+                    <Box component="img" width="80px" src={product?.images[0]} alt="img" />
                   </Box>
-                  <Box width="100%" >
-                    <Box sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }} >
+                  <Box width="100%">
+                    <Box
+                      sx={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
                       <Typography
                         component="p"
                         variant="subtitle2"
@@ -550,45 +559,49 @@ export default function StepsNewOrders({ closeDrawer }: any) {
                       justifyContent="flex-start"
                       spacing="10px"
                     >
-
-                      <FormControl fullWidth >
+                      <FormControl fullWidth>
                         <InputLabel id="variants">Variant</InputLabel>
                         <Select
                           labelId="variants"
-                          variant='filled'
-                          name='selectedVariant'
-                          label='Variant'
-                          value={product?.selectedVariant || ""}
-                          onChange={(event: SelectChangeEvent) => handleSelectVariant(event.target.value, product?._id)}
+                          variant="filled"
+                          name="selectedVariant"
+                          label="Variant"
+                          value={product?.selectedVariant || ''}
+                          onChange={(event: SelectChangeEvent) =>
+                            handleSelectVariant(event.target.value, product?._id)
+                          }
                         >
                           {product?.varients?.map((variant: any, i: any) => (
-                            <MenuItem key={i} value={variant?._id}>{variant?.groupName?.localized || variant?.groupName?.en || ""}</MenuItem>
+                            <MenuItem key={i} value={variant?._id}>
+                              {variant?.groupName?.localized || variant?.groupName?.en || ''}
+                            </MenuItem>
                           ))}
                         </Select>
                       </FormControl>
 
                       {product?.selectedVariant && (
-                        <FormControl fullWidth >
+                        <FormControl fullWidth>
                           <InputLabel id="rows">Row</InputLabel>
                           <Select
                             labelId="Row"
-                            variant='filled'
-                            name='selectedRow'
-                            value={product?.selectedRow || ""}
-                            onChange={(event: SelectChangeEvent) => handleSelectRow(event, product?._id)}
+                            variant="filled"
+                            name="selectedRow"
+                            value={product?.selectedRow || ''}
+                            onChange={(event: SelectChangeEvent) =>
+                              handleSelectRow(event, product?._id)
+                            }
                           >
-                            {product?.varients?.find((variant: any) => variant?._id === product?.selectedVariant)?.rows?.map((row: any, indx: any) => (
-                              <MenuItem key={indx} value={row?._id}>{row?.name?.localized || row?.name?.en || ""}</MenuItem>
-                            ))}
+                            {product?.varients
+                              ?.find((variant: any) => variant?._id === product?.selectedVariant)
+                              ?.rows?.map((row: any, indx: any) => (
+                                <MenuItem key={indx} value={row?._id}>
+                                  {row?.name?.localized || row?.name?.en || ''}
+                                </MenuItem>
+                              ))}
                           </Select>
                         </FormControl>
                       )}
-
-
-
-
                     </Stack>
-
 
                     <Stack
                       sx={{ mt: '10px' }}
@@ -626,7 +639,6 @@ export default function StepsNewOrders({ closeDrawer }: any) {
                   </Box>
                 </Stack>
               </Paper>
-
             ))}
 
             {/* Button */}
@@ -718,7 +730,6 @@ export default function StepsNewOrders({ closeDrawer }: any) {
                   </Typography>
                 </Box>
               </Stack>
-
             ))}
           </Paper>
 
@@ -962,17 +973,21 @@ export default function StepsNewOrders({ closeDrawer }: any) {
             >
               Branch
             </Typography>
-            <FormControl fullWidth >
+            <FormControl fullWidth>
               <InputLabel id="branch">Branch</InputLabel>
               <Select
                 labelId="Branch"
-                variant='filled'
-                name='branchId'
-                value={orderData?.branchId || ""}
-                onChange={(event: SelectChangeEvent) => setOrderData({ ...orderData, branchId: event.target.value, deliveryZoneId: "" })}
+                variant="filled"
+                name="branchId"
+                value={orderData?.branchId || ''}
+                onChange={(event: SelectChangeEvent) =>
+                  setOrderData({ ...orderData, branchId: event.target.value, deliveryZoneId: '' })
+                }
               >
                 {locationsState?.list?.map((delivery: any, indx: any) => (
-                  <MenuItem key={indx} value={delivery?._id}>{delivery?.name?.localized || delivery?.name?.en || ""}</MenuItem>
+                  <MenuItem key={indx} value={delivery?._id}>
+                    {delivery?.name?.localized || delivery?.name?.en || ''}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -985,22 +1000,24 @@ export default function StepsNewOrders({ closeDrawer }: any) {
             >
               Delivery Zone
             </Typography>
-            <FormControl fullWidth >
+            <FormControl fullWidth>
               <InputLabel id="zone">Delivery Zone</InputLabel>
               <Select
                 labelId="Delivery Zone"
-                variant='filled'
-                name='deliveryZoneId'
-                value={orderData?.deliveryZoneId || ""}
-                onChange={(event: SelectChangeEvent) => setOrderData({ ...orderData, deliveryZoneId: event.target.value })}
+                variant="filled"
+                name="deliveryZoneId"
+                value={orderData?.deliveryZoneId || ''}
+                onChange={(event: SelectChangeEvent) =>
+                  setOrderData({ ...orderData, deliveryZoneId: event.target.value })
+                }
               >
                 {deliveryZoneList?.map((zone: any, indx: any) => (
-                  <MenuItem key={indx} value={zone?._id}>{zone?.zoneName?.localized || zone?.zoneName?.en || ""}</MenuItem>
+                  <MenuItem key={indx} value={zone?._id}>
+                    {zone?.zoneName?.localized || zone?.zoneName?.en || ''}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
-
-
           </Paper>
           <Paper
             sx={{
@@ -1028,7 +1045,13 @@ export default function StepsNewOrders({ closeDrawer }: any) {
               <FormControlLabel
                 label={`${orderData?.address.addressType} ${orderData?.address.block}  ${orderData?.address.street} ${orderData?.address.house}`}
                 control={
-                  <Checkbox size="medium" defaultChecked onClick={() => { setAddressDialogOpen(true) }} />
+                  <Checkbox
+                    size="medium"
+                    defaultChecked
+                    onClick={() => {
+                      setAddressDialogOpen(true);
+                    }}
+                  />
                 }
               />
             ) : (
@@ -1038,14 +1061,15 @@ export default function StepsNewOrders({ closeDrawer }: any) {
                   component="p"
                   variant="subtitle2"
                   sx={{ fontSize: '.8rem', opacity: 0.7 }}
-                  onClick={() => { setAddressDialogOpen(true) }}
+                  onClick={() => {
+                    setAddressDialogOpen(true);
+                  }}
                 >
                   {' '}
                   Delivery Address{' '}
                 </Typography>
               </Stack>
             )}
-
           </Paper>
 
           <Paper
@@ -1090,8 +1114,9 @@ export default function StepsNewOrders({ closeDrawer }: any) {
                 onClick={handleOpenDropDown('order')}
               >
                 {' '}
-                {orderData?.status}{' '}
-                <Iconify icon="material-symbols:keyboard-arrow-down-rounded" />{' '}
+                {
+                  orderData?.status
+                } <Iconify icon="material-symbols:keyboard-arrow-down-rounded" />{' '}
               </Typography>
             </Stack>
           </Paper>
@@ -1190,17 +1215,19 @@ export default function StepsNewOrders({ closeDrawer }: any) {
         onClose={handleCloseDropDown('payment')}
         open={Boolean(dropDown.payment_method)}
       >
-        {['Bank Transfer', 'Installment Services', 'Cash On Delivery', 'Payment Gateway'].map((item) => (
-          <MenuItem
-            key={item}
-            // selected={dropDown.payment_value === item}
-            selected={orderData.paymentMethod === item}
-            sx={{ marginBottom: '20px' }}
-            onClick={handleCloseDropDown('payment', item)}
-          >
-            {item} Card
-          </MenuItem>
-        ))}
+        {['Bank Transfer', 'Installment Services', 'Cash On Delivery', 'Payment Gateway'].map(
+          (item) => (
+            <MenuItem
+              key={item}
+              // selected={dropDown.payment_value === item}
+              selected={orderData.paymentMethod === item}
+              sx={{ marginBottom: '20px' }}
+              onClick={handleCloseDropDown('payment', item)}
+            >
+              {item} Card
+            </MenuItem>
+          )
+        )}
       </Menu>
 
       <ConfirmDialog
@@ -1294,27 +1321,19 @@ const ShowAddressDialog = ({ closeDialog, adressValues, setAddressValues }: any)
     } else {
       reset();
     }
-  }, [adressValues, methods, reset])
-
-
-
+  }, [adressValues, methods, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
     setAddressValues(data);
     closeDialog();
   });
 
-
-
-
-
   return (
     <Dialog maxWidth="md" open>
       <DialogTitle>Delivery Address</DialogTitle>
-      <DialogContent sx={{ maxHeight: "100%" }} >
+      <DialogContent sx={{ maxHeight: '100%' }}>
         <FormProvider onSubmit={handleSubmit(onSubmit as any)} methods={methods}>
           <Grid container spacing={2}>
-
             <Grid xs={6}>
               <Typography
                 mb="5px"
@@ -1331,16 +1350,18 @@ const ShowAddressDialog = ({ closeDialog, adressValues, setAddressValues }: any)
                 value={undefined}
                 placeholder="Address Type"
               /> */}
-              <FormControl fullWidth >
+              <FormControl fullWidth>
                 <Select
-                  variant='filled'
-                  name='addressType'
+                  variant="filled"
+                  name="addressType"
                   value={undefined}
-                  onChange={(event: SelectChangeEvent) => methods.setValue('addressType', event.target.value)}
+                  onChange={(event: SelectChangeEvent) =>
+                    methods.setValue('addressType', event.target.value)
+                  }
                 >
-                  <MenuItem value="Home" >Home</MenuItem>
-                  <MenuItem value="Apartment" >Apartment</MenuItem>
-                  <MenuItem value="Office" >Office</MenuItem>
+                  <MenuItem value="Home">Home</MenuItem>
+                  <MenuItem value="Apartment">Apartment</MenuItem>
+                  <MenuItem value="Office">Office</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -1354,12 +1375,7 @@ const ShowAddressDialog = ({ closeDialog, adressValues, setAddressValues }: any)
               >
                 Block
               </Typography>
-              <RHFTextField
-                variant="filled"
-                name="block"
-                value={undefined}
-                placeholder="Block"
-              />
+              <RHFTextField variant="filled" name="block" value={undefined} placeholder="Block" />
             </Grid>
 
             <Grid xs={6}>
@@ -1372,12 +1388,7 @@ const ShowAddressDialog = ({ closeDialog, adressValues, setAddressValues }: any)
               >
                 Street
               </Typography>
-              <RHFTextField
-                variant="filled"
-                name="street"
-                value={undefined}
-                placeholder="street"
-              />
+              <RHFTextField variant="filled" name="street" value={undefined} placeholder="street" />
             </Grid>
             <Grid xs={6}>
               <Typography
@@ -1389,12 +1400,7 @@ const ShowAddressDialog = ({ closeDialog, adressValues, setAddressValues }: any)
               >
                 House
               </Typography>
-              <RHFTextField
-                variant="filled"
-                name="house"
-                value={undefined}
-                placeholder="house"
-              />
+              <RHFTextField variant="filled" name="house" value={undefined} placeholder="house" />
             </Grid>
             <Grid xs={6}>
               <Typography
@@ -1406,12 +1412,7 @@ const ShowAddressDialog = ({ closeDialog, adressValues, setAddressValues }: any)
               >
                 Avenue
               </Typography>
-              <RHFTextField
-                variant="filled"
-                name="avenue"
-                value={undefined}
-                placeholder="avenue"
-              />
+              <RHFTextField variant="filled" name="avenue" value={undefined} placeholder="avenue" />
             </Grid>
             <Grid xs={6}>
               <Typography
@@ -1423,12 +1424,7 @@ const ShowAddressDialog = ({ closeDialog, adressValues, setAddressValues }: any)
               >
                 PACI
               </Typography>
-              <RHFTextField
-                variant="filled"
-                name="PACI"
-                value={undefined}
-                placeholder="PACI"
-              />
+              <RHFTextField variant="filled" name="PACI" value={undefined} placeholder="PACI" />
             </Grid>
             <Grid xs={12}>
               <Typography
@@ -1458,12 +1454,7 @@ const ShowAddressDialog = ({ closeDialog, adressValues, setAddressValues }: any)
               >
                 Floor
               </Typography>
-              <RHFTextField
-                variant="filled"
-                name="floor"
-                value={undefined}
-                placeholder="floor"
-              />
+              <RHFTextField variant="filled" name="floor" value={undefined} placeholder="floor" />
             </Grid>
             <Grid xs={3}>
               <Typography
@@ -1481,7 +1472,6 @@ const ShowAddressDialog = ({ closeDialog, adressValues, setAddressValues }: any)
                 value={undefined}
                 placeholder="apartment"
               />
-
             </Grid>
             <Grid xs={3}>
               <Typography
@@ -1511,15 +1501,9 @@ const ShowAddressDialog = ({ closeDialog, adressValues, setAddressValues }: any)
               >
                 Office
               </Typography>
-              <RHFTextField
-                variant="filled"
-                name="office"
-                value={undefined}
-                placeholder="office"
-              />
+              <RHFTextField variant="filled" name="office" value={undefined} placeholder="office" />
             </Grid>
           </Grid>
-
         </FormProvider>
         {/* <Typography
           component="p"
@@ -1545,6 +1529,6 @@ const ShowAddressDialog = ({ closeDialog, adressValues, setAddressValues }: any)
           Ok
         </LoadingButton>
       </DialogActions>
-    </Dialog >
+    </Dialog>
   );
 };

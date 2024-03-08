@@ -247,7 +247,7 @@ export default function CategoriesView() {
     const FormValues: any = new FormData();
     Object.keys(categoriesData.name).forEach((key) => {
       const value = categoriesData.name[key];
-      if (key !== "localized") {
+      if (key !== 'localized') {
         FormValues.append(`name[${key}]`, value);
       }
     });
@@ -261,7 +261,6 @@ export default function CategoriesView() {
     if (typeof categoriesData?.bgColor !== 'string') {
       FormValues.append('bgColor', categoriesData?.bgColor);
     }
-
 
     dispatch(editCategory({ categoryId: editCatId, data: FormValues })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
@@ -342,7 +341,7 @@ export default function CategoriesView() {
     const FormValues: any = new FormData();
     Object.keys(subCategoriesData.name).forEach((key) => {
       const value = subCategoriesData.name[key];
-      if (key !== "localized") {
+      if (key !== 'localized') {
         FormValues.append(`name[${key}]`, value);
       }
     });
@@ -459,27 +458,27 @@ export default function CategoriesView() {
   // common
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-      (event: React.SyntheticEvent | React.MouseEvent) => {
-        if (state === 'cat') {
-          setCategoryDrawer((pv) => !pv);
-          setEditCatId(id);
-          if (id) {
-            dispatch(fetchOneCategory(id));
-          } else {
-            setCategoriesData({});
-            dispatch(setCategory({}));
-          }
-        } else if (state === 'sub') {
-          setSubCategoryDrawer((pv) => !pv);
-          setEditSubCatId(id);
-          if (id) {
-            dispatch(fetchOneSubCategory(id));
-          } else {
-            setSubCategoriesData({});
-            dispatch(setSubCategory({}));
-          }
+    (event: React.SyntheticEvent | React.MouseEvent) => {
+      if (state === 'cat') {
+        setCategoryDrawer((pv) => !pv);
+        setEditCatId(id);
+        if (id) {
+          dispatch(fetchOneCategory(id));
+        } else {
+          setCategoriesData({});
+          dispatch(setCategory({}));
         }
-      };
+      } else if (state === 'sub') {
+        setSubCategoryDrawer((pv) => !pv);
+        setEditSubCatId(id);
+        if (id) {
+          dispatch(fetchOneSubCategory(id));
+        } else {
+          setSubCategoriesData({});
+          dispatch(setSubCategory({}));
+        }
+      }
+    };
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
       if (
@@ -585,18 +584,18 @@ export default function CategoriesView() {
                 sx={
                   activeCategory === 'main'
                     ? {
-                      borderRadius: '12px',
-                      color: '#0F1349',
-                      backgroundColor: '#FFFFFF',
-                      boxShadow: '0px 6px 20px #00000033',
-                      '&:hover': { backgroundColor: '#FFFFFF' },
-                    }
+                        borderRadius: '12px',
+                        color: '#0F1349',
+                        backgroundColor: '#FFFFFF',
+                        boxShadow: '0px 6px 20px #00000033',
+                        '&:hover': { backgroundColor: '#FFFFFF' },
+                      }
                     : {
-                      borderRadius: '12px',
-                      color: '#8688A3',
-                      backgroundColor: 'background.neutral',
-                      '&:hover': { backgroundColor: 'background.neutral' },
-                    }
+                        borderRadius: '12px',
+                        color: '#8688A3',
+                        backgroundColor: 'background.neutral',
+                        '&:hover': { backgroundColor: 'background.neutral' },
+                      }
                 }
               >
                 {' '}
@@ -609,18 +608,18 @@ export default function CategoriesView() {
                 sx={
                   activeCategory === 'sub'
                     ? {
-                      borderRadius: '12px',
-                      color: '#0F1349',
-                      backgroundColor: '#FFFFFF',
-                      boxShadow: '0px 6px 20px #00000033',
-                      '&:hover': { backgroundColor: '#FFFFFF' },
-                    }
+                        borderRadius: '12px',
+                        color: '#0F1349',
+                        backgroundColor: '#FFFFFF',
+                        boxShadow: '0px 6px 20px #00000033',
+                        '&:hover': { backgroundColor: '#FFFFFF' },
+                      }
                     : {
-                      borderRadius: '12px',
-                      color: '#8688A3',
-                      backgroundColor: 'background.neutral',
-                      '&:hover': { backgroundColor: '#FFFFFF' },
-                    }
+                        borderRadius: '12px',
+                        color: '#8688A3',
+                        backgroundColor: 'background.neutral',
+                        '&:hover': { backgroundColor: '#FFFFFF' },
+                      }
                 }
               >
                 {' '}
@@ -922,9 +921,7 @@ export default function CategoriesView() {
               {list?.length > 0 && (
                 <Grid item xs={12} container spacing={2}>
                   {list?.map((cat: any, indx: any) => {
-                    const subCat = subCatList?.filter(
-                      (item: any) => item?.category === cat?._id
-                    );
+                    const subCat = subCatList?.filter((item: any) => item?.category === cat?._id);
                     return (
                       <React.Fragment key={indx}>
                         <Grid item xs={12} sx={{ mt: '20px' }}>
@@ -1105,11 +1102,18 @@ export default function CategoriesView() {
                 settingStateValue={handleCategoryData}
                 name="bgColor"
               /> */}
-              <MuiColorInput sx={{ width: "100%", margin: "auto", '& .css-1rn6l8w-MuiInputAdornment-root.MuiInputAdornment-positionStart.css-1rn6l8w-MuiInputAdornment-root:not(.MuiInputAdornment-hiddenLabel)': { margin: 0 } }} variant="filled"
+              <MuiColorInput
+                sx={{
+                  width: '100%',
+                  margin: 'auto',
+                  '& .css-1rn6l8w-MuiInputAdornment-root.MuiInputAdornment-positionStart.css-1rn6l8w-MuiInputAdornment-root:not(.MuiInputAdornment-hiddenLabel)':
+                    { margin: 0 },
+                }}
+                variant="filled"
                 value={categoriesData?.bgColor || ''}
                 // fullWidth
                 // onChange={event => isColorValid(event) ? setAppBar({ ...appBar, color: event }) : null}
-                onChange={event => setCategoriesData({ ...categoriesData, bgColor: event })}
+                onChange={(event) => setCategoriesData({ ...categoriesData, bgColor: event })}
               />
 
               <Typography
