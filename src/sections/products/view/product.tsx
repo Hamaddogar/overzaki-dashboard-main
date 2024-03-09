@@ -65,10 +65,10 @@ const Product = ({ product, indx }: any) => {
 
   useEffect(() => {
     if (loadStatus === 'idle') {
-      dispatch(fetchCategorysList({ pageNumber, pageSize })).then((response: any) => {
+      dispatch(fetchCategorysList({ pageNumber, pageSize }) as any).then((response: any) => {
         setCategoriesLength(response.payload.data.count);
         setListItems(response.payload.data.data);
-        dispatch(fetchSubCategorysList(error));
+        dispatch(fetchSubCategorysList(error) as any);
       });
     }
   }, [loadStatus, dispatch, pageNumber]);
