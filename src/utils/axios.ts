@@ -120,6 +120,12 @@ export const endpoints = {
     get: '/builder?type=website',
     search: '/builder/search',
     setObject: '/home-design/lists',
+    home: {
+      adAppBar: {
+        createSlider: '/appbar-design/ad_app_bar',
+        updateSlider: '/appbar-design',
+      },
+    },
   },
   customer: {
     list: '/customers',
@@ -245,7 +251,6 @@ export const endpoints = {
 
 export const defaultConfig = () => {
   const tanentId = getBuilderDomain() || '';
-  // console.log("NEW TANENT ID: ", tanentId)
   let headersObj: any = {
     'Content-Type': 'application/json',
   };

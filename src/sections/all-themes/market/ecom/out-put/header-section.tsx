@@ -10,7 +10,7 @@ interface HeaderSectionProps {
     children?: React.ReactNode,
     name: string,
     description?: string,
-    closer?: void,
+    closer?: any,
     cancel: {
         key: string,
         value: string | number

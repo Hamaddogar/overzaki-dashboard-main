@@ -202,18 +202,18 @@ const NavbarTheme = ({
             ? '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)'
             : '',
         }}
-      // borderTop:
-      //   appBarContainer.borderPosition === "top"
-      //     ? `1px solid ${appBarContainer.borderColor}`
-      //     : "none",
-      // borderLeft:
-      //   appBarContainer.borderPosition === "left"
-      //     ? `1px solid ${appBarContainer.borderColor}`
-      //     : "none",
-      // borderRight:
-      //   appBarContainer.borderPosition === "right"
-      //     ? `1px solid ${appBarContainer.borderColor}`
-      //     : "none",
+        // borderTop:
+        //   appBarContainer.borderPosition === "top"
+        //     ? `1px solid ${appBarContainer.borderColor}`
+        //     : "none",
+        // borderLeft:
+        //   appBarContainer.borderPosition === "left"
+        //     ? `1px solid ${appBarContainer.borderColor}`
+        //     : "none",
+        // borderRight:
+        //   appBarContainer.borderPosition === "right"
+        //     ? `1px solid ${appBarContainer.borderColor}`
+        //     : "none",
       >
         <div
           style={{ display: 'flex', alignItems: 'center', gap: '2px' }}
@@ -221,46 +221,45 @@ const NavbarTheme = ({
         >
           {appBarLeftDetails?.find((item) => item?.key == 'mobile_home_app_bar_show_icon_drawer')
             ?.show && (
-              <div>
-                <Image
-                  style={{
-                    ...generalIcons,
-                  }}
-                  src={
-                    appBarLeftDetails?.find(
-                      (item) => item?.key == 'mobile_home_app_bar_show_icon_drawer'
-                    )?.icon || ''
-                  }
-                />
-              </div>
-            )}
+            <div>
+              <Image
+                style={{
+                  ...generalIcons,
+                }}
+                src={
+                  appBarLeftDetails?.find(
+                    (item) => item?.key == 'mobile_home_app_bar_show_icon_drawer'
+                  )?.icon || ''
+                }
+              />
+            </div>
+          )}
           {appBarSearch?.position === 'left' && appBarSearch?.status && (
             <Input
               input={!matches && appBarSearch?.input}
               style={
                 appBarSearch?.input
                   ? {
-                    textBg: 'transparent !important',
-                    color: appBarSearch?.textColor,
-                    border: `${appBarSearch?.borderWidth?.toString()}px solid ${appBarSearch?.borderColor
-                      }`,
+                      textBg: 'transparent !important',
+                      color: appBarSearch?.textColor,
+                      border: `${appBarSearch?.borderWidth?.toString()}px solid ${appBarSearch?.borderColor}`,
 
-                    background: 'transparent',
-                    display: appBarSearch?.status ? 'flex' : 'none',
-                  }
+                      background: 'transparent',
+                      display: appBarSearch?.status ? 'flex' : 'none',
+                    }
                   : {
-                    ...generalIcons,
-                    backgroundColor: generalIcons?.hasBackground
-                      ? generalIcons?.backgroundColor
-                      : 'transparent',
-                    border: `${generalIcons?.border.toString()} ${generalIcons?.borderColor}`,
-                    boxShadow: generalIcons?.isShadow
-                      ? '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)'
-                      : 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justfiyContent: 'center',
-                  }
+                      ...generalIcons,
+                      backgroundColor: generalIcons?.hasBackground
+                        ? generalIcons?.backgroundColor
+                        : 'transparent',
+                      border: `${generalIcons?.border.toString()} ${generalIcons?.borderColor}`,
+                      boxShadow: generalIcons?.isShadow
+                        ? '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)'
+                        : 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justfiyContent: 'center',
+                    }
               }
               className={`${appBarSearch?.mobileView?.status ? 'max-sm:flex' : 'hidden'}`}
               location="left"
@@ -269,12 +268,14 @@ const NavbarTheme = ({
           <div className="flex items-center">
             {appBarLogo?.status && appBarLogo?.position === 'left' && (
               <div className="flex items-center">
-                <Image
-                  // Style of left Section
-                  style={appBarLogo}
-                  // Image link
-                  src={appBarLogo?.logo}
-                />
+                {appBarLogo?.logo && (
+                  <Image
+                    // Style of left Section
+                    style={appBarLogo}
+                    // Image link
+                    src={appBarLogo?.logo}
+                  />
+                )}
 
                 <Span
                   style={{ color: appBarLogo?.textColor, backgroundColor: appBarLogo?.textBg }}
@@ -309,12 +310,14 @@ const NavbarTheme = ({
           )}
           {appBarLogo?.status && appBarLogo?.position === 'center' && (
             <div className="flex items-center">
-              <Image
-                // Style of centered Section
-                style={appBarLogo}
-                // Image link
-                src={appBarLogo?.logo}
-              />
+              {appBarLogo?.logo && (
+                <Image
+                  // Style of centered Section
+                  style={appBarLogo}
+                  // Image link
+                  src={appBarLogo?.logo}
+                />
+              )}
 
               {appBarLogo?.text && (
                 <Span
@@ -330,18 +333,17 @@ const NavbarTheme = ({
               style={
                 appBarSearch?.input
                   ? {
-                    background: 'transparent',
-                    color:
-                      appBarSearch?.textColor === 'empty value'
-                        ? 'black'
-                        : appBarSearch?.textColor,
-                    display: appBarSearch?.status ? 'flex' : 'none',
-                    border:
-                      appBarSearch?.borderColor !== 'empty value'
-                        ? `${appBarSearch?.borderWidth?.toString()}px solid ${appBarSearch?.borderColor
-                        }`
-                        : 'none',
-                  }
+                      background: 'transparent',
+                      color:
+                        appBarSearch?.textColor === 'empty value'
+                          ? 'black'
+                          : appBarSearch?.textColor,
+                      display: appBarSearch?.status ? 'flex' : 'none',
+                      border:
+                        appBarSearch?.borderColor !== 'empty value'
+                          ? `${appBarSearch?.borderWidth?.toString()}px solid ${appBarSearch?.borderColor}`
+                          : 'none',
+                    }
                   : generalIcons
               }
               className={`${appBarSearch?.mobileView?.status ? 'max-sm:flex' : 'hidden'}`}
@@ -357,12 +359,14 @@ const NavbarTheme = ({
         >
           {appBarLogo?.status && appBarLogo?.position === 'right' && (
             <div className="flex items-center">
-              <Image
-                // Style of centered Section
-                style={appBarLogo}
-                // Image link
-                src={appBarLogo?.logo}
-              />
+              {appBarLogo?.logo && (
+                <Image
+                  // Style of centered Section
+                  style={appBarLogo}
+                  // Image link
+                  src={appBarLogo?.logo}
+                />
+              )}
 
               {appBarLogo?.text && (
                 <Span
@@ -379,13 +383,12 @@ const NavbarTheme = ({
               style={
                 appBarSearch?.input
                   ? {
-                    textBg: 'transparent !important',
-                    color: appBarSearch?.textColor,
-                    border: `${appBarSearch?.borderWidth?.toString()}px solid ${appBarSearch?.borderColor
-                      }`,
-                    background: 'transparent',
-                    display: appBarSearch?.status ? 'flex' : 'none',
-                  }
+                      textBg: 'transparent !important',
+                      color: appBarSearch?.textColor,
+                      border: `${appBarSearch?.borderWidth?.toString()}px solid ${appBarSearch?.borderColor}`,
+                      background: 'transparent',
+                      display: appBarSearch?.status ? 'flex' : 'none',
+                    }
                   : generalIcons
               }
               location="right"
@@ -393,31 +396,31 @@ const NavbarTheme = ({
           )}
           {appBarRightDetails?.find((item) => item?.key == 'mobile_home_app_bar_show_icon_lang')
             ?.show && (
-              <Image
-                style={{
-                  ...generalIcons,
-                }}
-                src={
-                  appBarRightDetails?.find(
-                    (item) => item?.key == 'mobile_home_app_bar_show_icon_lang'
-                  )?.icon || ''
-                }
-              />
-            )}
+            <Image
+              style={{
+                ...generalIcons,
+              }}
+              src={
+                appBarRightDetails?.find(
+                  (item) => item?.key == 'mobile_home_app_bar_show_icon_lang'
+                )?.icon || ''
+              }
+            />
+          )}
           {/* <ShoppingCartOutlinedIcon /> */}
           {appBarRightDetails?.find((item) => item?.key == 'mobile_home_app_bar_show_icon_cart')
             ?.show && (
-              <Image
-                style={{
-                  ...generalIcons,
-                }}
-                src={
-                  appBarRightDetails?.find(
-                    (item) => item?.key == 'mobile_home_app_bar_show_icon_cart'
-                  )?.icon || ''
-                }
-              />
-            )}
+            <Image
+              style={{
+                ...generalIcons,
+              }}
+              src={
+                appBarRightDetails?.find(
+                  (item) => item?.key == 'mobile_home_app_bar_show_icon_cart'
+                )?.icon || ''
+              }
+            />
+          )}
         </div>
       </div>
       {/* if cart is not empty */}

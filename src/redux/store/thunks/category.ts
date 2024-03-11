@@ -28,7 +28,6 @@ export const fetchCategorysList = createAsyncThunk(
         `${endpoints.category.list}${searchQuery}`,
         defaultConfig()
       );
-      console.log("Response: ", response)
       return response;
     } catch (error) {
       return error;

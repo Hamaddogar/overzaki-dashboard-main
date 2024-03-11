@@ -126,21 +126,16 @@ export default function CategoriesView() {
       if (editCatId) {
         await handleEditCategory();
       } else {
-        // const formData = new FormData()
-        // formData.append('name[en]', data.name.en)
-        // formData.append('name[ar]', data.name.ar)
-        // formData.append('image', categoriesData?.image)
-        // await dispatch(createBrand(data)).then((response: any) => {
-        //   if (response.meta.requestStatus === 'fulfilled') {
-        //     setCategoriesData(null);
-        //     dispatch(fetchAllBrands()).then((res) => setBrands(res?.payload?.data?.data));
-        //     setCategoryDrawer(false);
-        //     enqueueSnackbar('Successfully Created!', { variant: 'success' });
-        //   } else {
-        //     enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
-        //   }
-        // });
-        await handleCreateCategory()
+        await dispatch(createBrand(data)).then((response: any) => {
+          if (response.meta.requestStatus === 'fulfilled') {
+            setCategoriesData(null);
+            dispatch(fetchAllBrands()).then((res) => setBrands(res?.payload?.data?.data));
+            setCategoryDrawer(false);
+            enqueueSnackbar('Successfully Created!', { variant: 'success' });
+          } else {
+            enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+          }
+        });
       }
     } catch (err) {
       console.error(err);
@@ -178,7 +173,7 @@ export default function CategoriesView() {
 
   // -----------------------------------------------------------------------------------------
 
-  const handleCreateCategory = async () => {
+  const handleCreateCategory = () => {
     const FormValues: any = new FormData();
     Object.keys(categoriesData.name).forEach((key) => {
       const value = categoriesData.name[key];
@@ -188,11 +183,9 @@ export default function CategoriesView() {
       FormValues.append('image', categoriesData.image);
     }
 
-    await dispatch(createBrand(FormValues)).then((response: any) => {
+    dispatch(createCategory(FormValues)).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
         setCategoriesData(null);
-        dispatch(fetchAllBrands()).then((res) => setBrands(res?.payload?.data?.data));
-        setCategoryDrawer(false);
         enqueueSnackbar('Successfully Created!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -207,9 +200,9 @@ export default function CategoriesView() {
         FormValues.append(`name[${key}]`, value);
       }
     });
-    if (typeof categoriesData.image !== 'string') {
-      FormValues.append('image', categoriesData.image);
-    }
+    // if (typeof categoriesData.image !== 'string') {
+    //   FormValues.append('image', categoriesData.image);
+    // }
 
     dispatch(editBrand({ brandId: editCatId, data: FormValues })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
@@ -438,30 +431,6 @@ export default function CategoriesView() {
                                             <div {...provided.dragHandleProps}>
                                               <Iconify icon="ci:drag-vertical" />
                                             </div>
-                                            {category?.image ? (
-                                              <Box
-                                                component="img"
-                                                src={category.image}
-                                                alt=" "
-                                                width="60px"
-                                                height={'60px'}
-                                              />
-                                            ) : (
-                                              <Box
-                                                component="div"
-                                                width="60px"
-                                                height="60px"
-                                                display={'flex'}
-                                                alignItems={'center'}
-                                                justifyContent={'center'}
-                                              >
-                                                <Iconify
-                                                  icon="uil:images"
-                                                  width="40px"
-                                                  height="40px"
-                                                />
-                                              </Box>
-                                            )}
 
                                             <Box display="flex" gap="0px" flexDirection="column">
                                               <Typography
@@ -585,96 +554,6 @@ export default function CategoriesView() {
                 settingStateValue={handleBrandData}
                 name="name.ar"
               />
-
-
-              {categoriesData?.image ? <Box>
-                <Box
-                  sx={{
-                    width: '100px',
-                    height: '100px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '10px',
-                    flexDirection: 'column',
-                    border: '1px dashed rgb(134, 136, 163,.5)',
-                    borderRadius: '16px',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    mt:'20px'
-                  }}
-                >
-                  <Box
-                    component="img"
-                    src={
-                      typeof categoriesData?.image === 'string'
-                        ? categoriesData?.image
-                        : URL.createObjectURL(categoriesData?.image as any)
-                    }
-                    alt=""
-                    sx={{ maxHeight: '95px' }}
-                  />
-                  <Box
-                    onClick={() => {
-                      setCategoriesData((prev: any) => {
-                        return {
-                          ...prev,
-                          image: null
-                        }
-                      })
-                    }}
-                    sx={{
-                      backgroundColor: 'rgb(134, 136, 163,.09)',
-                      padding: '10px 11px 7px 11px',
-                      borderRadius: '36px',
-                      cursor: 'pointer',
-                      position: 'absolute',
-                      top: 0,
-                      right: 0,
-                    }}
-                  >
-                    <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
-                  </Box>
-                </Box>
-              </Box> : <UploadBox
-                sx={{
-                  width: '100px!important',
-                  height: '100px!important',
-                  textAlign: 'center',
-                  padding: '20px',
-                  mt:'20px'
-                }}
-                onDrop={(file) => {
-                  setCategoriesData((prev: any) => {
-                    return {
-                      ...prev,
-                      image: file[0]
-                    }
-                  })
-                }}
-                maxFiles={1}
-                maxSize={5242880}
-                accept={{
-                  'image/jpeg': [],
-                  'image/png': [],
-                }}
-                placeholder={
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '10px',
-                      flexDirection: 'column',
-                    }}
-                  >
-                    <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
-                    <span style={{ color: '#8688A3', fontSize: '.6rem' }}>
-                      Upload Image
-                    </span>
-                  </Box>
-                }
-              />}
             </Box>
           </FormProvider>
         </DetailsNavBar>

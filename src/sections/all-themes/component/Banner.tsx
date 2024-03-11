@@ -12,6 +12,8 @@ import { EffectFade } from 'swiper/modules';
 const BannerSlider = ({ bannerType, data, bannerContainerStyling }: any) => {
   const [swiperKey, setSwiperKey] = useState(Date.now());
   useEffect(() => {
+    console.log(bannerType);
+
     // Update the key whenever bannerType changes
     setSwiperKey(Date.now());
   }, [bannerType]);
@@ -35,7 +37,7 @@ const BannerSlider = ({ bannerType, data, bannerContainerStyling }: any) => {
     >
       {data?.map((item: any, i: any) => (
         <SwiperSlide key={i} style={{ position: 'relative' }} className="relative">
-          <img className="w-full object-center" src={item?.src} />
+          <img className="w-full object-center" src={item} />
           {item?.textStatus && (
             <h1 style={{ ...item?.style, position: 'absolute', width: '50%', fontSize: '10px' }}>
               {item?.text}

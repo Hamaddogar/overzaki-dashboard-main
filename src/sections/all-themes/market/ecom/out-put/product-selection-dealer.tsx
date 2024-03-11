@@ -14,11 +14,14 @@ import {
   Typography,
 } from '@mui/material';
 import Sketch from '@uiw/react-color-sketch';
-import { AnyArray } from 'mongoose';
-import React, { useState } from 'react';
+
+import React, { useRef, useState } from 'react';
 import Iconify from 'src/components/iconify';
 import ProductCard from 'src/sections/all-themes/component/product/ProductCard';
 import { productDummyData } from 'src/sections/all-themes/component/product/products-data';
+import ProductCardNike from 'src/sections/all-themes/component/ProductCardNike';
+import ProductCard2 from 'src/sections/all-themes/component/ProductCard2';
+import ProductCard4 from 'src/sections/all-themes/component/ProductCard4';
 
 const ProductSelectionDealer = () => {
   const [activeSection, setActiveSection] = useState('Section');
@@ -125,6 +128,7 @@ const ProductSelectionDealer = () => {
   ];
   //   boxShadow: '0 0 0 4px #FFFFFF',
   const [cardShape, setCardShape] = useState('square');
+
   return (
     <Stack width={'100%'}>
       <Stack padding={'5px'} bgcolor={'white'} width={'100%'}>
@@ -165,22 +169,91 @@ const ProductSelectionDealer = () => {
             gridTemplateColumns: `repeat(${numberOfColumns}, 0fr)`,
           }}
           gap={1}
-        // direction={'row'}
+          // direction={'row'}
         >
-          {productDummyData.map((item: any) => (
-            <ProductCard
-              key={item.name}
-              outOfStock={item?.outOfStock?.toString() || ""}
-              brand={item.brand}
-              layoutContentStyling={layoutContentStyling}
-              styleWishlistStyling={styleWishlistStyling}
-              styleImageStyling={styleImageStyling}
-              styleStyling={styleStyling}
-              img={item.img}
-              category={item.category}
-              name={item.name}
-            />
-          ))}
+          {productDummyData.map(
+            (item: any) =>
+              // <ProductCard2
+              //   key={item.name}
+              //   outOfStock={item?.outOfStock?.toString() || ''}
+              //   brand={item.brand}
+              //   layoutContentStyling={layoutContentStyling}
+              //   styleWishlistStyling={styleWishlistStyling}
+              //   styleImageStyling={styleImageStyling}
+              //   styleStyling={styleStyling}
+              //   img={item.img}
+              //   category={item.category}
+              //   name={item.name}
+              // />
+              // --------------------------------------
+              selectedSquareCard === 'style-1' && cardShape === 'square' ? (
+                <ProductCardNike
+                  key={item.name}
+                  outOfStock={item?.outOfStock?.toString() || ''}
+                  brand={item.brand}
+                  layoutContentStyling={layoutContentStyling}
+                  styleWishlistStyling={styleWishlistStyling}
+                  styleImageStyling={styleImageStyling}
+                  styleStyling={styleStyling}
+                  img={item.img}
+                  category={item.category}
+                  name={item.name}
+                />
+              ) : selectedSquareCard === 'style-2' && cardShape === 'square' ? (
+                <ProductCard2
+                  key={item.name}
+                  outOfStock={item?.outOfStock?.toString() || ''}
+                  brand={item.brand}
+                  layoutContentStyling={layoutContentStyling}
+                  styleWishlistStyling={styleWishlistStyling}
+                  styleImageStyling={styleImageStyling}
+                  styleStyling={styleStyling}
+                  img={item.img}
+                  category={item.category}
+                  name={item.name}
+                />
+              ) : selectedSquareCard === 'style-3' && cardShape === 'square' ? (
+                <ProductCard
+                  key={item.name}
+                  outOfStock={item?.outOfStock?.toString() || ''}
+                  brand={item.brand}
+                  layoutContentStyling={layoutContentStyling}
+                  styleWishlistStyling={styleWishlistStyling}
+                  styleImageStyling={styleImageStyling}
+                  styleStyling={styleStyling}
+                  img={item.img}
+                  category={item.category}
+                  name={item.name}
+                />
+              ) : (
+                cardShape === 'circle' && (
+                  <ProductCard4
+                    outOfStock={item?.outOfStock?.toString() || ''}
+                    brand={item.brand}
+                    layoutContentStyling={layoutContentStyling}
+                    styleWishlistStyling={styleWishlistStyling}
+                    styleImageStyling={styleImageStyling}
+                    styleStyling={styleStyling}
+                    img={item.img}
+                    category={item.category}
+                    name={item.name}
+                    key={item.name}
+                  />
+                )
+              )
+            // <ProductCardNike
+            //   outOfStock={item?.outOfStock?.toString() || ''}
+            //   brand={item.brand}
+            //   layoutContentStyling={layoutContentStyling}
+            //   styleWishlistStyling={styleWishlistStyling}
+            //   styleImageStyling={styleImageStyling}
+            //   styleStyling={styleStyling}
+            //   img={item.img}
+            //   category={item.category}
+            //   name={item.name}
+            //   key={item.name}
+            // />
+          )}
         </Box>
       </Stack>
       <Stack>
@@ -200,18 +273,18 @@ const ProductSelectionDealer = () => {
             sx={
               activeSection === 'Section'
                 ? {
-                  borderRadius: '12px',
-                  color: '#0F1349',
-                  backgroundColor: '#FFFFFF',
-                  boxShadow: '0px 6px 20px #00000033',
-                  '&:hover': { backgroundColor: '#FFFFFF' },
-                }
+                    borderRadius: '12px',
+                    color: '#0F1349',
+                    backgroundColor: '#FFFFFF',
+                    boxShadow: '0px 6px 20px #00000033',
+                    '&:hover': { backgroundColor: '#FFFFFF' },
+                  }
                 : {
-                  borderRadius: '12px',
-                  color: '#8688A3',
-                  backgroundColor: 'background.neutral',
-                  '&:hover': { backgroundColor: 'background.neutral' },
-                }
+                    borderRadius: '12px',
+                    color: '#8688A3',
+                    backgroundColor: 'background.neutral',
+                    '&:hover': { backgroundColor: 'background.neutral' },
+                  }
             }
           >
             {' '}
@@ -225,18 +298,18 @@ const ProductSelectionDealer = () => {
             sx={
               activeSection === 'Style'
                 ? {
-                  borderRadius: '12px',
-                  color: '#0F1349',
-                  backgroundColor: '#FFFFFF',
-                  boxShadow: '0px 6px 20px #00000033',
-                  '&:hover': { backgroundColor: '#FFFFFF' },
-                }
+                    borderRadius: '12px',
+                    color: '#0F1349',
+                    backgroundColor: '#FFFFFF',
+                    boxShadow: '0px 6px 20px #00000033',
+                    '&:hover': { backgroundColor: '#FFFFFF' },
+                  }
                 : {
-                  borderRadius: '12px',
-                  color: '#8688A3',
-                  backgroundColor: 'background.neutral',
-                  '&:hover': { backgroundColor: 'background.neutral' },
-                }
+                    borderRadius: '12px',
+                    color: '#8688A3',
+                    backgroundColor: 'background.neutral',
+                    '&:hover': { backgroundColor: 'background.neutral' },
+                  }
             }
           >
             {' '}
@@ -250,18 +323,18 @@ const ProductSelectionDealer = () => {
             sx={
               activeSection === 'Layout'
                 ? {
-                  borderRadius: '12px',
-                  color: '#0F1349',
-                  backgroundColor: '#FFFFFF',
-                  boxShadow: '0px 6px 20px #00000033',
-                  '&:hover': { backgroundColor: '#FFFFFF' },
-                }
+                    borderRadius: '12px',
+                    color: '#0F1349',
+                    backgroundColor: '#FFFFFF',
+                    boxShadow: '0px 6px 20px #00000033',
+                    '&:hover': { backgroundColor: '#FFFFFF' },
+                  }
                 : {
-                  borderRadius: '12px',
-                  color: '#8688A3',
-                  backgroundColor: 'background.neutral',
-                  '&:hover': { backgroundColor: '#FFFFFF' },
-                }
+                    borderRadius: '12px',
+                    color: '#8688A3',
+                    backgroundColor: 'background.neutral',
+                    '&:hover': { backgroundColor: '#FFFFFF' },
+                  }
             }
           >
             {' '}
@@ -1694,7 +1767,7 @@ const ProductSelectionDealer = () => {
                       }))
                     }
                     value={styleStyling.display}
-                  // value={logoObj?.position}
+                    // value={logoObj?.position}
                   >
                     <FormControlLabel
                       value="flex"

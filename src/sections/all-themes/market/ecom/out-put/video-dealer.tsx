@@ -88,18 +88,18 @@ const VideoDealer = () => {
           sx={
             activeSection === 'Section'
               ? {
-                borderRadius: '12px',
-                color: '#0F1349',
-                backgroundColor: '#FFFFFF',
-                boxShadow: '0px 6px 20px #00000033',
-                '&:hover': { backgroundColor: '#FFFFFF' },
-              }
+                  borderRadius: '12px',
+                  color: '#0F1349',
+                  backgroundColor: '#FFFFFF',
+                  boxShadow: '0px 6px 20px #00000033',
+                  '&:hover': { backgroundColor: '#FFFFFF' },
+                }
               : {
-                borderRadius: '12px',
-                color: '#8688A3',
-                backgroundColor: 'background.neutral',
-                '&:hover': { backgroundColor: 'background.neutral' },
-              }
+                  borderRadius: '12px',
+                  color: '#8688A3',
+                  backgroundColor: 'background.neutral',
+                  '&:hover': { backgroundColor: 'background.neutral' },
+                }
           }
         >
           {' '}
@@ -113,18 +113,18 @@ const VideoDealer = () => {
           sx={
             activeSection === 'Style'
               ? {
-                borderRadius: '12px',
-                color: '#0F1349',
-                backgroundColor: '#FFFFFF',
-                boxShadow: '0px 6px 20px #00000033',
-                '&:hover': { backgroundColor: '#FFFFFF' },
-              }
+                  borderRadius: '12px',
+                  color: '#0F1349',
+                  backgroundColor: '#FFFFFF',
+                  boxShadow: '0px 6px 20px #00000033',
+                  '&:hover': { backgroundColor: '#FFFFFF' },
+                }
               : {
-                borderRadius: '12px',
-                color: '#8688A3',
-                backgroundColor: 'background.neutral',
-                '&:hover': { backgroundColor: 'background.neutral' },
-              }
+                  borderRadius: '12px',
+                  color: '#8688A3',
+                  backgroundColor: 'background.neutral',
+                  '&:hover': { backgroundColor: 'background.neutral' },
+                }
           }
         >
           {' '}
@@ -138,18 +138,18 @@ const VideoDealer = () => {
           sx={
             activeSection === 'Layout'
               ? {
-                borderRadius: '12px',
-                color: '#0F1349',
-                backgroundColor: '#FFFFFF',
-                boxShadow: '0px 6px 20px #00000033',
-                '&:hover': { backgroundColor: '#FFFFFF' },
-              }
+                  borderRadius: '12px',
+                  color: '#0F1349',
+                  backgroundColor: '#FFFFFF',
+                  boxShadow: '0px 6px 20px #00000033',
+                  '&:hover': { backgroundColor: '#FFFFFF' },
+                }
               : {
-                borderRadius: '12px',
-                color: '#8688A3',
-                backgroundColor: 'background.neutral',
-                '&:hover': { backgroundColor: '#FFFFFF' },
-              }
+                  borderRadius: '12px',
+                  color: '#8688A3',
+                  backgroundColor: 'background.neutral',
+                  '&:hover': { backgroundColor: '#FFFFFF' },
+                }
           }
         >
           {' '}

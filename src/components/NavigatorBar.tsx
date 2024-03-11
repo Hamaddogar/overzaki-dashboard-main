@@ -11,13 +11,12 @@ import { Button } from '@mui/material';
 const NavigatorBar = ({
   itemsLength,
   setPageNumber,
-  pageSize,
+  pageSize
 }: {
   itemsLength: any;
   setPageNumber: any;
   pageSize: any;
-}) => (
-  <Stack spacing={2}>
+}) => <Stack spacing={2}>
     <Pagination
       count={Math.ceil(itemsLength / pageSize)}
       renderItem={(item: any) => (
@@ -36,7 +35,6 @@ const NavigatorBar = ({
         </Button>
       )}
     />
-  </Stack>
-);
+  </Stack>;
 
-export default NavigatorBar;
+export default NavigatorBar

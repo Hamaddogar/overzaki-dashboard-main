@@ -30,7 +30,8 @@ const BannerSliderAccordion = ({
   dataObj, url, builderId
 }: any) => {
   const [showTextBlock, setShowTextBlock] = useState(false);
-  const [data, setData] = useState<any>({});
+  // const [data, setData] = useState<any>({});
+  const [data, setData] = useState<any>([]);
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
@@ -194,7 +195,7 @@ const BannerSliderAccordion = ({
                   handleUpdateData('textStatus', e.target.checked);
                   setShowTextBlock((pv) => !pv);
                   setData((prev: any) =>
-                    prev.map((item: any, i: number) =>
+                    prev?.map((item: any, i: number) =>
                       i === index ? { ...item, textStatus: !item.textStatus } : item
                     )
                   );

@@ -1,9 +1,9 @@
-import { Box, Stack, Typography } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
+import { Stack, Typography } from '@mui/material';
 import Rating from '@mui/material/Rating';
 import { styled } from '@mui/material/styles';
-const ProductCard = ({
+const ProductCard2 = ({
   img,
   category,
   name,
@@ -24,6 +24,10 @@ const ProductCard = ({
   brand: string;
   outOfStock: string;
 }) => {
+  const [mainImage, setMainImage] = useState(
+    'https://static.nike.com/a/images/c_limit,w_592,f_auto/t_product_v1/e93db408-ecf6-4982-b0d0-13a756c9b8c2/pegasus-40-mens-road-running-shoes-zD8H1c.png'
+  );
+
   const StyledRating = styled(Rating)({
     '& .MuiRating-iconFilled': {
       color: `${layoutContentStyling.rating.backgroundColorFilled} !important`,
@@ -32,11 +36,26 @@ const ProductCard = ({
       color: layoutContentStyling.rating.backgroundColorEmpty,
     },
   });
-
   return (
-    <div style={{ ...styleStyling }}>
-      <Box sx={{ display: styleImageStyling.display, position: 'relative' }}>
-        <img style={{ ...styleImageStyling, height: '200px', minWidth: '130px' }} src={img} />
+    <div
+      style={{ height: '200px', minWidth: '130px', borderRadius: '8px', ...styleStyling }}
+      className="w-80 rounded"
+    >
+      <div
+        style={{
+          height: '70%',
+          width: '100%',
+          display: styleImageStyling.display,
+          position: 'relative',
+        }}
+        className="h-3/4 w-full"
+      >
+        <img
+          className="w-full h-full object-cover rounded-t"
+          style={{ height: '100%', width: '100%', objectFit: 'cover', ...styleImageStyling }}
+          src={img}
+          alt="piña"
+        />
         <FavoriteBorderOutlinedIcon
           sx={{
             ...styleWishlistStyling,
@@ -46,7 +65,8 @@ const ProductCard = ({
             height: '25px',
           }}
         />
-      </Box>
+      </div>
+
       {layoutContentStyling.isContent && (
         <Stack sx={{ minWidth: '130px', padding: layoutContentStyling.padding, maxWidth: '200px' }}>
           <Typography
@@ -115,4 +135,4 @@ const ProductCard = ({
   );
 };
 
-export default ProductCard;
+export default ProductCard2;

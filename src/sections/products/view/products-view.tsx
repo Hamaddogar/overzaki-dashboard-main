@@ -4,389 +4,730 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import FormProvider, { RHFCheckbox, RHFSelect, RHFTextField } from 'src/components/hook-form';
+import * as Yup from 'yup';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form';
 import LoadingButton from '@mui/lab/LoadingButton';
-import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
-import RemoveIcon from '@mui/icons-material/Remove';
 
 // @mui
 import Divider from '@mui/material/Divider';
+import { alpha } from '@mui/material/styles';
+import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Switch from '@mui/material/Switch';
-import { Box, Grid, IconButton, Stack, Step, StepLabel, Stepper, Typography } from '@mui/material';
+import { Box, Grid, Stack, Typography, Paper, Alert, Checkbox } from '@mui/material';
+import NavigatorBar from 'src/components/NavigatorBar';
+import TabContext from '@mui/lab/TabContext';
+import TabList from '@mui/lab/TabList';
+import TabPanel from '@mui/lab/TabPanel';
+// import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
+// import FormControl from '@mui/material/FormControl';
+// import Select from '@mui/material/Select';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
-import { UploadBox } from 'src/components/upload';
-import { useSettingsContext } from 'src/components/settings';
-import DetailsNavBar from '../DetailsNavBar';
-import { RoleBasedGuard } from 'src/auth/guard';
-import Iconify from 'src/components/iconify/iconify';
-import { BottomActions } from 'src/components/bottom-actions';
-import ProductTableToolbar from '../product-table-toolbar';
-import { useCreateProductMutation, useGetAllProductsQuery } from 'src/redux/store/services/api';
-import { TabContext, TabPanel } from '@mui/lab';
-import { DragDropContext, Droppable } from '@hello-pangea/dnd';
-import Product from './product';
-import { useSelector } from 'react-redux';
-import { RootState } from 'src/redux/store/store';
-import { useFieldArray, useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as Yup from 'yup';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from 'src/redux/store/store';
 import { useSnackbar } from 'notistack';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
+// _mock
+// import { allProducts } from 'src/_mock';
+// hooks
+import { useBoolean } from 'src/hooks/use-boolean';
+import { UploadBox } from 'src/components/upload';
+import {
+  createProduct,
+  createVariant,
+  deleteProduct,
+  editProduct,
+  editVariant,
+  fetchOneProduct,
+  fetchOneVariant,
+  fetchProductsList,
+  fetchProductsWithParams,
+  setProduct,
+} from 'src/redux/store/thunks/products';
+// components
+import { ConfirmDialog } from 'src/components/custom-dialog';
+import { useSettingsContext } from 'src/components/settings';
+import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
+import { BottomActions } from 'src/components/bottom-actions';
+//
+import Label from 'src/components/label/label';
+import Iconify from 'src/components/iconify/iconify';
+// import NavigatorBar from 'src/components/NavigatorBar';
+import { fetchCategorysList, fetchSubCategorysList } from 'src/redux/store/thunks/category';
+import { RoleBasedGuard } from 'src/auth/guard';
+import { useAuthContext } from 'src/auth/hooks';
 
-export const activeTab = {
+import Link from 'next/link';
+import DetailsNavBar from '../DetailsNavBar';
+import ProductTableToolbar from '../product-table-toolbar';
+import { fetchAllBrands } from 'src/redux/store/thunks/brand';
+
+const activeTab = {
   color: '#0F1349',
   background: 'rgb(209, 255, 240)',
   border: '2px solid #1AF9B3',
 };
-export const nonActiveTab = {
+const nonActiveTab = {
   color: '#8688A3',
   background: 'rgb(245, 245, 248)',
 };
 
-// components
-
-export const preparationTimeUnits = [
-  {
-    name: 'M',
-    value: 'minuits',
-  },
-  {
-    name: 'H',
-    value: 'hours',
-  },
-];
-
-export const selectionTypes = ['multiple', 'single'];
-
-export const ProductSchema = Yup.object().shape({
-  name: Yup.object().shape({
-    en: Yup.string().required(),
-    es: Yup.string().required(),
-    fr: Yup.string().required(),
-    tr: Yup.string().required(),
-    ar: Yup.string().required(),
-  }),
-  description: Yup.object().shape({
-    en: Yup.string().required(),
-    es: Yup.string().required(),
-    fr: Yup.string().required(),
-    tr: Yup.string().required(),
-    ar: Yup.string().required(),
-  }),
-  categoryId: Yup.string(),
-  subcategoryId: Yup.string(),
-  brandId: Yup.string(),
-  sort: Yup.number(),
-  preparationTime: Yup.number(),
-  preparationTimeUnit: Yup.string(),
-  ingredients: Yup.array().of(Yup.string()),
-  seasons: Yup.array().of(Yup.string()),
-  styles: Yup.array().of(Yup.string()),
-  occasions: Yup.array().of(Yup.string()),
-  fit: Yup.string(),
-  calories: Yup.string(),
-  price: Yup.number().required(),
-  purcahsePrice: Yup.number(),
-  purchaseLimit: Yup.number(),
-  quantity: Yup.number(),
-  barcode: Yup.string(),
-  sku: Yup.string(),
-  discountType: Yup.string(),
-  discountValue: Yup.number(),
-  varients: Yup.array().of(
-    Yup.object().shape({
-      groupName: Yup.object().shape({
-        en: Yup.string().required(),
-        ar: Yup.string().required(),
-        tr: Yup.string().required(),
-        es: Yup.string().required(),
-        fr: Yup.string().required(),
-        de: Yup.string().required(),
-      }),
-      selectionType: Yup.string(),
-      required: Yup.boolean(),
-      minimum: Yup.number(),
-      maximum: Yup.number(),
-      allowMoreQuantity: Yup.boolean(),
-      varientRows: Yup.array()
-        .of(
-          Yup.object().shape({
-            name: Yup.object().shape({
-              en: Yup.string().required(),
-              ar: Yup.string().required(),
-              tr: Yup.string().required(),
-              es: Yup.string().required(),
-              fr: Yup.string().required(),
-              de: Yup.string().required(),
-            }),
-            price: Yup.number(),
-            priceAfterDiscount: Yup.number(),
-            sku: Yup.string(),
-            barcode: Yup.string(),
-            quantity: Yup.number(),
-          })
-        )
-        .required(),
-    })
-  ),
-  allBranches: Yup.boolean(),
-  avalibleForMobile: Yup.boolean(),
-  avalibleForWebsite: Yup.boolean(),
-});
+// ----------------------------------------------------------------------
 
 export default function OrdersListView() {
-  const settings = useSettingsContext();
-  const selectedDomain = useSelector((state: RootState) => state?.selectedDomain?.data);
-  const languages = ['en', 'ar', 'de', 'tr', 'es', 'fr'];
-  const categoryState = useSelector((state: RootState) => state.category);
-  // console.log('CategoryState: ', categoryState);
-  const brandState = useSelector((state: RootState) => state.brands);
+  const pageSize = 5;
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const dispatch = useDispatch<AppDispatch>();
   const { enqueueSnackbar } = useSnackbar();
-  const getAllProductsRes = useGetAllProductsQuery(selectedDomain?.domain);
-  const [addProductReq, addProductRes] = useCreateProductMutation();
-  const [createProductSections, setcreateProductSections] = useState(0);
-  const [openCreateProduct, setOpenCreateProduct]: any = useState(false);
-  const [openProductName, setOpenProductName]: any = useState(false);
-  const [openProductDescription, setOpenProductDescription]: any = useState(false);
+  const categoryState = useSelector((state: any) => state.category);
+  const { verifyPermission } = useAuthContext();
+  // const loadStatus = useSelector((state: any) => state.products.status);
+  const { list, error, status, product, variant } = useSelector((state: any) => state.products);
+
+
+  const brandState = useSelector((state: any) => state.brands);
+
+
+
   const [productData, setProductData] = useState<any>(null);
-  const [ingrediants, setIngrediants] = useState([0]);
-  const [seasons, setSeason] = useState([0]);
-  const [styles, setStyles] = useState([0]);
-  const [occasion, setOccasion] = useState([0]);
-  const [variants, setVariants] = useState([0]);
-  const [variantsRows, setVariantsRow] = useState([0]);
+  const [productDataSections, setProductDataSections] = useState(0)
+  const [editProductId, setEditProductId] = useState<any>(null);
+  const [removeData, setRemoveData] = useState<any>(null);
+
+  const settings = useSettingsContext();
+
+  const [value, setValue] = useState<any>('All');
+  const confirm = useBoolean();
+  const [data, setData] = useState(list);
+  const [productsLength, setProductsLength] = useState<number>(list.length);
+  const [errorMsg, setErrorMsg] = useState('');
+
+
+
+
+  // brands
+  useEffect(() => {
+    if (brandState.status === 'idle') {
+      dispatch(fetchAllBrands());
+    }
+  }, [brandState, dispatch]);
+
+
+
+
+
+
+
+
+
+
+
+
+  const ProductSchema = Yup.object().shape({
+    name: Yup.object().shape({
+      en: Yup.string().required('English Name is required'),
+      ar: Yup.string().required('Arabic Name is required'),
+    }),
+
+    categoryId: Yup.string().required('Category is required'),
+    // subCategory: Yup.string().required('Sub Category is required'),
+
+    price: Yup.number().required('Field is required'),
+    description: Yup.object().shape({
+      en: Yup.string().required('English Name is required'),
+      ar: Yup.string().required('Arabic Name is required'),
+    }),
+    quantity: Yup.number().required('Field is required'),
+  });
 
   const methods = useForm({
     resolver: yupResolver(ProductSchema),
-    defaultValues: {
-      name: {
-        en: '',
-        es: '',
-        fr: '',
-        tr: '',
-        ar: '',
-      },
-      description: {
-        en: '',
-        es: '',
-        fr: '',
-        tr: '',
-        ar: '',
-      },
-      categoryId: categoryState.list[0] && categoryState.list[0]._id,
-      subcategoryId: categoryState?.subCatList[0] && categoryState?.subCatList[0]?._id,
-      quantity: 0,
-      brandId: brandState?.list[0]?._id,
-      sort: 0, // assuming sort starts from 0 or any number you prefer
-      preparationTime: 0, // assuming default preparation time as 0
-      preparationTimeUnit: preparationTimeUnits[0].value, // specify default unit if there's one
-      ingredients: [], // empty array indicating no default ingredients
-      seasons: [], // similarly, an empty array for seasons
-      styles: [],
-      occasions: [],
-      fit: '',
-      calories: '',
-      price: 0, // assuming default price as 0 or any minimum value
-      purcahsePrice: 0, // assuming default purchase price as 0 or any minimum value
-      purchaseLimit: 0, // assuming no limit by default
-      barcode: '',
-      sku: '',
-      discountType: '',
-      discountValue: 0,
-      varients: [],
-      allBranches: false,
-      avalibleForMobile: false,
-      avalibleForWebsite: false,
-    },
   });
 
   const {
     reset,
     handleSubmit,
     formState: { isSubmitting },
-    getValues,
-    watch,
-    setValue,
   } = methods;
 
-  const selectedDiscountType = watch('discountType');
+  const onSubmit = handleSubmit(async (data: any) => {
+    try {
+      console.log('data', data);
+      setProductData({ ...productData, discount_type: data?.discount_type || "percentage" })
+      if (editProductId) {
+        await editProductFun();
+      } else {
+        await createProductFun();
+      }
+    } catch (error) {
+      console.error(error);
+      reset();
+      setErrorMsg(typeof error === 'string' ? error : error.message);
+    }
+    handleDrawerCloseCommon('new')
+  });
 
-  const onSubmit = async () => {
-    const data = getValues();
-    const formData = new FormData();
-    productData?.images?.forEach((el: any, index: number) => {
-      formData.append(`images`, el as any);
-    });
-    selectedDomain?.appLanguage?.forEach((el: string) => {
-      formData.append(`title[${el}]`, data.name[el as keyof typeof data.name]);
-      formData.append(`description[${el}]`, data.description[el as keyof typeof data.description]);
-    });
-    if (data.categoryId) {
-      formData.append('categoryId', data.categoryId);
+  // reseting removeData value
+  useEffect(() => {
+    if (!confirm.value) {
+      setRemoveData(null);
     }
-    if (data.subcategoryId) {
-      formData.append('subcategoryId', data.subcategoryId);
-    }
-    if (data.brandId) {
-      formData.append('brandId', data.brandId);
-    }
-    formData.append('sort', `${data.sort}`);
-    formData.append('preparationTime', `${data.preparationTime}`);
-    formData.append('preparationTimeUnit', `${data.preparationTimeUnit}`);
-    data.ingredients?.forEach((el: any, index: any) => {
-      formData.append(`ingredients[${index}]`, `${el}`);
-    });
-    data.seasons?.forEach((el: any, index: any) => {
-      formData.append(`season[${index}]`, `${el}`);
-    });
-    data.styles?.forEach((el: any, index: any) => {
-      formData.append(`style[${index}]`, `${el}`);
-    });
-    data.occasions?.forEach((el: any, index: any) => {
-      formData.append(`occasion[${index}]`, `${el}`);
-    });
-    formData.append(`quantity`, `${data.quantity}`);
-    formData.append(`sellPrice`, `${data.price}`);
-    formData.append(`purchasePrice`, `${data.purcahsePrice}`);
-    formData.append(`purchaseLimit`, `${data.purchaseLimit}`);
-    formData.append(`barcode`, `${data.barcode}`);
-    formData.append(`sku`, `${data.sku}`);
-    formData.append(`discountType`, `${data.discountType}`);
-    formData.append(`discountValue`, `${data.discountValue}`);
-    formData.append(`isAvailableOnAllBranhces`, `${data.allBranches}`);
-    formData.append(`publish_app`, `${data.avalibleForMobile}`);
-    formData.append(`publish_website`, `${data.avalibleForWebsite}`);
-    data.varients?.forEach((el: any, index: any) => {
-      formData.append(`varients[${index}]`, JSON.stringify(el));
-    });
+  }, [confirm]);
 
-    await addProductReq({ domain: selectedDomain?.domain, data: formData })
-      .unwrap()
-      .then(() => {
-        reset();
-        setOpenCreateProduct(false);
-        setcreateProductSections(0);
-        setProductData(null);
+  useEffect(() => {
+    if (product && Object.entries(product).length > 0) {
+      console.log(product);
+
+      const newProduct = {
+        name: {
+          en: product.name.en,
+          ar: product.name.ar,
+        },
+        categoryId: product.categoryId?._id,
+        subCategory: product?.subCategory?._id,
+        price: product.price,
+        images: product.images,
+        description: {
+          en: product.description.en,
+          ar: product.description.ar,
+        },
+        quantity: product.quantity,
+        publish_app: product.publish_app,
+        brand: product?.brand?._id || "",
+        discount: product?.discount || "",
+        discount_type: product?.discount_type || "percentage",
+        discount_start: product?.discount_start || "",
+        discount_end: product?.discount_end || "",
+        max_quantity: product?.max_quantity || "",
+
+      };
+      setProductData(newProduct);
+      // Use setValue to update each field separately
+      Object.entries(newProduct).forEach(([fieldName, nestedData]: any) => {
+        if (fieldName === 'name' || fieldName === 'description') {
+          Object.entries(nestedData).forEach(([nestedFieldName, value]: any) => {
+            const fullFieldName: string = `${fieldName}.${nestedFieldName}`;
+            methods.setValue(
+              fullFieldName as 'name.en' | 'name.ar' | 'description.en' | 'description.ar',
+              value
+            );
+          });
+        } else {
+          methods.setValue(fieldName, nestedData);
+        }
       });
-  };
-
-  const handleNextInputs = async () => {
-    setcreateProductSections((prev) => prev + 1);
-  };
-
-  const handleAddImage = (acceptedFiles: any) => {
-    // Assuming productData.images is an array of the current images
-    const currentImageCount = productData?.images?.length || 0;
-    const maxFilesAllowed = 5;
-    const availableSlots = maxFilesAllowed - currentImageCount;
-
-    if (acceptedFiles.length > availableSlots) {
-      enqueueSnackbar('Cannot Add More Than 5 images !', { variant: 'error' });
-      acceptedFiles = acceptedFiles.slice(0, availableSlots);
+    } else {
+      setProductData(null);
+      reset();
     }
+  }, [product, reset, methods]);
+
+  useEffect(() => {
+    if (categoryState.status === 'idle') {
+      dispatch(fetchCategorysList({})).then((response: any) => {
+        // console.log("response", response);
+        dispatch(fetchSubCategorysList(categoryState.error));
+      });
+    }
+  }, [categoryState, dispatch]);
+
+  useEffect(() => {
     setProductData((prevData: any) => ({
       ...prevData,
-      images: [...(prevData?.images || []), ...acceptedFiles],
+      subCategory: product?.subCategory || null,
+    }));
+  }, [productData?.categoryId, product]);
+
+  const handleProductData = (e: any) => {
+    const { name, value } = e.target;
+    setProductData((prevData: any) => ({
+      ...prevData,
+      [name]: value,
     }));
   };
-  const deleteImage = (imageIndex: any) => {
-    setProductData((prevData: any) => {
-      const filteredImages = prevData.images.filter((_: any, index: any) => index !== imageIndex);
-      return {
+  const handleNestedProductData = (e: any) => {
+    const { name, value } = e.target;
+    const [parentKey, nestedKey] = name.split('.');
+
+    setProductData((prevData: any) => ({
+      ...prevData,
+      [parentKey]: {
+        ...prevData[parentKey],
+        [nestedKey]: value,
+      },
+    }));
+  };
+
+  const handleAddImage = (files: any) => {
+    if (files.length > 0) {
+      setProductData((prevData: any) => ({
         ...prevData,
-        images: filteredImages,
+        images: prevData.images ? [...prevData.images, files[0]] : [files[0]],
+        // images: files[0]
+      }));
+    }
+  };
+  const handleRemoveImage = (index: any) => {
+    setProductData((current: any) => {
+      const { images, ...rest } = current;
+      const updatedImages = images.filter((_: any, i: any) => i !== index);
+      return {
+        ...rest,
+        images: updatedImages,
       };
     });
   };
 
-  const renderDetails = () => {
-    switch (createProductSections) {
-      case 0:
-        return (
-          <>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                mt: 4,
-                mb: openProductName ? 2.5 : 0,
-              }}
-            >
-              <Typography
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{
-                  opacity: 0.7,
-                  fontSize: '1.2rem',
-                  display: 'flex',
-                  maxWidth: { xs: '120px', md: '218px' },
-                }}
-              >
-                Product Name
-              </Typography>
-              <IconButton onClick={() => setOpenProductName((val: any) => !val)}>
-                {openProductName ? <RemoveIcon /> : <AddIcon />}
-              </IconButton>
-            </Box>
-            <Box
-              sx={{
-                height: openProductName ? '425px' : 0,
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                transition: '0.3s ease',
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transform: `translateY(${openProductName ? 0 : '-100%'})`,
-                  transition: '0.3s ease',
-                }}
-              >
-                {languages?.map((el: string) => (
-                  <>
-                    <Typography
-                      component="p"
-                      noWrap
-                      variant="subtitle2"
-                      sx={{
-                        opacity: 0.7,
-                        fontSize: '.9rem',
-                        maxWidth: { xs: '120px', md: '218px' },
-                      }}
-                    >
-                      Product Name ({el.toUpperCase()})
-                    </Typography>
-                    <RHFTextField fullWidth variant="filled" name={`name.${el}`} />
-                  </>
-                ))}
-              </Box>
-            </Box>
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Upload Product Images
-            </Typography>
+  const createProductFun = () => {
+    const formData = convertStateToFormData(productData);
+    dispatch(createProduct(formData)).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        setProductData(null);
+        dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
+          setProductsLength(response.payload.data.count);
+          setData(response.payload.data.data);
+        });
+        enqueueSnackbar('Successfully Created!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  };
+  const editProductFun = () => {
+    const formData = convertStateToFormData(productData);
+    dispatch(editProduct({ productId: editProductId, data: formData })).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        setProductData(null);
+        dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
+          setProductsLength(response.payload.data.count);
+          setData(response.payload.data.data);
+        });
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  };
 
-            <Box mt="10px" sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-              {productData?.images.map((file: any, ind: any) => {
-                return (
-                  <Box key={ind}>
+  const removeProductFun = () => {
+    if (removeData) {
+      dispatch(deleteProduct(removeData)).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
+            setProductsLength(response.payload.data.count);
+            setData(response.payload.data.data);
+          });
+          enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
+          confirm.onFalse();
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    }
+  };
+
+  const convertStateToFormData = (state: any) => {
+    const formData = new FormData();
+
+    // Iterate over the properties of the state
+    Object.entries(state).forEach(([key, value]: any) => {
+      // this is only for the products and sending single image.
+      // && key !== 'images'
+      if (value) {
+        if (typeof value === 'object' && !Array.isArray(value) && key !== 'images') {
+          Object.entries(value).forEach(([nestedKey, nestedValue]: any) => {
+            formData.append(`${key}[${nestedKey}]`, nestedValue);
+          });
+        } else if (Array.isArray(value)) {
+          if (key === 'images') {
+            const newImages = value.filter((file) => typeof file !== 'string');
+            newImages.forEach((file: any, index: any) => {
+              formData.append(`${key}`, file);
+            });
+          } else {
+            // If the value is an array, assume it's a file input
+            value.forEach((file: any, index: any) => {
+              formData.append(`${key}[${index}]`, file);
+            });
+          }
+        } else {
+          // For other types of values
+          formData.append(key, value);
+        }
+      }
+    });
+
+    return formData;
+  };
+
+  const [tempVariantId, setTempVariantId] = useState<any>(null);
+
+  const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
+    setValue(newValue);
+    if (newValue === 'All') {
+      setData(list);
+    } else {
+      console.log(list, newValue);
+
+      const newData = list.filter((order: any) => order?.categoryId === newValue);
+      setData(newData);
+    }
+  };
+
+  const [openDetails, setOpenDetails] = useState(false);
+  const [openVariant, setOpenVariant] = useState(false);
+
+  // common
+  const toggleDrawerCommon =
+    (state: string, id: any = null) =>
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'new') {
+          setOpenDetails((pv) => !pv);
+          setEditProductId(id);
+          if (id) {
+            dispatch(fetchOneProduct(id));
+          } else {
+            setProductData({});
+            dispatch(setProduct({}));
+          }
+        } else if (state === 'variants') {
+          variantMethods.reset();
+          setOpenVariant((pv) => !pv);
+          dispatch(fetchOneVariant(id));
+          setTempVariantId(id);
+        }
+      };
+
+  const handleDrawerCloseCommon =
+    (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
+      if (
+        event.type === 'keydown' &&
+        ((event as React.KeyboardEvent).key === 'Tab' ||
+          (event as React.KeyboardEvent).key === 'Shift')
+      ) {
+        return;
+      }
+      if (state === 'new') {
+        setOpenDetails(false);
+        setProductDataSections(0)
+      }
+      if (state === 'variants') {
+        setOpenVariant(false);
+        setTempVariantId(null);
+      }
+    };
+  // -------------------------------------------------- Variants ---------------------
+
+  const [variantData, setVariantData] = useState<any>(null);
+  const [editVariantId, setEditVariantId] = useState(null);
+
+  const VaiantSchema = Yup.object().shape({
+    groupName: Yup.object().shape({
+      en: Yup.string().required('English Name is required'),
+      ar: Yup.string().required('Arabic Name is required'),
+    }),
+    selectionType: Yup.string().required('Field is required'),
+    minimum: Yup.number().test({
+      name: 'minimum',
+      message: 'Field is required',
+      test: (value: any, context: any) => {
+        // console.log("value", value);
+        if (context.parent?.selectionType === 'multiple' && !value) {
+          return false;
+        }
+        return true;
+      },
+    }),
+    maximum: Yup.number().test({
+      name: 'maximum',
+      message: 'Field is required',
+      test: (value: any, context: any) => {
+        // console.log("selectionType", context.parent?.selectionType);
+        if (context.parent?.selectionType === 'multiple' && !value) {
+          return false;
+        }
+        return true;
+      },
+    }),
+  });
+
+  const variantMethods = useForm({
+    resolver: yupResolver(VaiantSchema),
+  });
+
+  const onVariantSubmit = variantMethods.handleSubmit(async (data) => {
+    try {
+      // console.log("tempVariantId", tempVariantId);
+      // console.log("editVariantId", editVariantId);
+      if (editVariantId) {
+        await editVariantFun();
+      } else {
+        await createVariantFun();
+      }
+    } catch (error) {
+      console.error(error);
+      variantMethods.reset();
+      setErrorMsg(typeof error === 'string' ? error : error.message);
+    }
+  });
+
+  useEffect(() => {
+    if (variant && variant.length > 0) {
+      variantMethods.reset();
+
+      setEditVariantId(tempVariantId);
+      const firstVariant = variant[0];
+      const newData = {
+        groupName: {
+          en: firstVariant.groupName.en,
+          ar: firstVariant.groupName.ar,
+        },
+        allowMoreQuantity: firstVariant.allowMoreQuantity,
+        maximum: firstVariant?.maximum || 0,
+        minimum: firstVariant?.minimum || 0,
+        selectionType: firstVariant.selectionType,
+      };
+      setVariantData(newData);
+      Object.entries(newData).forEach(([fieldName, nestedData]: any) => {
+        if (fieldName === 'groupName') {
+          Object.entries(nestedData).forEach(([nestedFieldName, value]: any) => {
+            const fullFieldName: string = `${fieldName}.${nestedFieldName}`;
+            variantMethods.setValue(fullFieldName as 'groupName.en' | 'groupName.ar', value);
+          });
+        } else {
+          variantMethods.setValue(fieldName, nestedData);
+        }
+      });
+    } else {
+      variantMethods.reset();
+      setVariantData(null);
+      setEditVariantId(null);
+    }
+  }, [variant, variantMethods, tempVariantId]);
+
+  const handleNestedVariantData = (e: any) => {
+    const { name, value } = e.target;
+    const [parentKey, nestedKey] = name.split('.');
+    const obj = {
+      ...variantData,
+      groupName: {
+        ...(variantData?.groupName || {}),
+        [nestedKey]: value,
+      },
+    };
+    setVariantData(obj);
+  };
+  const handleVariantData = (e: any) => {
+    const { name, value } = e.target;
+    setVariantData((prevData: any) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+  const handleVariantCheckBox = (e: any, value: any) => {
+    const { name, checked } = e.target;
+    // console.log(name, checked);
+    setVariantData((prevData: any) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  // ------------
+  const createVariantFun = () => {
+    if (variantData && Object.entries(variantData).length > 0) {
+      // console.log("variantData", tempVariantId);
+      dispatch(createVariant({ productId: tempVariantId, data: variantData })).then(
+        (response: any) => {
+          if (response.meta.requestStatus === 'fulfilled') {
+            variantMethods.reset();
+            setVariantData(null);
+            setEditVariantId(null);
+            handleDrawerCloseCommon('variants');
+
+            dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
+              setProductsLength(response.payload.data.count);
+              setData(response.payload.data.data);
+            });
+            enqueueSnackbar('Successfully Created!', { variant: 'success' });
+          } else {
+            enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+          }
+        }
+      );
+    }
+  };
+
+  const editVariantFun = () => {
+    if (variantData && Object.entries(variantData).length > 0) {
+      dispatch(editVariant({ variantId: tempVariantId, data: variantData })).then(
+        (response: any) => {
+          if (response.meta.requestStatus === 'fulfilled') {
+            dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
+              setProductsLength(response.payload.data.count);
+              setData(response.payload.data.data);
+            });
+
+            enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+          } else {
+            enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+          }
+        }
+      );
+    }
+  };
+
+  // const removeProductFun = () => {
+  //   if (removeData) {
+  //     dispatch(deleteProduct(removeData)).then((response: any) => {
+  //       if (response.meta.requestStatus === 'fulfilled') {
+  //         dispatch(fetchProductsList(error));
+  //         enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
+  //         confirm.onFalse();
+  //       } else {
+  //         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+  //       }
+  //     });
+  //   }
+  // }
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
+      });
+    }
+  }, [dispatch, pageNumber, status]);
+
+  useEffect(() => {
+    setProductsLength(list.length);
+    setData(list);
+  }, [list])
+
+
+
+  const listStuff = data;
+  const [listItems, setListItems] = useState([]);
+  useEffect(() => {
+    setListItems(data);
+  }, [data]);
+
+  const handleOnDragEnd = (result: any) => {
+    if (!result.destination) return;
+    const items = Array.from(listItems);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    setListItems(items);
+  };
+  const [query, setQuery] = useState('');
+  const [sort, setSort] = useState(false);
+  useEffect(() => {
+    const sortedList = sort
+      ? [...listStuff].sort((a: any, b: any) =>
+        b.name.en.toLowerCase().localeCompare(a.name.en.toLowerCase())
+      )
+      : listStuff;
+    setListItems(sortedList);
+  }, [listStuff, sort]);
+  const imagesItrations = Array.from({ length: 3 }, (_, index) => index);
+  const [allowAction, setAllowAction] = useState<{ edit: boolean; remove: boolean }>({
+    edit: false,
+    remove: false,
+  });
+  const getPermission = async (moduleName: string, permissionName: string): Promise<void> => {
+    try {
+      const data = { permission: permissionName };
+      const responseData = await verifyPermission?.(data);
+
+      if (moduleName === 'edit') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, edit: responseData }));
+      } else if (moduleName === 'remove') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, remove: responseData }));
+      }
+    } catch (error) {
+      console.error(`Error while checking ${moduleName} permission:`, error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getPermission('edit', 'UPDATE_PRODUCT_BY_ID');
+      await getPermission('remove', 'DELETE_PRODUCT_BY_ID');
+    };
+    fetchData();
+  }, []);
+
+  const handleNextInputs = async () => {
+    const isValid = await methods.trigger(['name.en', 'name.ar', 'categoryId']);
+    if (isValid) {
+      setProductDataSections(prev => prev + 1);
+    }
+  }
+
+
+  const renderDetails = () => {
+    switch (productDataSections) {
+      case 0:
+        return <>
+          <Typography
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Product Name (English)
+          </Typography>
+          {/* defaultValue='iPhone 13 Pro Max' */}
+          {/* <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.en || ""} name='name.en' /> */}
+          <RHFTextField
+            fullWidth
+            variant="filled"
+            settingStateValue={handleNestedProductData}
+            value={productData?.name?.en || ''}
+            name="name.en"
+          />
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Product Name (Arabic)
+          </Typography>
+          {/* defaultValue="ايفون 13 برو ماكس" */}
+          {/* <TextField fullWidth variant='filled' onChange={handleNestedProductData} value={productData?.name?.ar || ""} name='name.ar' /> */}
+          <RHFTextField
+            fullWidth
+            variant="filled"
+            settingStateValue={handleNestedProductData}
+            value={productData?.name?.ar || ''}
+            name="name.ar"
+          />
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Upload Product Images
+          </Typography>
+
+          <Box mt="10px" sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+            {imagesItrations.map((itration: any, ind: any) => {
+              return (
+                <Box key={ind}>
+                  {/* {productData?.images ? ( */}
+                  {productData?.images?.length > 0 && productData?.images[itration] ? (
                     <Box
                       sx={{
                         width: '100px',
@@ -404,12 +745,17 @@ export default function OrdersListView() {
                     >
                       <Box
                         component="img"
-                        src={typeof file === 'string' ? file : URL.createObjectURL(file as any)}
+                        src={
+                          typeof productData?.images[itration] === 'string'
+                            ? productData?.images[itration]
+                            : URL.createObjectURL(productData?.images[itration])
+                        }
+                        // src={typeof productData?.images === 'string' ? productData?.images : URL.createObjectURL(productData?.images)}
                         alt=""
                         sx={{ maxHeight: '95px' }}
                       />
                       <Box
-                        onClick={() => deleteImage(ind)}
+                        onClick={() => handleRemoveImage(itration)}
                         sx={{
                           backgroundColor: 'rgb(134, 136, 163,.09)',
                           padding: '10px 11px 7px 11px',
@@ -423,761 +769,464 @@ export default function OrdersListView() {
                         <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
                       </Box>
                     </Box>
-                  </Box>
-                );
-              })}
-              <UploadBox
-                sx={{
-                  width: '100px!important',
-                  height: '100px!important',
-                  textAlign: 'center',
-                  padding: '20px',
-                }}
-                onDrop={handleAddImage}
-                maxFiles={5 - productData?.images?.length}
-                maxSize={5242880}
-                accept={{
-                  'image/jpeg': [],
-                  'image/png': [],
-                }}
-                disabled={productData?.images?.length === 5}
-                placeholder={
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '10px',
-                      flexDirection: 'column',
-                    }}
-                  >
-                    <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
-                    <span style={{ color: '#8688A3', fontSize: '.6rem' }}>Upload Image</span>
-                  </Box>
-                }
-              />
-            </Box>
-
-            {/* { */}
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                mt: 4,
-                mb: openProductDescription ? 2.5 : 0,
-              }}
-            >
-              <Typography
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{
-                  opacity: 0.7,
-                  fontSize: '1.2rem',
-                  display: 'flex',
-                  maxWidth: { xs: '120px', md: '218px' },
-                }}
-              >
-                Product Description
-              </Typography>
-              <IconButton onClick={() => setOpenProductDescription((val: any) => !val)}>
-                {openProductDescription ? <RemoveIcon /> : <AddIcon />}
-              </IconButton>
-            </Box>
-            <Box
-              sx={{
-                height: openProductDescription ? '1000px' : 0,
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                transition: '0.7s ease',
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transform: `translateY(${openProductDescription ? 0 : '-100%'})`,
-                  transition: '0.7s ease',
-                }}
-              >
-                {languages?.map((el: string) => (
-                  <>
-                    <Typography
-                      component="p"
-                      noWrap
-                      variant="subtitle2"
+                  ) : (
+                    <UploadBox
                       sx={{
-                        opacity: 0.7,
-                        fontSize: '.9rem',
-                        maxWidth: { xs: '120px', md: '218px' },
+                        width: '100px!important',
+                        height: '100px!important',
+                        textAlign: 'center',
+                        padding: '20px',
                       }}
-                    >
-                      Product Description ({el.toUpperCase()})
-                    </Typography>
-                    <RHFTextField
-                      fullWidth
-                      variant="filled"
-                      name={`description.${el}`}
-                      multiline
-                      rows={5}
+                      onDrop={handleAddImage}
+                      maxFiles={1}
+                      maxSize={5242880}
+                      accept={{
+                        'image/jpeg': [],
+                        'image/png': [],
+                      }}
+                      placeholder={
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '10px',
+                            flexDirection: 'column',
+                          }}
+                        >
+                          <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
+                          <span style={{ color: '#8688A3', fontSize: '.6rem' }}>
+                            Upload Image
+                          </span>
+                        </Box>
+                      }
                     />
-                  </>
-                ))}
-                {/* } */}
-              </Box>
-            </Box>
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Category
-            </Typography>
-            <RHFSelect
-              fullWidth
-              variant="filled"
-              name="categoryId"
-              id="demo-simple-select2"
-              defaultValue={categoryState.list[0] && categoryState.list[0]._id}
-            >
-              {categoryState &&
-                categoryState.list.map((cat: any, index: any) => (
-                  <MenuItem key={index} value={cat._id}>
-                    {cat?.name?.en || cat?.name || ''}
-                  </MenuItem>
-                ))}
-            </RHFSelect>
+                  )}
+                </Box>
+              );
+            })}
+          </Box>
 
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Sub-Category
-            </Typography>
-            <RHFSelect
-              fullWidth
-              variant="filled"
-              id="demo-simple-select"
-              name="subcategoryId"
-              defaultValue={categoryState && categoryState?.subCatList[0]?._id}
-            >
-              {categoryState &&
-                categoryState.subCatList.map((item: any, ind: any) => (
+          {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            Upload Product Video
+          </Typography>
+          <Box mt='10px' sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+            <Box sx={{
+              width: '100px', height: '100px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+              flexDirection: 'column', border: '1px dashed rgb(134, 136, 163,.5)', borderRadius: '16px'
+            }}>
+              <Iconify icon="octicon:video-16" style={{ color: '#8688A3' }} />
+            </Box>
+          </Box> */}
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Category
+          </Typography>
+
+          {/* <FormControl fullWidth>
+              <Select
+                variant='filled'
+                value={productData?.categoryId || ""}
+                onChange={handleProductData}
+                name='categoryId'
+              >
+                {categoryState.list.map((cat: any, index: any) => (
+                  <MenuItem key={index} value={cat._id}>{cat.name.en || cat.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl> */}
+          <RHFSelect
+            fullWidth
+            variant="filled"
+            name="categoryId"
+            id="demo-simple-select2"
+            value={productData?.categoryId || null}
+            settingStateValue={handleProductData}
+          >
+            {categoryState.list.map((cat: any, index: any) => (
+              <MenuItem key={index} value={cat._id}>
+                {cat?.name?.en || cat?.name || ''}
+              </MenuItem>
+            ))}
+          </RHFSelect>
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Sub-Category
+          </Typography>
+
+          {/* <FormControl fullWidth>
+              <Select
+                variant='filled'
+                value={productData?.subCategory || ""}
+                onChange={handleProductData}
+                name='subCategory'
+              >
+                {productData?.categoryId && categoryState.subCatList.filter((item: any) => item.category === productData.categoryId).map((item: any, ind: any) => (
+                  <MenuItem key={ind} value={item._id}>{item.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl> */}
+          <RHFSelect
+            fullWidth
+            variant="filled"
+            id="demo-simple-select"
+            name="subCategory"
+            value={productData?.subCategory || null}
+            settingStateValue={handleProductData}
+          >
+            {productData?.categoryId &&
+              categoryState.subCatList
+                .filter((item: any) => item.category === productData.categoryId)
+                .map((item: any, ind: any) => (
                   <MenuItem key={ind} value={item._id}>
                     {item?.name?.en || item?.name || ''}
                   </MenuItem>
                 ))}
-            </RHFSelect>
+          </RHFSelect>
 
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Brand
-            </Typography>
-            <RHFSelect
-              fullWidth
-              variant="filled"
-              name="brandId"
-              id="demo-simple-brand"
-              defaultValue={brandState?.list[0]?._id}
-            >
-              {brandState?.list &&
-                brandState.list?.map((brandObj: any) => (
-                  <MenuItem key={brandObj._id} value={brandObj._id}>
-                    {brandObj.name.localized}
-                  </MenuItem>
-                ))}
-            </RHFSelect>
-            <Typography
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Sort
-            </Typography>
-            <RHFTextField fullWidth variant="filled" name="sort" type="number" />
-            <Typography
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Preperation Time
-            </Typography>
-            <Box sx={{ display: 'flex', gap: '3px' }}>
-              <RHFTextField variant="filled" name="preparationTime" type="number" fullWidth />
-              <RHFSelect
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Brand
+          </Typography>
+          {/* <RHFTextField
+                fullWidth
                 variant="filled"
-                name="preparationTimeUnit"
-                id="demo-simple-brand"
-                sx={{ width: '30%' }}
-                defaultValue={preparationTimeUnits[0].value}
-              >
-                {preparationTimeUnits.map((unit: any) => (
-                  <MenuItem key={unit.value} value={unit.value}>
-                    {unit.name}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
-            </Box>
-            {/* Ingredients */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-              >
-                Ingredients
-              </Typography>
-              <IconButton onClick={() => setIngrediants((prev) => [...prev, prev.length])}>
-                <AddIcon />
-              </IconButton>
-            </Box>
-            {ingrediants.map((el) => (
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                <RHFTextField variant="filled" name={`ingredients[${el}]`} fullWidth />
-                <IconButton
-                  onClick={() =>
-                    setIngrediants((prev) => prev.filter((ingrediant) => ingrediant !== el))
-                  }
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
+                settingStateValue={handleProductData}
+                value={productData?.brand || ''}
+                name="brand"
+              /> */}
+          {/* {console.log(brandState)} */}
+          <RHFSelect
+            fullWidth
+            variant="filled"
+            name="brand"
+            id="demo-simple-brand"
+            value={productData?.brand || null}
+            settingStateValue={handleProductData}
+          >
+            {brandState?.list && brandState.list?.map((brandObj: any) => (
+              <MenuItem key={brandObj._id} value={brandObj._id}>{brandObj.name.localized}</MenuItem>
             ))}
-            {/* Seasons */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-              >
-                Seasons
-              </Typography>
-              <IconButton onClick={() => setSeason((prev) => [...prev, prev.length])}>
-                <AddIcon />
-              </IconButton>
-            </Box>
-            {seasons.map((el) => (
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                <RHFTextField variant="filled" name={`seasons[${el}]`} fullWidth />
-                <IconButton
-                  onClick={() => setSeason((prev) => prev.filter((season) => season !== el))}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            ))}
-            {/* styles */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-              >
-                Styles
-              </Typography>
-              <IconButton onClick={() => setStyles((prev) => [...prev, prev.length])}>
-                <AddIcon />
-              </IconButton>
-            </Box>
-            {styles.map((el) => (
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                <RHFTextField variant="filled" name={`styles[${el}]`} fullWidth />
-                <IconButton
-                  onClick={() => setStyles((prev) => prev.filter((style) => style !== el))}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            ))}
-            {/* occasion */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-              >
-                Occasions
-              </Typography>
-              <IconButton onClick={() => setOccasion((prev) => [...prev, prev.length])}>
-                <AddIcon />
-              </IconButton>
-            </Box>
-            {occasion.map((el) => (
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                <RHFTextField variant="filled" name={`occasions[${el}]`} fullWidth />
-                <IconButton
-                  onClick={() => setOccasion((prev) => prev.filter((occasion) => occasion !== el))}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            ))}
-            <Typography
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Fit
-            </Typography>
-            <RHFTextField fullWidth variant="filled" name={`fit`} />
-            <Typography
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Calories
-            </Typography>
-            <RHFTextField fullWidth variant="filled" name={`calories`} />
-          </>
-        );
+          </RHFSelect>
+        </>
       case 1:
-        return (
-          <>
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Price
-            </Typography>
-            <RHFTextField type="number" fullWidth variant="filled" name="price" />
+        return <>
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Price
+          </Typography>
 
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Purcahse Price
-            </Typography>
-            <RHFTextField fullWidth variant="filled" name="purcahsePrice" type="number" />
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Purchase limit
-            </Typography>
-            <RHFTextField fullWidth variant="filled" name="purchaseLimit" type="number" />
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Barcode
-            </Typography>
-            <RHFTextField fullWidth variant="filled" name="barcode" />
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Sku
-            </Typography>
-            <RHFTextField fullWidth variant="filled" name="sku" />
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-            >
-              Discount
-            </Typography>
-            <RHFTextField fullWidth variant="filled" name="discountValue" type="number" />
-            <Grid
-              container
-              mt="20px"
-              columnSpacing="20px"
-              pb="5px"
-              alignItems="flex-end"
-              rowGap="20px"
-              justifyContent="space-between"
-            >
-              <Grid item xs={6}>
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '56px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '.9rem',
-                    borderRadius: '16px',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    ...(selectedDiscountType === 'fixed_amount' ? activeTab : nonActiveTab),
-                  }}
-                  onClick={(e) => setValue('discountType', 'fixed_amount')}
-                >
-                  Fixed Amount
-                </Box>
-              </Grid>
-              <Grid item xs={6}>
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '56px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '.9rem',
-                    borderRadius: '16px',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    ...(selectedDiscountType === 'percentage' ? activeTab : nonActiveTab),
-                  }}
-                  onClick={(e) => setValue('discountType', 'percentage')}
-                >
-                  Percentage
-                </Box>
-              </Grid>
+          {/* <TextField fullWidth variant='filled' onChange={handleProductData} value={productData?.price || ""} name='price' /> */}
+          <RHFTextField
+            fullWidth
+            variant="filled"
+            settingStateValue={handleProductData}
+            value={productData?.price || ''}
+            name="price"
+          />
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Discount
+          </Typography>
+          <RHFTextField
+            fullWidth
+            variant="filled"
+            settingStateValue={handleProductData}
+            value={productData?.discount || ''}
+            name="discount"
+          />
+
+          <Grid
+            container
+            mt="20px"
+            columnSpacing="20px"
+            pb="5px"
+            alignItems="flex-end"
+            rowGap="20px"
+            justifyContent="space-between"
+          >
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  width: '100%',
+                  height: '56px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '.9rem',
+                  borderRadius: '16px',
+                  fontWeight: 800,
+                  cursor: "pointer",
+                  ...(productData?.discount_type === 'amount' ? activeTab : nonActiveTab),
+                }}
+                onClick={() => setProductData({ ...productData, discount_type: 'amount' })}
+              >
+                Fixed Amount
+              </Box>
             </Grid>
-            <Typography
-              mt="20px"
-              mb="5px"
-              component="p"
-              noWrap
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.9rem' }}
-            >
-              Quantity
-            </Typography>
-            <RHFTextField type="number" fullWidth variant="filled" name="quantity" />
-          </>
-        );
-      case 2:
-        return (
-          <>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  width: '100%',
+                  height: '56px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '.9rem',
+                  borderRadius: '16px',
+                  fontWeight: 800,
+                  cursor: "pointer",
+                  ...(productData?.discount_type === 'amount' ? nonActiveTab : activeTab),
+                }}
+                onClick={() => setProductData({ ...productData, discount_type: 'percentage' })}
+              >
+                Percentage
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
               <Typography
                 component="p"
-                noWrap
+                mb="5px"
                 variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                sx={{ opacity: 0.7, fontSize: '.8rem' }}
               >
-                Variants
+                Start Date
               </Typography>
-              <IconButton onClick={() => setVariants((prev) => [...prev, prev.length])}>
-                <AddIcon />
-              </IconButton>
-            </Box>
-            {variants.map((variant) => (
-              <>
-                <Box
-                  sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                >
-                  <Typography
-                    component="p"
-                    noWrap
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                  >
-                    Variant {variant + 1}
-                  </Typography>
-                  <IconButton
-                    onClick={() =>
-                      setVariants((prev) => prev.filter((element) => element !== variant))
-                    }
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
-                {selectedDomain?.appLanguage?.map((el: string) => (
-                  <>
-                    <Typography
-                      component="p"
-                      noWrap
-                      variant="subtitle2"
-                      sx={{
-                        opacity: 0.7,
-                        fontSize: '.9rem',
-                        maxWidth: { xs: '120px', md: '218px' },
-                      }}
-                    >
-                      Group Name ({el.toUpperCase()})
-                    </Typography>
-                    <RHFTextField
-                      fullWidth
-                      variant="filled"
-                      name={`varients[${variant}].groupName.${el}`}
-                    />
-                  </>
-                ))}
-                <Typography
-                  component="p"
-                  noWrap
-                  variant="subtitle2"
-                  sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                >
-                  Selection Type
-                </Typography>
-                <RHFSelect
-                  variant="filled"
-                  name={`varients[${variant}].selectionType`}
-                  id="demo-simple-brand"
-                  fullWidth
-                  defaultValue={selectionTypes[0]}
-                >
-                  {selectionTypes?.map((unit) => (
-                    <MenuItem key={unit} value={unit}>
-                      {unit.toUpperCase()}
-                    </MenuItem>
-                  ))}
-                </RHFSelect>
-                <Typography
-                  component="p"
-                  noWrap
-                  variant="subtitle2"
-                  sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                >
-                  Minimum
-                </Typography>
-                <RHFTextField
-                  fullWidth
-                  variant="filled"
-                  name={`varients[${variant}].minimum`}
-                  type="number"
-                />
-                <Typography
-                  component="p"
-                  noWrap
-                  variant="subtitle2"
-                  sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                >
-                  Maximum
-                </Typography>
-                <RHFTextField
-                  fullWidth
-                  variant="filled"
-                  name={`varients[${variant}].maximum`}
-                  type="number"
-                />
-                <RHFCheckbox
-                  name={`varients[${variant}].required`}
-                  label="Required" // Assuming your RHFCheckbox supports a label prop
-                />
-                <RHFCheckbox
-                  name={`varients[${variant}].allowMoreQuantity`}
-                  label="Allow More Quantity" // Assuming your RHFCheckbox supports a label prop
-                />
-                <Box
-                  sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                >
-                  <Typography
-                    component="p"
-                    noWrap
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                  >
-                    Variants Rows
-                  </Typography>
-                  <IconButton onClick={() => setVariantsRow((prev) => [...prev, prev.length])}>
-                    <AddIcon />
-                  </IconButton>
-                </Box>
-                {variantsRows.map((row) => (
-                  <>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Typography
-                        component="p"
-                        noWrap
-                        variant="subtitle2"
-                        sx={{
-                          opacity: 0.7,
-                          fontSize: '.9rem',
-                          maxWidth: { xs: '120px', md: '218px' },
-                        }}
-                      >
-                        Row {row + 1}
-                      </Typography>
-                      <IconButton
-                        onClick={() =>
-                          setVariantsRow((prev) => prev.filter((element) => element !== row))
-                        }
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                    {selectedDomain?.appLanguage?.map((el: string) => (
-                      <>
-                        <Typography
-                          component="p"
-                          noWrap
-                          variant="subtitle2"
-                          sx={{
-                            opacity: 0.7,
-                            fontSize: '.9rem',
-                            maxWidth: { xs: '120px', md: '218px' },
-                          }}
-                        >
-                          Variant Name ({el.toUpperCase()})
-                        </Typography>
-                        <RHFTextField
-                          fullWidth
-                          variant="filled"
-                          name={`varients[${variant}].varientRows[${row}].name.${el}`}
-                        />
-                      </>
-                    ))}
-                    <Typography
-                      component="p"
-                      noWrap
-                      variant="subtitle2"
-                      sx={{
-                        opacity: 0.7,
-                        fontSize: '.9rem',
-                        maxWidth: { xs: '120px', md: '218px' },
-                      }}
-                    >
-                      Price
-                    </Typography>
-                    <RHFTextField
-                      fullWidth
-                      variant="filled"
-                      name={`varients[${variant}].varientRows[${row}].price`}
-                      type="number"
-                    />
-                    <Typography
-                      component="p"
-                      noWrap
-                      variant="subtitle2"
-                      sx={{
-                        opacity: 0.7,
-                        fontSize: '.9rem',
-                        maxWidth: { xs: '120px', md: '218px' },
-                      }}
-                    >
-                      Price After Discount
-                    </Typography>
-                    <RHFTextField
-                      fullWidth
-                      variant="filled"
-                      name={`varients[${variant}].varientRows[${row}].priceAfterDiscount`}
-                      type="number"
-                    />
-                    <Typography
-                      component="p"
-                      noWrap
-                      variant="subtitle2"
-                      sx={{
-                        opacity: 0.7,
-                        fontSize: '.9rem',
-                        maxWidth: { xs: '120px', md: '218px' },
-                      }}
-                    >
-                      Quantity
-                    </Typography>
-                    <RHFTextField
-                      fullWidth
-                      variant="filled"
-                      name={`varients[${variant}].varientRows[${row}].quantity`}
-                      type="number"
-                    />
-                    <Typography
-                      component="p"
-                      noWrap
-                      variant="subtitle2"
-                      sx={{
-                        opacity: 0.7,
-                        fontSize: '.9rem',
-                        maxWidth: { xs: '120px', md: '218px' },
-                      }}
-                    >
-                      Sku
-                    </Typography>
-                    <RHFTextField
-                      fullWidth
-                      variant="filled"
-                      name={`varients[${variant}].varientRows[${row}].sku`}
-                    />
-                    <Typography
-                      component="p"
-                      noWrap
-                      variant="subtitle2"
-                      sx={{
-                        opacity: 0.7,
-                        fontSize: '.9rem',
-                        maxWidth: { xs: '120px', md: '218px' },
-                      }}
-                    >
-                      Barcode
-                    </Typography>
-                    <RHFTextField
-                      fullWidth
-                      variant="filled"
-                      name={`varients[${variant}].varientRows[${row}].barcode`}
-                    />
-                  </>
-                ))}
-              </>
-            ))}
-          </>
-        );
-      case 3:
-        return (
-          <>
-            <RHFCheckbox
-              name={`allBranches`}
-              label="Avalible for All Branches" // Assuming your RHFCheckbox supports a label prop
+              <RHFTextField
+                fullWidth type="date" variant="filled"
+                name="discount_start"
+                value={productData?.discount_start || ''}
+                settingStateValue={handleProductData}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <Typography
+                component="p"
+                mb="5px"
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.8rem' }}
+              >
+                End Date
+              </Typography>
+              <RHFTextField
+                fullWidth
+                type="date"
+                variant="filled"
+                name="discount_end"
+                value={productData?.discount_end || ''}
+                settingStateValue={handleProductData}
+              />
+            </Grid>
+
+
+          </Grid>
+
+          {/* <FormControl fullWidth>
+            <Select
+              variant='filled'
+              value={dropDown.price}
+              onChange={handleChangeDropDown('price')}
+            >
+              <MenuItem value='165.000'>165.000</MenuItem>
+              <MenuItem value='200.000'>200.000</MenuItem>
+            </Select>
+          </FormControl> */}
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem' }}
+          >
+            Description (English)
+          </Typography>
+
+          {/* <TextField
+              variant='filled'
+              multiline
+              fullWidth
+              rows={5}
+              sx={{ fontWeight: 900, fontSize: '26px' }}
+              value={productData?.description?.en || ""}
+              onChange={handleNestedProductData}
+              name='description.en'
+            /> */}
+          <RHFTextField
+            variant="filled"
+            multiline
+            fullWidth
+            rows={5}
+            sx={{ fontWeight: 900, fontSize: '26px' }}
+            value={productData?.description?.en || ''}
+            settingStateValue={handleNestedProductData}
+            name="description.en"
+          />
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem' }}
+          >
+            Description (Arabic)
+          </Typography>
+
+          {/* <TextField
+              variant='filled'
+              multiline
+              fullWidth
+              rows={5}
+              dir="rtl"
+              sx={{ fontWeight: 900, fontSize: '26px' }}
+              // defaultValue="هنالك العديد من الأنواع المتوفرة لنصوص لوريم إيبسوم، ولكن الغالبية تم تعديلها بشكل ما عبر إدخال بعض الكلمات العشوائية"
+              value={productData?.description?.ar || ""}
+              onChange={handleNestedProductData}
+              name='description.ar'
+            /> */}
+          <RHFTextField
+            variant="filled"
+            multiline
+            fullWidth
+            rows={5}
+            dir="rtl"
+            sx={{ fontWeight: 900, fontSize: '26px' }}
+            value={productData?.description?.ar || ''}
+            settingStateValue={handleNestedProductData}
+            name="description.ar"
+          />
+
+          {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            Available
+          </Typography>
+          <FormControl fullWidth>
+            <Select
+              variant='filled'
+              value={dropDown.available}
+              onChange={handleChangeDropDown('available')}
+            >
+              <MenuItem value='All Branches'>All Branches</MenuItem>
+              <MenuItem value='Main Branch'>Main Branch</MenuItem>
+            </Select>
+          </FormControl> */}
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem' }}
+          >
+            Quantity (in stock)
+          </Typography>
+          {/* <TextField type='number' fullWidth variant='filled' onChange={handleProductData} value={productData?.quantity || ""} name='quantity' /> */}
+          <RHFTextField
+            type="number"
+            fullWidth
+            variant="filled"
+            settingStateValue={handleProductData}
+            value={productData?.quantity || ''}
+            name="quantity"
+          />
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+          >
+            Max Quantity
+          </Typography>
+          <RHFTextField
+            fullWidth
+            variant="filled"
+            settingStateValue={handleProductData}
+            value={productData?.max_quantity || ''}
+            name="max_quantity"
+          />
+
+
+          <Typography
+            mt="20px"
+            mb="5px"
+            component="p"
+            noWrap
+            variant="subtitle2"
+            sx={{ opacity: 0.7, fontSize: '.9rem' }}
+          >
+            Product Status
+          </Typography>
+
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{
+              borderRadius: '16px',
+              padding: '7px 14px',
+              // backgroundColor: '#F5F6F8',
+            }}
+          >
+            <Typography
+              component="p"
+              variant="subtitle2"
+              sx={{ fontWeight: 900, fontSize: '.9rem' }}
+            >
+              Published
+            </Typography>
+            <Switch
+              size="medium"
+              checked={productData?.publish_app || false}
+              onChange={(e: any) =>
+                setProductData({ ...productData, publish_app: e.target.checked })
+              }
             />
-          </>
-        );
-      case 4:
-        return (
-          <>
-            <RHFCheckbox name={`avalibleForMobile`} label="Avalible for Mobile" />
-            <RHFCheckbox name={`avalibleForWebsite`} label="Avalible for Website" />
-          </>
-        );
+          </Stack>
+        </>
       default:
         return null;
     }
-  };
+  }
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -1207,7 +1256,7 @@ export default function OrdersListView() {
                     component="button"
                     variant="contained"
                     color="primary"
-                    onClick={() => setOpenCreateProduct(true)}
+                    onClick={toggleDrawerCommon('new')}
                   >
                     Add New Product
                   </Button>
@@ -1218,13 +1267,19 @@ export default function OrdersListView() {
 
           <Grid item xs={12}>
             <Box mt="20px">
-              <ProductTableToolbar sort={true} setSort={() => {}} query={''} setQuery={() => {}} />
+              <ProductTableToolbar
+                sort={sort}
+                setSort={setSort}
+                query={query}
+                setQuery={setQuery}
+              />
             </Box>
           </Grid>
+
           <Grid item xs={12}>
             <Box>
-              <TabContext value={'All'}>
-                {/* <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <TabContext value={value}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                   <TabList
                     variant="scrollable"
                     scrollButtons={false}
@@ -1268,10 +1323,10 @@ export default function OrdersListView() {
                       />
                     ))}
                   </TabList>
-                </Box> */}
+                </Box>
 
-                <TabPanel value={'All'} sx={{ px: 0, minHeight: '50vh' }}>
-                  <DragDropContext onDragEnd={() => {}}>
+                <TabPanel value={value} sx={{ px: 0, minHeight: '50vh' }}>
+                  <DragDropContext onDragEnd={handleOnDragEnd}>
                     <Droppable droppableId="items">
                       {(provided) => (
                         <Grid
@@ -1281,15 +1336,137 @@ export default function OrdersListView() {
                           spacing={2}
                         >
                           {/* DND START */}
-                          {getAllProductsRes?.data?.data?.data?.map((product: any, indx: any) => (
-                            <Product product={product} indx={indx} key={indx} />
-                          ))}
+                          {listItems
+                            .filter((item: any) =>
+                              item.name.en.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+                            )
+                            .map((product: any, indx: any) => (
+                              <Draggable key={indx} index={indx} draggableId={indx.toString()}>
+                                {(provided) => (
+                                  <Grid
+                                    {...provided.draggableProps}
+                                    ref={provided.innerRef}
+                                    item
+                                    xs={12}
+                                  >
+                                    <Paper elevation={4}>
+                                      <Grid
+                                        container
+                                        item
+                                        alignItems="center"
+                                        justifyContent="space-between"
+                                        rowGap={3}
+                                        sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
+                                      >
+                                        <Grid item xs={12} md={6}>
+                                          <Box
+                                            sx={{
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              gap: '8px',
+                                            }}
+                                          >
+                                            <div {...provided.dragHandleProps}>
+                                              <Iconify icon="ci:drag-vertical" />
+                                            </div>
+                                            <Box
+                                              component="img"
+                                              src={product.images[0]}
+                                              alt=" "
+                                              width="60px"
+                                            />
+                                            <Box display="flex" gap="0px" flexDirection="column">
+                                              <Typography
+                                                component="p"
+                                                noWrap
+                                                variant="subtitle2"
+                                                sx={{
+                                                  fontSize: '.9rem',
+                                                  fontWeight: 800,
+                                                  maxWidth: { xs: '100%', md: '188px' },
+                                                }}
+                                              >
+                                                {' '}
+                                                {product?.name?.en}{' '}
+                                              </Typography>
+                                              <Typography
+                                                component="p"
+                                                noWrap
+                                                variant="subtitle2"
+                                                sx={{
+                                                  opacity: 0.7,
+                                                  fontSize: '.9rem',
+                                                  maxWidth: { xs: '100%', md: '188px' },
+                                                }}
+                                              >
+                                                {product.category}
+                                              </Typography>
+                                            </Box>
+                                          </Box>
+                                        </Grid>
+
+                                        <Grid item xs={12} md={6}>
+                                          <Box
+                                            sx={{
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              gap: '8px',
+                                              justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                                            }}
+                                          >
+                                            <Typography
+                                              component="p"
+                                              variant="subtitle2"
+                                              sx={{ fontSize: '.8rem', fontWeight: 800 }}
+                                            >
+                                              {' '}
+                                              {product.price} KWD{' '}
+                                            </Typography>
+                                            &nbsp; &nbsp;
+                                            {/* <Iconify
+                                          icon="mdi:pen-plus"
+                                          onClick={toggleDrawerCommon('variants', product._id)}
+                                          style={{ cursor: 'pointer' }}
+                                        />{' '} */}
+                                            <Link href={`/dashboard/products/${product._id}`}>
+                                              <Iconify
+                                                icon="mdi:pen-plus"
+                                                style={{ cursor: 'pointer' }}
+                                              />{' '}
+                                            </Link>
+                                            &nbsp; &nbsp;
+                                            {allowAction.remove && (
+                                              <Iconify
+                                                icon="carbon:delete"
+                                                onClick={() => {
+                                                  setRemoveData(product._id);
+                                                  confirm.onTrue();
+                                                }}
+                                                style={{ cursor: 'pointer' }}
+                                              />
+                                            )}{' '}
+                                            &nbsp; &nbsp;
+                                            {allowAction.edit && (
+                                              <Iconify
+                                                icon="bx:edit"
+                                                onClick={toggleDrawerCommon('new', product._id)}
+                                                style={{ cursor: 'pointer' }}
+                                              />
+                                            )}
+                                          </Box>
+                                        </Grid>
+                                      </Grid>
+                                    </Paper>
+                                  </Grid>
+                                )}
+                              </Draggable>
+                            ))}
                         </Grid>
                       )}
                     </Droppable>
                   </DragDropContext>
                 </TabPanel>
-                {/* {Math.ceil(productsLength / pageSize) !== 1 && (
+                {Math.ceil(productsLength / pageSize) !== 1 && (
                   <Box
                     sx={{
                       width: '100%',
@@ -1304,45 +1481,31 @@ export default function OrdersListView() {
                       setPageNumber={setPageNumber}
                     />
                   </Box>
-                )} */}
+                )}
               </TabContext>
             </Box>
           </Grid>
         </Grid>
-        {/* products */}
+
         <DetailsNavBar
-          open={openCreateProduct}
-          onClose={() => setOpenCreateProduct(false)}
-          title={'Add New Product'}
+          open={openDetails}
+          onClose={handleDrawerCloseCommon('new')}
+          title={editProductId ? 'Edit Product' : 'Add New Product'}
           actions={
             <Stack alignItems="center" justifyContent="center" spacing="10px">
-              {createProductSections !== 4 ? (
+              {productDataSections === 0 ? (
                 // Render only the "Next" button for the first section
-                <>
-                  <LoadingButton
-                    fullWidth
-                    variant="soft"
-                    color="success"
-                    size="large"
-                    loading={isSubmitting}
-                    onClick={handleNextInputs}
-                    sx={{ borderRadius: '30px' }}
-                  >
-                    Next
-                  </LoadingButton>
-                  {createProductSections > 0 && (
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      color="inherit"
-                      size="large"
-                      onClick={() => setcreateProductSections((prev) => prev - 1)} // Adjust this function as needed to go back to the first section
-                      sx={{ borderRadius: '30px', marginLeft: '10px' }}
-                    >
-                      Back
-                    </Button>
-                  )}
-                </>
+                <LoadingButton
+                  fullWidth
+                  variant="soft"
+                  color="success"
+                  size="large"
+                  loading={isSubmitting}
+                  onClick={handleNextInputs}
+                  sx={{ borderRadius: '30px' }}
+                >
+                  Next
+                </LoadingButton>
               ) : (
                 // Render "Submit/Update" and "Back" buttons for other sections
                 <>
@@ -1352,17 +1515,17 @@ export default function OrdersListView() {
                     color="success"
                     size="large"
                     loading={isSubmitting}
-                    onClick={onSubmit}
+                    onClick={methods.handleSubmit(onSubmit as any)}
                     sx={{ borderRadius: '30px' }}
                   >
-                    Save
+                    {editProductId ? 'Update' : 'Save'}
                   </LoadingButton>
                   <Button
                     fullWidth
                     variant="outlined"
                     color="inherit"
                     size="large"
-                    onClick={() => setcreateProductSections((prev) => prev - 1)} // Adjust this function as needed to go back to the first section
+                    onClick={() => setProductDataSections(0)} // Adjust this function as needed to go back to the first section
                     sx={{ borderRadius: '30px', marginLeft: '10px' }}
                   >
                     Back
@@ -1372,30 +1535,221 @@ export default function OrdersListView() {
             </Stack>
           }
         >
-          <Stepper activeStep={createProductSections} alternativeLabel>
-            {['Step 1', 'Step 2', 'Step 3', 'Step 4', 'Step 5']?.map(
-              (label: any, index: number) => {
-                const stepProps: { completed?: boolean } = {};
-                const labelProps: {
-                  optional?: React.ReactNode;
-                } = {};
-
-                return (
-                  <Step key={label} {...stepProps}>
-                    <StepLabel sx={{ width: '55px' }} {...labelProps}>
-                      {label}
-                    </StepLabel>
-                  </Step>
-                );
-              }
-            )}
-          </Stepper>
           <FormProvider methods={methods} onSubmit={onSubmit}>
             <Divider flexItem />
-            <Box width="100%">{renderDetails()}</Box>
+            {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+            {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
+            Barcode (Optional)
+          </Typography>
+          <TextField fullWidth variant='filled' defaultValue='481155444762' name='branchCode'
+            InputProps={{
+              endAdornment: <InputAdornment position="end">
+                <Box component='img' src='/raw/barcode.svg' alt='' sx={{}} />
+              </InputAdornment>,
+            }}
+          /> */}
+
+            {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }} >
+            Color (Optional)
+          </Typography>
+          <FormControl fullWidth>
+            <Select
+              variant='filled'
+              value={dropDown.color}
+              onChange={handleChangeDropDown('color')}
+            >
+              <MenuItem value='blue'>
+                <Stack direction='row' spacing='20px' alignItems='center'>
+                  <Box sx={{ width: '23px', height: '23px', borderRadius: '23px', background: 'blue' }} />
+                  <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', fontWeight: 900 }} >
+                    Blue
+                  </Typography>
+                </Stack>
+              </MenuItem>
+              <MenuItem value='green'>
+                <Stack direction='row' spacing='20px' alignItems='center'>
+                  <Box sx={{ width: '23px', height: '23px', borderRadius: '23px', background: 'green' }} />
+                  <Typography component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', fontWeight: 900 }} >
+                    Green
+                  </Typography>
+                </Stack>
+              </MenuItem>
+
+            </Select>
+          </FormControl> */}
+            <Box width="100%">
+              {/* section 1 */}
+              {renderDetails()}
+            </Box>
           </FormProvider>
         </DetailsNavBar>
-        {/* <ConfirmDialog
+
+        <DetailsNavBar
+          open={openVariant}
+          onClose={handleDrawerCloseCommon('variants')}
+          title={editVariantId ? 'Edit Variant' : 'Add New Variant'}
+          actions={
+            <Stack alignItems="center" justifyContent="center" spacing="10px">
+              <LoadingButton
+                fullWidth
+                variant="soft"
+                color="success"
+                size="large"
+                loading={variantMethods.formState.isSubmitting}
+                onClick={() => variantMethods.handleSubmit(onVariantSubmit as any)()}
+                sx={{ borderRadius: '30px' }}
+              >
+                {editVariantId ? 'Update' : 'Save'}
+              </LoadingButton>
+            </Stack>
+          }
+        >
+          <FormProvider methods={variantMethods} onSubmit={onVariantSubmit}>
+            <Divider flexItem />
+            {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+            <Box width="100%">
+              <Typography
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Group Name (English)
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                settingStateValue={handleNestedVariantData}
+                value={variantData?.groupName?.en || ''}
+                name="groupName.en"
+              />
+
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Group Name (Arabic)
+              </Typography>
+
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                settingStateValue={handleNestedVariantData}
+                value={variantData?.groupName?.ar || ''}
+                name="groupName.ar"
+              />
+
+              <Typography
+                mt="20px"
+                mb="5px"
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Selection Type
+              </Typography>
+
+              <RHFSelect
+                fullWidth
+                variant="filled"
+                name="selectionType"
+                id="demo-simple-select2"
+                value={variantData?.selectionType || ''}
+                settingStateValue={handleVariantData}
+              >
+                <MenuItem value="multiple">Multiple</MenuItem>
+                <MenuItem value="single">Single</MenuItem>
+              </RHFSelect>
+
+              {variantData?.selectionType === 'multiple' && (
+                <>
+                  <Typography
+                    mt="20px"
+                    mb="5px"
+                    component="p"
+                    noWrap
+                    variant="subtitle2"
+                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                  >
+                    Minimum
+                  </Typography>
+                  <RHFTextField
+                    fullWidth
+                    type="number"
+                    variant="filled"
+                    settingStateValue={handleVariantData}
+                    value={variantData?.minimum || ''}
+                    name="minimum"
+                  />
+
+                  <Typography
+                    mt="20px"
+                    mb="5px"
+                    component="p"
+                    noWrap
+                    variant="subtitle2"
+                    sx={{ opacity: 0.7, fontSize: '.9rem' }}
+                  >
+                    Maximum
+                  </Typography>
+                  <RHFTextField
+                    type="number"
+                    fullWidth
+                    variant="filled"
+                    settingStateValue={handleVariantData}
+                    value={variantData?.maximum || ''}
+                    name="maximum"
+                  />
+                </>
+              )}
+
+              <Stack
+                mt="20px"
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{
+                  borderRadius: '16px',
+                  padding: '7px 14px',
+                  backgroundColor: '#F5F6F8',
+                }}
+              >
+                <Typography
+                  component="p"
+                  variant="subtitle2"
+                  sx={{ fontWeight: 900, fontSize: '.9rem' }}
+                >
+                  Allow More Quantity
+                </Typography>
+                <Checkbox
+                  size="medium"
+                  name="allowMoreQuantity"
+                  checked={variantData?.allowMoreQuantity || false}
+                  // onChange={(e: any) => setVariantData({ ...variantData, allowMoreQuantity: e.target.checked })}
+                  onChange={handleVariantCheckBox}
+                  inputProps={{ 'aria-label': 'secondary checkbox' }}
+                />
+                {/* <Switch size="medium"
+                checked={!!variantData?.allowMoreQuantity}
+                // onChange={(e: any) => setVariantData({ ...variantData, allowMoreQuantity: e.target.checked })}
+                onChange={(e) => {
+                  console.log('Previous variantData:', variantData);
+                  setVariantData((prevData: any) => ({ ...prevData, allowMoreQuantity: !!e.target.checked }));
+                  console.log('Updated variantData:', variantData);
+                }}
+                inputProps={{ 'aria-label': 'secondary checkbox' }}
+              /> */}
+              </Stack>
+            </Box>
+          </FormProvider>
+        </DetailsNavBar>
+
+        <ConfirmDialog
           open={confirm.value}
           onClose={confirm.onFalse}
           title="Delete"
@@ -1413,7 +1767,7 @@ export default function OrdersListView() {
               Delete
             </Button>
           }
-        /> */}
+        />
       </RoleBasedGuard>
     </Container>
   );

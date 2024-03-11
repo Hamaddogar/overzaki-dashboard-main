@@ -7,7 +7,7 @@ import { sections } from './response';
 
 const OfferNavbar = ({ adAppbar }: any) => {
   const { Slider, ...restOfStyles } = adAppbar;
-  console.log(restOfStyles);
+  // console.log(restOfStyles);
   return (
     adAppbar.status && (
       <Swiper

@@ -286,6 +286,11 @@ export default function BannerDealer({
   // console.log(bannerContainerStyling);
 
 
+  useEffect(() => {
+    console.log("slider image");
+    console.log(themeConfig.sliderImage);
+  }, [themeConfig])
+
 
 
   return (
@@ -293,7 +298,7 @@ export default function BannerDealer({
       {bannerType === 'slider' ? (
         <BannerSlider
           bannerContainerStyling={bannerContainerStyling}
-          data={data}
+          data={themeConfig.sliderImage}
           bannerType={sliderType}
         />
       ) : (

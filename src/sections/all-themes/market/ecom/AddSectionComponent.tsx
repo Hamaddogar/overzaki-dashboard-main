@@ -26,12 +26,12 @@ const AddSectionComponent = ({ onClose, onClick }: any) => {
         { name: 'App Bar', onClick: 'App Bar', img: '/raws/nav2.svg', imgheight: '110px', id: 2 },
       ],
     },
-    {
-      heading: 'Slider',
-      comps: [
-        { name: 'Slider', onClick: 'Header', img: '/raws/slider.png', imgheight: '258px', id: 3 },
-      ],
-    },
+    // {
+    //   heading: 'Slider',
+    //   comps: [
+    //     { name: 'Slider', onClick: 'Header', img: '/raws/slider.png', imgheight: '258px', id: 3 },
+    //   ],
+    // },
     {
       heading: 'Categories',
       comps: [
@@ -49,7 +49,7 @@ const AddSectionComponent = ({ onClose, onClick }: any) => {
       comps: [
         {
           name: 'Video Section (2)',
-          onClick: 'video',
+          onClick: 'Video',
           img: '/raws/video.png',
           imgheight: '',
           id: 5,
@@ -177,6 +177,7 @@ const AddSectionComponent = ({ onClose, onClick }: any) => {
     // For example, if you're using setState:
     setComponents(updatedComponents);
     setHeading('');
+    handleClose();
   };
 
   return (
@@ -218,7 +219,7 @@ const AddSectionComponent = ({ onClose, onClick }: any) => {
               <Stack
                 direction="row"
                 alignItems="center"
-                spacing="8px"
+                spacing="4px"
                 aria-controls={open ? 'basic-menu' : undefined}
                 aria-haspopup="true"
                 aria-expanded={open ? 'true' : undefined}
@@ -234,8 +235,9 @@ const AddSectionComponent = ({ onClose, onClick }: any) => {
                   borderRadius: '20px',
                 }}
               >
+                <Iconify style={{ color: '#8688A3' }} icon="ic:baseline-plus" />
                 <Typography variant="button" color="#8688A3">
-                  {item.heading}
+                  Add Here
                 </Typography>
               </Stack>
               <Menu

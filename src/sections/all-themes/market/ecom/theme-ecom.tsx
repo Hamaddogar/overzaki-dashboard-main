@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import './out-put/view/view.css';
 // @mui
@@ -58,6 +58,9 @@ import BrandDealer from './out-put/brand-dealer';
 import StylesDealer from './out-put/styles-dealer';
 import ProductSelectionDealer from './out-put/product-selection-dealer';
 import CategoryViewDealer from './out-put/category-selection';
+import FooterDealer from './out-put/FooterDealer';
+import AddProductDealer from './out-put/add-product-dealer';
+import AddCategoryDealer from './out-put/add-category-dealer';
 
 const dataPages = [
   { title: 'Home Page', link: 'https://ecom-zaki.vercel.app/' },
@@ -71,6 +74,7 @@ interface ControllsState {
   menu: (EventTarget & (Element | HTMLElement)) | null;
   addSection: Boolean;
 }
+// const [selectedSquareCard, setSelectedSquareCard] = useState('style-1');
 
 const defaultSections = [
   {
@@ -93,11 +97,13 @@ const defaultSections = [
         name: 'Top Bar',
         img: '/raws/bars.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
+        hideHeader: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any, url: any) => (
           <TopBarDealer
             handleThemeConfig={handleThemeConfig}
             themeConfig={themeConfig}
             builder_Id={builder_Id}
+            url={url}
           />
         ),
       },
@@ -188,6 +194,7 @@ const defaultSections = [
         name: 'Footer',
         img: '/raws/Mobiles.svg',
         show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <FooterDealer />,
       },
     ],
   },
@@ -215,6 +222,12 @@ const defaultSections = [
             themeConfig={themeConfig}
           />
         ),
+      },
+      {
+        name: 'Add Product',
+        img: '/raws/filters.png',
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <AddProductDealer />,
       },
       {
         name: 'Products Dealer',
@@ -315,6 +328,12 @@ const defaultSections = [
         Componenet: (handleThemeConfig: any, themeConfig: any) => (
           <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
         ),
+      },
+      {
+        name: 'Add Category',
+        img: '/raws/user-solid.svg',
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <AddCategoryDealer />,
       },
       {
         name: 'Category',
@@ -637,6 +656,15 @@ export default function EcomDesignMain() {
     setbuttonSection(btnSection);
   };
 
+  useEffect(() => {
+    if (controlls.page === 'Products Page') {
+      setbuttonSection('Products Dealer');
+    } else if (controlls.page === 'Categories') {
+      setbuttonSection('Category');
+    }
+    setControlls((pv) => ({ ...pv, addSection: false }));
+  }, [controlls.page]);
+
   const handleOpenDropDown = React.useCallback(
     (openTo: string) => (event: React.MouseEvent<HTMLElement> | React.KeyboardEvent) => {
       // console.log('event.currentTarget', event.currentTarget);
@@ -673,6 +701,12 @@ export default function EcomDesignMain() {
   const handleCancelBtn = () => {
     setbuttonSection('');
   };
+
+
+  const handleSaveSettings = () => {
+    console.log("event");
+
+  }
 
   return (
     <Box sx={{ height: '100%', transition: 'all .5' }}>
@@ -879,7 +913,10 @@ export default function EcomDesignMain() {
                         <LogoDealer
                           themeConfig={themeConfig}
                           builderId={builder_Id}
-                          handleThemeConfig={handleThemeConfig} setAppBarLogo={undefined} appBarLogo={undefined} />
+                          handleThemeConfig={handleThemeConfig}
+                          setAppBarLogo={undefined}
+                          appBarLogo={undefined}
+                        />
                       </Box>
                     )}
                     {buttonSection === 'Color' && (
@@ -948,12 +985,15 @@ export default function EcomDesignMain() {
                                 <Box key={'mainPageWrap_' + index + '_' + ind}>
                                   {buttonSection === sectionObj.name && (
                                     <Box key={'main_' + ind}>
-                                      <HeaderSection
-                                        name={sectionObj?.name ?? ''}
-                                        cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                                        handleCancelBtn={handleCancelBtn}
-                                        handleThemeConfig={handleThemeConfig}
-                                      />
+                                      {!sectionObj?.hideHeader && (
+                                        <HeaderSection
+                                          name={sectionObj?.name ?? ''}
+                                          cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
+                                          handleCancelBtn={handleCancelBtn}
+                                          handleThemeConfig={handleThemeConfig}
+                                          closer={() => handleSaveSettings()}
+                                        />
+                                      )}
                                       {sectionObj?.Componenet &&
                                         sectionObj?.Componenet(
                                           handleThemeConfig,
@@ -966,6 +1006,8 @@ export default function EcomDesignMain() {
                                 </Box>
                               );
                             }
+                            return null; // Make sure to return null for non-matching sections
+
                           })}
                         </Box>
                       ))}

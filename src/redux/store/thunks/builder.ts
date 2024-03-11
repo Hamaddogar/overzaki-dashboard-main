@@ -116,6 +116,47 @@ export const builderSetObjectInDesign = createAsyncThunk(
   }
 );
 
+// home Section
+// Topbar > create ad appbar slider
+export const createAdAppbarSlider = createAsyncThunk(
+  'builder/createAdAppbarSlider',
+  async ({ builderId, url, data }: any) => {
+    if (url && builderId) {
+      if (url.startsWith('https://')) {
+        url = url.replace(/^https?:\/\//, '');
+      }
+      let headersObj = defaultConfig();
+      headersObj.headers['x-tenant-id'] = url;
+      headersObj.headers['Content-Type'] = 'multipart/form-data';
+      const response = await postRequest(
+        `${endpoints.builder.home.adAppBar.createSlider}/${builderId}`,
+        data,
+        headersObj
+      );
+      return response.data;
+    }
+  }
+);
+export const updateAdAppbarSlider = createAsyncThunk(
+  'builder/updateAdAppbarSlider',
+  async ({ builderId, url, data, itemId }: any) => {
+    if (url && builderId) {
+      if (url.startsWith('https://')) {
+        url = url.replace(/^https?:\/\//, '');
+      }
+      let headersObj = defaultConfig();
+      headersObj.headers['x-tenant-id'] = url;
+      headersObj.headers['Content-Type'] = 'multipart/form-data';
+      const response = await postRequest(
+        `${endpoints.builder.home.adAppBar.updateSlider}/${builderId}/ad_app_bar/${itemId}`,
+        data,
+        headersObj
+      );
+      return response.data;
+    }
+  }
+);
+
 const builderSlice = createSlice({
   name: 'builder',
   initialState: {
