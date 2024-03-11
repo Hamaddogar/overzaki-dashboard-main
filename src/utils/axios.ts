@@ -245,7 +245,6 @@ export const endpoints = {
 
 export const defaultConfig = () => {
   const tanentId = getBuilderDomain() || '';
-  // console.log("NEW TANENT ID: ", tanentId)
   let headersObj: any = {
     'Content-Type': 'application/json',
   };

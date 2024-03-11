@@ -36,6 +36,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useGetProductQuery, useUpdateProductMutation } from 'src/redux/store/services/api';
 import { useDispatch } from 'react-redux';
 import { fetchCategorysList, fetchSubCategorysList } from 'src/redux/store/thunks/category';
+import { fetchAllBrands } from 'src/redux/store/thunks/brand';
 
 const Product = ({ product, indx }: any) => {
   const categoryState = useSelector((state: RootState) => state.category);
@@ -62,6 +63,7 @@ const Product = ({ product, indx }: any) => {
   const { list, subCatList, error, category, subCategory } = useSelector(
     (state: any) => state.category
   );
+  const [brands, setBrands] = useState<any>();
 
   useEffect(() => {
     if (loadStatus === 'idle') {
@@ -72,6 +74,9 @@ const Product = ({ product, indx }: any) => {
       });
     }
   }, [loadStatus, dispatch, pageNumber]);
+  useEffect(() => {
+    dispatch(fetchAllBrands()).then((res: any) => setBrands(res?.payload?.data?.data));
+  }, []);
 
   const methods = useForm({
     resolver: yupResolver(ProductSchema),

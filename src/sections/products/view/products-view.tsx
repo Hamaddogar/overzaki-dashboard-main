@@ -79,6 +79,7 @@ export const ProductSchema = Yup.object().shape({
     tr: Yup.string().required(),
     ar: Yup.string().required(),
   }),
+  type: Yup.string().required(),
   categoryId: Yup.string(),
   subcategoryId: Yup.string(),
   brandId: Yup.string(),
@@ -141,12 +142,14 @@ export const ProductSchema = Yup.object().shape({
 });
 
 export default function OrdersListView() {
+  const typeArr = ['BASIC', 'ADVANCED'];
   const settings = useSettingsContext();
   const selectedDomain = useSelector((state: RootState) => state?.selectedDomain?.data);
   const languages = ['en', 'ar', 'de', 'tr', 'es', 'fr'];
   const categoryState = useSelector((state: RootState) => state.category);
   // console.log('CategoryState: ', categoryState);
   const brandState = useSelector((state: RootState) => state.brands);
+  // console.log('brandState: ', brandState);
   const { enqueueSnackbar } = useSnackbar();
   const getAllProductsRes = useGetAllProductsQuery(selectedDomain?.domain);
   const [addProductReq, addProductRes] = useCreateProductMutation();
@@ -161,6 +164,17 @@ export default function OrdersListView() {
   const [occasion, setOccasion] = useState([0]);
   const [variants, setVariants] = useState([0]);
   const [variantsRows, setVariantsRow] = useState([0]);
+  const [currCategoryInd, setCurrCategoryInd]: any = useState(0);
+  const [currSubCategoryInd, setCurrSubCategoryInd]: any = useState(0);
+  const [currBrandInd, setCurrBrandInd]: any = useState(0);
+  const [currTypeInd, setCurrTypeInd]: any = useState(0);
+  const [currPrepInd, setCurrPrepInd]: any = useState(0);
+  const [stepperData, setStepperData] = useState([
+    'Product Details',
+    'Bussiness Details',
+    'Available Branches',
+    'Catering',
+  ]);
 
   const methods = useForm({
     resolver: yupResolver(ProductSchema),
@@ -179,13 +193,16 @@ export default function OrdersListView() {
         tr: '',
         ar: '',
       },
-      categoryId: categoryState.list[0] && categoryState.list[0]._id,
-      subcategoryId: categoryState?.subCatList[0] && categoryState?.subCatList[0]?._id,
+      type: typeArr[currTypeInd],
+      categoryId: !!categoryState.list[currCategoryInd] && categoryState.list[currCategoryInd]._id,
+      subcategoryId:
+        !!categoryState?.subCatList[currSubCategoryInd] &&
+        categoryState?.subCatList[currSubCategoryInd]?._id,
       quantity: 0,
-      brandId: brandState?.list[0]?._id,
+      brandId: brandState?.list[currBrandInd]?._id,
       sort: 0, // assuming sort starts from 0 or any number you prefer
       preparationTime: 0, // assuming default preparation time as 0
-      preparationTimeUnit: preparationTimeUnits[0].value, // specify default unit if there's one
+      preparationTimeUnit: preparationTimeUnits[currPrepInd].value, // specify default unit if there's one
       ingredients: [], // empty array indicating no default ingredients
       seasons: [], // similarly, an empty array for seasons
       styles: [],
@@ -199,7 +216,7 @@ export default function OrdersListView() {
       sku: '',
       discountType: '',
       discountValue: 0,
-      varients: [],
+      // varients: [],
       allBranches: false,
       avalibleForMobile: false,
       avalibleForWebsite: false,
@@ -251,6 +268,7 @@ export default function OrdersListView() {
     data.occasions?.forEach((el: any, index: any) => {
       formData.append(`occasion[${index}]`, `${el}`);
     });
+    formData.append(`type`, `${data.type}`);
     formData.append(`quantity`, `${data.quantity}`);
     formData.append(`sellPrice`, `${data.price}`);
     formData.append(`purchasePrice`, `${data.purcahsePrice}`);
@@ -262,9 +280,11 @@ export default function OrdersListView() {
     formData.append(`isAvailableOnAllBranhces`, `${data.allBranches}`);
     formData.append(`publish_app`, `${data.avalibleForMobile}`);
     formData.append(`publish_website`, `${data.avalibleForWebsite}`);
-    data.varients?.forEach((el: any, index: any) => {
-      formData.append(`varients[${index}]`, JSON.stringify(el));
-    });
+    // data.varients?.forEach((el: any, index: any) => {
+    //   formData.append(`varients[${index}]`, JSON.stringify(el));
+    // });
+    // console.log('Data: ', data);
+    // console.log('formData: ', formData);
 
     await addProductReq({ domain: selectedDomain?.domain, data: formData })
       .unwrap()
@@ -273,7 +293,8 @@ export default function OrdersListView() {
         setOpenCreateProduct(false);
         setcreateProductSections(0);
         setProductData(null);
-      });
+      })
+      .catch((err) => console.log('Error: ', err));
   };
 
   const handleNextInputs = async () => {
@@ -543,7 +564,13 @@ export default function OrdersListView() {
               variant="filled"
               name="categoryId"
               id="demo-simple-select2"
-              defaultValue={categoryState.list[0] && categoryState.list[0]._id}
+              defaultValue={!!categoryState?.list[0] && categoryState?.list[0]?._id}
+              value={categoryState?.list[currCategoryInd]?.value}
+              onChange={(e: any) => {
+                setCurrCategoryInd(
+                  categoryState?.list?.findIndex((val: any) => val?._id === e?.target?.value)
+                );
+              }}
             >
               {categoryState &&
                 categoryState.list.map((cat: any, index: any) => (
@@ -568,7 +595,13 @@ export default function OrdersListView() {
               variant="filled"
               id="demo-simple-select"
               name="subcategoryId"
-              defaultValue={categoryState && categoryState?.subCatList[0]?._id}
+              defaultValue={!!categoryState && categoryState?.subCatList[0]?._id}
+              value={categoryState?.subCatList[currSubCategoryInd]?.value}
+              onChange={(e: any) => {
+                setCurrSubCategoryInd(
+                  categoryState?.subCatList?.findIndex((val: any) => val?._id === e?.target?.value)
+                );
+              }}
             >
               {categoryState &&
                 categoryState.subCatList.map((item: any, ind: any) => (
@@ -594,6 +627,12 @@ export default function OrdersListView() {
               name="brandId"
               id="demo-simple-brand"
               defaultValue={brandState?.list[0]?._id}
+              value={brandState?.list[currBrandInd]?.value}
+              onChange={(e: any) => {
+                setCurrBrandInd(
+                  brandState?.list?.findIndex((val: any) => val?._id === e?.target?.value)
+                );
+              }}
             >
               {brandState?.list &&
                 brandState.list?.map((brandObj: any) => (
@@ -601,6 +640,37 @@ export default function OrdersListView() {
                     {brandObj.name.localized}
                   </MenuItem>
                 ))}
+            </RHFSelect>
+            <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            >
+              Type
+            </Typography>
+            <RHFSelect
+              fullWidth
+              variant="filled"
+              name="typeId"
+              // id="demo-simple-brand"
+              defaultValue={typeArr[0]}
+              value={typeArr[currTypeInd]}
+              onChange={(e: any) => {
+                // console.log('Val: ', e?.target?.value);
+                setCurrTypeInd(typeArr.findIndex((val: any) => val === e?.target?.value));
+                let tempData = [...stepperData];
+                currTypeInd == 1 ? tempData?.splice(2, 1) : tempData?.splice(2, 0, 'Variants');
+                setStepperData(tempData);
+              }}
+            >
+              {typeArr?.map((type: any, index: any) => (
+                <MenuItem key={index} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
             </RHFSelect>
             <Typography
               component="p"
@@ -627,6 +697,14 @@ export default function OrdersListView() {
                 id="demo-simple-brand"
                 sx={{ width: '30%' }}
                 defaultValue={preparationTimeUnits[0].value}
+                value={preparationTimeUnits[currPrepInd]?.value}
+                onChange={(e: any) => {
+                  // console.log('preparationTimeUnits: ', preparationTimeUnits);
+                  // console.log(e?.target?.value, ' val');
+                  setCurrPrepInd(
+                    preparationTimeUnits?.findIndex((val: any) => val?.value === e?.target?.value)
+                  );
+                }}
               >
                 {preparationTimeUnits.map((unit: any) => (
                   <MenuItem key={unit.value} value={unit.value}>
@@ -884,7 +962,7 @@ export default function OrdersListView() {
             <RHFTextField type="number" fullWidth variant="filled" name="quantity" />
           </>
         );
-      case 2:
+      case currTypeInd == 1 && 2:
         return (
           <>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -921,7 +999,7 @@ export default function OrdersListView() {
                     <DeleteIcon />
                   </IconButton>
                 </Box>
-                {selectedDomain?.appLanguage?.map((el: string) => (
+                {/* {selectedDomain?.appLanguage?.map((el: string) => (
                   <>
                     <Typography
                       component="p"
@@ -941,7 +1019,7 @@ export default function OrdersListView() {
                       name={`varients[${variant}].groupName.${el}`}
                     />
                   </>
-                ))}
+                ))} */}
                 <Typography
                   component="p"
                   noWrap
@@ -1158,7 +1236,7 @@ export default function OrdersListView() {
             ))}
           </>
         );
-      case 3:
+      case currTypeInd == 1 ? 3 : 2:
         return (
           <>
             <RHFCheckbox
@@ -1167,7 +1245,7 @@ export default function OrdersListView() {
             />
           </>
         );
-      case 4:
+      case currTypeInd == 1 ? 4 : 3:
         return (
           <>
             <RHFCheckbox name={`avalibleForMobile`} label="Avalible for Mobile" />
@@ -1373,22 +1451,26 @@ export default function OrdersListView() {
           }
         >
           <Stepper activeStep={createProductSections} alternativeLabel>
-            {['Step 1', 'Step 2', 'Step 3', 'Step 4', 'Step 5']?.map(
-              (label: any, index: number) => {
-                const stepProps: { completed?: boolean } = {};
-                const labelProps: {
-                  optional?: React.ReactNode;
-                } = {};
+            {stepperData?.map((label: any, index: number) => {
+              const stepProps: { completed?: boolean } = {};
+              const labelProps: {
+                optional?: React.ReactNode;
+              } = {};
 
-                return (
-                  <Step key={label} {...stepProps}>
-                    <StepLabel sx={{ width: '55px' }} {...labelProps}>
-                      {label}
-                    </StepLabel>
-                  </Step>
-                );
-              }
-            )}
+              return (
+                <Step key={label} {...stepProps}>
+                  <StepLabel
+                    sx={{
+                      width: currTypeInd == 1 ? '55px' : '70px',
+                      // , transition: '0.5s ease'
+                    }}
+                    {...labelProps}
+                  >
+                    {label}
+                  </StepLabel>
+                </Step>
+              );
+            })}
           </Stepper>
           <FormProvider methods={methods} onSubmit={onSubmit}>
             <Divider flexItem />
