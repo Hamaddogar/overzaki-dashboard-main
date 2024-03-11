@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import FormProvider, { RHFCheckbox, RHFSelect, RHFTextField } from 'src/components/hook-form';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -172,6 +172,13 @@ export default function OrdersListView() {
     'Available Branches',
     'Catering',
   ]);
+  useEffect(() => {
+    console.log('AddProductRes: ', addProductRes);
+    if (!!addProductRes?.error)
+      enqueueSnackbar(`Error! ${addProductRes?.error?.data?.message}`, { variant: 'error' });
+    else if (addProductRes?.isSuccess)
+      enqueueSnackbar(`Product Added Successfully`, { variant: 'success' });
+  }, [addProductRes]);
 
   const methods = useForm({
     resolver: yupResolver(ProductSchema),
@@ -1391,7 +1398,7 @@ export default function OrdersListView() {
           title={'Add New Product'}
           actions={
             <Stack alignItems="center" justifyContent="center" spacing="10px">
-              {createProductSections !== 4 ? (
+              {createProductSections != (currTypeInd === 1 ? 4 : 3) ? (
                 // Render only the "Next" button for the first section
                 <>
                   <LoadingButton
