@@ -37,6 +37,9 @@ import { useSnackbar } from 'notistack';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useDispatch } from 'react-redux';
+import { fetchLocationsList } from 'src/redux/store/thunks/location';
+import { fetchAllBrands } from 'src/redux/store/thunks/brand';
 
 export const activeTab = {
   color: '#0F1349',
@@ -135,6 +138,7 @@ export const ProductSchema = Yup.object().shape({
         .required(),
     })
   ),
+  // branches: Yup.array().of(Yup.string()),
   allBranches: Yup.boolean(),
   avalibleForMobile: Yup.boolean(),
   avalibleForWebsite: Yup.boolean(),
@@ -166,14 +170,25 @@ export default function OrdersListView() {
   const [currBrandInd, setCurrBrandInd]: any = useState(0);
   const [currTypeInd, setCurrTypeInd]: any = useState(0);
   const [currPrepInd, setCurrPrepInd]: any = useState(0);
+  const [isAllBranches, setIsAllBranches] = useState(true);
   const [stepperData, setStepperData] = useState([
     'Product Details',
     'Bussiness Details',
+    'Modifier Options',
     'Available Branches',
-    'Catering',
   ]);
+  const loadStatus = useSelector((state: any) => state.locations.status);
+  const { list, error } = useSelector((state: any) => state.locations);
+  const dispatch = useDispatch();
   useEffect(() => {
-    console.log('AddProductRes: ', addProductRes);
+    if (loadStatus === 'idle') {
+      dispatch(fetchLocationsList(error));
+    }
+  }, [loadStatus, dispatch, error]);
+  useEffect(() => {
+    dispatch(fetchAllBrands()).then((res) => res?.payload?.data?.data);
+  }, []);
+  useEffect(() => {
     if (!!addProductRes?.error)
       enqueueSnackbar(`Error! ${addProductRes?.error?.data?.message}`, { variant: 'error' });
     else if (addProductRes?.isSuccess)
@@ -220,7 +235,7 @@ export default function OrdersListView() {
       sku: '',
       discountType: '',
       discountValue: 0,
-      // varients: [],
+      // branches: [],
       allBranches: false,
       avalibleForMobile: false,
       avalibleForWebsite: false,
@@ -248,13 +263,13 @@ export default function OrdersListView() {
       formData.append(`title[${el}]`, data.name[el as keyof typeof data.name]);
       formData.append(`description[${el}]`, data.description[el as keyof typeof data.description]);
     });
-    if (data.categoryId) {
+    if (data?.categoryId) {
       formData.append('categoryId', data.categoryId);
     }
-    if (data.subcategoryId) {
+    if (data?.subcategoryId) {
       formData.append('subcategoryId', data.subcategoryId);
     }
-    if (data.brandId) {
+    if (data?.brandId) {
       formData.append('brandId', data.brandId);
     }
     formData.append('sort', `${data.sort}`);
@@ -272,6 +287,10 @@ export default function OrdersListView() {
     data.occasions?.forEach((el: any, index: any) => {
       formData.append(`occasion[${index}]`, `${el}`);
     });
+    data?.branches &&
+      data.branches?.forEach((el: any, index: any) => {
+        formData.append(`branches[${index}]`, `${el && list[index]}`);
+      });
     formData.append(`type`, `${data.type}`);
     formData.append(`quantity`, `${data.quantity}`);
     formData.append(`sellPrice`, `${data.price}`);
@@ -287,8 +306,6 @@ export default function OrdersListView() {
     // data.varients?.forEach((el: any, index: any) => {
     //   formData.append(`varients[${index}]`, JSON.stringify(el));
     // });
-    // console.log('Data: ', data);
-    // console.log('formData: ', formData);
 
     await addProductReq({ domain: selectedDomain?.domain, data: formData })
       .unwrap()
@@ -663,10 +680,11 @@ export default function OrdersListView() {
               defaultValue={typeArr[0]}
               value={typeArr[currTypeInd]}
               onChange={(e: any) => {
-                // console.log('Val: ', e?.target?.value);
                 setCurrTypeInd(typeArr.findIndex((val: any) => val === e?.target?.value));
                 let tempData = [...stepperData];
-                currTypeInd == 1 ? tempData?.splice(2, 1) : tempData?.splice(2, 0, 'Variants');
+                currTypeInd == 1
+                  ? tempData?.splice(2, 1)
+                  : tempData?.splice(2, 0, 'Variants Options');
                 setStepperData(tempData);
               }}
             >
@@ -703,8 +721,6 @@ export default function OrdersListView() {
                 defaultValue={preparationTimeUnits[0].value}
                 value={preparationTimeUnits[currPrepInd]?.value}
                 onChange={(e: any) => {
-                  // console.log('preparationTimeUnits: ', preparationTimeUnits);
-                  // console.log(e?.target?.value, ' val');
                   setCurrPrepInd(
                     preparationTimeUnits?.findIndex((val: any) => val?.value === e?.target?.value)
                   );
@@ -1244,18 +1260,29 @@ export default function OrdersListView() {
         return (
           <>
             <RHFCheckbox
+              defaultChecked={false}
+              onClick={(e: any) => {
+                let tempData = [...stepperData];
+                let check: any = e?.target?.value;
+                typeof check == 'string' &&
+                  (check == 'false' ? tempData?.pop() : tempData?.push('Available Branches'));
+                setIsAllBranches(check == 'true');
+                setStepperData(tempData);
+              }}
               name={`allBranches`}
               label="Avalible for All Branches" // Assuming your RHFCheckbox supports a label prop
             />
-          </>
-        );
-      case currTypeInd == 1 ? 4 : 3:
-        return (
-          <>
             <RHFCheckbox name={`avalibleForMobile`} label="Avalible for Mobile" />
             <RHFCheckbox name={`avalibleForWebsite`} label="Avalible for Website" />
           </>
         );
+      case currTypeInd == 1 ? 4 : 3:
+        return list?.map((location: any, index: any) => (
+          <RHFCheckbox
+            name={`branches[${location?.name?.en?.replaceAll(' ', '')}]`}
+            label={location?.name?.en}
+          />
+        ));
       default:
         return null;
     }
@@ -1398,7 +1425,8 @@ export default function OrdersListView() {
           title={'Add New Product'}
           actions={
             <Stack alignItems="center" justifyContent="center" spacing="10px">
-              {createProductSections != (currTypeInd === 1 ? 4 : 3) ? (
+              {createProductSections !=
+              (isAllBranches ? (currTypeInd === 1 ? 4 : 3) : currTypeInd === 1 ? 3 : 2) ? (
                 // Render only the "Next" button for the first section
                 <>
                   <LoadingButton
@@ -1465,8 +1493,13 @@ export default function OrdersListView() {
                 <Step key={label} {...stepProps}>
                   <StepLabel
                     sx={{
-                      width: currTypeInd == 1 ? '55px' : '70px',
-                      // , transition: '0.5s ease'
+                      width: isAllBranches
+                        ? currTypeInd == 1
+                          ? '55px'
+                          : '70px'
+                        : currTypeInd == 1
+                          ? '70px'
+                          : '105px',
                     }}
                     {...labelProps}
                   >

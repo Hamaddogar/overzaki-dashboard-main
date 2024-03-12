@@ -91,7 +91,12 @@ export function useNavData() {
         },
         {
           title: t('Products'),
-          path: paths.dashboard.products.root,
+          // path: paths.dashboard.products.root,
+          path: '',
+          children: [
+            { title: t('varients'), path: paths.dashboard.products.root },
+            { title: t('modifiers'), path: '' },
+          ],
           icon: ICONS.product,
           permissions: ['GET_PRODUCTS'],
         },
@@ -108,7 +113,6 @@ export function useNavData() {
         },
         {
           title: t('analytics'),
-
           icon: ICONS.analytics,
           path: '',
           children: [
@@ -164,7 +168,7 @@ export function useNavData() {
       ],
     },
   ]);
-// Add any other dependencies as needed
+  // Add any other dependencies as needed
 
   return navData;
 }
