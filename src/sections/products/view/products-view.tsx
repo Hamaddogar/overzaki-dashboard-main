@@ -40,6 +40,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch } from 'react-redux';
 import { fetchLocationsList } from 'src/redux/store/thunks/location';
 import { fetchAllBrands } from 'src/redux/store/thunks/brand';
+import { AppDispatch } from 'src/redux/store/store';
 
 export const activeTab = {
   color: '#0F1349',
@@ -138,7 +139,7 @@ export const ProductSchema = Yup.object().shape({
         .required(),
     })
   ),
-  // branches: Yup.array().of(Yup.string()),
+  branches: Yup.array().of(Yup.string()),
   allBranches: Yup.boolean(),
   avalibleForMobile: Yup.boolean(),
   avalibleForWebsite: Yup.boolean(),
@@ -179,22 +180,22 @@ export default function OrdersListView() {
   ]);
   const loadStatus = useSelector((state: any) => state.locations.status);
   const { list, error } = useSelector((state: any) => state.locations);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
+
   useEffect(() => {
-    if (loadStatus === 'idle') {
-      dispatch(fetchLocationsList(error));
-    }
-  }, [loadStatus, dispatch, error]);
-  useEffect(() => {
-    dispatch(fetchAllBrands()).then((res) => res?.payload?.data?.data);
+    dispatch(fetchAllBrands()).then((res: any) => res?.payload?.data?.data);
   }, []);
   useEffect(() => {
     if (!!addProductRes?.error)
-      enqueueSnackbar(`Error! ${addProductRes?.error?.data?.message}`, { variant: 'error' });
+      enqueueSnackbar(`Error! ${Object?.values(addProductRes?.error)[1]?.message}`, {
+        variant: 'error',
+      });
     else if (addProductRes?.isSuccess)
       enqueueSnackbar(`Product Added Successfully`, { variant: 'success' });
   }, [addProductRes]);
-
+  useEffect(() => {
+    if (loadStatus === 'idle') dispatch(fetchLocationsList(error));
+  }, [loadStatus, dispatch, error]);
   const methods = useForm({
     resolver: yupResolver(ProductSchema),
     defaultValues: {
@@ -235,7 +236,7 @@ export default function OrdersListView() {
       sku: '',
       discountType: '',
       discountValue: 0,
-      // branches: [],
+      branches: [],
       allBranches: false,
       avalibleForMobile: false,
       avalibleForWebsite: false,
