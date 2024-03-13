@@ -1,12 +1,21 @@
 'use client';
 
-import { useEffect, useReducer, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 // utils
 import axios, { endpoints } from 'src/utils/axios';
 //
-import { AuthContext } from './auth-context';
-import { clearCookie, getBuilderDomain, getCookie, isValidToken, setBuilderDomain, setCookie, setSession, setSocketURL } from './utils';
 import { ActionMapType, AuthStateType, AuthUserType } from '../../types';
+import { AuthContext } from './auth-context';
+import {
+  clearCookie,
+  getBuilderDomain,
+  getCookie,
+  isValidToken,
+  setBuilderDomain,
+  setCookie,
+  setSession,
+  setSocketURL,
+} from './utils';
 
 // ----------------------------------------------------------------------
 
@@ -74,28 +83,28 @@ const reducer = (state: AuthStateType, action: ActionsType) => {
     return {
       loading: false,
       user: action.payload.user,
-      socketURL: action.payload.socketURL
+      socketURL: action.payload.socketURL,
     };
   }
   if (action.type === Types.LOGIN) {
     return {
       ...state,
       user: action.payload.user,
-      socketURL: action.payload.socketURL
+      socketURL: action.payload.socketURL,
     };
   }
   if (action.type === Types.REGISTER) {
     return {
       ...state,
       user: action.payload.user,
-      socketURL: action.payload.socketURL
+      socketURL: action.payload.socketURL,
     };
   }
   if (action.type === Types.LOGOUT) {
     return {
       ...state,
       user: null,
-      socketURL: null
+      socketURL: null,
     };
   }
   return state;
@@ -115,7 +124,7 @@ const getSocketURL = (tokenKey: any) => {
   const newSocketURL = socketBaseURL + tokenKey;
   setSocketURL(newSocketURL);
   return newSocketURL;
-}
+};
 
 export function AuthProvider({ children }: Props) {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -131,11 +140,10 @@ export function AuthProvider({ children }: Props) {
 
         const { accessToken, refreshToken } = response.data.data;
 
-
         const newSocketURL = getSocketURL(accessToken);
 
         setSession(accessToken);
-        setCookie(REFRESH_KEY, refreshToken, 7)
+        setCookie(REFRESH_KEY, refreshToken, 7);
 
         dispatch({
           type: Types.INITIAL,
@@ -172,8 +180,8 @@ export function AuthProvider({ children }: Props) {
   // LOGIN
   const login = useCallback(async (email: string, password: string) => {
     const data = {
-      deviceName: "Device Name",
-      deviceToken: "Device Token",
+      deviceName: 'Device Name',
+      deviceToken: 'Device Token',
       email,
       password,
     };
@@ -186,7 +194,7 @@ export function AuthProvider({ children }: Props) {
 
     const newSocketURL = getSocketURL(accessToken);
 
-    setCookie(REFRESH_KEY, refreshToken, 7)
+    setCookie(REFRESH_KEY, refreshToken, 7);
     setSession(accessToken);
     setBuilderDomain(null);
     dispatch({
@@ -202,17 +210,17 @@ export function AuthProvider({ children }: Props) {
   const register = useCallback(
     async (email: string, password: string, firstName: string, lastName: string) => {
       const data = {
-        deviceName: "unique device name",
-        deviceToken: "firebase token",
+        deviceName: 'unique device name',
+        deviceToken: 'firebase token',
         firstName,
         lastName,
-        country: "PK",
-        phoneNumber: "+963999999991",
+        country: 'PK',
+        phoneNumber: '+963999999991',
         email,
         password,
-        preferedLanguage: ["en", "ar"],
-        birthday: "19999-5-01",
-        gender: "MALE"
+        preferedLanguage: ['en', 'ar'],
+        birthday: '19999-5-01',
+        gender: 'MALE',
       };
 
       const response = await axios.post(endpoints.auth.register, data);
@@ -221,7 +229,7 @@ export function AuthProvider({ children }: Props) {
 
       const newSocketURL = getSocketURL(accessToken);
       setSession(accessToken);
-      setCookie(REFRESH_KEY, refreshToken, 7)
+      setCookie(REFRESH_KEY, refreshToken, 7);
       setBuilderDomain(null);
       dispatch({
         type: Types.REGISTER,
@@ -236,7 +244,7 @@ export function AuthProvider({ children }: Props) {
   // VERIFY PERMISSIONS
   const verifyPermission = useCallback(
     (data: any) => {
-      const { permission, roles } = data
+      const { permission, roles } = data;
       const userRoles = state.user?.roles || [];
       const userPermissions = state.user?.permissions?.permissions || [];
       const hasCommonRole = userRoles.some((role: string) => roles && roles.includes(role));
@@ -249,39 +257,30 @@ export function AuthProvider({ children }: Props) {
     [state]
   );
   // SENDOTP
-  const sendOtp = useCallback(
-    async (email: string) => {
-      const data = {
-        email
-      };
-      const response = await axios.post(endpoints.auth.sendotp, data);
-      return { ...response.data };
-    },
-    []
-  );
+  const sendOtp = useCallback(async (email: string) => {
+    const data = {
+      email,
+    };
+    const response = await axios.post(endpoints.auth.sendotp, data);
+    return { ...response.data };
+  }, []);
   // VERIFYOTP
-  const verifyOtp = useCallback(
-    async (email: string, otp: number) => {
-      const data = {
-        email,
-        otp
-      };
-      const response = await axios.post(endpoints.auth.verifyotp, data);
-      return { ...response.data };
-    },
-    []
-  );
+  const verifyOtp = useCallback(async (email: string, otp: number) => {
+    const data = {
+      email,
+      otp,
+    };
+    const response = await axios.post(endpoints.auth.verifyotp, data);
+    return { ...response.data };
+  }, []);
   // forgotPassword
-  const forgotPassword = useCallback(
-    async (email: string) => {
-      const data = {
-        email
-      };
-      const response = await axios.post(endpoints.auth.forgotPassword, data);
-      return { ...response.data };
-    },
-    []
-  );
+  const forgotPassword = useCallback(async (email: string) => {
+    const data = {
+      email,
+    };
+    const response = await axios.post(endpoints.auth.forgotPassword, data);
+    return { ...response.data };
+  }, []);
   // newPassword
   const newPassword = useCallback(
     async (email: string, code: string, password: string) => {
@@ -289,7 +288,7 @@ export function AuthProvider({ children }: Props) {
         email,
         otp: Number(code),
         newPassword: password,
-        deviceName: "anyDeviceKey"
+        deviceName: 'anyDeviceKey',
       };
       const response = await axios.put(endpoints.auth.forgotPasswordVerity, data);
       const { success } = response.data;
@@ -305,14 +304,12 @@ export function AuthProvider({ children }: Props) {
   const logout = useCallback(async () => {
     await axios.get(endpoints.auth.loutout);
     setSession(null);
-    clearCookie(REFRESH_KEY)
+    clearCookie(REFRESH_KEY);
     setBuilderDomain(null);
     dispatch({
       type: Types.LOGOUT,
     });
   }, []);
-
-
 
   // Get Builder
   const getBuilders = useCallback(async () => {
@@ -323,7 +320,7 @@ export function AuthProvider({ children }: Props) {
       const response = await axios.get(endpoints.builder.get);
       const { data } = response.data;
       if (data?.length > 0) {
-        let builderDomain = data[0].domain
+        let builderDomain = data[0].domain;
         setBuilderDomain(builderDomain);
         return true;
       } else {
@@ -358,7 +355,19 @@ export function AuthProvider({ children }: Props) {
       verifyPermission,
       getBuilders,
     }),
-    [login, logout, register, sendOtp, verifyOtp, forgotPassword, newPassword, verifyPermission, state.user, status, getBuilders]
+    [
+      login,
+      logout,
+      register,
+      sendOtp,
+      verifyOtp,
+      forgotPassword,
+      newPassword,
+      verifyPermission,
+      state.user,
+      status,
+      getBuilders,
+    ]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

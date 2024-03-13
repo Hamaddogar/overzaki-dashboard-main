@@ -181,7 +181,7 @@ export default function OrdersListView() {
   const loadStatus = useSelector((state: any) => state.locations.status);
   const { list, error } = useSelector((state: any) => state.locations);
   const dispatch = useDispatch<AppDispatch>();
-
+  const [nextError, setNextError] = useState([]);
   useEffect(() => {
     dispatch(fetchAllBrands()).then((res: any) => res?.payload?.data?.data);
   }, []);
@@ -320,7 +320,15 @@ export default function OrdersListView() {
   };
 
   const handleNextInputs = async () => {
-    setcreateProductSections((prev) => prev + 1);
+    const data = getValues();
+    if (createProductSections == 0)
+      if (!data?.name?.en) {
+        setOpenProductName(true);
+        // setNextError((val) => [...val, ])
+      }
+    if (!data?.description?.en) setOpenProductDescription(true);
+    else if (data?.name?.en) setcreateProductSections((prev) => prev + 1);
+    // console.log('data branch name', data);
   };
 
   const handleAddImage = (acceptedFiles: any) => {
@@ -1266,7 +1274,10 @@ export default function OrdersListView() {
                 let tempData = [...stepperData];
                 let check: any = e?.target?.value;
                 typeof check == 'string' &&
-                  (check == 'false' ? tempData?.pop() : tempData?.push('Available Branches'));
+                  (check == 'false'
+                    ? tempData?.includes('Available Branches') && tempData?.pop()
+                    : !tempData?.includes('Available Branches') &&
+                      tempData?.push('Available Branches'));
                 setIsAllBranches(check == 'true');
                 setStepperData(tempData);
               }}
@@ -1278,12 +1289,17 @@ export default function OrdersListView() {
           </>
         );
       case currTypeInd == 1 ? 4 : 3:
-        return list?.map((location: any, index: any) => (
-          <RHFCheckbox
-            name={`branches[${location?.name?.en?.replaceAll(' ', '')}]`}
-            label={location?.name?.en}
-          />
-        ));
+        return (
+          <>
+            {list?.map((location: any, index: any) => (
+              <RHFCheckbox
+                defaultChecked={false}
+                name={`branches[${location?.name?.en?.replaceAll(' ', '')}]`}
+                label={location?.name?.en}
+              />
+            ))}
+          </>
+        );
       default:
         return null;
     }
