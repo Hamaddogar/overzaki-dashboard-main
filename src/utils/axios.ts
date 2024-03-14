@@ -122,8 +122,10 @@ export const endpoints = {
     setObject: '/home-design/lists',
     home: {
       adAppBar: {
+        updateBasicSlider: '/appbar-design/adappbar_basic',
         createSlider: '/appbar-design/ad_app_bar',
         updateSlider: '/appbar-design',
+        updateBasicAppBar: '/appbar-design/basic_info',
       },
     },
   },

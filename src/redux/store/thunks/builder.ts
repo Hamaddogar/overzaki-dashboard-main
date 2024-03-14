@@ -137,6 +137,44 @@ export const createAdAppbarSlider = createAsyncThunk(
     }
   }
 );
+export const updateBasicAdAppbar = createAsyncThunk(
+  'builder/updateBasicAdAppbar',
+  async ({ builderId, url, data }: any) => {
+    if (url && builderId) {
+      if (url.startsWith('https://')) {
+        url = url.replace(/^https?:\/\//, '');
+      }
+      let headersObj = defaultConfig();
+      headersObj.headers['x-tenant-id'] = url;
+      // headersObj.headers['Content-Type'] = 'multipart/form-data';
+      const response = await putRequest(
+        `${endpoints.builder.home.adAppBar.updateBasicSlider}/${builderId}`,
+        data,
+        headersObj
+      );
+      return response.data;
+    }
+  }
+);
+export const updateBasicAppbar = createAsyncThunk(
+  'builder/updateBasicAppbar',
+  async ({ builderId, url, data }: any) => {
+    if (url && builderId) {
+      if (url.startsWith('https://')) {
+        url = url.replace(/^https?:\/\//, '');
+      }
+      let headersObj = defaultConfig();
+      headersObj.headers['x-tenant-id'] = url;
+      headersObj.headers['Content-Type'] = 'multipart/form-data';
+      const response = await putRequest(
+        `${endpoints.builder.home.adAppBar.updateBasicAppBar}/${builderId}`,
+        data,
+        headersObj
+      );
+      return response.data;
+    }
+  }
+);
 export const updateAdAppbarSlider = createAsyncThunk(
   'builder/updateAdAppbarSlider',
   async ({ builderId, url, data, itemId }: any) => {

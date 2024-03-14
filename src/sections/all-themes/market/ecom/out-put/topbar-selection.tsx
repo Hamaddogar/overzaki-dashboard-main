@@ -26,7 +26,7 @@ import { sections } from 'src/sections/all-themes/component/response';
 import Slider from 'react-slick';
 import HeaderSection from './header-section';
 import { LoadingScreen } from 'src/components/loading-screen';
-import { createAdAppbarSlider, updateAdAppbarSlider } from 'src/redux/store/thunks/builder';
+import { createAdAppbarSlider, updateAdAppbarSlider, updateBasicAdAppbar } from 'src/redux/store/thunks/builder';
 interface TopBarProps {
   themeConfig: {
     navLogoPosition: string;
@@ -229,18 +229,28 @@ const TopBarDealer = ({
 
 
   const childFunction = () => {
-    console.log('Child function called');
-    console.log(adAppbar);
-
+    setLoader(true);
+    const payloadData = {
+      status: adAppbar.status,
+      width: adAppbar.width,
+      height: adAppbar.height,
+      bakgroundColor: adAppbar.backgroundColor,
+      AdText: "ad text",
+      href: "/ref",
+      textPosition: adAppbar.textPosition
+    };
+    setTimeout(() => {
+      dispatch(updateBasicAdAppbar({ builderId: builder_Id, url: url, data: payloadData })).then((response: any) => {
+        console.log("response", response);
+        setLoader(false)
+      })
+    }, 1000);
 
   };
 
   const handleSaveItem = (item: any) => {
     console.log(item);
     setLoader(true);
-    // dispatch(updateAdAppbarSlider({ builderId: builder_Id, url: url, data: JSON.stringify(item) })).then((response: any) => {
-    //   console.log("response", response);
-    // })
     const payloadData = {
       adAppbarFile: item?.adAppbarFile,
       data: JSON.stringify({
@@ -249,7 +259,6 @@ const TopBarDealer = ({
       })
     };
     setTimeout(() => {
-
       dispatch(createAdAppbarSlider({ builderId: builder_Id, url: url, data: payloadData })).then((response: any) => {
         console.log("response", response);
         setLoader(false)

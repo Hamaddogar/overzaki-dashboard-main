@@ -24,11 +24,13 @@ import { socketClient } from 'src/sections/all-themes/utils/helper-functions';
 import LogoDealer, { VisuallyHiddenInput } from './logo-part';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
-import { saveLogo } from 'src/redux/store/thunks/builder';
+import { saveLogo, updateBasicAdAppbar, updateBasicAppbar } from 'src/redux/store/thunks/builder';
 import Sketch from '@uiw/react-color-sketch';
 import './style.css';
 import NavbarTheme from 'src/sections/all-themes/component/NavbarTheme';
 import { sections } from 'src/sections/all-themes/component/response';
+import { LoadingScreen } from 'src/components/loading-screen';
+import HeaderSection from './header-section';
 // ----------------------------------------------------------------------
 
 const TABS = [
@@ -52,6 +54,7 @@ interface NavProps {
   handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
   mobile?: boolean;
   builder_Id: any;
+  url?: any
 }
 
 export default function NavDealer({
@@ -59,11 +62,15 @@ export default function NavDealer({
   handleThemeConfig,
   mobile = false,
   builder_Id,
+  url
 }: NavProps) {
+
   const [navbarState, setNavbarState] = useState(sections);
   const [currentTab, setCurrentTab] = useState('Layout');
   const [appBar, setAppBar] = useState<any>({});
   const [mainAppBar, setMainAppBar] = useState<any>({});
+  const [loader, setLoader] = useState<any>(false);
+
   const socket = socketClient();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -93,6 +100,8 @@ export default function NavDealer({
     parentClass: string,
     subchild: string = ''
   ) => {
+
+
     let _socketKey = '';
     let valueToShare = '';
 
@@ -119,11 +128,11 @@ export default function NavDealer({
       value: valueToShare,
     };
 
-    console.log('data', data);
+    // console.log('data', data);
+    // if (socket) {
+    //   socket.emit('website:cmd', data);
+    // }
 
-    if (socket) {
-      socket.emit('website:cmd', data);
-    }
   };
 
   const isColorValid = (color: string) =>
@@ -213,9 +222,9 @@ export default function NavDealer({
       key: targetHeader + _socketKey,
       value: valueToShare,
     };
-    if (socket) {
-      socket.emit('website:cmd', data);
-    }
+    // if (socket) {
+    //   socket.emit('website:cmd', data);
+    // }
   }, 1500);
 
   const [containerBackgroundColor, setContainerBackgrounColor] = useState(false);
@@ -241,9 +250,138 @@ export default function NavDealer({
     setMenus(updatedMenus);
     setCenterMenu((prev: any) => ({ ...prev, menuItems: updatedMenus }));
   };
-  console.log(centerMenu);
+
+
+
+  // appBar
+
+  const childFunction = () => {
+    console.log("appBar", appBar);
+
+    setLoader(true);
+    const menu = appBar.menu;
+    const search = appBar.search;
+    const container = appBar.container;
+
+    const payloadData = {
+      menu: {
+        style: {
+          // size: "20px",
+          // fontStyle: "sans",
+          color: menu?.color,
+          backgroundColor: menu?.backgroundColor,
+          hoverColor: menu?.hoverColor
+        },
+        menuItems: []
+      },
+      search: {
+        status: search?.status,
+        input: search?.input,
+        position: search?.position,
+        // textBg: "gray",
+        textColor: search?.textColor,
+        // borderColor: "black",
+        borderWidth: search?.borderWidth?.toString(),
+        // mobileView: {
+        //   status: true,
+        //   width: "100%",
+        //   height: "100"
+        // }
+      },
+      container: {
+        show: container?.show,
+        isShadow: container?.isShadow,
+        // startColor: "red",
+        // finalColor: "pink",
+        // width: "100%",
+        // height: "150",
+        backgroundColor: container?.backgroundColor,
+        backgroundColorDark: "black",
+        borderBottomWidth: container?.borderBottomWidth,
+        borderBottomColor: container?.borderBottomColor,
+        borderBottomColorDark: "blue",
+        isCenterTitle: false,
+        containerViewStyle: {
+          marginBottom: 5
+        }
+      }
+    }
+
+    // const payloadData = {
+    //   menu: {
+    //     style: {
+    //       size: "20px",
+    //       color: "red",
+    //       backgroundColor: "tomato",
+    //       hoverColor: "#eee",
+    //       fontStyle: "sans"
+    //     },
+    //     menuItems: [
+    //       {
+    //         name: "home",
+    //         link: "/home"
+    //       }
+    //     ]
+    //   },
+    //   search: {
+    //     status: true,
+    //     input: true,
+    //     position: "top",
+    //     textBg: "gray",
+    //     textColor: "black",
+    //     borderColor: "black",
+    //     borderWidth: "1px",
+    //     mobileView: {
+    //       status: true,
+    //       width: "200",
+    //       height: "250"
+    //     }
+    //   },
+    //   container: {
+    //     show: true,
+    //     isShadow: true,
+    //     startColor: "blue",
+    //     finalColor: "pink",
+    //     width: "200",
+    //     height: "300",
+    //     backgroundColor: "blue",
+    //     backgroundColorDark: "black",
+    //     borderBottomWidth: 200,
+    //     borderBottomColor: "red",
+    //     borderBottomColorDark: "blue",
+    //     isCenterTitle: false,
+    //     containerViewStyle: {
+    //       marginBottom: 5
+    //     }
+    //   }
+    // }
+
+    setTimeout(() => {
+      dispatch(updateBasicAppbar({ builderId: builder_Id, url: url, data: { data: JSON.stringify(payloadData) } })).then((response: any) => {
+        console.log("response", response);
+        setLoader(false)
+      })
+    }, 1000);
+
+  };
+
+
+
+
+
+
   return (
     <div>
+      {loader && (
+        <LoadingScreen />
+      )}
+      <HeaderSection
+        name={"App Bar"}
+        cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
+        handleCancelBtn={() => { }}
+        handleThemeConfig={() => { }}
+        closer={() => childFunction()}
+      />
       <Stack
         spacing={1}
         sx={{

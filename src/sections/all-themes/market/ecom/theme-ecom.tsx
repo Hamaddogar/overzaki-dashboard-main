@@ -111,11 +111,13 @@ const defaultSections = [
         name: 'App Bar',
         img: '/raws/bars.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
+        hideHeader: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any, url: any) => (
           <NavDealer
             handleThemeConfig={handleThemeConfig}
             themeConfig={themeConfig}
             builder_Id={builder_Id}
+            url={url}
           />
         ),
       },
