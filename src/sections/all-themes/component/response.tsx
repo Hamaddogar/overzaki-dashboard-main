@@ -16,7 +16,7 @@ export const sections = [
     },
     generalIcons: {
       color: 'black',
-      border: '1px solid',
+      border: 'none',
       padding: '6px', //updated
       borderRadius: '8px',
       backgroundColor: 'transparent',

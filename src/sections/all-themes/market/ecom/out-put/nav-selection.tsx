@@ -54,7 +54,7 @@ interface NavProps {
   handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
   mobile?: boolean;
   builder_Id: any;
-  url?: any
+  url?: any;
 }
 
 export default function NavDealer({
@@ -62,9 +62,8 @@ export default function NavDealer({
   handleThemeConfig,
   mobile = false,
   builder_Id,
-  url
+  url,
 }: NavProps) {
-
   const [navbarState, setNavbarState] = useState(sections);
   const [currentTab, setCurrentTab] = useState('Layout');
   const [appBar, setAppBar] = useState<any>({});
@@ -100,8 +99,6 @@ export default function NavDealer({
     parentClass: string,
     subchild: string = ''
   ) => {
-
-
     let _socketKey = '';
     let valueToShare = '';
 
@@ -132,7 +129,6 @@ export default function NavDealer({
     // if (socket) {
     //   socket.emit('website:cmd', data);
     // }
-
   };
 
   const isColorValid = (color: string) =>
@@ -251,12 +247,10 @@ export default function NavDealer({
     setCenterMenu((prev: any) => ({ ...prev, menuItems: updatedMenus }));
   };
 
-
-
   // appBar
 
   const childFunction = () => {
-    console.log("appBar", appBar);
+    console.log('appBar', appBar);
 
     setLoader(true);
     const menu = appBar.menu;
@@ -270,9 +264,9 @@ export default function NavDealer({
           // fontStyle: "sans",
           color: menu?.color,
           backgroundColor: menu?.backgroundColor,
-          hoverColor: menu?.hoverColor
+          hoverColor: menu?.hoverColor,
         },
-        menuItems: []
+        menuItems: [],
       },
       search: {
         status: search?.status,
@@ -296,16 +290,16 @@ export default function NavDealer({
         // width: "100%",
         // height: "150",
         backgroundColor: container?.backgroundColor,
-        backgroundColorDark: "black",
+        backgroundColorDark: 'black',
         borderBottomWidth: container?.borderBottomWidth,
         borderBottomColor: container?.borderBottomColor,
-        borderBottomColorDark: "blue",
+        borderBottomColorDark: 'blue',
         isCenterTitle: false,
         containerViewStyle: {
-          marginBottom: 5
-        }
-      }
-    }
+          marginBottom: 5,
+        },
+      },
+    };
 
     // const payloadData = {
     //   menu: {
@@ -357,29 +351,81 @@ export default function NavDealer({
     // }
 
     setTimeout(() => {
-      dispatch(updateBasicAppbar({ builderId: builder_Id, url: url, data: { data: JSON.stringify(payloadData) } })).then((response: any) => {
-        console.log("response", response);
-        setLoader(false)
-      })
+      dispatch(
+        updateBasicAppbar({
+          builderId: builder_Id,
+          url: url,
+          data: { data: JSON.stringify(payloadData) },
+        })
+      ).then((response: any) => {
+        console.log('response', response);
+        setLoader(false);
+      });
     }, 1000);
-
   };
-
-
-
-
-
-
+  const [language, setLangauge] = useState(true);
+  const dataCart = [
+    {
+      name: 'Cart 1',
+      checked: false,
+      icon: '/raw/cart3.svg',
+      value: '/raw/cart3.svg',
+    },
+    {
+      name: 'Cart 2',
+      checked: true,
+      icon: '/raw/cart1.svg',
+      value: '/raw/cart1.svg',
+    },
+    {
+      name: 'Cart 3',
+      checked: false,
+      icon: '/raw/cart2.svg',
+      value: '/raw/cart2.svg',
+    },
+    {
+      name: 'Cart 4',
+      checked: false,
+      icon: '/raw/cart4.svg',
+      value: '/raw/cart4.svg',
+    },
+  ];
+  const dataHeader = [
+    {
+      name: 'Menu 1',
+      checked: false,
+      icon: 'material-symbols:menu',
+      value: 'material-symbols:menu',
+    },
+    {
+      name: 'Menu 2',
+      checked: true,
+      icon: 'majesticons:menu',
+      value: 'majesticons:menu',
+    },
+    {
+      name: 'Menu 3',
+      checked: false,
+      icon: 'charm:menu-kebab',
+      value: 'charm:menu-kebab',
+    },
+    {
+      name: 'Menu 4',
+      checked: false,
+      icon: 'ci:menu-alt-03',
+      value: 'ci:menu-alt-03',
+    },
+  ];
+  const [cartLogo, setCartLogo] = useState('/raw/cart3.svg');
+  const [headerLogo, setHeaderLogo] = useState('ci:menu-alt-03');
   return (
     <div>
-      {loader && (
-        <LoadingScreen />
-      )}
+      {loader && <LoadingScreen />}
       <HeaderSection
-        name={"App Bar"}
+        name={'App Bar'}
         cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-        handleCancelBtn={() => { }}
-        handleThemeConfig={() => { }}
+        handleCancelBtn={() => {}}
+        handleThemeConfig={() => {}}
         closer={() => childFunction()}
       />
       <Stack
@@ -398,6 +444,9 @@ export default function NavDealer({
         }}
       >
         <NavbarTheme
+          headerLogo={headerLogo}
+          cartLogo={cartLogo}
+          language={language}
           centerMenu={centerMenu}
           appBarContainer={appBarContainer}
           appBarLogo={appBarLogo}
@@ -822,16 +871,15 @@ export default function NavDealer({
                           onChange={(event: any) => {
                             isColorValid(event?.hex)
                               ? handleChangeEvent('color', event?.hex, 'menu', 'style')
-                              : null
+                              : null;
                             setCenterMenu((prev) => ({
                               ...prev,
                               style: {
                                 ...prev.style,
                                 color: event.hex,
                               },
-                            }))
-                          }
-                          }
+                            }));
+                          }}
                           presetColors={customPresets}
                           style={{ width: '100%' }}
                         />
@@ -876,16 +924,15 @@ export default function NavDealer({
                             onChange={(event: any) => {
                               isColorValid(event?.hex)
                                 ? handleChangeEvent('backgroundColor', event?.hex, 'menu', 'style')
-                                : null
+                                : null;
                               setCenterMenu((prev) => ({
                                 ...prev,
                                 style: {
                                   ...prev.style,
                                   backgroundColor: event.hex,
                                 },
-                              }))
-                            }
-                            }
+                              }));
+                            }}
                             presetColors={customPresets}
                             style={{ width: '100%' }}
                           />
@@ -928,16 +975,15 @@ export default function NavDealer({
                             onChange={(event: any) => {
                               isColorValid(event?.hex)
                                 ? handleChangeEvent('hoverColor', event?.hex, 'menu', 'style')
-                                : null
+                                : null;
                               setCenterMenu((prev) => ({
                                 ...prev,
                                 style: {
                                   ...prev.style,
                                   hoverColor: event.hex,
                                 },
-                              }))
-                            }
-                            }
+                              }));
+                            }}
                             presetColors={customPresets}
                             style={{ width: '100%' }}
                           />
@@ -971,9 +1017,9 @@ export default function NavDealer({
                               placeholder="https://"
                               value={item.link}
                               onChange={(event) => handleChangeMenu(event, 'link', i)}
-                            // onChange={(event) =>
-                            //   // setMenus([...menus])
-                            // }
+                              // onChange={(event) =>
+                              //   // setMenus([...menus])
+                              // }
                             />
                           </Stack>
                         </Stack>
@@ -1308,6 +1354,143 @@ export default function NavDealer({
                   </Box>
                 </Box> */}
               </Stack>
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+        <Accordion sx={{ width: '100%' }}>
+          <AccordionSummary
+            sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
+            expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
+          >
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="subtitle1">Language</Typography>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              width={'100%'}
+            >
+              <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                Language
+              </Typography>
+              <Switch
+                checked={language}
+                onChange={(event: any, value: any) => setLangauge(value)}
+                inputProps={{ 'aria-label': 'controlled' }}
+              />
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+        <Accordion sx={{ width: '100%' }}>
+          <AccordionSummary
+            sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
+            expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
+          >
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="subtitle1">Cart</Typography>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box pt="20px">
+              <RadioGroup
+                aria-labelledby="cart-buttons-group-label"
+                defaultValue={cartLogo}
+                onChange={(event) => setCartLogo(event.target.value)}
+                name="cart-buttons-group"
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
+                }}
+              >
+                {dataCart.map((cart, indx) => (
+                  <FormControlLabel
+                    key={indx}
+                    value={cart.value}
+                    control={<Radio checked={cart.value === cartLogo} size="medium" />}
+                    label={
+                      <Stack direction="row" alignItems="center" spacing="20px" ml="15px">
+                        <Stack
+                          alignItems="center"
+                          justifyContent="center"
+                          sx={{
+                            width: '60px',
+                            height: '60px',
+                            borderRadius: '12px',
+                            background: cart.value === cartLogo ? '#1BFBB6' : '#F5F5F8',
+                          }}
+                        >
+                          <Box component="img" src={cart.icon} />
+                        </Stack>
+                        <Typography
+                          variant="button"
+                          color={cart.value === cartLogo ? '#0F1349' : '#8688A3'}
+                        >
+                          {cart.name}
+                        </Typography>
+                      </Stack>
+                    }
+                  />
+                ))}
+              </RadioGroup>
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+        <Accordion sx={{ width: '100%' }}>
+          <AccordionSummary
+            sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
+            expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
+          >
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="subtitle1">Left Header</Typography>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box pt="20px">
+              <RadioGroup
+                aria-labelledby="cart-buttons-group-label"
+                defaultValue={headerLogo}
+                onChange={(event) => setHeaderLogo(event.target.value)}
+                name="cart-buttons-group"
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
+                }}
+              >
+                {dataHeader.map((cart, indx) => (
+                  <FormControlLabel
+                    key={indx}
+                    value={cart.value}
+                    control={<Radio checked={cart.value === headerLogo} size="medium" />}
+                    label={
+                      <Stack direction="row" alignItems="center" spacing="20px" ml="15px">
+                        <Stack
+                          alignItems="center"
+                          justifyContent="center"
+                          sx={{
+                            width: '60px',
+                            height: '60px',
+                            borderRadius: '12px',
+                            background: cart.value === cartLogo ? '#1BFBB6' : '#F5F5F8',
+                          }}
+                        >
+                          <Iconify style={{ color: 'black' }} icon={cart.icon} />
+                        </Stack>
+                        <Typography
+                          variant="button"
+                          color={cart.value === cartLogo ? '#0F1349' : '#8688A3'}
+                        >
+                          {cart.name}
+                        </Typography>
+                      </Stack>
+                    }
+                  />
+                ))}
+              </RadioGroup>
             </Box>
           </AccordionDetails>
         </Accordion>

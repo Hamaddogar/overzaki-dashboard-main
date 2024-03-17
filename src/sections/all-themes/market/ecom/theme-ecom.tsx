@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import './out-put/view/view.css';
 // @mui
@@ -18,7 +18,6 @@ import Typography from '@mui/material/Typography';
 import { Stack, Container } from '@mui/material';
 // components
 import Iconify from 'src/components/iconify';
-
 import Scrollbar from 'src/components/scrollbar/scrollbar';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { BottomActions } from 'src/components/bottom-actions';
@@ -56,11 +55,6 @@ import TopBarDealer from './out-put/topbar-selection';
 import VideoDealer from './out-put/video-dealer';
 import BrandDealer from './out-put/brand-dealer';
 import StylesDealer from './out-put/styles-dealer';
-import ProductSelectionDealer from './out-put/product-selection-dealer';
-import CategoryViewDealer from './out-put/category-selection';
-import FooterDealer from './out-put/FooterDealer';
-import AddProductDealer from './out-put/add-product-dealer';
-import AddCategoryDealer from './out-put/add-category-dealer';
 
 const dataPages = [
   { title: 'Home Page', link: 'https://ecom-zaki.vercel.app/' },
@@ -74,7 +68,6 @@ interface ControllsState {
   menu: (EventTarget & (Element | HTMLElement)) | null;
   addSection: Boolean;
 }
-// const [selectedSquareCard, setSelectedSquareCard] = useState('style-1');
 
 const defaultSections = [
   {
@@ -97,13 +90,11 @@ const defaultSections = [
         name: 'Top Bar',
         img: '/raws/bars.svg',
         show: true,
-        hideHeader: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any, url: any) => (
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
           <TopBarDealer
             handleThemeConfig={handleThemeConfig}
             themeConfig={themeConfig}
             builder_Id={builder_Id}
-            url={url}
           />
         ),
       },
@@ -111,13 +102,11 @@ const defaultSections = [
         name: 'App Bar',
         img: '/raws/bars.svg',
         show: true,
-        hideHeader: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any, url: any) => (
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
           <NavDealer
             handleThemeConfig={handleThemeConfig}
             themeConfig={themeConfig}
             builder_Id={builder_Id}
-            url={url}
           />
         ),
       },
@@ -137,12 +126,11 @@ const defaultSections = [
         name: 'Banner',
         img: '/raws/Banners.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any, url: any) => (
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
           <BannerDealer
             handleThemeConfig={handleThemeConfig}
             themeConfig={themeConfig}
             builderId={builder_Id}
-            url={url}
           />
         ),
       },
@@ -196,7 +184,6 @@ const defaultSections = [
         name: 'Footer',
         img: '/raws/Mobiles.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => <FooterDealer />,
       },
     ],
   },
@@ -226,18 +213,6 @@ const defaultSections = [
         ),
       },
       {
-        name: 'Add Product',
-        img: '/raws/filters.png',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => <AddProductDealer />,
-      },
-      {
-        name: 'Products Dealer',
-        img: '/raws/filters.png',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => <ProductSelectionDealer />,
-      },
-      {
         name: 'List View',
         img: '/raws/listing.svg',
         show: true,
@@ -261,14 +236,14 @@ const defaultSections = [
           <CardShapeDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
         ),
       },
-      {
-        name: 'View',
-        img: '/raws/listing.svg',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <ProductPageViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
-      },
+      // {
+      //   name: 'View',
+      //   img: '/raws/listing.svg',
+      //   show: true,
+      //   Componenet: (handleThemeConfig: any, themeConfig: any) => (
+      //     <ProductPageViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+      //   ),
+      // },
 
       {
         name: 'Product Card',
@@ -330,18 +305,6 @@ const defaultSections = [
         Componenet: (handleThemeConfig: any, themeConfig: any) => (
           <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
         ),
-      },
-      {
-        name: 'Add Category',
-        img: '/raws/user-solid.svg',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => <AddCategoryDealer />,
-      },
-      {
-        name: 'Category',
-        img: '/raws/user-solid.svg',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => <CategoryViewDealer />,
       },
     ],
   },
@@ -480,8 +443,6 @@ export default function EcomDesignMain() {
     bannerShow: false,
     bannerImages: [],
     //
-    sliderImage: [],
-    //
     headerShow: false,
     headerImages: '/raws/bags.jpg',
     headerTitle: 'Find everything you need',
@@ -556,6 +517,7 @@ export default function EcomDesignMain() {
 
   const searchParams = useSearchParams();
   const builder_Id = searchParams.get('id')?.toString() || '';
+
   const url = searchParams.get('url')?.toString() || '';
   // const url = "http://localhost:3000";
 
@@ -658,15 +620,6 @@ export default function EcomDesignMain() {
     setbuttonSection(btnSection);
   };
 
-  useEffect(() => {
-    if (controlls.page === 'Products Page') {
-      setbuttonSection('Products Dealer');
-    } else if (controlls.page === 'Categories') {
-      setbuttonSection('Category');
-    }
-    setControlls((pv) => ({ ...pv, addSection: false }));
-  }, [controlls.page]);
-
   const handleOpenDropDown = React.useCallback(
     (openTo: string) => (event: React.MouseEvent<HTMLElement> | React.KeyboardEvent) => {
       // console.log('event.currentTarget', event.currentTarget);
@@ -704,12 +657,6 @@ export default function EcomDesignMain() {
     setbuttonSection('');
   };
 
-
-  const handleSaveSettings = () => {
-    console.log("event");
-
-  }
-
   return (
     <Box sx={{ height: '100%', transition: 'all .5' }}>
       {smUp && (
@@ -742,18 +689,18 @@ export default function EcomDesignMain() {
                       sx={
                         activeSection === 'Style'
                           ? {
-                            borderRadius: '12px',
-                            color: '#0F1349',
-                            backgroundColor: '#FFFFFF',
-                            boxShadow: '0px 6px 20px #00000033',
-                            '&:hover': { backgroundColor: '#FFFFFF' },
-                          }
+                              borderRadius: '12px',
+                              color: '#0F1349',
+                              backgroundColor: '#FFFFFF',
+                              boxShadow: '0px 6px 20px #00000033',
+                              '&:hover': { backgroundColor: '#FFFFFF' },
+                            }
                           : {
-                            borderRadius: '12px',
-                            color: '#8688A3',
-                            backgroundColor: 'background.neutral',
-                            '&:hover': { backgroundColor: 'background.neutral' },
-                          }
+                              borderRadius: '12px',
+                              color: '#8688A3',
+                              backgroundColor: 'background.neutral',
+                              '&:hover': { backgroundColor: 'background.neutral' },
+                            }
                       }
                     >
                       {' '}
@@ -767,18 +714,18 @@ export default function EcomDesignMain() {
                       sx={
                         activeSection === 'Layout'
                           ? {
-                            borderRadius: '12px',
-                            color: '#0F1349',
-                            backgroundColor: '#FFFFFF',
-                            boxShadow: '0px 6px 20px #00000033',
-                            '&:hover': { backgroundColor: '#FFFFFF' },
-                          }
+                              borderRadius: '12px',
+                              color: '#0F1349',
+                              backgroundColor: '#FFFFFF',
+                              boxShadow: '0px 6px 20px #00000033',
+                              '&:hover': { backgroundColor: '#FFFFFF' },
+                            }
                           : {
-                            borderRadius: '12px',
-                            color: '#8688A3',
-                            backgroundColor: 'background.neutral',
-                            '&:hover': { backgroundColor: '#FFFFFF' },
-                          }
+                              borderRadius: '12px',
+                              color: '#8688A3',
+                              backgroundColor: 'background.neutral',
+                              '&:hover': { backgroundColor: '#FFFFFF' },
+                            }
                       }
                     >
                       {' '}
@@ -916,8 +863,6 @@ export default function EcomDesignMain() {
                           themeConfig={themeConfig}
                           builderId={builder_Id}
                           handleThemeConfig={handleThemeConfig}
-                          setAppBarLogo={undefined}
-                          appBarLogo={undefined}
                         />
                       </Box>
                     )}
@@ -987,29 +932,23 @@ export default function EcomDesignMain() {
                                 <Box key={'mainPageWrap_' + index + '_' + ind}>
                                   {buttonSection === sectionObj.name && (
                                     <Box key={'main_' + ind}>
-                                      {!sectionObj?.hideHeader && (
-                                        <HeaderSection
-                                          name={sectionObj?.name ?? ''}
-                                          cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                                          handleCancelBtn={handleCancelBtn}
-                                          handleThemeConfig={handleThemeConfig}
-                                          closer={() => handleSaveSettings()}
-                                        />
-                                      )}
+                                      <HeaderSection
+                                        name={sectionObj?.name ?? ''}
+                                        cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
+                                        handleCancelBtn={handleCancelBtn}
+                                        handleThemeConfig={handleThemeConfig}
+                                      />
                                       {sectionObj?.Componenet &&
                                         sectionObj?.Componenet(
                                           handleThemeConfig,
                                           themeConfig,
-                                          builder_Id,
-                                          url
+                                          builder_Id
                                         )}
                                     </Box>
                                   )}
                                 </Box>
                               );
                             }
-                            return null; // Make sure to return null for non-matching sections
-
                           })}
                         </Box>
                       ))}
