@@ -19,7 +19,6 @@ const IconCard = ({
   id,
   toggleDrawerCommon,
   setIconData,
-
   handleIconDelete,
 }: any) => {
   const router = useRouter();

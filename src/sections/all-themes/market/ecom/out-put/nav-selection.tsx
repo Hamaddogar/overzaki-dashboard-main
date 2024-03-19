@@ -24,7 +24,7 @@ import { socketClient } from 'src/sections/all-themes/utils/helper-functions';
 import LogoDealer, { VisuallyHiddenInput } from './logo-part';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
-import { saveLogo, updateBasicAdAppbar, updateBasicAppbar } from 'src/redux/store/thunks/builder';
+import { saveLogo, updateBasicAppbar } from 'src/redux/store/thunks/builder';
 import Sketch from '@uiw/react-color-sketch';
 import './style.css';
 import NavbarTheme from 'src/sections/all-themes/component/NavbarTheme';
@@ -71,6 +71,16 @@ export default function NavDealer({
   const [loader, setLoader] = useState<any>(false);
 
   const socket = socketClient();
+
+  useEffect(() => {
+    socket?.connect()
+    return () => {
+      socket?.disconnect();
+    }
+  }, [socket])
+
+
+
   const dispatch = useDispatch<AppDispatch>();
 
   const debounce = (func: any, delay: any) => {
@@ -218,9 +228,9 @@ export default function NavDealer({
       key: targetHeader + _socketKey,
       value: valueToShare,
     };
-    // if (socket) {
-    //   socket.emit('website:cmd', data);
-    // }
+    if (socket) {
+      socket.emit('website:cmd', data);
+    }
   }, 1500);
 
   const [containerBackgroundColor, setContainerBackgrounColor] = useState(false);
@@ -246,8 +256,6 @@ export default function NavDealer({
     setMenus(updatedMenus);
     setCenterMenu((prev: any) => ({ ...prev, menuItems: updatedMenus }));
   };
-
-  // appBar
 
   const childFunction = () => {
     console.log('appBar', appBar);
@@ -364,68 +372,69 @@ export default function NavDealer({
     }, 1000);
   };
   const [language, setLangauge] = useState(true);
+
   const dataCart = [
     {
       name: 'Cart 1',
       checked: false,
       icon: '/raw/cart3.svg',
-      value: '/raw/cart3.svg',
+      value: '1',
     },
     {
       name: 'Cart 2',
       checked: true,
       icon: '/raw/cart1.svg',
-      value: '/raw/cart1.svg',
+      value: '2',
     },
     {
       name: 'Cart 3',
       checked: false,
       icon: '/raw/cart2.svg',
-      value: '/raw/cart2.svg',
+      value: '3',
     },
     {
       name: 'Cart 4',
       checked: false,
       icon: '/raw/cart4.svg',
-      value: '/raw/cart4.svg',
+      value: '4',
     },
   ];
-  const dataHeader = [
+  const dataLeftHeader = [
     {
       name: 'Menu 1',
       checked: false,
-      icon: 'material-symbols:menu',
-      value: 'material-symbols:menu',
+      icon: 'heroicons-outline:menu-alt-2',
+      value: '1',
     },
     {
       name: 'Menu 2',
       checked: true,
-      icon: 'majesticons:menu',
-      value: 'majesticons:menu',
+      icon: 'material-symbols:menu',
+      value: '2',
     },
     {
       name: 'Menu 3',
       checked: false,
-      icon: 'charm:menu-kebab',
-      value: 'charm:menu-kebab',
+      icon: 'carbon:menu',
+      value: '3',
     },
     {
       name: 'Menu 4',
       checked: false,
-      icon: 'ci:menu-alt-03',
-      value: 'ci:menu-alt-03',
+      icon: 'system-uicons:menu-vertical',
+      value: '4',
     },
   ];
   const [cartLogo, setCartLogo] = useState('/raw/cart3.svg');
-  const [headerLogo, setHeaderLogo] = useState('ci:menu-alt-03');
+  const [headerLogo, setHeaderLogo] = useState('heroicons-outline:menu-alt-2');
   return (
     <div>
       {loader && <LoadingScreen />}
       <HeaderSection
         name={'App Bar'}
         cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-        handleCancelBtn={() => {}}
-        handleThemeConfig={() => {}}
+        handleCancelBtn={() => { }}
+        handleThemeConfig={() => { }}
         closer={() => childFunction()}
       />
       <Stack
@@ -443,17 +452,18 @@ export default function NavDealer({
           },
         }}
       >
-        <NavbarTheme
-          headerLogo={headerLogo}
-          cartLogo={cartLogo}
-          language={language}
-          centerMenu={centerMenu}
-          appBarContainer={appBarContainer}
-          appBarLogo={appBarLogo}
-          appBarSearch={appBarSearch}
-          generalIcons={generalIcons}
-          navbarState={navbarState}
-        />
+        <Stack border={5} borderColor={'#5cb85c'}>
+          <NavbarTheme
+            headerLogo={headerLogo}
+            cartLogo={cartLogo}
+            centerMenu={centerMenu}
+            appBarContainer={appBarContainer}
+            appBarLogo={appBarLogo}
+            appBarSearch={appBarSearch}
+            generalIcons={generalIcons}
+            navbarState={navbarState}
+          />
+        </Stack>
         <Accordion
           sx={{
             width: '100%',
@@ -1017,9 +1027,9 @@ export default function NavDealer({
                               placeholder="https://"
                               value={item.link}
                               onChange={(event) => handleChangeMenu(event, 'link', i)}
-                              // onChange={(event) =>
-                              //   // setMenus([...menus])
-                              // }
+                            // onChange={(event) =>
+                            //   // setMenus([...menus])
+                            // }
                             />
                           </Stack>
                         </Stack>
@@ -1363,80 +1373,97 @@ export default function NavDealer({
             expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
           >
             <Box sx={{ width: '100%' }}>
-              <Typography variant="subtitle1">Language</Typography>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              width={'100%'}
-            >
-              <Typography variant="caption" sx={{ fontWeight: 900 }}>
-                Language
-              </Typography>
-              <Switch
-                checked={language}
-                onChange={(event: any, value: any) => setLangauge(value)}
-                inputProps={{ 'aria-label': 'controlled' }}
-              />
-            </Stack>
-          </AccordionDetails>
-        </Accordion>
-        <Accordion sx={{ width: '100%' }}>
-          <AccordionSummary
-            sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
-            expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
-          >
-            <Box sx={{ width: '100%' }}>
               <Typography variant="subtitle1">Cart</Typography>
             </Box>
           </AccordionSummary>
           <AccordionDetails>
-            <Box pt="20px">
-              <RadioGroup
-                aria-labelledby="cart-buttons-group-label"
-                defaultValue={cartLogo}
-                onChange={(event) => setCartLogo(event.target.value)}
-                name="cart-buttons-group"
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '20px',
-                }}
-              >
-                {dataCart.map((cart, indx) => (
-                  <FormControlLabel
-                    key={indx}
-                    value={cart.value}
-                    control={<Radio checked={cart.value === cartLogo} size="medium" />}
-                    label={
-                      <Stack direction="row" alignItems="center" spacing="20px" ml="15px">
-                        <Stack
-                          alignItems="center"
-                          justifyContent="center"
-                          sx={{
-                            width: '60px',
-                            height: '60px',
-                            borderRadius: '12px',
-                            background: cart.value === cartLogo ? '#1BFBB6' : '#F5F5F8',
-                          }}
-                        >
-                          <Box component="img" src={cart.icon} />
-                        </Stack>
-                        <Typography
-                          variant="button"
-                          color={cart.value === cartLogo ? '#0F1349' : '#8688A3'}
-                        >
-                          {cart.name}
-                        </Typography>
-                      </Stack>
-                    }
-                  />
-                ))}
-              </RadioGroup>
-            </Box>
+            {' '}
+            <div>
+              {mobile ? (
+                <Box pt="20px">
+                  <RadioGroup
+                    aria-labelledby="cart-buttons-group-label"
+                    // defaultValue={themeConfig.cart}
+                    onChange={(event) => setCartLogo(event.target.value)}
+                    name="cart-buttons-group"
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '20px',
+                    }}
+                  >
+                    {dataCart.map((cart, indx) => (
+                      <FormControlLabel
+                        key={indx}
+                        value={cart.icon}
+                        control={<Radio checked={cart.icon === cartLogo} size="medium" />}
+                        label={
+                          <Stack direction="row" alignItems="center" spacing="20px" ml="15px">
+                            <Stack
+                              direction="row"
+                              justifyContent="space-between">
+                              <Stack
+                                direction="row"
+                                justifyContent="space-between"
+                                alignItems="center"
+                                sx={{
+                                  width: '60px',
+                                  height: '60px',
+                                  borderRadius: '12px',
+                                  backgroundColor: '#8688A3',
+                                }}
+                              >
+                                <Box component="img" src={cart.icon} />
+                              </Stack>
+                              <Typography variant="button">{cart.name}</Typography>
+                            </Stack>
+                          </Stack>
+                        }
+                      />
+                    ))}
+                  </RadioGroup>
+                </Box>
+              ) : (
+                <Box pt="20px">
+                  <RadioGroup
+                    aria-labelledby="cart-buttons-group-label"
+                    // defaultValue={themeConfig.cart}
+                    onChange={(event) => setCartLogo(event.target.value)}
+                    name="cart-buttons-group"
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '20px',
+                    }}
+                  >
+                    {dataCart.map((cart, indx) => (
+                      <FormControlLabel
+                        key={indx}
+                        value={cart.icon}
+                        control={<Radio checked={cart.icon === cartLogo} size="medium" />}
+                        label={
+                          <Stack direction="row" alignItems="center" spacing="20px" ml="15px">
+                            <Stack
+                              alignItems="center"
+                              justifyContent="center"
+                              sx={{
+                                width: '60px',
+                                height: '60px',
+                                borderRadius: '12px',
+                                backgroundColor: '#8688A3',
+                              }}
+                            >
+                              <Box component="img" src={cart.icon} />
+                            </Stack>
+                            <Typography variant="button">{cart.name}</Typography>
+                          </Stack>
+                        }
+                      />
+                    ))}
+                  </RadioGroup>
+                </Box>
+              )}
+            </div>
           </AccordionDetails>
         </Accordion>
         <Accordion sx={{ width: '100%' }}>
@@ -1449,49 +1476,43 @@ export default function NavDealer({
             </Box>
           </AccordionSummary>
           <AccordionDetails>
-            <Box pt="20px">
-              <RadioGroup
-                aria-labelledby="cart-buttons-group-label"
-                defaultValue={headerLogo}
-                onChange={(event) => setHeaderLogo(event.target.value)}
-                name="cart-buttons-group"
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '20px',
-                }}
-              >
-                {dataHeader.map((cart, indx) => (
-                  <FormControlLabel
-                    key={indx}
-                    value={cart.value}
-                    control={<Radio checked={cart.value === headerLogo} size="medium" />}
-                    label={
-                      <Stack direction="row" alignItems="center" spacing="20px" ml="15px">
-                        <Stack
-                          alignItems="center"
-                          justifyContent="center"
-                          sx={{
-                            width: '60px',
-                            height: '60px',
-                            borderRadius: '12px',
-                            background: cart.value === cartLogo ? '#1BFBB6' : '#F5F5F8',
-                          }}
-                        >
-                          <Iconify style={{ color: 'black' }} icon={cart.icon} />
-                        </Stack>
-                        <Typography
-                          variant="button"
-                          color={cart.value === cartLogo ? '#0F1349' : '#8688A3'}
-                        >
-                          {cart.name}
-                        </Typography>
+            {' '}
+            <RadioGroup
+              aria-labelledby="cart-buttons-group-label"
+              // defaultValue={themeConfig.cart}
+              onChange={(event) => setHeaderLogo(event.target.value)}
+              name="cart-buttons-group"
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '20px',
+              }}
+            >
+              {dataLeftHeader.map((cart, indx) => (
+                <FormControlLabel
+                  key={indx}
+                  value={cart.icon}
+                  control={<Radio checked={cart.icon === headerLogo} size="medium" />}
+                  label={
+                    <Stack direction="row" alignItems="center" spacing="20px" ml="15px">
+                      <Stack
+                        alignItems="center"
+                        justifyContent="center"
+                        sx={{
+                          width: '60px',
+                          height: '60px',
+                          borderRadius: '12px',
+                          backgroundColor: '#8688A3',
+                        }}
+                      >
+                        <Iconify style={{ color: 'blue' }} icon={cart.icon} />
                       </Stack>
-                    }
-                  />
-                ))}
-              </RadioGroup>
-            </Box>
+                      <Typography variant="button">{cart.name}</Typography>
+                    </Stack>
+                  }
+                />
+              ))}
+            </RadioGroup>
           </AccordionDetails>
         </Accordion>
       </Stack>

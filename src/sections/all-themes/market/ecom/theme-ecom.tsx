@@ -2,9 +2,10 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import './out-put/view/view.css';
+import ArrowForwardIosOutlinedIcon from '@mui/icons-material/ArrowForwardIosOutlined';
 // @mui
 import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
@@ -15,9 +16,13 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Tooltip from '@mui/material/Tooltip';
 import Fade from '@mui/material/Fade';
 import Typography from '@mui/material/Typography';
-import { Stack, Container } from '@mui/material';
+import NavigateNextOutlinedIcon from '@mui/icons-material/NavigateNextOutlined';
+import { Stack, Container, Drawer } from '@mui/material';
 // components
+import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import Iconify from 'src/components/iconify';
+import CategoryIcon from '@mui/icons-material/Category';
 import Scrollbar from 'src/components/scrollbar/scrollbar';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { BottomActions } from 'src/components/bottom-actions';
@@ -27,6 +32,7 @@ import HeaderSection from './out-put/header-section';
 import FontFamilyDealer from './out-put/font-styles-selection';
 import LogoDealer from './out-put/logo-part';
 import ColorsDealer from './out-put/colors-selection';
+import CallEndOutlinedIcon from '@mui/icons-material/CallEndOutlined';
 import CartsDealer from './out-put/carts-selection';
 import NavDealer from './out-put/nav-selection';
 import BannerDealer from './out-put/banner-selection';
@@ -55,7 +61,19 @@ import TopBarDealer from './out-put/topbar-selection';
 import VideoDealer from './out-put/video-dealer';
 import BrandDealer from './out-put/brand-dealer';
 import StylesDealer from './out-put/styles-dealer';
-
+import ProductSelectionDealer from './out-put/product-selection-dealer';
+import CategoryViewDealer from './out-put/category-selection';
+import FooterDealer from './out-put/FooterDealer';
+import AddProductDealer from './out-put/add-product-dealer';
+import AddCategoryDealer from './out-put/add-category-dealer';
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import ProductDetailsDealer from './out-put/product-details-dealer';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import ContactUsDealer from './out-put/contact-us-dealer';
+import SignupDealer from './out-put/signup-dealer';
+import SignInDealer from './out-put/sign-in-dealer';
+import ForgotPassDealer from './out-put/forgot-pass-dealer';
+import OtpDealer from './out-put/otp-dealer';
 const dataPages = [
   { title: 'Home Page', link: 'https://ecom-zaki.vercel.app/' },
   { title: 'Products Page', link: 'https://ecom-zaki.vercel.app/products' },
@@ -68,6 +86,7 @@ interface ControllsState {
   menu: (EventTarget & (Element | HTMLElement)) | null;
   addSection: Boolean;
 }
+// const [selectedSquareCard, setSelectedSquareCard] = useState('style-1');
 
 const defaultSections = [
   {
@@ -90,11 +109,13 @@ const defaultSections = [
         name: 'Top Bar',
         img: '/raws/bars.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
+        hideHeader: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any, url: any) => (
           <TopBarDealer
             handleThemeConfig={handleThemeConfig}
             themeConfig={themeConfig}
             builder_Id={builder_Id}
+            url={url}
           />
         ),
       },
@@ -126,22 +147,23 @@ const defaultSections = [
         name: 'Banner',
         img: '/raws/Banners.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any, url: any) => (
           <BannerDealer
             handleThemeConfig={handleThemeConfig}
             themeConfig={themeConfig}
             builderId={builder_Id}
+            url={url}
           />
         ),
       },
-      {
-        name: 'CategoriesLayout',
-        img: '/raws/Categories.svg',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <LayoutCategoriesDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
-      },
+      // {
+      //   name: 'CategoriesLayout',
+      //   img: '/raws/Categories.svg',
+      //   show: true,
+      //   Componenet: (handleThemeConfig: any, themeConfig: any) => (
+      //     <LayoutCategoriesDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+      //   ),
+      // },
       {
         name: 'Nav',
         img: '',
@@ -154,7 +176,8 @@ const defaultSections = [
       },
       {
         name: 'Video',
-        img: '/raws/Trending.svg',
+        img: '',
+        icon: PlayArrowIcon,
         show: true,
         Componenet: (handleThemeConfig: any, themeConfig: any) => <VideoDealer />,
       },
@@ -166,24 +189,25 @@ const defaultSections = [
           <BrandDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
         ),
       },
-      {
-        name: 'Products',
-        img: '/raws/Products.svg',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <ProductViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
-        // onClick: () => {
-        //   setControlls({ ...controlls, page: "Products Page" });
-        //   setTimeout(() => {
-        //     handleButton('List View');
-        //   }, 1000);
-        // }
-      },
+      // {
+      //   name: 'Products',
+      //   img: '/raws/Products.svg',
+      //   show: true,
+      //   Componenet: (handleThemeConfig: any, themeConfig: any) => (
+      //     <ProductViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+      //   ),
+      //   // onClick: () => {
+      //   //   setControlls({ ...controlls, page: "Products Page" });
+      //   //   setTimeout(() => {
+      //   //     handleButton('List View');
+      //   //   }, 1000);
+      //   // }
+      // },
       {
         name: 'Footer',
         img: '/raws/Mobiles.svg',
         show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <FooterDealer />,
       },
     ],
   },
@@ -213,29 +237,42 @@ const defaultSections = [
         ),
       },
       {
-        name: 'List View',
-        img: '/raws/listing.svg',
+        name: 'Add Product',
+        img: '',
+        icon: AddOutlinedIcon,
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <ListViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <AddProductDealer />,
       },
       {
-        name: 'Card Style',
-        img: '/raws/cards.svg',
+        name: 'Products Dealer',
+        img: '/raws/filters.png',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <CardStyleDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <ProductSelectionDealer />,
       },
-      {
-        name: 'Card Shape',
-        img: '/raws/shape.svg',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <CardShapeDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
-      },
+      // {
+      //   name: 'List View',
+      //   img: '/raws/listing.svg',
+      //   show: true,
+      //   Componenet: (handleThemeConfig: any, themeConfig: any) => (
+      //     <ListViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+      //   ),
+      // },
+      // {
+      //   name: 'Card Style',
+      //   img: '/raws/cards.svg',
+      //   show: true,
+      //   Componenet: (handleThemeConfig: any, themeConfig: any) => (
+      //     <CardStyleDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+      //   ),
+      // },
+      // {
+      //   name: 'Card Shape',
+      //   img: '/raws/shape.svg',
+      //   show: true,
+      //   Componenet: (handleThemeConfig: any, themeConfig: any) => (
+      //     <CardShapeDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+      //   ),
+      // },
       // {
       //   name: 'View',
       //   img: '/raws/listing.svg',
@@ -245,22 +282,29 @@ const defaultSections = [
       //   ),
       // },
 
-      {
-        name: 'Product Card',
-        img: '/raws/cards.svg',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <ProductPageProductCardDealer
-            handleThemeConfig={handleThemeConfig}
-            themeConfig={themeConfig}
-          />
-        ),
-      },
+      // {
+      //   name: 'Product Card',
+      //   img: '/raws/cards.svg',
+      //   show: true,
+      //   Componenet: (handleThemeConfig: any, themeConfig: any) => (
+      //     <ProductPageProductCardDealer
+      //       handleThemeConfig={handleThemeConfig}
+      //       themeConfig={themeConfig}
+      //     />
+      //   ),
+      // },
     ],
   },
   {
     page: 'Product Details Page',
     sectinos: [
+      {
+        name: 'Product Details Dealer',
+        img: '',
+        icon: Inventory2OutlinedIcon,
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <ProductDetailsDealer />,
+      },
       {
         name: 'Images',
         img: '/raws/i.png',
@@ -298,13 +342,27 @@ const defaultSections = [
   {
     page: 'Categories',
     sectinos: [
+      // {
+      //   name: 'User Info',
+      //   img: '/raws/user-solid.svg',
+      //   show: true,
+      //   Componenet: (handleThemeConfig: any, themeConfig: any) => (
+      //     <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+      //   ),
+      // },
       {
-        name: 'User Info',
-        img: '/raws/user-solid.svg',
+        name: 'Add Category',
+        img: '',
+        icon: AddOutlinedIcon,
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <AddCategoryDealer />,
+      },
+      {
+        name: 'Category',
+        img: '',
+        icon: CategoryIcon,
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <CategoryViewDealer />,
       },
     ],
   },
@@ -325,12 +383,10 @@ const defaultSections = [
     page: 'Sign Up Page',
     sectinos: [
       {
-        name: 'User Info',
+        name: 'Sign Up Dealer',
         img: '/raws/user-solid.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <SignupDealer />,
       },
     ],
   },
@@ -338,39 +394,23 @@ const defaultSections = [
     page: 'Sign In Page',
     sectinos: [
       {
-        name: 'User Info',
+        name: 'Sign In Dealer',
         img: '/raws/user-solid.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <SignInDealer />,
       },
     ],
   },
 
   {
-    page: 'Wishlist',
-    sectinos: [
-      {
-        name: 'User Info',
-        img: '/raws/user-solid.svg',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
-      },
-    ],
-  },
-  {
     page: 'Contact Us',
     sectinos: [
       {
-        name: 'User Info',
-        img: '/raws/user-solid.svg',
+        name: 'Contact Us Dealer',
+        img: '',
+        icon: CallEndOutlinedIcon,
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <ContactUsDealer />,
       },
     ],
   },
@@ -378,12 +418,10 @@ const defaultSections = [
     page: 'Forgot Password',
     sectinos: [
       {
-        name: 'User Info',
+        name: 'Forgot Password Dealer',
         img: '/raws/user-solid.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <ForgotPassDealer />,
       },
     ],
   },
@@ -392,12 +430,10 @@ const defaultSections = [
     page: 'OTP',
     sectinos: [
       {
-        name: 'User Info',
+        name: 'OTP Dealer',
         img: '/raws/user-solid.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <OtpDealer />,
       },
     ],
   },
@@ -442,6 +478,8 @@ export default function EcomDesignMain() {
     //
     bannerShow: false,
     bannerImages: [],
+    //
+    sliderImage: [],
     //
     headerShow: false,
     headerImages: '/raws/bags.jpg',
@@ -517,7 +555,6 @@ export default function EcomDesignMain() {
 
   const searchParams = useSearchParams();
   const builder_Id = searchParams.get('id')?.toString() || '';
-
   const url = searchParams.get('url')?.toString() || '';
   // const url = "http://localhost:3000";
 
@@ -620,6 +657,29 @@ export default function EcomDesignMain() {
     setbuttonSection(btnSection);
   };
 
+  useEffect(() => {
+    if (controlls.page === 'Products Page') {
+      setbuttonSection('Products Dealer');
+    } else if (controlls.page === 'Categories') {
+      setbuttonSection('Category');
+    } else if (controlls.page === 'Product Details Page') {
+      setbuttonSection('Product Details Dealer');
+    } else if (controlls.page === 'Contact Us') {
+      setbuttonSection('Contact Us Dealer');
+    } else if (controlls.page === 'Contact Us') {
+      setbuttonSection('Contact Us Dealer');
+    } else if (controlls.page === 'Sign Up Page') {
+      setbuttonSection('Sign Up Dealer');
+    } else if (controlls.page === 'Sign In Page') {
+      setbuttonSection('Sign In Dealer');
+    } else if (controlls.page === 'Forgot Password') {
+      setbuttonSection('Forgot Password Dealer');
+    } else if (controlls.page === 'OTP') {
+      setbuttonSection('OTP Dealer');
+    }
+    setControlls((pv) => ({ ...pv, addSection: false }));
+  }, [controlls.page]);
+
   const handleOpenDropDown = React.useCallback(
     (openTo: string) => (event: React.MouseEvent<HTMLElement> | React.KeyboardEvent) => {
       // console.log('event.currentTarget', event.currentTarget);
@@ -657,6 +717,24 @@ export default function EcomDesignMain() {
     setbuttonSection('');
   };
 
+  const handleSaveSettings = () => {
+    console.log('event');
+  };
+  const [open, setOpen] = React.useState(false);
+
+  const toggleDrawer = (newOpen: boolean) => () => {
+    setOpen(newOpen);
+  };
+  const openDropDown = () => {
+    setControlls((pv) => ({ ...pv, addSection: true }));
+    setOpen(false);
+  };
+
+  const [sideDrawer, setSideDrawer] = useState(false);
+  const handleOpenSection = (section: any) => {
+    setOpen(false);
+    setbuttonSection(section);
+  };
   return (
     <Box sx={{ height: '100%', transition: 'all .5' }}>
       {smUp && (
@@ -732,13 +810,7 @@ export default function EcomDesignMain() {
                       Layout{' '}
                     </Button>
                   </Stack>
-                  <Button
-                    startIcon={<Iconify icon="mi:add" />}
-                    disabled={!(activeSection === 'Layout')}
-                    onClick={handleOpenDropDown('addSection')}
-                  >
-                    Add Section
-                  </Button>
+                  <Button></Button>
                 </Stack>
                 <Stack direction="row" alignItems="center" justifyContent="center" spacing="10px">
                   <Iconify
@@ -863,6 +935,8 @@ export default function EcomDesignMain() {
                           themeConfig={themeConfig}
                           builderId={builder_Id}
                           handleThemeConfig={handleThemeConfig}
+                          setAppBarLogo={undefined}
+                          appBarLogo={undefined}
                         />
                       </Box>
                     )}
@@ -932,23 +1006,28 @@ export default function EcomDesignMain() {
                                 <Box key={'mainPageWrap_' + index + '_' + ind}>
                                   {buttonSection === sectionObj.name && (
                                     <Box key={'main_' + ind}>
-                                      <HeaderSection
-                                        name={sectionObj?.name ?? ''}
-                                        cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                                        handleCancelBtn={handleCancelBtn}
-                                        handleThemeConfig={handleThemeConfig}
-                                      />
+                                      {!sectionObj?.hideHeader && (
+                                        <HeaderSection
+                                          name={sectionObj?.name ?? ''}
+                                          cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
+                                          handleCancelBtn={handleCancelBtn}
+                                          handleThemeConfig={handleThemeConfig}
+                                          closer={() => handleSaveSettings()}
+                                        />
+                                      )}
                                       {sectionObj?.Componenet &&
                                         sectionObj?.Componenet(
                                           handleThemeConfig,
                                           themeConfig,
-                                          builder_Id
+                                          builder_Id,
+                                          url
                                         )}
                                     </Box>
                                   )}
                                 </Box>
                               );
                             }
+                            return null; // Make sure to return null for non-matching sections
                           })}
                         </Box>
                       ))}
@@ -957,9 +1036,36 @@ export default function EcomDesignMain() {
               </Grid>
 
               {/* Buttons Controlls section  */}
-              <Grid xs={2}>
+              <Grid alignItems={'center'} display={'flex'} xs={2}>
+                <div
+                  style={{
+                    transition: 'all .5s',
+                    height: '100px',
+                    position: 'absolute',
+                    right: sideDrawer ? '90px' : 0,
+                    backgroundColor: '#1BFBB6',
+                    color: '#0f1349',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderTopLeftRadius: '10px',
+                    borderBottomLeftRadius: '10px',
+                  }}
+                  onClick={() => setSideDrawer((pv) => !pv)}
+                >
+                  {sideDrawer ? <ArrowForwardIosOutlinedIcon /> : <ArrowBackIosNewOutlinedIcon />}
+                </div>
                 <Card
-                  sx={{ borderRadius: '0px', py: '20px', height: '100%', transition: 'all .5s' }}
+                  sx={{
+                    borderRadius: '0px',
+                    py: '20px',
+                    height: '100%',
+                    top: 130,
+                    transition: 'all .5s',
+                    width: '91px',
+                    position: 'fixed',
+                    right: sideDrawer ? 0 : '-90px',
+                  }}
                 >
                   <Scrollbar>
                     {activeSection === 'Style' && (
@@ -1146,9 +1252,34 @@ export default function EcomDesignMain() {
                           {controlls.page === Obj.page && (
                             <Stack
                               alignItems="center"
-                              sx={{ height: '100%', textAlign: 'center', transition: 'all .5s' }}
+                              sx={{
+                                height: '100%',
+                                textAlign: 'center',
+                                transition: 'all .5s',
+                              }}
                               spacing="20px"
                             >
+                              <Stack alignItems={'center'}>
+                                <Button
+                                  sx={{
+                                    backgroundColor: '#1BFBB6',
+                                    width: '50px',
+                                    height: '50px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    minWidth: 'auto',
+                                    padding: '0px',
+                                  }}
+                                  startIcon={<Iconify color={'#0F1349'} icon="mi:add" />}
+                                  disabled={!(activeSection === 'Layout')}
+                                  onClick={() => openDropDown()}
+                                ></Button>
+                                <Typography variant="caption" color="#0F1349">
+                                  Add Section
+                                </Typography>
+                              </Stack>
                               {Obj.sectinos.map((sectionObj, ind) => {
                                 if (sectionObj.show) {
                                   return (
@@ -1177,13 +1308,17 @@ export default function EcomDesignMain() {
                                           },
                                         }}
                                         variant="contained"
-                                        onClick={handleButton(sectionObj.name)}
+                                        onClick={() => handleOpenSection(sectionObj.name)}
                                       >
-                                        <Box
-                                          component="img"
-                                          src={sectionObj.img}
-                                          sx={{ width: '20px', height: '20px' }}
-                                        />
+                                        {sectionObj.img ? (
+                                          <Box
+                                            component="img"
+                                            src={sectionObj.img}
+                                            sx={{ width: '20px', height: '20px' }}
+                                          />
+                                        ) : (
+                                          <sectionObj.icon sx={{ width: '25px', height: '25px' }} />
+                                        )}
                                       </Button>
                                       <Typography variant="caption" color="#0F1349">
                                         {sectionObj.name}

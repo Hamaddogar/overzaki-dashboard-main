@@ -22,8 +22,8 @@ export const socketClient = () => {
     })
 
     socket.on("connect_error", async err => {
-      // console.log(`connect_error due to ${err.message}`)
-      await fetch("/api/socket")
+      console.log(`connect_error due to ${err.message}`)
+      // await fetch("/api/socket")
     })
 
     return socket;
