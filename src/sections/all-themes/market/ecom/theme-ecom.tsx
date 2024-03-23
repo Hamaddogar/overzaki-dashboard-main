@@ -767,18 +767,18 @@ export default function EcomDesignMain() {
                       sx={
                         activeSection === 'Style'
                           ? {
-                            borderRadius: '12px',
-                            color: '#0F1349',
-                            backgroundColor: '#FFFFFF',
-                            boxShadow: '0px 6px 20px #00000033',
-                            '&:hover': { backgroundColor: '#FFFFFF' },
-                          }
+                              borderRadius: '12px',
+                              color: '#0F1349',
+                              backgroundColor: '#FFFFFF',
+                              boxShadow: '0px 6px 20px #00000033',
+                              '&:hover': { backgroundColor: '#FFFFFF' },
+                            }
                           : {
-                            borderRadius: '12px',
-                            color: '#8688A3',
-                            backgroundColor: 'background.neutral',
-                            '&:hover': { backgroundColor: 'background.neutral' },
-                          }
+                              borderRadius: '12px',
+                              color: '#8688A3',
+                              backgroundColor: 'background.neutral',
+                              '&:hover': { backgroundColor: 'background.neutral' },
+                            }
                       }
                     >
                       {' '}
@@ -792,18 +792,18 @@ export default function EcomDesignMain() {
                       sx={
                         activeSection === 'Layout'
                           ? {
-                            borderRadius: '12px',
-                            color: '#0F1349',
-                            backgroundColor: '#FFFFFF',
-                            boxShadow: '0px 6px 20px #00000033',
-                            '&:hover': { backgroundColor: '#FFFFFF' },
-                          }
+                              borderRadius: '12px',
+                              color: '#0F1349',
+                              backgroundColor: '#FFFFFF',
+                              boxShadow: '0px 6px 20px #00000033',
+                              '&:hover': { backgroundColor: '#FFFFFF' },
+                            }
                           : {
-                            borderRadius: '12px',
-                            color: '#8688A3',
-                            backgroundColor: 'background.neutral',
-                            '&:hover': { backgroundColor: '#FFFFFF' },
-                          }
+                              borderRadius: '12px',
+                              color: '#8688A3',
+                              backgroundColor: 'background.neutral',
+                              '&:hover': { backgroundColor: '#FFFFFF' },
+                            }
                       }
                     >
                       {' '}
@@ -1316,9 +1316,9 @@ export default function EcomDesignMain() {
                                             src={sectionObj.img}
                                             sx={{ width: '20px', height: '20px' }}
                                           />
-                                        ) : sectionObj.icon ? (
+                                        ) : (
                                           <sectionObj.icon sx={{ width: '25px', height: '25px' }} />
-                                        ) : <></>}
+                                        )}
                                       </Button>
                                       <Typography variant="caption" color="#0F1349">
                                         {sectionObj.name}

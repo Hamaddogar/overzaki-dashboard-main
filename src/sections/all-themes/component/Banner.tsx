@@ -8,6 +8,7 @@ import { sections } from './response';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css/effect-fade';
 import { EffectFade } from 'swiper/modules';
+import { Stack } from '@mui/system';
 
 const BannerSlider = ({ bannerType, data, bannerContainerStyling }: any) => {
   const [swiperKey, setSwiperKey] = useState(Date.now());
@@ -36,7 +37,11 @@ const BannerSlider = ({ bannerType, data, bannerContainerStyling }: any) => {
       loop
     >
       {data?.map((item: any, i: any) => (
-        <SwiperSlide key={i} style={{ position: 'relative' }} className="relative">
+        <SwiperSlide
+          key={i}
+          style={{ position: 'relative', border: '5px solid #5cb85c' }}
+          className="relative"
+        >
           <img className="w-full object-center" src={item} />
           {item?.textStatus && (
             <h1 style={{ ...item?.style, position: 'absolute', width: '50%', fontSize: '10px' }}>
@@ -45,15 +50,6 @@ const BannerSlider = ({ bannerType, data, bannerContainerStyling }: any) => {
           )}
         </SwiperSlide>
       ))}
-      {/* <SwiperSlide>
-        <img src="https://graphicsfamily.com/wp-content/uploads/edd/2021/10/Business-Website-Banner-Design-1180x664.jpg" />
-      </SwiperSlide>
-      <SwiperSlide>
-        <img src="https://graphicsfamily.com/wp-content/uploads/edd/2021/10/Business-Website-Banner-Design-1180x664.jpg" />
-      </SwiperSlide>
-      <SwiperSlide>
-        <img src="https://graphicsfamily.com/wp-content/uploads/edd/2021/10/Business-Website-Banner-Design-1180x664.jpg" />
-      </SwiperSlide> */}
     </Swiper>
   );
 };
