@@ -113,6 +113,7 @@ export const endpoints = {
     rows: '/rows',
   },
   builder: {
+    design: '/design/config',
     list: '/builder',
     save: '/design/save',
     logo: '/design/logo_image',
@@ -124,6 +125,7 @@ export const endpoints = {
       adAppBar: {
         updateBasicSlider: '/appbar-design/adappbar_basic',
         createSlider: '/appbar-design/ad_app_bar',
+        removeSlider: '/home-design',
         updateSlider: '/appbar-design',
         updateBasicAppBar: '/appbar-design/basic_info',
       },

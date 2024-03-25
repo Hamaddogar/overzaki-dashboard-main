@@ -24,11 +24,13 @@ import { socketClient } from 'src/sections/all-themes/utils/helper-functions';
 import LogoDealer, { VisuallyHiddenInput } from './logo-part';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
-import { saveLogo } from 'src/redux/store/thunks/builder';
+import { saveLogo, updateBasicAppbar } from 'src/redux/store/thunks/builder';
 import Sketch from '@uiw/react-color-sketch';
 import './style.css';
 import NavbarTheme from 'src/sections/all-themes/component/NavbarTheme';
 import { sections } from 'src/sections/all-themes/component/response';
+import { LoadingScreen } from 'src/components/loading-screen';
+import HeaderSection from './header-section';
 // ----------------------------------------------------------------------
 
 const TABS = [
@@ -52,6 +54,7 @@ interface NavProps {
   handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
   mobile?: boolean;
   builder_Id: any;
+  url?: any;
 }
 
 export default function NavDealer({
@@ -59,12 +62,25 @@ export default function NavDealer({
   handleThemeConfig,
   mobile = false,
   builder_Id,
+  url,
 }: NavProps) {
   const [navbarState, setNavbarState] = useState(sections);
   const [currentTab, setCurrentTab] = useState('Layout');
   const [appBar, setAppBar] = useState<any>({});
   const [mainAppBar, setMainAppBar] = useState<any>({});
+  const [loader, setLoader] = useState<any>(false);
+
   const socket = socketClient();
+
+  useEffect(() => {
+    socket?.connect()
+    return () => {
+      socket?.disconnect();
+    }
+  }, [socket])
+
+
+
   const dispatch = useDispatch<AppDispatch>();
 
   const debounce = (func: any, delay: any) => {
@@ -119,11 +135,10 @@ export default function NavDealer({
       value: valueToShare,
     };
 
-    console.log('data', data);
-
-    if (socket) {
-      socket.emit('website:cmd', data);
-    }
+    // console.log('data', data);
+    // if (socket) {
+    //   socket.emit('website:cmd', data);
+    // }
   };
 
   const isColorValid = (color: string) =>
@@ -241,6 +256,123 @@ export default function NavDealer({
     setMenus(updatedMenus);
     setCenterMenu((prev: any) => ({ ...prev, menuItems: updatedMenus }));
   };
+
+  const childFunction = () => {
+    console.log('appBar', appBar);
+
+    setLoader(true);
+    const menu = appBar.menu;
+    const search = appBar.search;
+    const container = appBar.container;
+
+    const payloadData = {
+      menu: {
+        style: {
+          // size: "20px",
+          // fontStyle: "sans",
+          color: menu?.color,
+          backgroundColor: menu?.backgroundColor,
+          hoverColor: menu?.hoverColor,
+        },
+        menuItems: [],
+      },
+      search: {
+        status: search?.status,
+        input: search?.input,
+        position: search?.position,
+        // textBg: "gray",
+        textColor: search?.textColor,
+        // borderColor: "black",
+        borderWidth: search?.borderWidth?.toString(),
+        // mobileView: {
+        //   status: true,
+        //   width: "100%",
+        //   height: "100"
+        // }
+      },
+      container: {
+        show: container?.show,
+        isShadow: container?.isShadow,
+        // startColor: "red",
+        // finalColor: "pink",
+        // width: "100%",
+        // height: "150",
+        backgroundColor: container?.backgroundColor,
+        backgroundColorDark: 'black',
+        borderBottomWidth: container?.borderBottomWidth,
+        borderBottomColor: container?.borderBottomColor,
+        borderBottomColorDark: 'blue',
+        isCenterTitle: false,
+        containerViewStyle: {
+          marginBottom: 5,
+        },
+      },
+    };
+
+    // const payloadData = {
+    //   menu: {
+    //     style: {
+    //       size: "20px",
+    //       color: "red",
+    //       backgroundColor: "tomato",
+    //       hoverColor: "#eee",
+    //       fontStyle: "sans"
+    //     },
+    //     menuItems: [
+    //       {
+    //         name: "home",
+    //         link: "/home"
+    //       }
+    //     ]
+    //   },
+    //   search: {
+    //     status: true,
+    //     input: true,
+    //     position: "top",
+    //     textBg: "gray",
+    //     textColor: "black",
+    //     borderColor: "black",
+    //     borderWidth: "1px",
+    //     mobileView: {
+    //       status: true,
+    //       width: "200",
+    //       height: "250"
+    //     }
+    //   },
+    //   container: {
+    //     show: true,
+    //     isShadow: true,
+    //     startColor: "blue",
+    //     finalColor: "pink",
+    //     width: "200",
+    //     height: "300",
+    //     backgroundColor: "blue",
+    //     backgroundColorDark: "black",
+    //     borderBottomWidth: 200,
+    //     borderBottomColor: "red",
+    //     borderBottomColorDark: "blue",
+    //     isCenterTitle: false,
+    //     containerViewStyle: {
+    //       marginBottom: 5
+    //     }
+    //   }
+    // }
+
+    setTimeout(() => {
+      dispatch(
+        updateBasicAppbar({
+          builderId: builder_Id,
+          url: url,
+          data: { data: JSON.stringify(payloadData) },
+        })
+      ).then((response: any) => {
+        console.log('response', response);
+        setLoader(false);
+      });
+    }, 1000);
+  };
+  const [language, setLangauge] = useState(true);
+
   const dataCart = [
     {
       name: 'Cart 1',
@@ -295,9 +427,16 @@ export default function NavDealer({
   ];
   const [cartLogo, setCartLogo] = useState('/raw/cart3.svg');
   const [headerLogo, setHeaderLogo] = useState('heroicons-outline:menu-alt-2');
-  const [language, setLanguage] = useState(false);
   return (
     <div>
+      {loader && <LoadingScreen />}
+      <HeaderSection
+        name={'App Bar'}
+        cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
+        handleCancelBtn={() => { }}
+        handleThemeConfig={() => { }}
+        closer={() => childFunction()}
+      />
       <Stack
         spacing={1}
         sx={{
@@ -315,7 +454,6 @@ export default function NavDealer({
       >
         <Stack border={5} borderColor={'#5cb85c'}>
           <NavbarTheme
-            language={language}
             headerLogo={headerLogo}
             cartLogo={cartLogo}
             centerMenu={centerMenu}
@@ -889,9 +1027,9 @@ export default function NavDealer({
                               placeholder="https://"
                               value={item.link}
                               onChange={(event) => handleChangeMenu(event, 'link', i)}
-                              // onChange={(event) =>
-                              //   // setMenus([...menus])
-                              // }
+                            // onChange={(event) =>
+                            //   // setMenus([...menus])
+                            // }
                             />
                           </Stack>
                         </Stack>
@@ -1262,18 +1400,23 @@ export default function NavDealer({
                         label={
                           <Stack direction="row" alignItems="center" spacing="20px" ml="15px">
                             <Stack
-                              alignItems="center"
-                              justifyContent="center"
-                              sx={{
-                                width: '60px',
-                                height: '60px',
-                                borderRadius: '12px',
-                                backgroundColor: 'transparent',
-                              }}
-                            >
-                              <Box component="img" src={cart.icon} />
+                              direction="row"
+                              justifyContent="space-between">
+                              <Stack
+                                direction="row"
+                                justifyContent="space-between"
+                                alignItems="center"
+                                sx={{
+                                  width: '60px',
+                                  height: '60px',
+                                  borderRadius: '12px',
+                                  backgroundColor: '#8688A3',
+                                }}
+                              >
+                                <Box component="img" src={cart.icon} />
+                              </Stack>
+                              <Typography variant="button">{cart.name}</Typography>
                             </Stack>
-                            <Typography variant="button">{cart.name}</Typography>
                           </Stack>
                         }
                       />
@@ -1307,7 +1450,7 @@ export default function NavDealer({
                                 width: '60px',
                                 height: '60px',
                                 borderRadius: '12px',
-                                backgroundColor: 'transparent',
+                                backgroundColor: '#8688A3',
                               }}
                             >
                               <Box component="img" src={cart.icon} />
@@ -1359,7 +1502,7 @@ export default function NavDealer({
                           width: '60px',
                           height: '60px',
                           borderRadius: '12px',
-                          backgroundColor: 'transparent',
+                          backgroundColor: '#8688A3',
                         }}
                       >
                         <Iconify style={{ color: 'blue' }} icon={cart.icon} />
@@ -1370,34 +1513,6 @@ export default function NavDealer({
                 />
               ))}
             </RadioGroup>
-          </AccordionDetails>
-        </Accordion>
-        <Accordion sx={{ width: '100%' }}>
-          <AccordionSummary
-            sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
-            expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
-          >
-            <Box sx={{ width: '100%' }}>
-              <Typography variant="subtitle1">Language</Typography>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            {' '}
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              width={'100%'}
-            >
-              <Typography variant="caption" sx={{ fontWeight: 900 }}>
-                Show
-              </Typography>
-              <Switch
-                checked={language}
-                onChange={(event: any, value: any) => setLanguage(value)}
-                inputProps={{ 'aria-label': 'controlled' }}
-              />
-            </Stack>
           </AccordionDetails>
         </Accordion>
       </Stack>

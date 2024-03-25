@@ -6,25 +6,28 @@ import 'swiper/css/autoplay';
 import { sections } from './response';
 
 const OfferNavbar = ({ adAppbar }: any) => {
-  const { Slider, ...restOfStyles } = adAppbar;
+  const { slider, ...restOfStyles } = adAppbar;
   // console.log(restOfStyles);
+
+
   return (
     adAppbar.status && (
       <Swiper
         modules={[Autoplay]}
         autoplay={{ delay: 1700 }}
         loop
-        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: adAppbar?.height && adAppbar?.height > 50 ? `${adAppbar?.height}px` : "50px", background: adAppbar?.bakgroundColor || "white" }}
       // className="w-full flex items-center justify-center"
       >
-        {adAppbar?.Slider?.map((item: any, i: any) => (
+        {adAppbar?.slider?.map((item: any, i: any) => (
           <SwiperSlide
             style={{
-              ...restOfStyles,
               width: '100%',
+              background: "transparent",
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              // ...restOfStyles,
             }}
             key={i}
           >
@@ -44,11 +47,11 @@ const OfferNavbar = ({ adAppbar }: any) => {
             //   onClick={item?.href ? () => router.push(item?.href) : () => {}}
             //   className="flex cursor-pointer items-center w-full justify-center"
             >
-              {/* <img
+              <img
                 style={{ width: '12px', height: '12px' }}
                 // className="w-8 h-8"
                 src={item?.imageURL}
-              /> */}
+              />
               <span style={{ color: item.color || 'black' }}>{item?.text}</span>
             </div>
           </SwiperSlide>
