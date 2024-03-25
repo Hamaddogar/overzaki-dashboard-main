@@ -126,7 +126,6 @@ const AddNewTheme: React.FC<DesignMainProps> = () => {
 
         formData.append(`appLanguage[0]`, addData.appLanguage.en ? 'en' : '');
         formData.append('appLanguage[1]', addData.appLanguage.ar ? 'ar' : '');
-        formData.append('defaultLanguage', 'en');
         formData.append(`appDescription[en]`, "description");
         formData.append('appDescription[ar]', "description");
         formData.append(`appName[en]`, addData.appName.en);

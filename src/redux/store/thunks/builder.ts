@@ -137,27 +137,6 @@ export const createAdAppbarSlider = createAsyncThunk(
     }
   }
 );
-
-// Topbar > remove ad appbar slider
-export const removeAdAppbarSlider = createAsyncThunk(
-  'builder/removeAdAppbarSlider',
-  async ({ builderId, url, data, itemId }: any) => {
-    if (url && builderId) {
-      if (url.startsWith('https://')) {
-        url = url.replace(/^https?:\/\//, '');
-      }
-      let headersObj = defaultConfig();
-      headersObj.headers['x-tenant-id'] = url;
-      headersObj.headers['data'] = JSON.stringify(data);
-
-      const response = await deleteRequest(
-        `${endpoints.builder.home.adAppBar.removeSlider}/${builderId}/lists/${itemId}`,
-        headersObj
-      );
-      return response.data;
-    }
-  }
-);
 export const updateBasicAdAppbar = createAsyncThunk(
   'builder/updateBasicAdAppbar',
   async ({ builderId, url, data }: any) => {
@@ -196,24 +175,6 @@ export const updateBasicAppbar = createAsyncThunk(
     }
   }
 );
-export const getBuilderDetails = createAsyncThunk(
-  'builder/getBuilderDetails',
-  async ({ builderId, url }: any) => {
-    if (url && builderId) {
-      if (url.startsWith('https://')) {
-        url = url.replace(/^https?:\/\//, '');
-      }
-      let headersObj = defaultConfig();
-      headersObj.headers['x-tenant-id'] = url;
-      headersObj.headers['Content-Type'] = 'multipart/form-data';
-      const response = await getRequest(
-        `${endpoints.builder.design}?domain=${url}&type=temporary`,
-        headersObj
-      );
-      return response.data;
-    }
-  }
-);
 export const updateAdAppbarSlider = createAsyncThunk(
   'builder/updateAdAppbarSlider',
   async ({ builderId, url, data, itemId }: any) => {
@@ -242,7 +203,6 @@ const builderSlice = createSlice({
     loading: false,
     error: null as string | null,
     status: 'idle',
-    builderDetails: null as any,
   },
   reducers: {
     setBuilder: (state, action: PayloadAction<any>) => {
@@ -321,19 +281,6 @@ const builderSlice = createSlice({
       .addCase(builderActivateApplication.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
-      })
-
-      .addCase(getBuilderDetails.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message !== undefined ? action.error.message : null;
-      })
-      .addCase(getBuilderDetails.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(getBuilderDetails.fulfilled, (state, action) => {
-        state.loading = false;
-        state.builderDetails = action.payload;
       });
   },
 });
