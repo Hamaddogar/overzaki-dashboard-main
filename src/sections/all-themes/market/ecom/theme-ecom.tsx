@@ -74,6 +74,11 @@ import SignupDealer from './out-put/signup-dealer';
 import SignInDealer from './out-put/sign-in-dealer';
 import ForgotPassDealer from './out-put/forgot-pass-dealer';
 import OtpDealer from './out-put/otp-dealer';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from 'src/redux/store/store';
+import { getBuilderDetails } from 'src/redux/store/thunks/builder';
+import { useSelector } from 'react-redux';
+
 const dataPages = [
   { title: 'Home Page', link: 'https://ecom-zaki.vercel.app/' },
   { title: 'Products Page', link: 'https://ecom-zaki.vercel.app/products' },
@@ -453,6 +458,8 @@ const defaultSections = [
 ];
 
 export default function EcomDesignMain() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { builderDetails } = useSelector((state: any) => state.builder);
   const socket = socketClient();
 
   const [activeSection, setActiveSection] = useState('Style');
@@ -574,7 +581,7 @@ export default function EcomDesignMain() {
       let valueToShare = '';
 
       if (!parentClass?.startsWith('layout')) {
-        setThemeConfig((pv: any) => ({ ...pv, [key]: newValue }));
+        setThemeConfig((pv) => ({ ...pv, [key]: newValue }));
         _socketKey = parentClass ? parentClass + '.' + key : key;
         valueToShare = newValue;
         if (typeof newValue === 'number') {
@@ -623,7 +630,7 @@ export default function EcomDesignMain() {
           // setbuttonSection('App Bar');
           setbuttonSection('');
           setActiveSection(newValue);
-          setControlls((pv: any) => ({ ...pv, addSection: true }));
+          setControlls((pv) => ({ ...pv, addSection: true }));
         } else {
           setbuttonSection('Font');
           setActiveSection(newValue);
@@ -635,7 +642,7 @@ export default function EcomDesignMain() {
         }
       } else if (newValue === 'Layout') {
         setActiveSection(newValue);
-        setControlls((pv: any) => ({ ...pv, addSection: false }));
+        setControlls((pv) => ({ ...pv, addSection: false }));
       } else {
         setActiveSection(newValue);
         setControlls({
@@ -677,15 +684,15 @@ export default function EcomDesignMain() {
     } else if (controlls.page === 'OTP') {
       setbuttonSection('OTP Dealer');
     }
-    setControlls((pv: any) => ({ ...pv, addSection: false }));
+    setControlls((pv) => ({ ...pv, addSection: false }));
   }, [controlls.page]);
 
   const handleOpenDropDown = React.useCallback(
     (openTo: string) => (event: React.MouseEvent<HTMLElement> | React.KeyboardEvent) => {
       // console.log('event.currentTarget', event.currentTarget);
 
-      if (openTo === 'menu') setControlls((pv: any) => ({ ...pv, menu: event.currentTarget }));
-      else if (openTo === 'addSection') setControlls((pv: any) => ({ ...pv, addSection: true }));
+      if (openTo === 'menu') setControlls((pv) => ({ ...pv, menu: event.currentTarget }));
+      else if (openTo === 'addSection') setControlls((pv) => ({ ...pv, addSection: true }));
       // else if (openTo === "analytics") setDropDown((pv) => ({ ...pv, analytics: event.currentTarget }))
     },
     []
@@ -703,9 +710,9 @@ export default function EcomDesignMain() {
         }
 
         if (closeTo === 'menu') {
-          setControlls((pv: { page: any; }) => ({ ...pv, menu: null, page: value || pv.page }));
+          setControlls((pv) => ({ ...pv, menu: null, page: value || pv.page }));
         } else if (closeTo === 'addSection') {
-          setControlls((pv: any) => ({ ...pv, addSection: false }));
+          setControlls((pv) => ({ ...pv, addSection: false }));
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -726,7 +733,7 @@ export default function EcomDesignMain() {
     setOpen(newOpen);
   };
   const openDropDown = () => {
-    setControlls((pv: any) => ({ ...pv, addSection: true }));
+    setControlls((pv) => ({ ...pv, addSection: true }));
     setOpen(false);
   };
 
@@ -735,6 +742,25 @@ export default function EcomDesignMain() {
     setOpen(false);
     setbuttonSection(section);
   };
+
+
+  useEffect(() => {
+    if (!builderDetails) {
+      dispatch(getBuilderDetails({ builderId: builder_Id, url }));
+    }
+  }, [builderDetails])
+
+
+
+
+
+
+
+
+
+
+
+
   return (
     <Box sx={{ height: '100%', transition: 'all .5' }}>
       {smUp && (
@@ -767,18 +793,18 @@ export default function EcomDesignMain() {
                       sx={
                         activeSection === 'Style'
                           ? {
-                              borderRadius: '12px',
-                              color: '#0F1349',
-                              backgroundColor: '#FFFFFF',
-                              boxShadow: '0px 6px 20px #00000033',
-                              '&:hover': { backgroundColor: '#FFFFFF' },
-                            }
+                            borderRadius: '12px',
+                            color: '#0F1349',
+                            backgroundColor: '#FFFFFF',
+                            boxShadow: '0px 6px 20px #00000033',
+                            '&:hover': { backgroundColor: '#FFFFFF' },
+                          }
                           : {
-                              borderRadius: '12px',
-                              color: '#8688A3',
-                              backgroundColor: 'background.neutral',
-                              '&:hover': { backgroundColor: 'background.neutral' },
-                            }
+                            borderRadius: '12px',
+                            color: '#8688A3',
+                            backgroundColor: 'background.neutral',
+                            '&:hover': { backgroundColor: 'background.neutral' },
+                          }
                       }
                     >
                       {' '}
@@ -792,18 +818,18 @@ export default function EcomDesignMain() {
                       sx={
                         activeSection === 'Layout'
                           ? {
-                              borderRadius: '12px',
-                              color: '#0F1349',
-                              backgroundColor: '#FFFFFF',
-                              boxShadow: '0px 6px 20px #00000033',
-                              '&:hover': { backgroundColor: '#FFFFFF' },
-                            }
+                            borderRadius: '12px',
+                            color: '#0F1349',
+                            backgroundColor: '#FFFFFF',
+                            boxShadow: '0px 6px 20px #00000033',
+                            '&:hover': { backgroundColor: '#FFFFFF' },
+                          }
                           : {
-                              borderRadius: '12px',
-                              color: '#8688A3',
-                              backgroundColor: 'background.neutral',
-                              '&:hover': { backgroundColor: '#FFFFFF' },
-                            }
+                            borderRadius: '12px',
+                            color: '#8688A3',
+                            backgroundColor: 'background.neutral',
+                            '&:hover': { backgroundColor: '#FFFFFF' },
+                          }
                       }
                     >
                       {' '}
@@ -849,7 +875,7 @@ export default function EcomDesignMain() {
                   onClose={handleCloseDropDown('menu')}
                   open={Boolean(controlls.menu)}
                 >
-                  {sectionsList.map((sectionObj: { page: any; }) => (
+                  {sectionsList.map((sectionObj) => (
                     <MenuItem
                       key={sectionObj.page}
                       selected={controlls.page === sectionObj.page}
@@ -998,7 +1024,7 @@ export default function EcomDesignMain() {
 
                     {/* Layout  HomePage */}
                     {activeSection === 'Layout' &&
-                      sectionsList.map((Obj: { sectinos: any[]; }, index: string) => (
+                      sectionsList.map((Obj, index) => (
                         <Box key={'wrap' + index}>
                           {Obj.sectinos.map((sectionObj, ind) => {
                             if (sectionObj.show) {
@@ -1051,7 +1077,7 @@ export default function EcomDesignMain() {
                     borderTopLeftRadius: '10px',
                     borderBottomLeftRadius: '10px',
                   }}
-                  onClick={() => setSideDrawer((pv: any) => !pv)}
+                  onClick={() => setSideDrawer((pv) => !pv)}
                 >
                   {sideDrawer ? <ArrowForwardIosOutlinedIcon /> : <ArrowBackIosNewOutlinedIcon />}
                 </div>
@@ -1247,7 +1273,7 @@ export default function EcomDesignMain() {
                     )}
 
                     {activeSection === 'Layout' &&
-                      sectionsList.map((Obj: { page: any; sectinos: any[]; }, index: string) => (
+                      sectionsList.map((Obj, index) => (
                         <Box key={'wrap' + index}>
                           {controlls.page === Obj.page && (
                             <Stack
@@ -1280,7 +1306,7 @@ export default function EcomDesignMain() {
                                   Add Section
                                 </Typography>
                               </Stack>
-                              {Obj.sectinos.map((sectionObj: { show: any; name: any; img: any; icon: unknown; }, ind: string) => {
+                              {Obj.sectinos.map((sectionObj, ind) => {
                                 if (sectionObj.show) {
                                   return (
                                     <Stack
@@ -1316,9 +1342,9 @@ export default function EcomDesignMain() {
                                             src={sectionObj.img}
                                             sx={{ width: '20px', height: '20px' }}
                                           />
-                                        ) : (
+                                        ) : sectionObj.icon ? (
                                           <sectionObj.icon sx={{ width: '25px', height: '25px' }} />
-                                        )}
+                                        ) : <></>}
                                       </Button>
                                       <Typography variant="caption" color="#0F1349">
                                         {sectionObj.name}

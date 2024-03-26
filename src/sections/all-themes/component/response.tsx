@@ -88,7 +88,7 @@ export const sections = [
         height: '50px',
         backgroundColor: 'white',
         textPosition: 'center',
-        Slider: [],
+        slider: [],
       },
     },
 

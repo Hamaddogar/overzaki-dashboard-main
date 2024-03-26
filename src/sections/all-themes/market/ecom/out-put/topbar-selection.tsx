@@ -15,7 +15,7 @@ import {
   Typography,
 } from '@mui/material';
 import Sketch from '@uiw/react-color-sketch';
-import React, { ChangeEvent, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import Iconify from 'src/components/iconify';
 import { VisuallyHiddenInput } from './logo-part';
 import { AppDispatch } from 'src/redux/store/store';
@@ -23,20 +23,11 @@ import { useDispatch } from 'react-redux';
 import { socketClient } from 'src/sections/all-themes/utils/helper-functions';
 import OfferNavbar from 'src/sections/all-themes/component/OfferNavbar';
 import { sections } from 'src/sections/all-themes/component/response';
-import Slider from 'react-slick';
 import HeaderSection from './header-section';
 import { LoadingScreen } from 'src/components/loading-screen';
-import { createAdAppbarSlider, updateAdAppbarSlider, updateBasicAdAppbar } from 'src/redux/store/thunks/builder';
-interface TopBarProps {
-  themeConfig: {
-    navLogoPosition: string;
-  };
-  handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
-  mobile?: boolean;
-  builder_Id: any;
-  url?: any;
-  ref?: any
-}
+import { createAdAppbarSlider, removeAdAppbarSlider, updateBasicAdAppbar } from 'src/redux/store/thunks/builder';
+import { useSelector } from 'react-redux';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const customPresets = [
   '#FF5733', // Reddish Orange
@@ -61,6 +52,19 @@ const customPresets = [
   '#3366FF', // Vivid Blue
 ];
 
+interface TopBarProps {
+  themeConfig: {
+    navLogoPosition: string;
+  };
+  handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
+  mobile?: boolean;
+  builder_Id: any;
+  url?: any;
+  ref?: any;
+}
+
+
+
 const TopBarDealer = ({
   themeConfig,
   handleThemeConfig,
@@ -70,19 +74,45 @@ const TopBarDealer = ({
 }: TopBarProps) => {
 
   const dispatch = useDispatch<AppDispatch>();
+  const { builderDetails } = useSelector((state: any) => state.builder as any);
   const socket = socketClient();
 
   const targetHeader = 'home.sections.appBar.adAppBar.';
 
+
+  // const [adAppbar, setAdAppbar] = useState(sections[0].appBar.adAppBar);
+  const [adAppbar, setAdAppbar] = useState<any>(sections[0].appBar.adAppBar);
+
   const [topBarObj, setTopBarObj] = useState<any>({});
   const [loader, setLoader] = useState<any>(false);
+  const [appBarItems, setAppBarItems] = useState<any>([]);
 
-  const [appBarItems, setAppBarItems] = useState([]);
-  const [sliderArray, setSliderArray] = useState([]);
+  // const [sliderArray, setSliderArray] = useState([]);
+
 
   // Create a ref to store the latest state value
   const appBarItemsRef = useRef(appBarItems);
   appBarItemsRef.current = appBarItems;
+
+
+  useEffect(() => {
+    if (builderDetails) {
+      const topbarPath = builderDetails?.design?.home?.sections?.appBar?.adAppBar;
+      const Slider = builderDetails?.design?.home?.sections?.appBar?.adAppBar?.slider || [];
+      const newTopBarObject = {
+        ...topbarPath,
+        slider: Slider.map((item: any) => ({ ...item, image: item.file })),
+      }
+
+      setTopBarObj(newTopBarObject);
+      setAdAppbar(newTopBarObject);
+      setAppBarItems(Slider?.map((item: any) => ({ ...item, image: item.file })) || []);
+      // slider: response.payload.home.sections.appBar.adAppBar.slider.map((item: any) => ({ ...item, image: item.file })),
+    }
+  }, [builderDetails])
+
+
+
 
   let timeoutId: any;
   const debounce = (func: any, delay: any) => {
@@ -107,44 +137,34 @@ const TopBarDealer = ({
 
   const handleChangeEvent = debounce((key: any, newValue: any, parentClass: any = null) => {
 
-    // console.log(key, newValue, parentClass);
-
-
-    let _socketKey = '';
-    let valueToShare = '';
-    const nestedAppbar = parentClass ? topBarObj?.[parentClass] : null;
-
-    // console.log("topBarObj", topBarObj);
-    // console.log("nestedAppbar", nestedAppbar);
-    // console.log("nestedAppbar", typeof nestedAppbar);
+    // let _socketKey = '';
+    // let valueToShare = '';
+    const nestedAppbar = parentClass ? adAppbar?.[parentClass] : null;
 
     if (nestedAppbar !== null) {
-      setTopBarObj({ ...topBarObj, [parentClass]: { ...nestedAppbar, [key]: newValue } });
+      setAdAppbar({ ...adAppbar, [parentClass]: { ...nestedAppbar, [key]: newValue } });
     } else {
-      // const newObject = { ...topBarObj, [key]: newValue };
-      // console.log("newObject", newObject);
-
-      setTopBarObj({ ...topBarObj, [key]: newValue });
+      setAdAppbar({ ...adAppbar, [key]: newValue });
     }
 
 
 
-    _socketKey = parentClass ? parentClass + '.' + key : key;
+    // _socketKey = parentClass ? parentClass + '.' + key : key;
     // valueToShare = typeof newValue === 'number' ? `${newValue}px` : newValue;
-    valueToShare = newValue;
+    // valueToShare = newValue;
 
     // const targetHeader = 'appBar.websiteLogo.';
-    const data = {
-      builderId: builder_Id,
-      key: targetHeader + _socketKey,
-      value: valueToShare,
-    };
+    // const data = {
+    //   builderId: builder_Id,
+    //   key: targetHeader + _socketKey,
+    //   value: valueToShare,
+    // };
 
-    console.log("data", data);
-    if (socket) {
-      socket.emit('website:cmd', data);
-    }
-  }, 1500);
+    // console.log("data", data);
+    // if (socket) {
+    //   socket.emit('website:cmd', data);
+    // }
+  }, 500);
 
 
   const isColorValid = (color: string) =>
@@ -209,13 +229,13 @@ const TopBarDealer = ({
       alert('Please select a valid image file.');
     }
   };
-  const [adAppbar, setAdAppbar] = useState(sections[0].appBar.adAppBar);
+
 
   const handleTextChange = (index: any, event: any, name: any) => {
     const value = name !== 'color' ? event.target.value : event;
     setAdAppbar((prevState: any) => ({
       ...prevState,
-      Slider: prevState.Slider.map((item: any, i: any) => {
+      slider: prevState.slider.map((item: any, i: any) => {
         if (i === index) {
           return {
             ...item,
@@ -234,11 +254,13 @@ const TopBarDealer = ({
       status: adAppbar.status,
       width: adAppbar.width,
       height: adAppbar.height,
-      bakgroundColor: adAppbar.backgroundColor,
+      bakgroundColor: adAppbar.bakgroundColor,
       AdText: "ad text",
       href: "/ref",
       textPosition: adAppbar.textPosition
     };
+    console.log("payloadData", payloadData);
+
     setTimeout(() => {
       dispatch(updateBasicAdAppbar({ builderId: builder_Id, url: url, data: payloadData })).then((response: any) => {
         console.log("response", response);
@@ -251,6 +273,10 @@ const TopBarDealer = ({
   const handleSaveItem = (item: any) => {
     console.log(item);
     setLoader(true);
+    // setAdAppbar((prevState: any) => ({
+    //   ...prevState,
+    //   slider: [...prevState.slider, { text: item.text, image: item.image, href: item.href, color: item.color, _id: }],
+    // }));
     const payloadData = {
       adAppbarFile: item?.adAppbarFile,
       data: JSON.stringify({
@@ -262,6 +288,24 @@ const TopBarDealer = ({
       dispatch(createAdAppbarSlider({ builderId: builder_Id, url: url, data: payloadData })).then((response: any) => {
         console.log("response", response);
         setLoader(false)
+        response.payload.home.sections.appBar.adAppBar.slider
+        setAdAppbar((prevState: any) => ({
+          ...prevState,
+          slider: response.payload.home.sections.appBar.adAppBar.slider.map((item: any) => ({ ...item, image: item.file })),
+        }));
+      })
+    }, 1000);
+  }
+
+  const handleDeleteItem = (item: any) => {
+    setLoader(true);
+    const payloadData = {
+      path: "home.sections.appBar.adAppBar.slider"
+    };
+    setTimeout(() => {
+      dispatch(removeAdAppbarSlider({ builderId: builder_Id, url: url, data: payloadData, itemId: item?._id })).then((response: any) => {
+        console.log("response_delted", response);
+        setLoader(false);
       })
     }, 1000);
   }
@@ -275,7 +319,7 @@ const TopBarDealer = ({
     );
     setAdAppbar((prevState: any) => ({
       ...prevState,
-      Slider: [...prevState.Slider, { text: '', image: '', href: '' }],
+      slider: [...prevState.slider, { text: '', image: '', href: '' }],
     }));
   }
 
@@ -293,9 +337,7 @@ const TopBarDealer = ({
         closer={() => childFunction()}
       />
       <Stack gap={2} direction={'column'}>
-        {/* <Box sx={{ border: '4px solid lightgray' }}>
-        <img src="https://s3.ezgif.com/tmp/ezgif-3-392363cace.gif" />
-      </Box> */}
+
         <OfferNavbar adAppbar={adAppbar} />
         <Accordion>
           <AccordionSummary
@@ -319,12 +361,12 @@ const TopBarDealer = ({
               </Typography>
               <Switch
                 inputProps={{ 'aria-label': 'controlled' }}
-                checked={topBarObj?.status}
+                checked={adAppbar?.status}
                 onChange={(event: any, value: any) => handleChangeEvent('status', value)}
               />
             </Stack>
             <Box sx={{ width: '100%', display: 'flex', gap: 2, my: 2 }}>
-              <Box>
+              {/* <Box>
                 <Typography variant="caption" color="#8688A3">
                   Width
                 </Typography>
@@ -338,7 +380,7 @@ const TopBarDealer = ({
                     />
                   </Stack>
                 </Stack>
-              </Box>
+              </Box> */}
               <Box>
                 <Typography variant="caption" color="#8688A3">
                   Height
@@ -348,7 +390,7 @@ const TopBarDealer = ({
                     <TextField
                       variant="filled"
                       type="number"
-                      value={topBarObj?.height}
+                      defaultValue={adAppbar?.height}
                       onChange={(event) => handleChangeEvent('height', event.target.value)}
                     />
                   </Stack>
@@ -366,22 +408,11 @@ const TopBarDealer = ({
                 spacing="18px"
                 marginTop="10px"
               >
-                {/* <MuiColorInput
-                      sx={{ width: '100%', margin: 'auto' }}
-                      variant="outlined"
-                      value={appBar?.container?.backgroundColor ?? '#000001'}
-                      format="hex"
-                      onChange={(event) =>
-                        isColorValid(event)
-                          ? handleChangeEvent('backgroundColor', event, 'container')
-                          : null
-                      }
-                    /> */}
+
                 <Sketch
                   onChange={(event: any) => {
                     isColorValid(event?.hex) ? handleChangeEvent('bakgroundColor', event?.hex) : null;
-
-                    setAdAppbar((prev) => ({ ...prev, backgroundColor: event?.hex }));
+                    // setAdAppbar((prev: any) => ({ ...prev, bakgroundColor: event?.hex }));
                   }}
                   presetColors={customPresets}
                   style={{ width: '100%' }}
@@ -411,15 +442,23 @@ const TopBarDealer = ({
               </IconButton>
             </Box>
             <Stack gap={3}>
-              {appBarItems.map((item, i) => (
+              {appBarItems.map((item: any, i: any) => (
                 <Box key={i} sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
                   <Stack direction={'row'} alignItems={'center'} justifyContent={'space-between'} mt={2} >
                     <Typography variant="caption" sx={{ fontWeight: 900 }}>
                       Ad {i + 1}
                     </Typography>
-                    <Button variant='contained' sx={{ backgroundColor: '#F5F5F8', color: '#898BA5', '&:hover': { backgroundColor: '#DEE1E6' } }} onClick={() => { handleSaveItem(item) }} >
-                      Save
-                    </Button>
+                    {appBarItems?.[i]?._id ? (
+                      <>
+                        <IconButton aria-label="delete" size="large" onClick={() => { handleDeleteItem(item) }} >
+                          <DeleteIcon />
+                        </IconButton>
+                      </>
+                    ) :
+                      <Button variant='contained' sx={{ backgroundColor: '#F5F5F8', color: '#898BA5', '&:hover': { backgroundColor: '#DEE1E6' } }} onClick={() => { handleSaveItem(item) }} >
+                        Save
+                      </Button>
+                    }
 
                   </Stack>
                   <Stack direction="row" my={2} alignItems="center" spacing="20px">
@@ -437,8 +476,18 @@ const TopBarDealer = ({
                       component="label"
                     >
                       <VisuallyHiddenInput type="file" onChange={handleImageChange64(i)} />
-                      <Iconify icon="bi:image" style={{ color: '#C2C3D1', display: 'block' }} />
+                      {appBarItems?.[i]?.image ? (
+                        <Box
+                          component="img"
+                          src={appBarItems?.[i]?.image}
+                          alt=" "
+                          width="60px"
+                        />
+                      ) : (
+                        <Iconify icon="bi:image" style={{ color: '#C2C3D1', display: 'block' }} />
+                      )}
                     </Box>
+
 
                     <Box>
                       <Typography
@@ -468,11 +517,11 @@ const TopBarDealer = ({
                         variant="filled"
                         type="text"
                         placeholder="Get 25% Off"
-                        value={topBarObj?.Slider?.[`text${i}`]}
+                        defaultValue={appBarItems?.[i]?.text || ""}
                         onChange={(event) => {
                           handleSliderItemChange(i, event.target.value, 'text')
-                          // handleChangeEvent(`text${i}`, event.target.value, 'Slider');
-                          handleTextChange(i, event, 'text');
+                          // handleChangeEvent(`text${i}`, event.target.value, 'slider');
+                          // handleTextChange(i, event, 'text');
                         }}
                       />
                     </Box>
@@ -485,10 +534,10 @@ const TopBarDealer = ({
                         variant="filled"
                         type="text"
                         placeholder="www.overzaki.com"
-                        // value={appBar?.logoObj?.width}
+                        defaultValue={appBarItems?.[i]?.href || ""}
                         onChange={(event) => {
-                          handleTextChange(i, event, 'href')
                           handleSliderItemChange(i, event.target.value, 'href')
+                          // handleTextChange(i, event, 'href')
                         }}
 
                       />
@@ -509,7 +558,12 @@ const TopBarDealer = ({
             }
           /> */}
                       <Sketch
-                        onChange={(event) => handleTextChange(i, event.hex, 'color')}
+                        // onChange={(event) => handleTextChange(i, event.hex, 'color')}
+                        onChange={(event) => {
+                          // handleTextChange(i, event.hex, 'color')
+                          handleSliderItemChange(i, event.hex, 'color')
+                        }
+                        }
                         presetColors={customPresets}
                         style={{ width: '100%' }}
                       />
@@ -525,7 +579,7 @@ const TopBarDealer = ({
 
               <RadioGroup
                 onChange={(event: any) => {
-                  setAdAppbar((prev) => ({ ...prev, textPosition: event.target.value }));
+                  // setAdAppbar((prev: any) => ({ ...prev, textPosition: event.target.value }));
                   handleChangeEvent(`textPosition`, event.target.value)
                 }}
                 row
