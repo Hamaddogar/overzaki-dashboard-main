@@ -554,6 +554,7 @@ export default function LogoDealer({
   setAppBarLogo,
 }: LogoProps) {
   const [logoObj, setLogoObj] = useState<any>(null);
+  const [imagePreview, setImagePreview] = useState<any>(null)
   const dispatch = useDispatch<AppDispatch>();
   const socket = socketClient();
 
@@ -591,7 +592,7 @@ export default function LogoDealer({
     if (socket) {
       socket.emit('website:cmd', data);
     }
-  }, 1500);
+  }, 500);
 
   const handleImageChange64 = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -602,7 +603,7 @@ export default function LogoDealer({
       reader.onload = () => {
         const base64 = reader.result?.toString().split(',')[1]; // Get the base64 data
         console.log('Base64:', base64); // Log the base64 data
-        // setImagePreview(reader.result?.toString() || null);
+        setImagePreview(reader.result?.toString() || null);
         handleThemeConfig(key, reader.result?.toString() || '');
         saveTempData(file);
       };
@@ -707,10 +708,20 @@ export default function LogoDealer({
               component="label"
             >
               <VisuallyHiddenInput type="file" onChange={handleImageChange64('logo')} />
-              <Iconify
-                icon="bi:image"
-                style={{ color: '#C2C3D1', display: themeConfig?.logo ? 'none' : 'block' }}
-              />
+              {imagePreview ? (
+                <Box
+                  component="img"
+                  src={imagePreview}
+                  alt=" "
+                  width="60px"
+                />
+              ) : (
+                <Iconify
+                  icon="bi:image"
+                  style={{ color: '#C2C3D1', display: themeConfig?.logo ? 'none' : 'block' }}
+                />
+              )}
+
             </Box>
 
             <Box>

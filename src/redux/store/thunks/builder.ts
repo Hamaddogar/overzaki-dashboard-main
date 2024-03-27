@@ -148,7 +148,7 @@ export const removeAdAppbarSlider = createAsyncThunk(
       }
       let headersObj = defaultConfig();
       headersObj.headers['x-tenant-id'] = url;
-      headersObj.headers['data'] = JSON.stringify(data);
+      headersObj.headers['x-path'] = data?.path;
 
       const response = await deleteRequest(
         `${endpoints.builder.home.adAppBar.removeSlider}/${builderId}/lists/${itemId}`,

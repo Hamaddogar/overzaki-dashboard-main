@@ -7,7 +7,7 @@ import { sections } from './response';
 
 const OfferNavbar = ({ adAppbar }: any) => {
   const { slider, ...restOfStyles } = adAppbar;
-  // console.log(restOfStyles);
+  console.log("slider", slider);
 
 
   return (
@@ -49,8 +49,8 @@ const OfferNavbar = ({ adAppbar }: any) => {
             >
               <img
                 style={{ width: '12px', height: '12px' }}
-                // className="w-8 h-8"
-                src={item?.imageURL}
+                className="mr-2"
+                src={item?.image}
               />
               <span style={{ color: item.color || 'black' }}>{item?.text}</span>
             </div>

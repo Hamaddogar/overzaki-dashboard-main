@@ -32,7 +32,28 @@ import { sections } from 'src/sections/all-themes/component/response';
 import { LoadingScreen } from 'src/components/loading-screen';
 import HeaderSection from './header-section';
 // ----------------------------------------------------------------------
-
+const customPresets = [
+  '#FF5733', // Reddish Orange
+  '#33FF57', // Greenish Yellow
+  '#3366FF', // Vivid Blue
+  '#FF33FF', // Electric Purple
+  '#33FFFF', // Cyan
+  '#FF3366', // Pink
+  '#6633FF', // Blue Purple
+  '#FF9900', // Orange
+  '#00FF99', // Spring Green
+  '#9966FF', // Royal Purple
+  '#99FF33', // Lime Green
+  '#FF66CC', // Pastel Pink
+  '#66FF33', // Bright Lime
+  '#FF6600', // Bright Orange
+  '#FF99CC', // Light Pink
+  '#3399FF', // Sky Blue
+  '#FFCC00', // Gold
+  '#33CC66', // Jade
+  '#33FF57', // Greenish Yellow
+  '#3366FF', // Vivid Blue
+];
 const TABS = [
   {
     value: 'Layout',
@@ -47,6 +68,61 @@ const TABS = [
     label: 'Components',
   },
 ];
+
+const dataCart = [
+  {
+    name: 'Cart 1',
+    checked: false,
+    icon: '/raw/cart3.svg',
+    value: '1',
+  },
+  {
+    name: 'Cart 2',
+    checked: true,
+    icon: '/raw/cart1.svg',
+    value: '2',
+  },
+  {
+    name: 'Cart 3',
+    checked: false,
+    icon: '/raw/cart2.svg',
+    value: '3',
+  },
+  {
+    name: 'Cart 4',
+    checked: false,
+    icon: '/raw/cart4.svg',
+    value: '4',
+  },
+];
+const dataLeftHeader = [
+  {
+    name: 'Menu 1',
+    checked: false,
+    icon: 'heroicons-outline:menu-alt-2',
+    value: '1',
+  },
+  {
+    name: 'Menu 2',
+    checked: true,
+    icon: 'material-symbols:menu',
+    value: '2',
+  },
+  {
+    name: 'Menu 3',
+    checked: false,
+    icon: 'carbon:menu',
+    value: '3',
+  },
+  {
+    name: 'Menu 4',
+    checked: false,
+    icon: 'system-uicons:menu-vertical',
+    value: '4',
+  },
+];
+
+
 interface NavProps {
   themeConfig: {
     navLogoPosition: string;
@@ -64,13 +140,53 @@ export default function NavDealer({
   builder_Id,
   url,
 }: NavProps) {
+
+
+  const socket = socketClient();
   const [navbarState, setNavbarState] = useState(sections);
   const [currentTab, setCurrentTab] = useState('Layout');
   const [appBar, setAppBar] = useState<any>({});
   const [mainAppBar, setMainAppBar] = useState<any>({});
   const [loader, setLoader] = useState<any>(false);
 
-  const socket = socketClient();
+
+  const [language, setLangauge] = useState(true);
+
+  const [cartLogo, setCartLogo] = useState('/raw/cart3.svg');
+
+  const [headerLogo, setHeaderLogo] = useState('heroicons-outline:menu-alt-2');
+
+  const [containerBackgroundColor, setContainerBackgrounColor] = useState(false);
+
+  const [searchBackgroundColor, setSearchBackgroundColor] = useState(false);
+
+  const [isMenu, setIsMenu] = useState(false);
+
+  const [menuColors, setMenuColors] = useState({ textBackgroundColor: false, hoverColor: false });
+  // Navbar
+  const [generalIcons, setGeneralIcons] = useState(navbarState[0].generalIcons);
+  const [appBarSearch, setAppBarSearch] = useState(navbarState[0].appBar.search);
+  // console.log(generalIcons);
+  const [appBarLogo, setAppBarLogo] = useState(navbarState[0]?.websiteLogo);
+
+  const [appBarContainer, setAppBarContainer] = useState(navbarState[0].appBar.container);
+
+  const [centerMenu, setCenterMenu] = useState(navbarState[0]?.appBar?.menu);
+
+
+  const [menus, setMenus] = useState([
+    {
+      link: '',
+      name: '',
+    },
+  ]);
+
+  useEffect(() => {
+    // const menuesList = menus.filter((menuObj: any) => menuObj.link !== '' && menuObj.name !== '');
+    // if (menuesList.length > 0) {
+    //   sendSocketMsg(menuesList);
+    // }
+  }, [menus]);
 
   useEffect(() => {
     socket?.connect()
@@ -93,15 +209,7 @@ export default function NavDealer({
     };
   };
 
-  // useEffect(() => {
-  //   if (socket) {
-  //     socket.on(`${builder_Id}:cmd`, (data) => {
-  //       console.log("response");
 
-  //       console.log(JSON.stringify(data.result));
-  //     });
-  //   }
-  // }, [builder_Id])
 
   const handleChangeEvent = (
     key: string,
@@ -148,28 +256,7 @@ export default function NavDealer({
   const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
     setCurrentTab(newValue);
   }, []);
-  const customPresets = [
-    '#FF5733', // Reddish Orange
-    '#33FF57', // Greenish Yellow
-    '#3366FF', // Vivid Blue
-    '#FF33FF', // Electric Purple
-    '#33FFFF', // Cyan
-    '#FF3366', // Pink
-    '#6633FF', // Blue Purple
-    '#FF9900', // Orange
-    '#00FF99', // Spring Green
-    '#9966FF', // Royal Purple
-    '#99FF33', // Lime Green
-    '#FF66CC', // Pastel Pink
-    '#66FF33', // Bright Lime
-    '#FF6600', // Bright Orange
-    '#FF99CC', // Light Pink
-    '#3399FF', // Sky Blue
-    '#FFCC00', // Gold
-    '#33CC66', // Jade
-    '#33FF57', // Greenish Yellow
-    '#3366FF', // Vivid Blue
-  ];
+
   const handleImageChange64 = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
@@ -201,23 +288,9 @@ export default function NavDealer({
     const formDataToSend = new FormData();
     formDataToSend.append('image', file);
 
-    dispatch(saveLogo({ builderId: builder_Id, data: formDataToSend })).then((response: any) => {
-      // console.log("response", response);
-    });
+    dispatch(saveLogo({ builderId: builder_Id, data: formDataToSend }));
   };
-  const [menus, setMenus] = useState([
-    {
-      link: '',
-      name: '',
-    },
-  ]);
 
-  useEffect(() => {
-    const menuesList = menus.filter((menuObj: any) => menuObj.link !== '' && menuObj.name !== '');
-    if (menuesList.length > 0) {
-      sendSocketMsg(menuesList);
-    }
-  }, [menus]);
 
   const sendSocketMsg = debounce((menuesList: any) => {
     const targetHeader = 'home.sections.appBar.menu.';
@@ -231,21 +304,10 @@ export default function NavDealer({
     if (socket) {
       socket.emit('website:cmd', data);
     }
-  }, 1500);
+  }, 500);
 
-  const [containerBackgroundColor, setContainerBackgrounColor] = useState(false);
-  const [searchBackgroundColor, setSearchBackgroundColor] = useState(false);
-  const [isMenu, setIsMenu] = useState(false);
-  const [menuColors, setMenuColors] = useState({ textBackgroundColor: false, hoverColor: false });
-  // Navbar
-  const [generalIcons, setGeneralIcons] = useState(navbarState[0].generalIcons);
-  const [appBarSearch, setAppBarSearch] = useState(navbarState[0].appBar.search);
-  // console.log(generalIcons);
-  const [appBarLogo, setAppBarLogo] = useState(navbarState[0]?.websiteLogo);
 
-  const [appBarContainer, setAppBarContainer] = useState(navbarState[0].appBar.container);
 
-  const [centerMenu, setCenterMenu] = useState(navbarState[0]?.appBar?.menu);
   const handleChangeMenu = (event: any, target: any, index: any) => {
     const updatedMenus = menus.map((menuItem, i) => {
       if (i === index) {
@@ -265,6 +327,8 @@ export default function NavDealer({
     const search = appBar.search;
     const container = appBar.container;
 
+    const menuesList = menus.filter((menuObj: any) => menuObj.link !== '' && menuObj.name !== '');
+
     const payloadData = {
       menu: {
         style: {
@@ -274,7 +338,7 @@ export default function NavDealer({
           backgroundColor: menu?.backgroundColor,
           hoverColor: menu?.hoverColor,
         },
-        menuItems: [],
+        menuItems: menuesList && menuesList.length > 0 ? menuesList : [],
       },
       search: {
         status: search?.status,
@@ -309,54 +373,6 @@ export default function NavDealer({
       },
     };
 
-    // const payloadData = {
-    //   menu: {
-    //     style: {
-    //       size: "20px",
-    //       color: "red",
-    //       backgroundColor: "tomato",
-    //       hoverColor: "#eee",
-    //       fontStyle: "sans"
-    //     },
-    //     menuItems: [
-    //       {
-    //         name: "home",
-    //         link: "/home"
-    //       }
-    //     ]
-    //   },
-    //   search: {
-    //     status: true,
-    //     input: true,
-    //     position: "top",
-    //     textBg: "gray",
-    //     textColor: "black",
-    //     borderColor: "black",
-    //     borderWidth: "1px",
-    //     mobileView: {
-    //       status: true,
-    //       width: "200",
-    //       height: "250"
-    //     }
-    //   },
-    //   container: {
-    //     show: true,
-    //     isShadow: true,
-    //     startColor: "blue",
-    //     finalColor: "pink",
-    //     width: "200",
-    //     height: "300",
-    //     backgroundColor: "blue",
-    //     backgroundColorDark: "black",
-    //     borderBottomWidth: 200,
-    //     borderBottomColor: "red",
-    //     borderBottomColorDark: "blue",
-    //     isCenterTitle: false,
-    //     containerViewStyle: {
-    //       marginBottom: 5
-    //     }
-    //   }
-    // }
 
     setTimeout(() => {
       dispatch(
@@ -371,62 +387,7 @@ export default function NavDealer({
       });
     }, 1000);
   };
-  const [language, setLangauge] = useState(true);
 
-  const dataCart = [
-    {
-      name: 'Cart 1',
-      checked: false,
-      icon: '/raw/cart3.svg',
-      value: '1',
-    },
-    {
-      name: 'Cart 2',
-      checked: true,
-      icon: '/raw/cart1.svg',
-      value: '2',
-    },
-    {
-      name: 'Cart 3',
-      checked: false,
-      icon: '/raw/cart2.svg',
-      value: '3',
-    },
-    {
-      name: 'Cart 4',
-      checked: false,
-      icon: '/raw/cart4.svg',
-      value: '4',
-    },
-  ];
-  const dataLeftHeader = [
-    {
-      name: 'Menu 1',
-      checked: false,
-      icon: 'heroicons-outline:menu-alt-2',
-      value: '1',
-    },
-    {
-      name: 'Menu 2',
-      checked: true,
-      icon: 'material-symbols:menu',
-      value: '2',
-    },
-    {
-      name: 'Menu 3',
-      checked: false,
-      icon: 'carbon:menu',
-      value: '3',
-    },
-    {
-      name: 'Menu 4',
-      checked: false,
-      icon: 'system-uicons:menu-vertical',
-      value: '4',
-    },
-  ];
-  const [cartLogo, setCartLogo] = useState('/raw/cart3.svg');
-  const [headerLogo, setHeaderLogo] = useState('heroicons-outline:menu-alt-2');
   return (
     <div>
       {loader && <LoadingScreen />}

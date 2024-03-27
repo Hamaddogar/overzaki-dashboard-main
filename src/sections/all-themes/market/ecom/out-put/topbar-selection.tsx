@@ -305,6 +305,13 @@ const TopBarDealer = ({
     setTimeout(() => {
       dispatch(removeAdAppbarSlider({ builderId: builder_Id, url: url, data: payloadData, itemId: item?._id })).then((response: any) => {
         console.log("response_delted", response);
+        if (response.payload) {
+
+          setAdAppbar((prevState: any) => ({
+            ...prevState,
+            slider: response.payload?.home.sections.appBar.adAppBar.slider,
+          }));
+        }
         setLoader(false);
       })
     }, 1000);
@@ -456,7 +463,7 @@ const TopBarDealer = ({
                       </>
                     ) :
                       <Button variant='contained' sx={{ backgroundColor: '#F5F5F8', color: '#898BA5', '&:hover': { backgroundColor: '#DEE1E6' } }} onClick={() => { handleSaveItem(item) }} >
-                        Save
+                        Add
                       </Button>
                     }
 
