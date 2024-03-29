@@ -54,7 +54,8 @@ export default function BannerDealer({
 
   const [banner, setBanner] = useState<any>({});
   const [bannerSliderImages, setBannerSliderImages] = useState<any>([]);
-  const [bannerType, setBannerType] = useState('');
+  const [bannerType, setBannerType] = useState<any>('');
+  const [paymentBox, setPaymentBox] = useState<any>(null)
 
 
 
@@ -103,7 +104,7 @@ export default function BannerDealer({
     }
 
 
-  }, 1500);
+  }, 500);
 
   const isColorValid = (color: string) =>
     /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^rgb\(\d{1,3}, \d{1,3}, \d{1,3}\)$|^rgba\(\d{1,3}, \d{1,3}, \d{1,3}, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$|^hsl\(\d{1,3}, \d{1,3}%, \d{1,3}%\)$|^hsla\(\d{1,3}, \d{1,3}%, \d{1,3}%, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$/.test(
@@ -126,7 +127,7 @@ export default function BannerDealer({
       switch (action) {
         case 'delete':
           arrayData.splice(1, location);
-          console.log("arrayData", arrayData);
+          console.log('arrayData', arrayData);
 
           handleThemeConfig('bannerImages', arrayData);
           break;
@@ -138,7 +139,7 @@ export default function BannerDealer({
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     handleThemeConfig('bannerShow', event.target.checked);
-  }
+  };
 
   const handleNewBanner = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -148,7 +149,10 @@ export default function BannerDealer({
 
       reader.onload = () => {
         // handleThemeConfig(key, [...themeConfig.bannerImages, reader.result?.toString()]);
-        handleThemeConfig(key, [...(key === 'bannerImages' ? themeConfig.bannerImages : themeConfig.sliderImage), reader.result?.toString()]);
+        handleThemeConfig(key, [
+          ...(key === 'bannerImages' ? themeConfig.bannerImages : themeConfig.sliderImage),
+          reader.result?.toString(),
+        ]);
       };
 
 
@@ -156,35 +160,34 @@ export default function BannerDealer({
 
       reader.readAsDataURL(file); // Read the file as data URL
 
-      let filePath = "";
+      let filePath = '';
 
       const formData = new FormData();
       formData.append('image', file);
 
       if (key === 'bannerImages') {
-        filePath = "home.sections.banner.bannerBackground.file";
+        filePath = 'home.sections.banner.bannerBackground.file';
         formData.append('filePath', filePath);
       } else {
         const defaultVideoData = {
           textStatus: true,
-          type: "",
+          type: '',
           style: {
-            top: "10",
-            color: "black",
-            textposition: "10",
-            fontWeight: "12",
+            top: '10',
+            color: 'black',
+            textposition: '10',
+            fontWeight: '12',
             size: 1,
-            left: 2
+            left: 2,
           },
-          text: "",
-          href: ""
-        }
-        setBannerSliderImages([...bannerSliderImages, { file: file, data: defaultVideoData }])
-        filePath = "home.sections.banner.slider";
+          text: '',
+          href: '',
+        };
+        setBannerSliderImages([...bannerSliderImages, { file: file, data: defaultVideoData }]);
+        filePath = 'home.sections.banner.slider';
         formData.append('data', JSON.stringify(defaultVideoData));
         formData.append('path', filePath);
       }
-
 
       // if (file && file.type.startsWith('image/')) {
       //   const reader = new FileReader();
@@ -194,23 +197,19 @@ export default function BannerDealer({
       //   reader.readAsDataURL(file); // Read the file as data URL
       // }
 
-
-      if (url.startsWith("https://")) {
-        url = url.replace(/^https?:\/\//, "");
+      if (url.startsWith('https://')) {
+        url = url.replace(/^https?:\/\//, '');
       }
 
-      dispatch(builderSetObjectInDesign({ url: url, builderId: builderId, data: formData })).then((response: any) => {
-        console.log("response", response);
-      })
-
-
+      dispatch(builderSetObjectInDesign({ url: url, builderId: builderId, data: formData })).then(
+        (response: any) => {
+          console.log('response', response);
+        }
+      );
     } else {
       alert('Please select a valid image file.');
     }
   };
-
-
-
 
   // const handleNewSliderBanner = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
   //   const file = event.target.files?.[0];
@@ -252,7 +251,8 @@ export default function BannerDealer({
     shadow: true,
     borderBottomWidth: 0,
   });
-
+  const [bannerContainerSearch, setBannerContainerSearch] = useState<any>(null)
+  const [bannerSearch, setBannerSearch] = useState<any>(null)
   const [sliderType, setSliderType] = useState<any>(
     sections[0]?.banner?.bannerBackground?.sliderType
   );
@@ -285,9 +285,8 @@ export default function BannerDealer({
   const [bannerContainerStyling, setBannerContainerStyling] = useState({});
   // console.log(bannerContainerStyling);
 
-
   useEffect(() => {
-    console.log("slider image");
+    console.log('slider image');
     console.log(themeConfig.sliderImage);
   }, [themeConfig])
 
@@ -295,15 +294,99 @@ export default function BannerDealer({
 
   return (
     <Box pt="20px">
-      {bannerType === 'slider' ? (
-        <BannerSlider
-          bannerContainerStyling={bannerContainerStyling}
-          data={themeConfig.sliderImage}
-          bannerType={sliderType}
-        />
-      ) : (
-        <img src={themeConfig.bannerImages[0]} />
+      {!themeConfig.bannerImages[0] && !themeConfig.sliderImage && (
+        <Stack border={5} borderColor={'#5cb85c'}>
+          <img src={'/raws/banner.png'} />
+        </Stack>
       )}
+      {bannerType === 'slider' ? (
+        <div style={{ position: 'relative' }}>
+          <BannerSlider
+            bannerContainerStyling={bannerContainerStyling}
+            data={themeConfig.sliderImage}
+            bannerType={sliderType}
+          />
+          {bannerContainerSearch.show && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                width: '100%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 999,
+                display:
+                  themeConfig.bannerImages[0] ||
+                  (themeConfig.sliderImage.length > 0 ? 'flex' : 'none'),
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {bannerContainerSearch.text && (
+                <h1
+                  style={{ textAlign: 'center', lineHeight: 1, fontSize: '20px', fontWeight: 900, color: 'white' }}
+                >
+                  {bannerSearch.topText}
+                  <br /> <span style={{ fontSize: '25px', color: "white" }}>{bannerSearch.bottomText}</span>
+                </h1>
+              )}
+              <div
+                style={{
+                  display: bannerContainerSearch.search ? 'flex' : 'none',
+                  alignItems: 'center',
+                  width: '50%',
+                  backgroundColor: 'white',
+                  padding: '5px',
+                  borderRadius: '20px',
+                }}
+              >
+                <input
+                  style={{ outline: 'none', border: 'none' }}
+                  type="text"
+                  placeholder={bannerSearch.placeHolder}
+                />
+                <div
+                  style={{
+                    backgroundColor: 'orange',
+                    padding: '2px',
+                    borderRadius: '5px',
+                    width: '40%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Iconify icon="material-symbols:search" />
+                </div>
+              </div>
+            </div>
+          )}
+          {paymentBox.show && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '80%',
+                left: '50%',
+                width: '100%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 999,
+                display: paymentBox ? 'flex' : 'none',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <img width={'60%'} src={'/pymntbox.jpg'} />
+            </div>
+          )}
+        </div>
+      ) : (
+        <Stack border={5} borderColor={'#5cb85c'}>
+          <img src={themeConfig.bannerImages[0]} />
+        </Stack>
+      )}
+
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography variant="caption" sx={{ fontWeight: 900 }}>
           Show Banners Section
@@ -312,8 +395,8 @@ export default function BannerDealer({
           checked={themeConfig.bannerShow}
           // onChange={handleChange}
           onChange={(event: any) => {
-            handleChange(event)
-            handleChangeEvent("show", event.target.checked, "container")
+            handleChange(event);
+            handleChangeEvent('show', event.target.checked, 'container');
           }}
           inputProps={{ 'aria-label': 'controlled' }}
         />
@@ -343,7 +426,7 @@ export default function BannerDealer({
                 //   value={logoObj?.position || 'center'}
                 onChange={(event: any) => {
                   setBannerType(event.target.value);
-                  handleChangeEvent("backgroundType", event.target.value, "bannerBackground")
+                  handleChangeEvent('backgroundType', event.target.value, 'bannerBackground');
                 }}
               >
                 <FormControlLabel value="slider" control={<Radio size="medium" />} label="Slider" />
@@ -463,9 +546,10 @@ export default function BannerDealer({
                     <RadioGroup
                       row
                       // value={logoObj?.position || 'center'}
-                      onChange={(event: any) =>
-                        handleChangeEvent('sliderType', event?.target?.value, 'bannerBackground')
-                      }
+                      onChange={(event: any) => {
+                        handleChangeEvent('sliderType', event?.target?.value, 'bannerBackground');
+                        setSliderType(event.target.value);
+                      }}
                     // onChange={(event: any) => setSliderType(event.target.value)}
                     >
                       <FormControlLabel
@@ -576,7 +660,7 @@ export default function BannerDealer({
                     <Slider
                       value={bannerContainer.borderBottomWidth}
                       onChange={(_event: Event, newValue: number | number[]) => {
-                        handleChangeEvent('borderWidth', newValue, 'container')
+                        handleChangeEvent('borderWidth', newValue, 'container');
                         setBannerContainer((pv: any) => ({ ...pv, borderBottomWidth: newValue }));
                         setBannerContainerStyling((prev) => ({
                           ...prev,
@@ -591,13 +675,13 @@ export default function BannerDealer({
                 </Stack>
               </Box>
 
-
               <Box sx={{ width: '100%' }}>
                 <Typography variant="caption" color="#8688A3">
                   Border Color
                 </Typography>
                 <Stack direction="row" alignItems="center" spacing="18px">
-                  <Sketch presetColors={customPresets}
+                  <Sketch
+                    presetColors={customPresets}
                     onChange={(event: any) => {
                       setBannerContainerStyling((prev: any) => ({
                         ...prev,
@@ -606,10 +690,10 @@ export default function BannerDealer({
 
                       isColorValid(event?.hex)
                         ? handleChangeEvent('borderColor', event?.hex, 'container')
-                        : null
-                    }
-                    }
-                    style={{ width: '100%' }} />
+                        : null;
+                    }}
+                    style={{ width: '100%' }}
+                  />
                 </Stack>
               </Box>
 
@@ -625,8 +709,8 @@ export default function BannerDealer({
                 <Switch
                   checked={bannerContainer.shadow}
                   onChange={(event: any, value: any) => {
-                    handleChangeEvent('isShadow', value, 'container')
-                    setBannerContainer((pv: any) => ({ ...pv, shadow: !pv.shadow }))
+                    handleChangeEvent('isShadow', value, 'container');
+                    setBannerContainer((pv: any) => ({ ...pv, shadow: !pv.shadow }));
                   }}
                   inputProps={{ 'aria-label': 'controlled' }}
                 />
@@ -637,16 +721,18 @@ export default function BannerDealer({
                     Shadow Color
                   </Typography>
                   <Stack direction="row" alignItems="center" spacing="18px">
-                    <Sketch presetColors={customPresets} onChange={(event: any) =>
-                      isColorValid(event?.hex)
-                        ? handleChangeEvent('colorShadow', event?.hex, 'container')
-                        : null
-                    } style={{ width: '100%' }} />
+                    <Sketch
+                      presetColors={customPresets}
+                      onChange={(event: any) =>
+                        isColorValid(event?.hex)
+                          ? handleChangeEvent('colorShadow', event?.hex, 'container')
+                          : null
+                      }
+                      style={{ width: '100%' }}
+                    />
                   </Stack>
                 </Box>
               )}
-
-
 
               <Box sx={{ width: '100%' }}>
                 <Typography variant="caption" color="#8688A3">
@@ -690,6 +776,166 @@ export default function BannerDealer({
                 </Stack>
               </Box>
             </Stack>
+          </AccordionDetails>
+        </Accordion>
+      )}
+
+      {themeConfig.bannerShow && (
+        <Accordion>
+          <AccordionSummary
+            sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
+            expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
+          >
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="subtitle1">Center Content</Typography>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Accordion>
+              <AccordionSummary
+                sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
+                expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
+              >
+                <Box sx={{ width: '100%' }}>
+                  <Typography variant="subtitle1">Search</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Stack>
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    width={'100%'}
+                  >
+                    <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                      Show
+                    </Typography>
+                    <Switch
+                      checked={bannerContainerSearch.show}
+                      onChange={(event: any, value: any) => {
+                        setBannerContainerSearch((pv: any) => ({ ...pv, show: !pv.show }));
+                      }}
+                      inputProps={{ 'aria-label': 'controlled' }}
+                    />
+                  </Stack>
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    width={'100%'}
+                  >
+                    <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                      Text
+                    </Typography>
+                    <Switch
+                      checked={bannerContainerSearch.text}
+                      onChange={(event: any, value: any) => {
+                        setBannerContainerSearch((pv: any) => ({ ...pv, text: !pv.text }));
+                      }}
+                      inputProps={{ 'aria-label': 'controlled' }}
+                    />
+                  </Stack>
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    width={'100%'}
+                  >
+                    <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                      Search
+                    </Typography>
+                    <Switch
+                      checked={bannerContainerSearch.search}
+                      onChange={(event: any, value: any) => {
+                        setBannerContainerSearch((pv: any) => ({ ...pv, search: !pv.search }));
+                      }}
+                      inputProps={{ 'aria-label': 'controlled' }}
+                    />
+                  </Stack>
+                </Stack>
+                <Box>
+                  <Typography variant="caption" color="#8688A3">
+                    Bottom text
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing="18px">
+                    <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                      <TextField
+                        variant="filled"
+                        type="text"
+                        value={bannerSearch.bottomText}
+                        onChange={(event) =>
+                          setBannerSearch((pv: any) => ({ ...pv, bottomText: event.target.value }))
+                        }
+                      />
+                    </Stack>
+                  </Stack>
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="#8688A3">
+                    Top text
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing="18px">
+                    <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                      <TextField
+                        variant="filled"
+                        type="text"
+                        value={bannerSearch.topText}
+                        onChange={(event) =>
+                          setBannerSearch((pv: any) => ({ ...pv, topText: event.target.value }))
+                        }
+                      />
+                    </Stack>
+                  </Stack>
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="#8688A3">
+                    Input placeholder
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing="18px">
+                    <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                      <TextField
+                        variant="filled"
+                        type="text"
+                        value={bannerSearch.placeHolder}
+                        onChange={(event) =>
+                          setBannerSearch((pv: any) => ({ ...pv, placeHolder: event.target.value }))
+                        }
+                      />
+                    </Stack>
+                  </Stack>
+                </Box>
+              </AccordionDetails>
+            </Accordion>
+            <Accordion>
+              <AccordionSummary
+                sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
+                expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
+              >
+                <Box sx={{ width: '100%' }}>
+                  <Typography variant="subtitle1">Payment Box</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  width={'100%'}
+                >
+                  <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                    Show
+                  </Typography>
+                  <Switch
+                    checked={paymentBox.show}
+                    onChange={(event: any, value: any) => {
+                      setPaymentBox((pv: any) => ({ ...pv, show: !pv.show }));
+                    }}
+                    inputProps={{ 'aria-label': 'controlled' }}
+                  />
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
           </AccordionDetails>
         </Accordion>
       )}

@@ -78,6 +78,9 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
 import { getBuilderDetails } from 'src/redux/store/thunks/builder';
 import { useSelector } from 'react-redux';
+import OrderDealer from './out-put/order-dealer';
+import CheckoutDealer from './out-put/checkout-dealer';
+
 
 const dataPages = [
   { title: 'Home Page', link: 'https://ecom-zaki.vercel.app/' },
@@ -345,6 +348,18 @@ const defaultSections = [
     ],
   },
   {
+    page: 'Orders Page',
+    sectinos: [
+      {
+        name: 'Orders Dealer',
+        img: '',
+        icon: CallEndOutlinedIcon,
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <OrderDealer />,
+      },
+    ],
+  },
+  {
     page: 'Categories',
     sectinos: [
       // {
@@ -375,12 +390,10 @@ const defaultSections = [
     page: 'Checkout',
     sectinos: [
       {
-        name: 'User Info',
+        name: 'Checkout Dealer',
         img: '/raws/user-solid.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <CheckoutDealer />,
       },
     ],
   },
@@ -419,6 +432,7 @@ const defaultSections = [
       },
     ],
   },
+
   {
     page: 'Forgot Password',
     sectinos: [
@@ -683,6 +697,10 @@ export default function EcomDesignMain() {
       setbuttonSection('Forgot Password Dealer');
     } else if (controlls.page === 'OTP') {
       setbuttonSection('OTP Dealer');
+    } else if (controlls.page === 'Checkout') {
+      setbuttonSection('Checkout Dealer');
+    } else if (controlls.page === 'Orders Page') {
+      setbuttonSection('Orders Dealer');
     }
     setControlls((pv) => ({ ...pv, addSection: false }));
   }, [controlls.page]);
@@ -1297,6 +1315,7 @@ export default function EcomDesignMain() {
                                     alignItems: 'center',
                                     minWidth: 'auto',
                                     padding: '0px',
+                                    border: 'none',
                                   }}
                                   startIcon={<Iconify color={'#0F1349'} icon="mi:add" />}
                                   disabled={!(activeSection === 'Layout')}
