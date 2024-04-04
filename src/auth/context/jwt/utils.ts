@@ -48,27 +48,27 @@ export const tokenExpired = (exp: number) => {
   clearTimeout(expiredTimer);
 
   expiredTimer = setTimeout(() => {
-    alert('Token expired');
+    console.log('Token expired');
 
-    clearCookie("accessToken")
+    clearCookie('accessToken');
 
     window.location.href = paths.auth.jwt.login;
   }, timeLeft);
 };
 
 // ----------------------------------------------------------------------
-export function setCookie(key:string, value:string, expDays:number) {
+export function setCookie(key: string, value: string, expDays: number) {
   const d = new Date();
-  d.setTime(d.getTime() + (expDays*24*60*60*1000)); // Convert expiration days to milliseconds
-  let expires = "expires="+ d.toUTCString();
-  document.cookie = key + "=" + value + ";" + expires + ";path=/";
+  d.setTime(d.getTime() + expDays * 24 * 60 * 60 * 1000); // Convert expiration days to milliseconds
+  let expires = 'expires=' + d.toUTCString();
+  document.cookie = key + '=' + value + ';' + expires + ';path=/';
 }
 
-export function getCookie(key:string) {
-  let name = key + "=";
+export function getCookie(key: string) {
+  let name = key + '=';
   let decodedCookie = decodeURIComponent(document.cookie);
   let ca = decodedCookie.split(';');
-  for(let i = 0; i < ca.length; i++) {
+  for (let i = 0; i < ca.length; i++) {
     let c = ca[i];
     while (c.charAt(0) === ' ') {
       c = c.substring(1);
@@ -80,10 +80,9 @@ export function getCookie(key:string) {
   return null;
 }
 
-export function clearCookie(name:string) {
+export function clearCookie(name: string) {
   document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 }
-
 
 // Assuming setCookie and clearCookie are defined as shown in previous examples
 
@@ -111,19 +110,19 @@ export const setSession = (accessToken: string | null) => {
 
 export const setSocketURL = (URL: string | null) => {
   if (URL) {
-    setCookie("socketURL" ,URL , 7 )
+    setCookie('socketURL', URL, 7);
   } else {
-    clearCookie("socketURL")
+    clearCookie('socketURL');
   }
 };
 
 export const setBuilderDomain = (domainURL: string | null) => {
   if (domainURL) {
-    setCookie('builder' , domainURL , 7)
+    setCookie('builder', domainURL, 7);
   } else {
-    clearCookie('builder')
+    clearCookie('builder');
   }
 };
 export const getBuilderDomain = () => {
-  return getCookie('builder')
+  return getCookie('builder');
 };

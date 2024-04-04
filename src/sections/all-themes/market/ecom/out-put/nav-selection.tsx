@@ -24,7 +24,7 @@ import { socketClient } from 'src/sections/all-themes/utils/helper-functions';
 import LogoDealer, { VisuallyHiddenInput } from './logo-part';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
-import { saveLogo, updateBasicAppbar } from 'src/redux/store/thunks/builder';
+import { saveLogo, updateBasicAppbar, updateWebsiteLogo } from 'src/redux/store/thunks/builder';
 import Sketch from '@uiw/react-color-sketch';
 import './style.css';
 import NavbarTheme from 'src/sections/all-themes/component/NavbarTheme';
@@ -330,6 +330,10 @@ export default function NavDealer({
     const menuesList = menus.filter((menuObj: any) => menuObj.link !== '' && menuObj.name !== '');
 
     const payloadData = {
+      cartIcon: cartLogo || "",
+      languageIcon: "languageIcon",
+      menuIcon: headerLogo || "",
+      languageIconStatus: true,
       menu: {
         style: {
           // size: "20px",
@@ -374,18 +378,84 @@ export default function NavDealer({
     };
 
 
+    // setLoader(false);
+
+
+
+    const logoPayload = {
+      position: appBarLogo?.position,
+      status: appBarLogo?.status || 'true',
+      logo: appBarLogo?.file,
+      text: {
+        size: "md",
+        isBold: true,
+        color: appBarLogo?.textColor,
+        colorDark: "#333",
+        backgroundColor: appBarLogo?.textBg,
+        numberOfLines: 3,
+        style: [""]
+      },
+      logoObj: {
+        text: appBarLogo?.text,
+        status: appBarLogo?.status,
+        position: appBarLogo?.position,
+        textBg: appBarLogo?.textBg,
+        textColor: appBarLogo?.textColor,
+        borderColor: appBarLogo?.borderColor,
+        borderWidth: appBarLogo?.borderWidth,
+        width: appBarLogo?.width || "50px",
+        height: appBarLogo?.height || "auto"
+      }
+    }
+
+
+
     setTimeout(() => {
-      dispatch(
-        updateBasicAppbar({
-          builderId: builder_Id,
-          url: url,
-          data: { data: JSON.stringify(payloadData) },
+      try {
+        dispatch(
+          updateBasicAppbar({
+            builderId: builder_Id,
+            url: url,
+            data: { data: JSON.stringify(payloadData) }
+          })
+        ).then((response: any) => {
+          console.log('response', response);
+          setLoader(false);
+        }).catch((er) => {
+          console.log("err", er);
+
         })
-      ).then((response: any) => {
-        console.log('response', response);
-        setLoader(false);
-      });
+
+        // setting up logo object
+        const formdata = new FormData();
+        formdata.append('text', JSON.stringify(logoPayload.text));
+        formdata.append('logoObj', JSON.stringify(logoPayload.logoObj));
+        formdata.append('position', logoPayload?.position);
+        formdata.append('status', JSON.stringify(logoPayload?.status || "true"));
+        if (logoPayload.logo) {
+          formdata.append('logo', logoPayload.logo);
+        }
+
+        dispatch(
+          updateWebsiteLogo({
+            builderId: builder_Id,
+            url: url,
+            data: formdata
+          })
+        ).then((response: any) => {
+          console.log('response', response);
+          setLoader(false);
+        }).catch((er) => {
+          console.log("err", er);
+
+        })
+      } catch (error) {
+        console.log(error);
+
+      }
     }, 1000);
+
+
   };
 
   return (

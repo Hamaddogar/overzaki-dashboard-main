@@ -19,6 +19,12 @@ import Iconify from 'src/components/iconify';
 import { AppDispatch } from 'src/redux/store/store';
 import { builderSetObjectInDesign } from 'src/redux/store/thunks/builder';
 
+const isColorValid = (color: string) =>
+  /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^rgb\(\d{1,3}, \d{1,3}, \d{1,3}\)$|^rgba\(\d{1,3}, \d{1,3}, \d{1,3}, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$|^hsl\(\d{1,3}, \d{1,3}%, \d{1,3}%\)$|^hsla\(\d{1,3}, \d{1,3}%, \d{1,3}%, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$/.test(
+    color
+  );
+
+
 const BannerSliderAccordion = ({
   img,
   index,
@@ -35,6 +41,8 @@ const BannerSliderAccordion = ({
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
+    console.log("dataObj", dataObj);
+
     setData(dataObj)
   }, [dataObj]);
 
@@ -98,10 +106,6 @@ const BannerSliderAccordion = ({
 
   }, 1500)
 
-  const isColorValid = (color: string) =>
-    /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^rgb\(\d{1,3}, \d{1,3}, \d{1,3}\)$|^rgba\(\d{1,3}, \d{1,3}, \d{1,3}, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$|^hsl\(\d{1,3}, \d{1,3}%, \d{1,3}%\)$|^hsla\(\d{1,3}, \d{1,3}%, \d{1,3}%, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$/.test(
-      color
-    );
 
   return (
     <Box>
@@ -194,11 +198,16 @@ const BannerSliderAccordion = ({
                 onChange={(e) => {
                   handleUpdateData('textStatus', e.target.checked);
                   setShowTextBlock((pv) => !pv);
-                  setData((prev: any) =>
-                    prev?.map((item: any, i: number) =>
-                      i === index ? { ...item, textStatus: !item.textStatus } : item
-                    )
-                  );
+                  // testing
+                  // setData({
+                  //   ...item, textStatus: !item.textStatus
+                  // });
+
+                  // setData((prev: any) => {
+                  //   return prev && prev?.map((item: any, i: number) =>
+                  //     i === index ? { ...item, textStatus: !item.textStatus } : item
+                  //   )
+                  // });
                 }}
                 inputProps={{ 'aria-label': 'controlled' }}
               />
@@ -225,11 +234,12 @@ const BannerSliderAccordion = ({
                     // value={appBar?.logoObj?.width}
                     onChange={(event) => {
                       handleUpdateData('text', event.target.value)
-                      setData((prev: any) =>
-                        prev.map((item: any, i: number) =>
-                          i === index ? { ...item, text: event.target.value } : item
-                        )
-                      )
+
+                      // setData((prev: any) =>
+                      //   prev.map((item: any, i: number) =>
+                      //     i === index ? { ...item, text: event.target.value } : item
+                      //   )
+                      // )
                     }
 
                     }
@@ -242,13 +252,13 @@ const BannerSliderAccordion = ({
                   <Stack direction="row" alignItems="center" spacing="18px">
                     <Sketch
                       onChange={(event) => {
-                        setData((prev: any) =>
-                          prev.map((item: any, i: number) =>
-                            i === index
-                              ? { ...item, style: { ...item.style, color: event.hex } }
-                              : item
-                          )
-                        )
+                        // setData((prev: any) =>
+                        //   prev.map((item: any, i: number) =>
+                        //     i === index
+                        //       ? { ...item, style: { ...item.style, color: event.hex } }
+                        //       : item
+                        //   )
+                        // )
                         isColorValid(event?.hex)
                           ? handleUpdateData('color', event?.hex, 'style')
                           : null
@@ -271,19 +281,19 @@ const BannerSliderAccordion = ({
                   <Switch
                     // checked={appBar?.icon?.shadow}
                     onChange={(event, value) => {
-                      setData((prev: any) =>
-                        prev.map((item: any, i: number) =>
-                          i === index
-                            ? {
-                              ...item,
-                              style: {
-                                ...item.style,
-                                fontWeight: value === true ? 900 : 400,
-                              },
-                            }
-                            : item
-                        )
-                      )
+                      // setData((prev: any) =>
+                      //   prev.map((item: any, i: number) =>
+                      //     i === index
+                      //       ? {
+                      //         ...item,
+                      //         style: {
+                      //           ...item.style,
+                      //           fontWeight: value === true ? 900 : 400,
+                      //         },
+                      //       }
+                      //       : item
+                      //   )
+                      // )
                       handleUpdateData('fontWeight', value ? '12' : '0', 'style')
                     }
                     }
@@ -320,23 +330,24 @@ const BannerSliderAccordion = ({
                       <RadioGroup
                         row
                         //   value={logoObj?.position || 'center'}
-                        onChange={(event) =>
-                          setData((prev: any) =>
-                            prev.map((item: any, i: number) =>
-                              i === index
-                                ? {
-                                  ...item,
-                                  style: {
-                                    ...item.style,
-                                    // Conditional assignment based on the checkbox value
-                                    ...(event.target.value === 'left'
-                                      ? { left: '20px', right: undefined }
-                                      : { right: '20px', left: undefined }),
-                                  },
-                                }
-                                : item
-                            )
-                          )
+                        onChange={(event) => {
+                          // setData((prev: any) =>
+                          //   prev.map((item: any, i: number) =>
+                          //     i === index
+                          //       ? {
+                          //         ...item,
+                          //         style: {
+                          //           ...item.style,
+                          //           // Conditional assignment based on the checkbox value
+                          //           ...(event.target.value === 'left'
+                          //             ? { left: '20px', right: undefined }
+                          //             : { right: '20px', left: undefined }),
+                          //         },
+                          //       }
+                          //       : item
+                          //   )
+                          // )
+                        }
                         }
                       // onChange={(event: any) => setBannerType(event.target.value)}
                       >
@@ -357,30 +368,32 @@ const BannerSliderAccordion = ({
                         Vertical Positioning
                       </Typography>
                       {/* <RadioGroup row value={banner?.search?.status || "true"} onChange={(event: any) => handleChangeEvent('status', event?.target?.value, 'search')}>
-<FormControlLabel value="slider" control={<Radio size="medium" />} label="Slider" />
-<FormControlLabel value="image" control={<Radio size="medium" />} label="Image" />
-<FormControlLabel value="video" control={<Radio size="medium" />} label="Video" />
-</RadioGroup> */}
+                            <FormControlLabel value="slider" control={<Radio size="medium" />} label="Slider" />
+                            <FormControlLabel value="image" control={<Radio size="medium" />} label="Image" />
+                            <FormControlLabel value="video" control={<Radio size="medium" />} label="Video" />
+                        </RadioGroup> */}
+
                       <RadioGroup
                         row
                         //   value={logoObj?.position || 'center'}
-                        onChange={(event: any) =>
-                          setData((prev: any) =>
-                            prev.map((item: any, i: number) =>
-                              i === index
-                                ? {
-                                  ...item,
-                                  style: {
-                                    ...item.style,
-                                    // Conditional assignment based on the checkbox value
-                                    ...(event.target.value === 'top'
-                                      ? { top: '20px', bottom: undefined }
-                                      : { bottom: '20px', top: undefined }),
-                                  },
-                                }
-                                : item
-                            )
-                          )
+                        onChange={(event: any) => {
+                          // setData((prev: any) =>
+                          //   prev.map((item: any, i: number) =>
+                          //     i === index
+                          //       ? {
+                          //         ...item,
+                          //         style: {
+                          //           ...item.style,
+                          //           // Conditional assignment based on the checkbox value
+                          //           ...(event.target.value === 'top'
+                          //             ? { top: '20px', bottom: undefined }
+                          //             : { bottom: '20px', top: undefined }),
+                          //         },
+                          //       }
+                          //       : item
+                          //   )
+                          // )
+                        }
                         }
                       >
                         <FormControlLabel value="top" control={<Radio size="medium" />} label="top" />

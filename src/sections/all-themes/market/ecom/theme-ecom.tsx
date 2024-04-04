@@ -131,11 +131,13 @@ const defaultSections = [
         name: 'App Bar',
         img: '/raws/bars.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
+        hideHeader: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any, url: any) => (
           <NavDealer
             handleThemeConfig={handleThemeConfig}
             themeConfig={themeConfig}
             builder_Id={builder_Id}
+            url={url}
           />
         ),
       },
@@ -155,6 +157,7 @@ const defaultSections = [
         name: 'Banner',
         img: '/raws/Banners.svg',
         show: true,
+        hideHeader: true,
         Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any, url: any) => (
           <BannerDealer
             handleThemeConfig={handleThemeConfig}
@@ -966,7 +969,7 @@ export default function EcomDesignMain() {
                         <Buttons themeConfig={themeConfig} handleThemeConfig={handleThemeConfig} />
                       </Box>
                     )}
-                    {buttonSection === 'Logo' && (
+                    {/* {buttonSection === 'Logo' && (
                       <Box>
                         <HeaderSection
                           name="Branding Logo"
@@ -983,7 +986,7 @@ export default function EcomDesignMain() {
                           appBarLogo={undefined}
                         />
                       </Box>
-                    )}
+                    )} */}
                     {buttonSection === 'Color' && (
                       <Box>
                         <HeaderSection
@@ -1172,7 +1175,7 @@ export default function EcomDesignMain() {
                           </Typography>
                         </Stack>
 
-                        <Stack spacing="3px" alignItems="center" justifyContent="center">
+                        {/* <Stack spacing="3px" alignItems="center" justifyContent="center">
                           <Button
                             sx={{
                               padding: '0px',
@@ -1197,7 +1200,7 @@ export default function EcomDesignMain() {
                           <Typography variant="caption" color="#0F1349">
                             Logo
                           </Typography>
-                        </Stack>
+                        </Stack> */}
 
                         <Stack spacing="3px" alignItems="center" justifyContent="center">
                           <Button

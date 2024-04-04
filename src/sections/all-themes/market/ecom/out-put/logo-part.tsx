@@ -553,9 +553,14 @@ export default function LogoDealer({
   builderId,
   setAppBarLogo,
 }: LogoProps) {
+
+
   const [logoObj, setLogoObj] = useState<any>(null);
+
   const [imagePreview, setImagePreview] = useState<any>(null)
+
   const dispatch = useDispatch<AppDispatch>();
+
   const socket = socketClient();
 
   const debounce = (func: any, delay: any) => {
@@ -586,15 +591,14 @@ export default function LogoDealer({
       key: targetHeader + _socketKey,
       value: valueToShare,
     };
-
-    console.log('data', data);
-
-    if (socket) {
-      socket.emit('website:cmd', data);
-    }
+    // console.log('data', data);
+    // if (socket) {
+    //   socket.emit('website:cmd', data);
+    // }
   }, 500);
 
   const handleImageChange64 = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
+
     const file = event.target.files?.[0];
 
     if (file && file.type.startsWith('image/')) {
@@ -605,6 +609,7 @@ export default function LogoDealer({
         console.log('Base64:', base64); // Log the base64 data
         setImagePreview(reader.result?.toString() || null);
         handleThemeConfig(key, reader.result?.toString() || '');
+        setAppBarLogo((prev: any) => ({ ...prev, logo: reader.result?.toString() }));
         saveTempData(file);
       };
 
@@ -617,10 +622,10 @@ export default function LogoDealer({
   const saveTempData = (file: any) => {
     const formDataToSend = new FormData();
     formDataToSend.append('image', file);
-
-    dispatch(saveLogo({ builderId: builderId, data: formDataToSend })).then((response: any) => {
-      console.log('response', response);
-    });
+    setAppBarLogo((prev: any) => ({ ...prev, file: file }));
+    // dispatch(saveLogo({ builderId: builderId, data: formDataToSend })).then((response: any) => {
+    //   console.log('response', response);
+    // });
   };
 
   const isColorValid = (color: string) =>
@@ -653,9 +658,9 @@ export default function LogoDealer({
     status: false,
     textBackground: false,
   });
-  useEffect(() => {
-    setAppBarLogo((prev: any) => ({ ...prev, logo: themeConfig?.logo }));
-  }, [themeConfig?.logo]);
+  // useEffect(() => {
+  //   setAppBarLogo((prev: any) => ({ ...prev, logo: themeConfig?.logo }));
+  // }, [themeConfig?.logo]);
 
   return (
     <Box width={'100%'} mt="20px">
@@ -853,7 +858,6 @@ export default function LogoDealer({
                 </Typography>
                 <Stack direction="row" alignItems="center" spacing="18px">
                   {/* <MuiColorInput sx={{ width: "100%", margin: "auto", }} variant="outlined"
-
                         value={logoObj?.textBg ?? "#000001"}
                         format="hex"
                         onChange={event => isColorValid(event) ? handleChangeEvent('textBg', event, 'logoObj') : null}

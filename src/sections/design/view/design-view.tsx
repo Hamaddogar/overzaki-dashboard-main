@@ -216,7 +216,7 @@ const DesignMain: React.FC<DesignMainProps> = () => {
                         container
                         spacing={2}
                       >
-                        {listItems.map((builderObj: any, indx: any) => (
+                        {listItems && listItems.map((builderObj: any, indx: any) => (
                           <Draggable key={indx} index={indx} draggableId={indx.toString()}>
                             {(provided) => (
                               <Grid
@@ -294,7 +294,7 @@ const DesignMain: React.FC<DesignMainProps> = () => {
                                         variant="subtitle2"
                                         sx={{ fontSize: '.8rem' }}
                                       >
-                                        {builderObj?.BusinessCategory || "--"}
+                                        {builderObj?.BusinessCategory?.name?.localized || "--"}
                                         {/* <span style={{ fontSize: '.7rem' }}>({builderObj.isPublishWebSite})</span>{' '} */}
                                       </Typography>
                                     </Grid>
@@ -341,7 +341,7 @@ const DesignMain: React.FC<DesignMainProps> = () => {
                                         {/* {allowAction.edit && ( */}
                                         <Link
                                           href={paths.dashboard.design.theme(
-                                            builderObj?.BusinessCategory || "",
+                                            builderObj?.BusinessCategory?.name?.localized || "",
                                             builderObj?.websiteTheme,
                                             `https://${builderObj?.domain}`,
                                             builderObj?._id

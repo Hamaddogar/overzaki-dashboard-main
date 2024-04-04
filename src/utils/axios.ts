@@ -129,6 +129,7 @@ export const endpoints = {
         updateSlider: '/appbar-design',
         updateBasicAppBar: '/appbar-design/basic_info',
       },
+      updateWebsiteLogo: '/general-design/website_logo',
     },
   },
   customer: {

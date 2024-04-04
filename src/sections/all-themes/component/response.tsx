@@ -13,6 +13,7 @@ export const sections = [
       width: '40px',
       height: '40px',
       borderRadius: '10%',
+      file: null
     },
     generalIcons: {
       color: 'black',

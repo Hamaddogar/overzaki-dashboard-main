@@ -180,6 +180,7 @@ export const updateBasicAdAppbar = createAsyncThunk(
 export const updateBasicAppbar = createAsyncThunk(
   'builder/updateBasicAppbar',
   async ({ builderId, url, data }: any) => {
+    console.log('headersObj', builderId, url, data);
     if (url && builderId) {
       if (url.startsWith('https://')) {
         url = url.replace(/^https?:\/\//, '');
@@ -187,8 +188,34 @@ export const updateBasicAppbar = createAsyncThunk(
       let headersObj = defaultConfig();
       headersObj.headers['x-tenant-id'] = url;
       headersObj.headers['Content-Type'] = 'multipart/form-data';
+
+      console.log('headersObj', headersObj);
+
       const response = await putRequest(
         `${endpoints.builder.home.adAppBar.updateBasicAppBar}/${builderId}`,
+        data,
+        headersObj
+      );
+      return response.data;
+    }
+  }
+);
+export const updateWebsiteLogo = createAsyncThunk(
+  'builder/updateWebsiteLogo',
+  async ({ builderId, url, data }: any) => {
+    console.log('headersObj', builderId, url, data);
+    if (url && builderId) {
+      if (url.startsWith('https://')) {
+        url = url.replace(/^https?:\/\//, '');
+      }
+      let headersObj = defaultConfig();
+      headersObj.headers['x-tenant-id'] = url;
+      headersObj.headers['Content-Type'] = 'multipart/form-data';
+
+      console.log('headersObj', headersObj);
+
+      const response = await putRequest(
+        `${endpoints.builder.home.updateWebsiteLogo}/${builderId}`,
         data,
         headersObj
       );
