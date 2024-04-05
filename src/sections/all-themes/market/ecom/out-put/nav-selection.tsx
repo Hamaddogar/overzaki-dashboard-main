@@ -150,7 +150,7 @@ export default function NavDealer({
   const [loader, setLoader] = useState<any>(false);
 
 
-  const [language, setLangauge] = useState(true);
+  const [language, setLanguage] = useState(true);
 
   const [cartLogo, setCartLogo] = useState('/raw/cart3.svg');
 
@@ -485,6 +485,7 @@ export default function NavDealer({
       >
         <Stack border={5} borderColor={'#5cb85c'}>
           <NavbarTheme
+            language={language}
             headerLogo={headerLogo}
             cartLogo={cartLogo}
             centerMenu={centerMenu}
@@ -1536,7 +1537,7 @@ export default function NavDealer({
                           backgroundColor: '#8688A3',
                         }}
                       >
-                        <Iconify style={{ color: 'blue' }} icon={cart.icon} />
+                        <Iconify style={{ color: 'black' }} icon={cart.icon} />
                       </Stack>
                       <Typography variant="button">{cart.name}</Typography>
                     </Stack>
@@ -1544,6 +1545,34 @@ export default function NavDealer({
                 />
               ))}
             </RadioGroup>
+          </AccordionDetails>
+        </Accordion>
+        <Accordion sx={{ width: '100%' }}>
+          <AccordionSummary
+            sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
+            expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
+          >
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="subtitle1">Language</Typography>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>
+            {' '}
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              width={'100%'}
+            >
+              <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                Show
+              </Typography>
+              <Switch
+                checked={language}
+                onChange={(event: any, value: any) => setLanguage(value)}
+                inputProps={{ 'aria-label': 'controlled' }}
+              />
+            </Stack>
           </AccordionDetails>
         </Accordion>
       </Stack>

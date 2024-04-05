@@ -80,8 +80,7 @@ import { getBuilderDetails } from 'src/redux/store/thunks/builder';
 import { useSelector } from 'react-redux';
 import OrderDealer from './out-put/order-dealer';
 import CheckoutDealer from './out-put/checkout-dealer';
-
-
+import OrderDetailsDealer from './out-put/order-details-dealer';
 const dataPages = [
   { title: 'Home Page', link: 'https://ecom-zaki.vercel.app/' },
   { title: 'Products Page', link: 'https://ecom-zaki.vercel.app/products' },
@@ -363,6 +362,17 @@ const defaultSections = [
     ],
   },
   {
+    page: 'Order Details',
+    sectinos: [
+      {
+        name: 'Order Details Dealer',
+        img: '/raws/user-solid.svg',
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <OrderDetailsDealer />,
+      },
+    ],
+  },
+  {
     page: 'Categories',
     sectinos: [
       // {
@@ -400,6 +410,7 @@ const defaultSections = [
       },
     ],
   },
+
   {
     page: 'Sign Up Page',
     sectinos: [
