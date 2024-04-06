@@ -132,7 +132,8 @@ const AddNewTheme: React.FC<DesignMainProps> = () => {
         formData.append(`appName[en]`, addData.appName.en);
         formData.append('appName[ar]', addData.appName.ar);
         formData.append('primaryColor', addData.primaryColor);
-        formData.append('theme', addData.theme);
+        // formData.append('theme', addData.theme);
+        formData.append('theme', 'theme-code');
         formData.append('BusinessType', addData.type);
         formData.append('BusinessCategory', 'Market');
         formData.append('logo', addData.logo);
